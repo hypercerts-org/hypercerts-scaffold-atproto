@@ -1,5 +1,5 @@
 "use client";
-import { MailIcon, AtSignIcon } from "lucide-react";
+import { AtSignIcon } from "lucide-react";
 
 import {
   InputGroup,
