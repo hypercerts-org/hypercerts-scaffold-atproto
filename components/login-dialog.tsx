@@ -9,6 +9,7 @@ import {
 import { Button } from "./ui/button";
 import { useOAuthContext } from "@/providers/OAuthProviderSSR";
 import { FormEventHandler, useState } from "react";
+import { PDS_URL } from "@/utils/constants";
 
 export default function LoginDialog() {
   const [handle, setHandle] = useState("");
@@ -17,6 +18,10 @@ export default function LoginDialog() {
   const handleSubmit: FormEventHandler<HTMLFormElement> = (e) => {
     e.preventDefault();
     signIn(handle);
+  };
+
+  const redirectToAccountCreation = () => {
+    signIn(PDS_URL);
   };
   return (
     <form onSubmit={handleSubmit} className="grid w-full max-w-sm gap-6 py-10">
@@ -31,6 +36,13 @@ export default function LoginDialog() {
       </InputGroup>
 
       <Button type="submit">Login</Button>
+      <Button
+        onClick={redirectToAccountCreation}
+        variant={"link"}
+        type="button"
+      >
+        Create an account
+      </Button>
     </form>
   );
 }
