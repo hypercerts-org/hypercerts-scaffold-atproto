@@ -8,6 +8,9 @@ import { useOAuthContext } from "@/providers/OAuthProviderSSR";
 import { Label } from "@radix-ui/react-label";
 import { FormEventHandler, useState } from "react";
 import * as HypercertRecord from "@/lexicons/types/org/hypercerts/claim/record";
+import { BlobRef } from "@atproto/lexicon";
+import { Spinner } from "@/components/ui/spinner";
+import { toast } from "sonner";
 
 export default function Home() {
   const { atProtoAgent, session } = useOAuthContext();
@@ -17,45 +20,57 @@ export default function Home() {
   const [workScope, setWorkScope] = useState("");
   const [workTimeframeFrom, setWorkTimeframeFrom] = useState<Date | null>(null);
   const [workTimeframeTo, setWorkTimeframeTo] = useState<Date | null>(null);
+  const [creating, setCreating] = useState(false);
 
   const handleSubmit: FormEventHandler = async (e) => {
     e.preventDefault();
-    if (!atProtoAgent || !session) return;
-
-    const blob = new Blob([file!], { type: file?.type });
-    const response = await atProtoAgent.com.atproto.repo.uploadBlob(blob);
-    const uploadedBlob = response.data.blob;
-    const record = {
-      $type: "org.hypercerts.claim.record",
-      title,
-      shortDescription,
-      workScope,
-      image: { $type: "smallBlob", ...uploadedBlob },
-      workTimeframeFrom: workTimeframeFrom?.toISOString() || null,
-      workTimeFrameTo: workTimeframeTo?.toISOString() || null,
-      createdAt: new Date().toISOString(),
-    };
-    if (
-      HypercertRecord.isRecord(record) &&
-      HypercertRecord.validateRecord(record).success
-    ) {
-      console.log({
+    try {
+      if (!atProtoAgent || !session) return;
+      setCreating(true);
+      let uploadedBlob: BlobRef | null = null;
+      if (file) {
+        const blob = new Blob([file!], { type: file?.type });
+        const response = await atProtoAgent.com.atproto.repo.uploadBlob(blob);
+        uploadedBlob = response.data.blob;
+      }
+      const record = {
+        $type: "org.hypercerts.claim.record",
         title,
         shortDescription,
         workScope,
-        workTimeframeFrom,
-        workTimeframeTo,
-      });
-      await atProtoAgent.com.atproto.repo.createRecord({
-        rkey: new Date().getTime().toString(),
-        record,
-        collection: "org.hypercerts.claim.record",
-        repo: atProtoAgent.assertDid,
-      });
-    } else {
-      console.log("isRecord", HypercertRecord.isRecord(record));
-      console.log(HypercertRecord.validateRecord(record));
-      console.log("validation failed");
+        image: uploadedBlob ? { $type: "smallBlob", ...uploadedBlob } : null,
+        workTimeframeFrom: workTimeframeFrom?.toISOString() || null,
+        workTimeFrameTo: workTimeframeTo?.toISOString() || null,
+        createdAt: new Date().toISOString(),
+      };
+      if (
+        HypercertRecord.isRecord(record) &&
+        HypercertRecord.validateRecord(record).success
+      ) {
+        await atProtoAgent.com.atproto.repo.createRecord({
+          rkey: new Date().getTime().toString(),
+          record,
+          collection: "org.hypercerts.claim.record",
+          repo: atProtoAgent.assertDid,
+        });
+        toast.success("Hypercert created successfully!");
+      } else {
+        const validation = HypercertRecord.validateRecord(record);
+        if (!validation.success) {
+          toast.error(validation.error.message);
+        } else {
+          toast.error("Invalid hypercert data, please check your inputs.");
+        }
+      }
+    } catch (error) {
+      console.error("Error creating hypercert:", error);
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "Failed to create hypercert please try again"
+      );
+    } finally {
+      setCreating(false);
     }
   };
   return (
@@ -106,7 +121,10 @@ export default function Home() {
         />
         <DatePicker onChange={setWorkTimeframeTo} label="Work Time Frame To" />
       </div>
-      <Button type="submit">Create Hypercert</Button>
+      <Button disabled={creating} type="submit">
+        {creating && <Spinner />}
+        {creating ? "Creating Hypercert" : "Create Hypercert"}
+      </Button>
     </form>
   );
 }

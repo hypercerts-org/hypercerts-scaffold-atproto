@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { SignedInProvider } from "@/providers/SignedInProvider";
+import { Toaster } from "@/components/ui/sonner";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -31,6 +32,7 @@ export default function RootLayout({
       >
         <OAuthProvider>
           <SignedInProvider>{children}</SignedInProvider>
+          <Toaster/>
         </OAuthProvider>
       </body>
     </html>
