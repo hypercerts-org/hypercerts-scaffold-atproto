@@ -12,6 +12,7 @@ import * as HypercertRecord from "@/lexicons/types/org/hypercerts/claim/record";
 export default function Home() {
   const { atProtoAgent, session } = useOAuthContext();
   const [title, setTitle] = useState("");
+  const [file, setFile] = useState<File | undefined>();
   const [shortDescription, setShortDescription] = useState("");
   const [workScope, setWorkScope] = useState("");
   const [workTimeframeFrom, setWorkTimeframeFrom] = useState<Date | null>(null);
@@ -20,11 +21,16 @@ export default function Home() {
   const handleSubmit: FormEventHandler = async (e) => {
     e.preventDefault();
     if (!atProtoAgent || !session) return;
+
+    const blob = new Blob([file!], { type: file?.type });
+    const response = await atProtoAgent.com.atproto.repo.uploadBlob(blob);
+    const uploadedBlob = response.data.blob;
     const record = {
       $type: "org.hypercerts.claim.record",
       title,
       shortDescription,
       workScope,
+      image: { $type: "smallBlob", ...uploadedBlob },
       workTimeframeFrom: workTimeframeFrom?.toISOString() || null,
       workTimeFrameTo: workTimeframeTo?.toISOString() || null,
       createdAt: new Date().toISOString(),
@@ -33,8 +39,6 @@ export default function Home() {
       HypercertRecord.isRecord(record) &&
       HypercertRecord.validateRecord(record).success
     ) {
-      console.log("Validation Passed");
-      console.log(atProtoAgent.assertDid);
       console.log({
         title,
         shortDescription,
@@ -48,7 +52,6 @@ export default function Home() {
         collection: "org.hypercerts.claim.record",
         repo: atProtoAgent.assertDid,
       });
-      console.log("record created");
     } else {
       console.log("isRecord", HypercertRecord.isRecord(record));
       console.log(HypercertRecord.validateRecord(record));
@@ -80,7 +83,12 @@ export default function Home() {
       </div>
       <div className="flex flex-col gap-1">
         <Label htmlFor="short-description">Background Image</Label>
-        <Input type="file" placeholder="Add Background Image" required></Input>
+        <Input
+          onChange={(e) => setFile(e.target.files?.[0])}
+          type="file"
+          placeholder="Add Background Image"
+          required
+        ></Input>
       </div>
       <div className="flex flex-col gap-1">
         <Label htmlFor="workScope">Work Scope Tags</Label>
