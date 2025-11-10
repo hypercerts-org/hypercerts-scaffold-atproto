@@ -3,6 +3,7 @@
 import { AtSignIcon } from "lucide-react";
 import { useState, FormEventHandler } from "react";
 import { useOAuthContext } from "@/providers/OAuthProviderSSR";
+import { useUserHandle } from "@/queries/use-user-handle";
 import { Button } from "@/components/ui/button";
 import {
   InputGroup,
@@ -18,6 +19,7 @@ import { PDS_URL } from "@/utils/constants";
 
 export default function Navbar() {
   const { isSignedIn, signIn, signOut, isLoading } = useOAuthContext();
+  const userHandle = useUserHandle();
   const [handle, setHandle] = useState("");
   const [open, setOpen] = useState(false);
 
@@ -39,16 +41,23 @@ export default function Navbar() {
 
   return (
     <nav className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="flex h-14 items-center justify-end px-4 max-w-7xl mx-auto">
+      <div className="flex h-14 items-center justify-end gap-3 px-4 max-w-7xl mx-auto">
         {isSignedIn ? (
-          <Button
-            onClick={handleLogout}
-            disabled={isLoading}
-            variant="outline"
-            size="sm"
-          >
-            Logout
-          </Button>
+          <>
+            {userHandle && (
+              <span className="text-sm text-muted-foreground">
+                @{userHandle}
+              </span>
+            )}
+            <Button
+              onClick={handleLogout}
+              disabled={isLoading}
+              variant="outline"
+              size="sm"
+            >
+              Logout
+            </Button>
+          </>
         ) : (
           <Popover open={open} onOpenChange={setOpen}>
             <PopoverTrigger asChild>
