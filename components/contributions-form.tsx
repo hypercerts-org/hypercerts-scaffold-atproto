@@ -70,19 +70,50 @@ export default function HypercertContributionForm({
   useEffect(() => {
     async function fetchContributionData() {
       if (!atProtoAgent || !hypercertRecord) return;
-      const contributionLocation = parseAtUri(
+      const contributionURI = parseAtUri(
         hypercertRecord?.contributions?.[0]?.uri
       );
-      if (contributionLocation) {
+      if (contributionURI) {
         const response = await atProtoAgent.com.atproto.repo.getRecord({
           repo: atProtoAgent.assertDid,
           collection: "org.hypercerts.claim.contribution",
-          rkey: contributionLocation.rkey,
+          rkey: contributionURI.rkey,
         });
-        console.log("Fetched contribution data:", response.data);
+        return response.data;
       }
     }
-    fetchContributionData();
+    async function prefillFromExistingContribution() {
+      if (!atProtoAgent) return;
+      try {
+        const data = await fetchContributionData();
+
+        const contributionRecord = data?.value as
+          | Contribution.Record
+          | undefined;
+        if (!contributionRecord) return;
+        setRole(contributionRecord.role ?? "");
+        setContributors(
+          Array.isArray(contributionRecord.contributors) &&
+            contributionRecord.contributors.length > 0
+            ? contributionRecord.contributors
+            : [""]
+        );
+        setDescription(contributionRecord.description ?? "");
+        setWorkTimeframeFrom(
+          contributionRecord.workTimeframeFrom
+            ? new Date(contributionRecord.workTimeframeFrom)
+            : undefined
+        );
+        setWorkTimeframeTo(
+          contributionRecord.workTimeframeTo
+            ? new Date(contributionRecord.workTimeframeTo)
+            : undefined
+        );
+      } catch (e) {
+        console.error("Failed to prefill contribution:", e);
+      }
+    }
+    prefillFromExistingContribution();
   }, [hypercertRecord, atProtoAgent]);
 
   const handleSubmit: FormEventHandler<HTMLFormElement> = async (e) => {
