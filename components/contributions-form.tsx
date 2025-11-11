@@ -14,9 +14,9 @@ import { Plus, X } from "lucide-react";
 import { DatePicker } from "./date-range-picker";
 import { useOAuthContext } from "@/providers/OAuthProviderSSR";
 import * as Contribution from "@/lexicons/types/org/hypercerts/claim/contribution";
-import * as HypercerRecord from "@/lexicons/types/org/hypercerts/claim";
 import { toast } from "sonner";
 import { CertData } from "@/app/[hypercertId]/page";
+import { validateContribution, validateHypercert } from "@/lib/utils";
 
 export default function HypercertContributionForm({
   hypercertId,
@@ -52,6 +52,18 @@ export default function HypercertContributionForm({
     setContributors(updated);
   };
 
+  const createContribution = async (
+    contributionRecord: Contribution.Record
+  ) => {
+    const response = await atProtoAgent?.com.atproto.repo.createRecord({
+      rkey: new Date().getTime().toString(),
+      record: contributionRecord,
+      collection: "org.hypercerts.claim.contribution",
+      repo: atProtoAgent.assertDid,
+    });
+    return response;
+  };
+
   const handleSubmit: FormEventHandler<HTMLFormElement> = async (e) => {
     e.preventDefault();
     const contributionRecord = {
@@ -59,63 +71,51 @@ export default function HypercertContributionForm({
       hypercert: hypercertRef || undefined,
       role,
       contributors: contributors.filter((c) => c.trim() !== ""),
-      description: description || undefined,
-      workTimeframeFrom: workTimeframeFrom?.toISOString() || undefined,
-      workTimeframeTo: workTimeframeTo?.toISOString() || undefined,
+      description: description,
+      workTimeframeFrom: workTimeframeFrom?.toISOString(),
+      workTimeframeTo: workTimeframeTo?.toISOString(),
       createdAt: new Date().toISOString(),
     };
-    if (
-      Contribution.isRecord(contributionRecord) &&
-      Contribution.validateRecord(contributionRecord).success
-    ) {
-      try {
-        const response = await atProtoAgent?.com.atproto.repo.createRecord({
-          rkey: new Date().getTime().toString(),
-          record: contributionRecord,
-          collection: "org.hypercerts.claim.contribution",
-          repo: atProtoAgent.assertDid,
-        });
-        const contributionCid = response?.data.cid;
-        const contributionURI = response?.data.uri;
-        const updatedHypercert = {
-          ...hypercertRecord,
-          contributions: [
-            ...(hypercertRecord?.contributions || []),
-            {
-              $type: "com.atproto.repo.strongRef",
-              cid: contributionCid!,
-              uri: contributionURI!,
-            },
-          ],
-        };
-        if (
-          HypercerRecord.isRecord(updatedHypercert) &&
-          HypercerRecord.validateRecord(updatedHypercert)
-        ) {
-          const updateResponse = await atProtoAgent?.com.atproto.repo.putRecord(
-            {
-              rkey: hypercertId,
-              repo: atProtoAgent.assertDid,
-              collection: "org.hypercerts.claim",
-              record: updatedHypercert,
-            }
-          );
-          console.log(updateResponse);
-          toast.success("Contribution created and linked successfully!");
-        }
-
-        toast.success("Contribution created successfully!");
-      } catch (error) {
-        console.error("Error creating contribution:", error);
-        toast.error("Failed to create contribution");
+    const isValidContribution = validateContribution(contributionRecord);
+    if (!isValidContribution.success) {
+      toast.error(isValidContribution.error || "Invalid contribution record");
+      return;
+    }
+    try {
+      const response = await createContribution(
+        contributionRecord as Contribution.Record
+      );
+      const contributionCid = response?.data.cid;
+      const contributionURI = response?.data.uri;
+      if (!contributionCid || !contributionURI) {
+        return;
       }
-    } else {
-      const validation = Contribution.validateRecord(contributionRecord);
-      if (!validation.success) {
-        toast.error(`Validation failed: ${validation.error.message}`);
-      } else {
-        toast.error("Validation failed: Unknown error");
+      const updatedHypercert = {
+        ...hypercertRecord,
+        contributions: [
+          ...(hypercertRecord?.contributions || []),
+          {
+            $type: "com.atproto.repo.strongRef",
+            cid: contributionCid,
+            uri: contributionURI,
+          },
+        ],
+      };
+      const isValidHypercert = validateHypercert(updatedHypercert);
+      if (!isValidHypercert.success) {
+        toast.error(isValidHypercert.error || "Invalid updated hypercert");
+        return;
       }
+      await atProtoAgent?.com.atproto.repo.putRecord({
+        rkey: hypercertId,
+        repo: atProtoAgent.assertDid,
+        collection: "org.hypercerts.claim",
+        record: updatedHypercert,
+      });
+      toast.success("Contribution created and linked successfully!");
+    } catch (error) {
+      console.error("Error creating contribution:", error);
+      toast.error("Failed to create contribution");
     }
   };
 
