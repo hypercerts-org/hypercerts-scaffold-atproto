@@ -95,6 +95,7 @@ export default function EditHypercertIdPage() {
           <HypercertContributionForm
             hypercertId={hypercertId}
             hypercertData={certData}
+            onBack={() => setStep(1)}
           />
         </div>
       )}

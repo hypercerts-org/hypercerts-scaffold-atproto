@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { Plus, X } from "lucide-react";
+import { Plus, X, ArrowLeft } from "lucide-react";
 import { DatePicker } from "./date-range-picker";
 import { useOAuthContext } from "@/providers/OAuthProviderSSR";
 import * as Contribution from "@/lexicons/types/org/hypercerts/claim/contribution";
@@ -25,123 +25,120 @@ import {
 export default function HypercertContributionForm({
   hypercertId,
   hypercertData,
+  onBack,
 }: {
   hypercertId: string;
   hypercertData?: CertData;
+  onBack?: () => void;
 }) {
   const { atProtoAgent } = useOAuthContext();
+
   const hypercertRef = {
     $type: "com.atproto.repo.strongRef",
     uri: hypercertData?.uri,
     cid: hypercertData?.cid,
   };
+
   const hypercertRecord = hypercertData?.value;
+
   const [role, setRole] = useState("");
   const [contributors, setContributors] = useState([""]);
   const [description, setDescription] = useState("");
   const [workTimeframeFrom, setWorkTimeframeFrom] = useState<Date>();
   const [workTimeframeTo, setWorkTimeframeTo] = useState<Date>();
+  const [saving, setSaving] = useState(false);
 
-  const addContributor = () => {
-    setContributors([...contributors, ""]);
-  };
+  // Prefill from first contribution (if present)
+  useEffect(() => {
+    async function fetchContributionData() {
+      if (!atProtoAgent || !hypercertRecord?.contributions?.length) return;
 
-  const removeContributor = (index: number) => {
-    setContributors(contributors.filter((_, idx) => idx !== index));
-  };
+      const firstRef = hypercertRecord.contributions[0];
+      const parsed = parseAtUri(firstRef?.uri);
+      if (!parsed) return;
 
-  const updateContributor = (index: number, value: string) => {
-    const updated = [...contributors];
-    updated[index] = value;
-    setContributors(updated);
-  };
+      try {
+        const response = await atProtoAgent.com.atproto.repo.getRecord({
+          repo: parsed.did,
+          collection: parsed.collection || "org.hypercerts.claim.contribution",
+          rkey: parsed.rkey,
+        });
+
+        const value = response?.data?.value as Contribution.Record | undefined;
+        if (!value) return;
+
+        setRole(value.role ?? "");
+        setContributors(
+          Array.isArray(value.contributors) && value.contributors.length > 0
+            ? value.contributors
+            : [""]
+        );
+        setDescription(value.description ?? "");
+        setWorkTimeframeFrom(
+          value.workTimeframeFrom
+            ? new Date(value.workTimeframeFrom)
+            : undefined
+        );
+        setWorkTimeframeTo(
+          value.workTimeframeTo ? new Date(value.workTimeframeTo) : undefined
+        );
+      } catch (e) {
+        console.error("Failed to prefill contribution:", e);
+      }
+    }
+    fetchContributionData();
+  }, [hypercertRecord, atProtoAgent]);
+
+  const addContributor = () => setContributors((arr) => [...arr, ""]);
+  const removeContributor = (index: number) =>
+    setContributors((arr) => arr.filter((_, idx) => idx !== index));
+  const updateContributor = (index: number, value: string) =>
+    setContributors((arr) => arr.map((v, i) => (i === index ? value : v)));
 
   const createContribution = async (
     contributionRecord: Contribution.Record
   ) => {
     const response = await atProtoAgent?.com.atproto.repo.createRecord({
-      rkey: new Date().getTime().toString(),
+      rkey: String(Date.now()),
       record: contributionRecord,
       collection: "org.hypercerts.claim.contribution",
       repo: atProtoAgent.assertDid,
     });
     return response;
   };
-  useEffect(() => {
-    async function fetchContributionData() {
-      if (!atProtoAgent || !hypercertRecord) return;
-      const contributionURI = parseAtUri(
-        hypercertRecord?.contributions?.[0]?.uri
-      );
-      if (contributionURI) {
-        const response = await atProtoAgent.com.atproto.repo.getRecord({
-          repo: atProtoAgent.assertDid,
-          collection: "org.hypercerts.claim.contribution",
-          rkey: contributionURI.rkey,
-        });
-        return response.data;
-      }
-    }
-    async function prefillFromExistingContribution() {
-      if (!atProtoAgent) return;
-      try {
-        const data = await fetchContributionData();
-
-        const contributionRecord = data?.value as
-          | Contribution.Record
-          | undefined;
-        if (!contributionRecord) return;
-        setRole(contributionRecord.role ?? "");
-        setContributors(
-          Array.isArray(contributionRecord.contributors) &&
-            contributionRecord.contributors.length > 0
-            ? contributionRecord.contributors
-            : [""]
-        );
-        setDescription(contributionRecord.description ?? "");
-        setWorkTimeframeFrom(
-          contributionRecord.workTimeframeFrom
-            ? new Date(contributionRecord.workTimeframeFrom)
-            : undefined
-        );
-        setWorkTimeframeTo(
-          contributionRecord.workTimeframeTo
-            ? new Date(contributionRecord.workTimeframeTo)
-            : undefined
-        );
-      } catch (e) {
-        console.error("Failed to prefill contribution:", e);
-      }
-    }
-    prefillFromExistingContribution();
-  }, [hypercertRecord, atProtoAgent]);
 
   const handleSubmit: FormEventHandler<HTMLFormElement> = async (e) => {
     e.preventDefault();
+    if (!atProtoAgent) return;
+
     const contributionRecord = {
       $type: "org.hypercerts.claim.contribution",
       hypercert: hypercertRef || undefined,
       role,
       contributors: contributors.filter((c) => c.trim() !== ""),
-      description: description,
+      description: description || undefined,
       workTimeframeFrom: workTimeframeFrom?.toISOString(),
       workTimeframeTo: workTimeframeTo?.toISOString(),
       createdAt: new Date().toISOString(),
     };
+
     const isValidContribution = validateContribution(contributionRecord);
     if (!isValidContribution.success) {
       toast.error(isValidContribution.error || "Invalid contribution record");
       return;
     }
+
     try {
+      setSaving(true);
+
       const response = await createContribution(
         contributionRecord as Contribution.Record
       );
-      const contributionCid = response?.data.cid;
-      const contributionURI = response?.data.uri;
-      if (!contributionCid || !contributionURI) {
-        return;
-      }
+
+      const contributionCid = response?.data?.cid;
+      const contributionURI = response?.data?.uri;
+      if (!contributionCid || !contributionURI) return;
+
       const updatedHypercert = {
         ...hypercertRecord,
         contributions: [
@@ -153,21 +150,26 @@ export default function HypercertContributionForm({
           },
         ],
       };
+
       const isValidHypercert = validateHypercert(updatedHypercert);
       if (!isValidHypercert.success) {
         toast.error(isValidHypercert.error || "Invalid updated hypercert");
         return;
       }
-      await atProtoAgent?.com.atproto.repo.putRecord({
+
+      await atProtoAgent.com.atproto.repo.putRecord({
         rkey: hypercertId,
         repo: atProtoAgent.assertDid,
         collection: "org.hypercerts.claim",
         record: updatedHypercert,
       });
-      toast.success("Contribution created and linked successfully!");
+
+      toast.success("Contribution updated and linked!");
     } catch (error) {
-      console.error("Error creating contribution:", error);
-      toast.error("Failed to create contribution");
+      console.error("Error saving contribution:", error);
+      toast.error("Failed to update contribution");
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -175,17 +177,24 @@ export default function HypercertContributionForm({
     <div className="p-6">
       <div className="max-w-3xl mx-auto">
         <Card className="shadow-lg">
-          <CardHeader>
-            <CardTitle className="text-2xl">
-              Create Hypercert Contribution
-            </CardTitle>
-            <CardDescription>
-              Record a contribution made toward a hypercert&apos;s impact
-            </CardDescription>
+          <CardHeader className="pb-2">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs uppercase tracking-wide text-muted-foreground">
+                  Step 2 of 2 · Contributions
+                </p>
+                <CardTitle className="text-2xl mt-1">
+                  Update Hypercert Contribution
+                </CardTitle>
+                <CardDescription className="mt-1">
+                  Link roles, contributors, and timeframes for this hypercert.
+                </CardDescription>
+              </div>
+            </div>
           </CardHeader>
+
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Role */}
               <div className="space-y-2">
                 <Label htmlFor="role">Role / Title *</Label>
                 <Input
@@ -198,7 +207,6 @@ export default function HypercertContributionForm({
                 />
               </div>
 
-              {/* Contributors */}
               <div className="space-y-2">
                 <Label>Contributors (DIDs) *</Label>
                 <div className="space-y-2">
@@ -218,6 +226,7 @@ export default function HypercertContributionForm({
                           variant="outline"
                           size="icon"
                           onClick={() => removeContributor(index)}
+                          aria-label={`Remove contributor ${index + 1}`}
                         >
                           <X className="h-4 w-4" />
                         </Button>
@@ -237,7 +246,6 @@ export default function HypercertContributionForm({
                 </Button>
               </div>
 
-              {/* Description */}
               <div className="space-y-2">
                 <Label htmlFor="description">Description (Optional)</Label>
                 <Textarea
@@ -248,12 +256,11 @@ export default function HypercertContributionForm({
                   maxLength={2000}
                   rows={4}
                 />
-                <p className="text-xs text-gray-500">
+                <p className="text-xs text-muted-foreground">
                   {description.length} / 2000 characters
                 </p>
               </div>
 
-              {/* Work Timeframe */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <DatePicker
@@ -271,10 +278,29 @@ export default function HypercertContributionForm({
                 </div>
               </div>
 
-              {/* Submit Button */}
-              <Button type="submit" className="w-full">
-                Create Contribution
-              </Button>
+              <div className="flex items-center justify-end gap-4 pt-2">
+                {onBack ? (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={onBack}
+                    className="gap-2"
+                  >
+                    <ArrowLeft className="h-4 w-4" />
+                    Back
+                  </Button>
+                ) : (
+                  <div />
+                )}
+
+                <Button
+                  type="submit"
+                  disabled={saving}
+                  className="min-w-[180px]"
+                >
+                  {saving ? "Saving…" : "Update Contribution"}
+                </Button>
+              </div>
             </form>
           </CardContent>
         </Card>
