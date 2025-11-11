@@ -258,12 +258,14 @@ export default function HypercertContributionForm({
                 <div className="space-y-2">
                   <DatePicker
                     label="Work Started"
+                    initDate={workTimeframeFrom}
                     onChange={setWorkTimeframeFrom}
                   />
                 </div>
                 <div className="space-y-2">
                   <DatePicker
                     label="Work Finished"
+                    initDate={workTimeframeTo}
                     onChange={setWorkTimeframeTo}
                   />
                 </div>

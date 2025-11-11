@@ -116,10 +116,15 @@ export default function Home() {
       </div>
       <div className="flex justify-between w-full">
         <DatePicker
+          initDate={workTimeframeFrom || undefined}
           onChange={setWorkTimeframeFrom}
           label="Work Time Frame From"
         />
-        <DatePicker onChange={setWorkTimeframeTo} label="Work Time Frame To" />
+        <DatePicker
+          initDate={workTimeframeTo || undefined}
+          onChange={setWorkTimeframeTo}
+          label="Work Time Frame To"
+        />
       </div>
       <Button disabled={creating} type="submit">
         {creating && <Spinner />}
