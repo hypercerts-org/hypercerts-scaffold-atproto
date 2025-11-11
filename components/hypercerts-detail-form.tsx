@@ -14,7 +14,7 @@ import * as HypercertRecord from "@/lexicons/types/org/hypercerts/claim";
 
 type HypercertDetailsFormProps = {
   hypercertId: string;
-  initialRecord: HypercertRecord.Record;
+  initialRecord?: HypercertRecord.Record;
   onSaved?: (args: { advance: boolean }) => void;
 };
 
@@ -28,14 +28,14 @@ export default function HypercertDetailsForm({
   const [shortDescription, setShortDescription] = useState(
     initialRecord?.shortDescription || ""
   );
-  const [workScope, setWorkScope] = useState(initialRecord.workScope);
+  const [workScope, setWorkScope] = useState(initialRecord?.workScope || "");
   const [workTimeframeFrom, setWorkTimeframeFrom] = useState<Date | null>(
-    initialRecord.workTimeFrameFrom
+    initialRecord?.workTimeFrameFrom
       ? new Date(initialRecord.workTimeFrameFrom)
       : null
   );
   const [workTimeframeTo, setWorkTimeframeTo] = useState<Date | null>(
-    initialRecord.workTimeFrameTo
+    initialRecord?.workTimeFrameTo
       ? new Date(initialRecord.workTimeFrameTo)
       : null
   );
@@ -47,18 +47,25 @@ export default function HypercertDetailsForm({
 
     try {
       setSaving(true);
+      if (
+        !workTimeframeFrom ||
+        !workTimeframeTo ||
+        !title ||
+        !shortDescription ||
+        !workScope ||
+        !initialRecord?.createdAt
+      ) {
+        return;
+      }
 
-      // Ensure consistent casing for the repo record
       const record: HypercertRecord.Record = {
-        ...initialRecord,
+        ...(initialRecord || {}),
         $type: "org.hypercerts.claim",
         title,
         shortDescription,
         workScope,
-        workTimeframeFrom: workTimeframeFrom?.toISOString(),
-        workTimeframeTo: workTimeframeTo?.toISOString(),
-        workTimeFrameFrom: undefined as never,
-        workTimeFrameTo: undefined as never,
+        workTimeFrameFrom: workTimeframeFrom.toISOString(),
+        workTimeFrameTo: workTimeframeTo.toISOString(),
       };
 
       if (
@@ -71,9 +78,7 @@ export default function HypercertDetailsForm({
           rkey: hypercertId,
           record,
         });
-
         toast.success("Hypercert saved");
-
         onSaved?.({ advance });
       } else {
         const validation = HypercertRecord.validateRecord(record);

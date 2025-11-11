@@ -9,8 +9,8 @@ import type * as HypercertRecord from "@/lexicons/types/org/hypercerts/claim";
 
 import HypercertDetailsForm from "@/components/hypercerts-detail-form";
 import HypercertContributionForm from "@/components/contributions-form";
+import { ComAtprotoRepoGetRecord } from "@atproto/api";
 
-// Simple stepper header (you can swap for shadcn/ui primitives if you prefer)
 function StepperHeader({ step }: { step: 1 | 2 }) {
   const steps = [
     { id: 1, label: "Hypercert Details" },
@@ -35,7 +35,7 @@ function StepperHeader({ step }: { step: 1 | 2 }) {
             {s.label}
           </span>
           {idx < steps.length - 1 && (
-            <div className="w-10 h-[2px] bg-border mx-2" />
+            <div className="w-10 h-1.5 bg-border mx-2" />
           )}
         </div>
       ))}
@@ -43,14 +43,17 @@ function StepperHeader({ step }: { step: 1 | 2 }) {
   );
 }
 
+export type CertData = Omit<ComAtprotoRepoGetRecord.OutputSchema, "value"> & {
+  value: HypercertRecord.Record;
+};
+
 export default function EditHypercertIdPage() {
   const params = useParams<{ hypercertId: string }>();
   const hypercertId = params.hypercertId;
   const router = useRouter();
   const { atProtoAgent, session } = useOAuthContext();
+  const [certData, setCertData] = useState<CertData>();
 
-  const [originalRecord, setOriginalRecord] =
-    useState<HypercertRecord.Record>();
   const [loading, setLoading] = useState(true);
   const [step, setStep] = useState<1 | 2>(1);
 
@@ -73,10 +76,7 @@ export default function EditHypercertIdPage() {
           collection: "org.hypercerts.claim",
           rkey: hypercertId,
         });
-        const record = response?.data?.value as
-          | HypercertRecord.Record
-          | undefined;
-        if (!cancelled) setOriginalRecord(record);
+        setCertData(response?.data as CertData);
       } catch (error) {
         console.error("Error fetching hypercert:", error);
         toast.error("Failed to load hypercert");
@@ -98,8 +98,7 @@ export default function EditHypercertIdPage() {
     );
   }
 
-  // Guard: in case fetch failed
-  if (!originalRecord) {
+  if (!certData?.value) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] gap-2">
         <p className="text-muted-foreground">No record found.</p>
@@ -114,7 +113,7 @@ export default function EditHypercertIdPage() {
       {step === 1 && (
         <HypercertDetailsForm
           hypercertId={hypercertId}
-          initialRecord={originalRecord}
+          initialRecord={certData?.value}
           onSaved={({ advance }) => {
             // When the child successfully saves, decide whether to advance
             if (advance) {
@@ -131,7 +130,7 @@ export default function EditHypercertIdPage() {
           {/* optional: a compact summary of the main record above the form */}
           <HypercertContributionForm
             hypercertId={hypercertId}
-            record={originalRecord}
+            hypercertData={certData}
           />
         </div>
       )}

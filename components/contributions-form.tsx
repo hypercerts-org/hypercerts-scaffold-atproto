@@ -16,16 +16,22 @@ import { useOAuthContext } from "@/providers/OAuthProviderSSR";
 import * as Contribution from "@/lexicons/types/org/hypercerts/claim/contribution";
 import * as HypercerRecord from "@/lexicons/types/org/hypercerts/claim";
 import { toast } from "sonner";
+import { CertData } from "@/app/[hypercertId]/page";
 
 export default function HypercertContributionForm({
   hypercertId,
-  record,
+  hypercertData,
 }: {
   hypercertId: string;
-  record?: HypercerRecord.Record;
+  hypercertData?: CertData;
 }) {
   const { atProtoAgent } = useOAuthContext();
-  const [hypercertRef, setHypercertRef] = useState("");
+  const hypercertRef = {
+    $type: "com.atproto.repo.strongRef",
+    uri: hypercertData?.uri,
+    cid: hypercertData?.cid,
+  };
+  const hypercertRecord = hypercertData?.value;
   const [role, setRole] = useState("");
   const [contributors, setContributors] = useState([""]);
   const [description, setDescription] = useState("");
@@ -72,9 +78,9 @@ export default function HypercertContributionForm({
         const contributionCid = response?.data.cid;
         const contributionURI = response?.data.uri;
         const updatedHypercert = {
-          ...record,
+          ...hypercertRecord,
           contributions: [
-            ...(record?.contributions || []),
+            ...(hypercertRecord?.contributions || []),
             {
               $type: "com.atproto.repo.strongRef",
               cid: contributionCid!,
