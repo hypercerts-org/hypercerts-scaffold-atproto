@@ -11,6 +11,9 @@ import { useState } from "react";
 import { toast } from "sonner";
 
 import * as HypercertRecord from "@/lexicons/types/org/hypercerts/claim";
+import HypercertsBaseForm, {
+  HypercertRecordForm,
+} from "./hypercerts-base-form";
 
 type HypercertDetailsFormProps = {
   hypercertId: string;
@@ -24,50 +27,32 @@ export default function HypercertDetailsForm({
   onSaved,
 }: HypercertDetailsFormProps) {
   const { atProtoAgent } = useOAuthContext();
-  const [title, setTitle] = useState(initialRecord?.title || "");
-  const [shortDescription, setShortDescription] = useState(
-    initialRecord?.shortDescription || ""
-  );
-  const [workScope, setWorkScope] = useState(initialRecord?.workScope || "");
-  const [workTimeframeFrom, setWorkTimeframeFrom] = useState<Date | null>(
-    initialRecord?.workTimeFrameFrom
-      ? new Date(initialRecord.workTimeFrameFrom)
-      : null
-  );
-  const [workTimeframeTo, setWorkTimeframeTo] = useState<Date | null>(
-    initialRecord?.workTimeFrameTo
-      ? new Date(initialRecord.workTimeFrameTo)
-      : null
-  );
-
   const [saving, setSaving] = useState(false);
 
-  async function saveRecord({ advance }: { advance: boolean }) {
+  async function saveRecord(certInfo: HypercertRecordForm, advance: boolean) {
     if (!atProtoAgent) return;
+    const {
+      title,
+      workTimeFrameFrom,
+      workTimeFrameTo,
+      workScope,
+      shortDescription,
+    } = certInfo;
+    if (!initialRecord?.createdAt) {
+      return;
+    }
 
     try {
       setSaving(true);
-      if (
-        !workTimeframeFrom ||
-        !workTimeframeTo ||
-        !title ||
-        !shortDescription ||
-        !workScope ||
-        !initialRecord?.createdAt
-      ) {
-        return;
-      }
-
       const record: HypercertRecord.Record = {
         ...(initialRecord || {}),
         $type: "org.hypercerts.claim",
         title,
         shortDescription,
         workScope,
-        workTimeFrameFrom: workTimeframeFrom.toISOString(),
-        workTimeFrameTo: workTimeframeTo.toISOString(),
+        workTimeFrameFrom,
+        workTimeFrameTo,
       };
-
       if (
         HypercertRecord.isRecord(record) &&
         HypercertRecord.validateRecord(record).success
@@ -99,80 +84,10 @@ export default function HypercertDetailsForm({
   }
 
   return (
-    <form
-      onSubmit={(e) => {
-        e.preventDefault();
-        saveRecord({ advance: false });
-      }}
-      className="flex flex-col gap-4 max-w-2xl mx-auto"
-    >
-      <div className="flex flex-col gap-1">
-        <Label htmlFor="title">Hypercert Name</Label>
-        <Input
-          id="title"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          placeholder="Enter the hypercert name"
-          required
-        />
-      </div>
-
-      <div className="flex flex-col gap-1">
-        <Label htmlFor="description">Short Description</Label>
-        <Textarea
-          id="description"
-          value={shortDescription}
-          onChange={(e) => setShortDescription(e.target.value)}
-          placeholder="Enter a short description"
-          required
-          rows={4}
-        />
-      </div>
-
-      <div className="flex flex-col gap-1">
-        <Label htmlFor="workScope">Work Scope Tags</Label>
-        <Textarea
-          id="workScope"
-          value={workScope}
-          onChange={(e) => setWorkScope(e.target.value)}
-          placeholder="Enter tags that describe the work"
-        />
-      </div>
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <DatePicker
-          initDate={workTimeframeFrom ?? undefined}
-          onChange={setWorkTimeframeFrom}
-          label="Work Time Frame From"
-        />
-        <DatePicker
-          initDate={workTimeframeTo ?? undefined}
-          onChange={setWorkTimeframeTo}
-          label="Work Time Frame To"
-        />
-      </div>
-
-      <div className="flex gap-3 justify-end pt-2">
-        <Button
-          type="submit"
-          variant="outline"
-          disabled={saving}
-          aria-label="Save"
-        >
-          {saving && <Spinner className="mr-2" />}
-          {saving ? "Saving…" : "Save"}
-        </Button>
-
-        <Button
-          type="button"
-          disabled={saving}
-          onClick={() => saveRecord({ advance: true })}
-          aria-label="Save and go to Contributions"
-        >
-          {saving && <Spinner className="mr-2" />}
-          {saving ? "Saving…" : "Save & Next"}
-        </Button>
-      </div>
-    </form>
+    <HypercertsBaseForm
+      onSave={saveRecord}
+      isSaving={false}
+      saveDisabled={false}
+    />
   );
 }

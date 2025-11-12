@@ -40,8 +40,7 @@ export default function HypercertsBaseForm({
   const [workTimeframeFrom, setWorkTimeframeFrom] = useState<Date | null>(null);
   const [workTimeframeTo, setWorkTimeframeTo] = useState<Date | null>(null);
 
-  const handleSubmit: FormEventHandler<HTMLFormElement> = (e) => {
-    e.preventDefault();
+  const getRecord = () => {
     if (
       !(
         title &&
@@ -62,10 +61,23 @@ export default function HypercertsBaseForm({
       workTimeFrameTo: workTimeframeTo.toISOString(),
       createdAt: new Date().toISOString(),
     };
-    onCreate?.(record);
+    return record;
+  };
+
+  const handleSubmit: FormEventHandler<HTMLFormElement> = (e) => {
+    e.preventDefault();
+    const record = getRecord();
+    if (!record) return;
+    if (onCreate) {
+      onCreate?.(record);
+    } else if (onSave) {
+      onSave?.(record, false);
+    }
   };
   const handleSaveAndContinue = () => {
-    // onSave?.(record, true);
+    const record = getRecord();
+    if (!record) return;
+    onSave?.(record, true);
   };
   return (
     <form
