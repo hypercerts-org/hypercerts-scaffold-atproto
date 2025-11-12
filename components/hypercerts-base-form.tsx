@@ -34,7 +34,6 @@ export default function HypercertsBaseForm({
   updateActions,
   certInfo,
 }: HypercertsBaseFormProps) {
-  console.log(certInfo, "CERTT INFO");
   const [title, setTitle] = useState(certInfo?.title || "");
   const [file, setFile] = useState<File | undefined>();
   const [shortDescription, setShortDescription] = useState(

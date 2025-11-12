@@ -21,6 +21,7 @@ import {
   validateContribution,
   validateHypercert,
 } from "@/lib/utils";
+import { Spinner } from "./ui/spinner";
 
 export default function HypercertContributionForm({
   hypercertId,
@@ -46,6 +47,7 @@ export default function HypercertContributionForm({
   const [description, setDescription] = useState("");
   const [workTimeframeFrom, setWorkTimeframeFrom] = useState<Date>();
   const [workTimeframeTo, setWorkTimeframeTo] = useState<Date>();
+  const [fetching, setFetching] = useState(false);
   const [saving, setSaving] = useState(false);
 
   // Prefill from first contribution (if present)
@@ -58,6 +60,7 @@ export default function HypercertContributionForm({
       if (!parsed) return;
 
       try {
+        setFetching(true);
         const response = await atProtoAgent.com.atproto.repo.getRecord({
           repo: parsed.did,
           collection: parsed.collection || "org.hypercerts.claim.contribution",
@@ -84,6 +87,8 @@ export default function HypercertContributionForm({
         );
       } catch (e) {
         console.error("Failed to prefill contribution:", e);
+      } finally {
+        setFetching(false);
       }
     }
     fetchContributionData();
@@ -172,6 +177,14 @@ export default function HypercertContributionForm({
     }
   };
 
+  if (fetching) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <Spinner />
+      </div>
+    );
+  }
+
   return (
     <div className="p-6">
       <div className="max-w-3xl mx-auto">
@@ -183,7 +196,8 @@ export default function HypercertContributionForm({
                   Step 2 of 2 · Contributions
                 </p>
                 <CardTitle className="text-2xl mt-1">
-                  Update Hypercert Contribution
+                  {hypercertRecord?.contributions?.length ? "Update" : "Add"}{" "}
+                  Hypercert Contribution
                 </CardTitle>
                 <CardDescription className="mt-1">
                   Link roles, contributors, and timeframes for this hypercert.
