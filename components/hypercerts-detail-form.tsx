@@ -79,6 +79,7 @@ export default function HypercertDetailsForm({
 
   return (
     <HypercertsBaseForm
+      updateActions
       onSave={saveRecord}
       isSaving={saving}
       saveDisabled={false}
