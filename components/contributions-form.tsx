@@ -22,6 +22,16 @@ import {
   validateHypercert,
 } from "@/lib/utils";
 import { Spinner } from "./ui/spinner";
+import {
+  Command,
+  CommandInput,
+  CommandList,
+  CommandEmpty,
+  CommandGroup,
+  CommandItem,
+  CommandSeparator,
+} from "./ui/command";
+import UserSelection from "./user-selection";
 
 export default function HypercertContributionForm({
   hypercertId,
@@ -219,6 +229,7 @@ export default function HypercertContributionForm({
                   required
                 />
               </div>
+              {/* <UserSelection /> */}
 
               <div className="space-y-2">
                 <Label>Contributors (DIDs) *</Label>

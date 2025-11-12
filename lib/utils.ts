@@ -16,19 +16,17 @@ export function getImageURL(
   if (typeof blobRef === "string") {
     return blobRef;
   }
-
   if (blobRef && "$type" in blobRef && blobRef.$type === "string") {
     return blobRef.$type;
   }
-
-  // case 3: object with ref (BlobRef)
-  if (blobRef && "ref" in blobRef && "ref" in blobRef.original) {
+  if (blobRef && "ref" in blobRef) {
     const cid = blobRef.ref ?? undefined;
     if (!did || !cid) return undefined;
 
+    // when the ref is read then it becomes a string. forcefully cast as string to avoid ts errors for now
     const url = `${PDS_URL}xrpc/com.atproto.sync.getBlob?did=${encodeURIComponent(
       did
-    )}&cid=${encodeURIComponent(cid as string)}`;
+    )}&cid=${encodeURIComponent(cid as unknown as string)}`;
     console.log(url);
     return url;
   }
