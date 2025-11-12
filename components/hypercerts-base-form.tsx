@@ -5,9 +5,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
 import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@radix-ui/react-label";
-import { FormEventHandler, useEffect, useState } from "react";
 import * as Hypercert from "@/lexicons/types/org/hypercerts/claim";
+import { Label } from "@radix-ui/react-label";
+import { FormEventHandler, useState } from "react";
 
 export interface HypercertsBaseFormProps {
   isSaving: boolean;
