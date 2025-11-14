@@ -229,7 +229,6 @@ export default function HypercertContributionForm({
                   required
                 />
               </div>
-              {/* <UserSelection /> */}
 
               <div className="space-y-2">
                 <Label>Contributors (DIDs) *</Label>
