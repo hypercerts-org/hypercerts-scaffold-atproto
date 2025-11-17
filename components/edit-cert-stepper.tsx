@@ -4,6 +4,7 @@ export function StepperHeader({ step }: { step: number }) {
     { id: 2, label: "Contributions" },
     { id: 3, label: "Evidence" },
     { id: 4, label: "Location" },
+    { id: 5, label: "Rights" },
   ];
   return (
     <div className="flex items-center justify-center gap-6 my-6">

@@ -14,6 +14,7 @@ import { toast } from "sonner";
 import { CertData } from "../[hypercertId]/edit/page";
 import HypercertEvidenceForm from "@/components/evidence-form";
 import HypercertLocationForm from "@/components/locations-form";
+import HypercertRightsForm from "@/components/rights-form";
 
 export default function Home() {
   const { atProtoAgent, session } = useOAuthContext();
@@ -130,12 +131,17 @@ export default function Home() {
           />
         </div>
       )}
-      {step === 4 && hypercertId && certData && (
+      {step === 4 && hypercertId && (
         <div className="mt-6">
           <HypercertLocationForm
             onNext={nextStepper}
             hypercertId={hypercertId}
           />
+        </div>
+      )}
+      {step === 5 && hypercertId && (
+        <div className="mt-6">
+          <HypercertRightsForm onNext={nextStepper} hypercertId={hypercertId} />
         </div>
       )}
     </div>
