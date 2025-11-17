@@ -182,6 +182,17 @@ export default function HypercertRightsForm({
                 ) : (
                   <div />
                 )}
+                {!!onNext && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={onNext}
+                    className="gap-2"
+                  >
+                    <ArrowLeft className="h-4 w-4 rotate-180" />
+                    Skip
+                  </Button>
+                )}
 
                 <Button
                   type="submit"

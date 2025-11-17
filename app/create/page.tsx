@@ -3,6 +3,7 @@
 import HypercertContributionForm from "@/components/contributions-form";
 import { StepperHeader } from "@/components/edit-cert-stepper";
 import HypercertEvidenceForm from "@/components/evidence-form";
+import HypercertCompletionStep from "@/components/hypercert-completion-step";
 import HypercertsCreateForm from "@/components/hypercerts-create-form";
 import HypercertLocationForm from "@/components/locations-form";
 import HypercertRightsForm from "@/components/rights-form";
@@ -15,6 +16,9 @@ export default function Home() {
   const nextStepper = () => {
     setStep((step) => step + 1);
   };
+  const previousStepper = () => {
+    setStep((step) => step - 1);
+  };
   return (
     <div className="max-w-4xl mx-auto py-8 px-4">
       <StepperHeader step={step} />
@@ -26,26 +30,39 @@ export default function Home() {
         />
       )}
       {step === 2 && hypercertId && (
-        <div className="mt-6">
-          <HypercertContributionForm
-            hypercertId={hypercertId}
-            onSkip={() => setStep((step) => step + 1)}
-            onBack={() => setStep(1)}
-          />
-        </div>
+        <HypercertContributionForm
+          hypercertId={hypercertId}
+          onSkip={() => setStep((step) => step + 1)}
+          onBack={previousStepper}
+        />
       )}
       {step === 3 && hypercertId && (
         <HypercertEvidenceForm
           hypercertId={hypercertId}
           onNext={nextStepper}
-          onBack={() => setStep(2)}
+          onBack={previousStepper}
         />
       )}
       {step === 4 && hypercertId && (
-        <HypercertLocationForm onNext={nextStepper} hypercertId={hypercertId} />
+        <HypercertLocationForm
+          onNext={nextStepper}
+          onBack={previousStepper}
+          hypercertId={hypercertId}
+        />
       )}
       {step === 5 && hypercertId && (
-        <HypercertRightsForm onNext={nextStepper} hypercertId={hypercertId} />
+        <HypercertRightsForm
+          onNext={nextStepper}
+          onBack={previousStepper}
+          hypercertId={hypercertId}
+        />
+      )}
+      {step === 6 && (
+        <HypercertCompletionStep
+          onCreateAnother={() => setStep(1)}
+          onBack={previousStepper}
+          hypercertId={hypercertId}
+        />
       )}
     </div>
   );
