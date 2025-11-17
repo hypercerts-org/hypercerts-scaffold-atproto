@@ -14,7 +14,6 @@ import { Textarea } from "@/components/ui/textarea";
 import * as Location from "@/lexicons/types/app/certified/location";
 import * as HypercertClaim from "@/lexicons/types/org/hypercerts/claim";
 import { createLocation, getHypercert, updateHypercert } from "@/lib/queries";
-import { HypercertRecordData } from "@/lib/types";
 import { validateHypercert } from "@/lib/utils";
 import { useOAuthContext } from "@/providers/OAuthProviderSSR";
 import { ArrowLeft, Link as LinkIcon, Upload } from "lucide-react";
@@ -170,7 +169,6 @@ export default function HypercertLocationForm({
           <CardHeader className="pb-2">
             <div className="flex items-center justify-between">
               <div>
-                {/* You can prepend "Step X of Y ·" here if you want */}
                 <CardTitle className="text-2xl">
                   Add Hypercert Location
                 </CardTitle>
