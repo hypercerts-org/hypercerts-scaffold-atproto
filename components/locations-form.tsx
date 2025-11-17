@@ -12,7 +12,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import * as Location from "@/lexicons/types/app/certified/location";
-import { getHypercert } from "@/lib/queries";
+import * as HypercertClaim from "@/lexicons/types/org/hypercerts/claim";
+import { createLocation, getHypercert, updateHypercert } from "@/lib/queries";
+import { HypercertRecordData } from "@/lib/types";
 import { validateHypercert } from "@/lib/utils";
 import { useOAuthContext } from "@/providers/OAuthProviderSSR";
 import { ArrowLeft, Link as LinkIcon, Upload } from "lucide-react";
@@ -60,99 +62,97 @@ export default function HypercertLocationForm({
     setLocationFile(file ?? null);
   };
 
+  const getLocationContent = async () => {
+    if (contentMode === "link") {
+      if (!locationUrl.trim()) {
+        toast.error("Please provide a link to the evidence.");
+        setSaving(false);
+        return;
+      }
+      return { $type: "app.certified.defs#uri", value: locationUrl.trim() };
+    } else {
+      if (!locationFile) {
+        toast.error("Please upload an evidence file.");
+        setSaving(false);
+        return;
+      }
+      const blob = new Blob([locationFile], { type: locationFile.type });
+      const response = await atProtoAgent!.com.atproto.repo.uploadBlob(blob);
+      const uploadedBlob = response.data.blob;
+      return { $type: "smallBlob", ...uploadedBlob };
+    }
+  };
+
+  const handleLocationCreation = async () => {
+    const location = await getLocationContent();
+    if (!location) return;
+    const locationRecord: Location.Record = {
+      $type: "app.certified.location",
+      lpVersion,
+      srs,
+      locationType: effectiveLocationType,
+      location,
+      name: name || undefined,
+      description: description || undefined,
+      createdAt: new Date().toISOString(),
+    };
+
+    const validation = Location.validateRecord(locationRecord);
+    if (!validation.success) {
+      toast.error(validation.error?.message || "Invalid location record");
+      setSaving(false);
+      return;
+    }
+    const locationInfo = await createLocation(atProtoAgent!, locationRecord);
+    const locationCid = locationInfo?.data?.cid;
+    const locationURI = locationInfo?.data?.uri;
+
+    return { locationCid, locationURI };
+  };
+
+  const handleUpdateHypercert = async (
+    locationCID: string,
+    locationURI: string
+  ) => {
+    if (!atProtoAgent) return;
+    const hypercert = await getHypercert(hypercertId, atProtoAgent);
+    const hypercertRecord = (hypercert.data.value ||
+      {}) as HypercertClaim.Record;
+    const updatedHypercert = {
+      ...hypercertRecord,
+      locations: [
+        {
+          $type: "com.atproto.repo.strongRef",
+          cid: locationCID,
+          uri: locationURI,
+        },
+      ],
+    };
+
+    const hypercertValidation = validateHypercert(updatedHypercert);
+    if (!hypercertValidation.success) {
+      toast.error(
+        hypercertValidation.error || "Invalid updated hypercert record"
+      );
+      setSaving(false);
+      return;
+    }
+    await updateHypercert(hypercertId, atProtoAgent, updatedHypercert);
+  };
+
   const handleSubmit: FormEventHandler<HTMLFormElement> = async (e) => {
     e.preventDefault();
     if (!atProtoAgent) return;
     try {
       setSaving(true);
-
-      let locationValue: Location.Record["location"];
-
-      if (contentMode === "link") {
-        if (!locationUrl.trim()) {
-          toast.error("Please provide a link (URI) for the location.");
-          setSaving(false);
-          return;
-        }
-        locationValue = {
-          $type: "app.certified.defs#uri",
-          value: locationUrl.trim(),
-        };
-      } else {
-        if (!locationFile) {
-          toast.error("Please upload a file containing location data.");
-          setSaving(false);
-          return;
-        }
-        const blob = new Blob([locationFile], { type: locationFile.type });
-        const response = await atProtoAgent.com.atproto.repo.uploadBlob(blob);
-        const uploadedBlob = response.data.blob;
-
-        locationValue = { $type: "smallBlob", ...uploadedBlob };
-      }
-
-      const locationRecord: Location.Record = {
-        $type: "app.certified.location",
-        lpVersion,
-        srs,
-        locationType: effectiveLocationType,
-        location: locationValue,
-        name: name || undefined,
-        description: description || undefined,
-        createdAt: new Date().toISOString(),
-      };
-
-      const validation = Location.validateRecord(locationRecord);
-      if (!validation.success) {
-        toast.error(validation.error?.message || "Invalid location record");
-        setSaving(false);
-        return;
-      }
-
-      const createResponse = await atProtoAgent.com.atproto.repo.createRecord({
-        rkey: String(Date.now()),
-        record: locationRecord,
-        collection: "app.certified.location",
-        repo: atProtoAgent.assertDid,
-      });
-
-      const locationCid = createResponse?.data?.cid;
-      const locationURI = createResponse?.data?.uri;
+      const { locationCid, locationURI } =
+        (await handleLocationCreation()) || {};
       if (!locationCid || !locationURI) {
         toast.error("Failed to create location record");
         setSaving(false);
         return;
       }
-      const hypercert = await getHypercert(hypercertId, atProtoAgent);
-      const hypercertRecord = hypercert.data.value || {};
-
-      const updatedHypercert = {
-        ...hypercertRecord,
-        locations: [
-          {
-            $type: "com.atproto.repo.strongRef",
-            cid: locationCid,
-            uri: locationURI,
-          },
-        ],
-      };
-
-      const hypercertValidation = validateHypercert(updatedHypercert);
-      if (!hypercertValidation.success) {
-        toast.error(
-          hypercertValidation.error || "Invalid updated hypercert record"
-        );
-        setSaving(false);
-        return;
-      }
-
-      await atProtoAgent.com.atproto.repo.putRecord({
-        rkey: hypercertId,
-        repo: atProtoAgent.assertDid,
-        collection: "org.hypercerts.claim",
-        record: updatedHypercert,
-      });
-
+      await handleUpdateHypercert(locationCid, locationURI);
       toast.success("Location created and linked to hypercert!");
       onNext?.();
     } catch (error) {
@@ -359,7 +359,7 @@ export default function HypercertLocationForm({
                   disabled={saving}
                   className="min-w-[180px]"
                 >
-                  {saving ? "Saving…" : "Save Location"}
+                  {saving ? "Saving…" : "Save & Next"}
                 </Button>
               </div>
             </form>

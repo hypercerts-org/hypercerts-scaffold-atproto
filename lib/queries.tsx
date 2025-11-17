@@ -2,6 +2,7 @@ import { Agent } from "@atproto/api";
 import * as HypercertClaim from "@/lexicons/types/org/hypercerts/claim";
 import * as HypercertContribution from "@/lexicons/types/org/hypercerts/claim/contribution";
 import * as HypercertEvidence from "@/lexicons/types/org/hypercerts/claim/evidence";
+import * as HypercertLocation from "@/lexicons/types/app/certified/location";
 import { Collections } from "./types";
 
 export const getHypercert = async (rkey: string, atProtoAgent: Agent) => {
@@ -46,6 +47,18 @@ export const createEvidence = async (
   const response = await atProtoAgent.com.atproto.repo.createRecord({
     record,
     collection: "org.hypercerts.claim.evidence",
+    repo: atProtoAgent.assertDid,
+  });
+  return response;
+};
+
+export const createLocation = async (
+  atProtoAgent: Agent,
+  record: HypercertLocation.Record
+) => {
+  const response = await atProtoAgent.com.atproto.repo.createRecord({
+    record,
+    collection: "app.certified.location",
     repo: atProtoAgent.assertDid,
   });
   return response;
