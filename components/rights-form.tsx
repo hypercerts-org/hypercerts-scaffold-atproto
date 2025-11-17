@@ -12,7 +12,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import * as Rights from "@/lexicons/types/org/hypercerts/claim/rights";
-import { getHypercert } from "@/lib/queries";
+import * as HypercertClaim from "@/lexicons/types/org/hypercerts/claim";
+import { getHypercert, updateHypercert } from "@/lib/queries";
 import { validateHypercert } from "@/lib/utils";
 import { useOAuthContext } from "@/providers/OAuthProviderSSR";
 import { ArrowLeft } from "lucide-react";
@@ -36,75 +37,74 @@ export default function HypercertRightsForm({
 
   const [saving, setSaving] = useState(false);
 
+  const handleRightsCreation = async () => {
+    if (!atProtoAgent) return;
+    const rightsRecord: Rights.Record = {
+      $type: "org.hypercerts.claim.rights",
+      rightsName,
+      rightsType,
+      rightsDescription,
+      createdAt: new Date().toISOString(),
+    };
+
+    const validation = Rights.validateRecord(rightsRecord);
+    if (!validation.success) {
+      toast.error(validation.error?.message || "Invalid rights record");
+      setSaving(false);
+      return;
+    }
+
+    const createResponse = await atProtoAgent.com.atproto.repo.createRecord({
+      rkey: String(Date.now()),
+      record: rightsRecord,
+      collection: "org.hypercerts.claim.rights",
+      repo: atProtoAgent.assertDid,
+    });
+
+    const rightsCid = createResponse?.data?.cid;
+    const rightsURI = createResponse?.data?.uri;
+    if (!rightsCid || !rightsURI) {
+      toast.error("Failed to create rights record");
+      setSaving(false);
+      return;
+    }
+    return { rightsCid, rightsURI };
+  };
+
+  const handleCreate = async (rightsCid: string, rightsURI: string) => {
+    if (!atProtoAgent) return;
+    const hypercert = await getHypercert(hypercertId, atProtoAgent);
+    const hypercertRecord = hypercert.data.value || {};
+    const updatedHypercert = {
+      ...hypercertRecord,
+      rights: {
+        $type: "com.atproto.repo.strongRef",
+        cid: rightsCid,
+        uri: rightsURI,
+      },
+    } as HypercertClaim.Record;
+
+    const hypercertValidation = validateHypercert(updatedHypercert);
+    if (!hypercertValidation.success) {
+      toast.error(
+        hypercertValidation.error || "Invalid updated hypercert record"
+      );
+      setSaving(false);
+      return;
+    }
+
+    await updateHypercert(hypercertId, atProtoAgent, updatedHypercert);
+  };
+
   const handleSubmit: FormEventHandler<HTMLFormElement> = async (e) => {
     e.preventDefault();
     if (!atProtoAgent) return;
 
     try {
       setSaving(true);
-
-      const rightsRecord: Rights.Record = {
-        $type: "org.hypercerts.claim.rights",
-        rightsName,
-        rightsType,
-        rightsDescription,
-        createdAt: new Date().toISOString(),
-      };
-
-      const validation = Rights.validateRecord(rightsRecord);
-      if (!validation.success) {
-        toast.error(validation.error?.message || "Invalid rights record");
-        setSaving(false);
-        return;
-      }
-
-      const createResponse = await atProtoAgent.com.atproto.repo.createRecord({
-        rkey: String(Date.now()),
-        record: rightsRecord,
-        collection: "org.hypercerts.claim.rights",
-        repo: atProtoAgent.assertDid,
-      });
-
-      const rightsCid = createResponse?.data?.cid;
-      const rightsURI = createResponse?.data?.uri;
-      if (!rightsCid || !rightsURI) {
-        toast.error("Failed to create rights record");
-        setSaving(false);
-        return;
-      }
-
-      // Fetch latest hypercert before updating
-      const hypercert = await getHypercert(hypercertId, atProtoAgent);
-      const hypercertRecord = hypercert.data.value || {};
-
-      const updatedHypercert = {
-        ...hypercertRecord,
-        // Assuming the hypercert record has/accepts a `rights` field
-        rights: [
-          {
-            $type: "com.atproto.repo.strongRef",
-            cid: rightsCid,
-            uri: rightsURI,
-          },
-        ],
-      };
-
-      const hypercertValidation = validateHypercert(updatedHypercert);
-      if (!hypercertValidation.success) {
-        toast.error(
-          hypercertValidation.error || "Invalid updated hypercert record"
-        );
-        setSaving(false);
-        return;
-      }
-
-      await atProtoAgent.com.atproto.repo.putRecord({
-        rkey: hypercertId,
-        repo: atProtoAgent.assertDid,
-        collection: "org.hypercerts.claim",
-        record: updatedHypercert,
-      });
-
+      const { rightsCid, rightsURI } = (await handleRightsCreation()) || {};
+      if (!rightsCid || !rightsURI) return;
+      await handleCreate(rightsCid, rightsURI);
       toast.success("Rights created and linked to hypercert!");
       onNext?.();
     } catch (error) {
@@ -122,7 +122,6 @@ export default function HypercertRightsForm({
           <CardHeader className="pb-2">
             <div className="flex items-center justify-between">
               <div>
-                {/* e.g. "Step X of Y · Rights" if you want */}
                 <CardTitle className="text-2xl">Add Hypercert Rights</CardTitle>
                 <CardDescription className="mt-1">
                   Define the rights and usage terms associated with this
