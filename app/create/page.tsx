@@ -17,7 +17,7 @@ import HypercertLocationForm from "@/components/locations-form";
 
 export default function Home() {
   const { atProtoAgent, session } = useOAuthContext();
-  const [step, setStep] = useState<number>(1);
+  const [step, setStep] = useState<number>(4);
   const [creating, setCreating] = useState(false);
   const [hypercertId, setHypercertId] = useState<string>();
   const [certData, setCertData] = useState<CertData>();
@@ -126,7 +126,7 @@ export default function Home() {
           />
         </div>
       )}
-      {step === 4 && hypercertId && certData && (
+      {step === 4 && (
         <div className="mt-6">
           <HypercertLocationForm hypercertId={hypercertId} />
         </div>

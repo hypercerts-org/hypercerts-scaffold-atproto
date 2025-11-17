@@ -328,7 +328,6 @@ export default function HypercertLocationForm({
                     <Input
                       type="url"
                       placeholder="https://example.com/location.json"
-                      value={locationUrl}
                       onChange={(e) => setLocationUrl(e.target.value)}
                       required
                     />
