@@ -1,4 +1,4 @@
-import { FormEventHandler, useEffect, useState } from "react";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -9,29 +9,19 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Button } from "@/components/ui/button";
-import { Plus, X, ArrowLeft } from "lucide-react";
-import { DatePicker } from "./date-range-picker";
-import { useOAuthContext } from "@/providers/OAuthProviderSSR";
 import * as Contribution from "@/lexicons/types/org/hypercerts/claim/contribution";
-import { toast } from "sonner";
 import { HypercertRecordData } from "@/lib/types";
 import {
   parseAtUri,
   validateContribution,
   validateHypercert,
 } from "@/lib/utils";
+import { useOAuthContext } from "@/providers/OAuthProviderSSR";
+import { ArrowLeft, Plus, X } from "lucide-react";
+import { FormEventHandler, useEffect, useState } from "react";
+import { toast } from "sonner";
+import { DatePicker } from "./date-range-picker";
 import { Spinner } from "./ui/spinner";
-import {
-  Command,
-  CommandInput,
-  CommandList,
-  CommandEmpty,
-  CommandGroup,
-  CommandItem,
-  CommandSeparator,
-} from "./ui/command";
-import UserSelection from "./user-selection";
 
 export default function HypercertContributionForm({
   hypercertId,
