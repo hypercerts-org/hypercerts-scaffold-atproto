@@ -5,6 +5,7 @@ import { Separator } from "@/components/ui/separator";
 import type { HypercertRecordData } from "@/lib/types";
 import { Link2, LinkIcon } from "lucide-react";
 import Link from "next/link";
+import { URILink } from "./uri-link";
 
 export default function HypercertDetailsView({
   hypercertData,
@@ -72,10 +73,7 @@ export default function HypercertDetailsView({
         <div className="space-y-1 md:col-span-2">
           <dt className="text-xs text-muted-foreground">URI</dt>
           <dd className="text-sm break-all">
-            <Link target="_blank" rel="noreferrer nooopener" className="flex gap-2 items-center hover:text-blue-400 hover:underline" href={`https://pdsls.dev/${hypercertData.uri}`}>
-              {hypercertData.uri || "—"}
-              <LinkIcon size={18} />
-            </Link>
+            <URILink uri={hypercertData.uri} />
           </dd>
         </div>
 

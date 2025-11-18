@@ -4,7 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Spinner } from "@/components/ui/spinner";
 import { useOAuthContext } from "@/providers/OAuthProviderSSR";
-import { useEffect, useState } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import { toast } from "sonner";
 
 import type {
@@ -12,6 +12,7 @@ import type {
   HypercertRecordData,
 } from "@/lib/types";
 import { parseAtUri } from "@/lib/utils";
+import { URILink } from "./uri-link";
 
 export default function ContributionsView({
   hypercertData,
@@ -127,7 +128,11 @@ export default function ContributionsView({
 
                 <Separator className="md:col-span-2" />
 
-                <Field label="URI" value={contribution.uri || "—"} mono />
+                <Field
+                  label="URI"
+                  value={<URILink uri={contribution.uri || "—"} />}
+                  mono
+                />
                 <Field label="CID" value={contribution.cid || "—"} mono />
               </div>
             </CardContent>
@@ -148,7 +153,7 @@ function Field({
   mono,
 }: {
   label: string;
-  value: string;
+  value: ReactNode;
   mono?: boolean;
 }) {
   return (
