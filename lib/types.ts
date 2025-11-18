@@ -1,6 +1,7 @@
 import type * as HypercertRecord from "@/lexicons/types/org/hypercerts/claim";
 import type * as HypercertContribution from "@/lexicons/types/org/hypercerts/claim/contribution";
 import type * as HypercertEvidence from "@/lexicons/types/org/hypercerts/claim/evidence";
+import type * as HypercertRights from "@/lexicons/types/org/hypercerts/claim/rights";
 import { ComAtprotoRepoGetRecord } from "@atproto/api";
 
 export type HypercertEvidenceData = Omit<
@@ -15,6 +16,13 @@ export type HypercertRecordData = Omit<
   "value"
 > & {
   value: HypercertRecord.Record;
+};
+
+export type HypercertRightsData = Omit<
+  ComAtprotoRepoGetRecord.OutputSchema,
+  "value"
+> & {
+  value: HypercertRights.Record;
 };
 
 export type HypercertContributionData = Omit<
