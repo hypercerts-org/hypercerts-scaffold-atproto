@@ -8,7 +8,7 @@ import { ReactNode, useEffect, useState } from "react";
 import { toast } from "sonner";
 
 import type { HypercertRecordData, HypercertEvidenceData } from "@/lib/types";
-import { parseAtUri } from "@/lib/utils";
+import { getBlobURL, getPDSlsURI, parseAtUri } from "@/lib/utils";
 import { URILink } from "./uri-link";
 import { $Typed } from "@atproto/api";
 import { SmallBlob, Uri } from "@/lexicons/types/app/certified/defs";
@@ -90,7 +90,9 @@ export default function EvidenceView({
           (content as $Typed<Uri>)?.value
         ) {
           const contentValue = (content as $Typed<Uri>).value;
-          contentDisplay = <URILink uri={contentValue} />;
+          contentDisplay = (
+            <URILink uri={getPDSlsURI(contentValue)} label={contentValue} />
+          );
         }
         // Handle smallBlob content
         else if (contentType === "smallBlob") {
@@ -101,9 +103,10 @@ export default function EvidenceView({
               {contentValue?.ref && (
                 <>
                   {" · "}
-                  <span className="font-mono break-all">
-                    {contentValue.ref as unknown as string}
-                  </span>
+                  <URILink
+                    uri={getBlobURL(contentValue, atProtoAgent?.assertDid)}
+                    label={contentValue.ref.toString()}
+                  />
                 </>
               )}
             </p>
@@ -153,7 +156,12 @@ export default function EvidenceView({
 
                 <Field
                   label="URI"
-                  value={<URILink uri={evidence.uri || "—"} />}
+                  value={
+                    <URILink
+                      uri={getPDSlsURI(evidence.uri) || "—"}
+                      label={evidence.uri}
+                    />
+                  }
                   mono
                 />
                 <Field label="CID" value={evidence.cid || "—"} mono />

@@ -6,6 +6,7 @@ import type { HypercertRecordData } from "@/lib/types";
 import { Link2, LinkIcon } from "lucide-react";
 import Link from "next/link";
 import { URILink } from "./uri-link";
+import { getPDSlsURI } from "@/lib/utils";
 
 export default function HypercertDetailsView({
   hypercertData,
@@ -73,7 +74,7 @@ export default function HypercertDetailsView({
         <div className="space-y-1 md:col-span-2">
           <dt className="text-xs text-muted-foreground">URI</dt>
           <dd className="text-sm break-all">
-            <URILink uri={hypercertData.uri} />
+            <URILink uri={getPDSlsURI(hypercertData.uri)} label={hypercertData.uri} />
           </dd>
         </div>
 

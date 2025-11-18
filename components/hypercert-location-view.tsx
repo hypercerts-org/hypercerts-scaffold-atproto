@@ -8,10 +8,11 @@ import { ReactNode, useEffect, useState } from "react";
 import { toast } from "sonner";
 
 import type { HypercertRecordData, HypercertLocationData } from "@/lib/types";
-import { parseAtUri } from "@/lib/utils";
+import { getBlobURL, getPDSlsURI, parseAtUri } from "@/lib/utils";
 import { URILink } from "./uri-link";
 import { $Typed } from "@atproto/api";
 import { SmallBlob, Uri } from "@/lexicons/types/app/certified/defs";
+import { blob } from "stream/consumers";
 
 export default function LocationView({
   hypercertData,
@@ -74,7 +75,6 @@ export default function LocationView({
     );
   }
 
-  // There is a location ref, but we couldn’t fetch details
   if (!location) {
     return (
       <p className="text-sm text-muted-foreground">
@@ -85,19 +85,15 @@ export default function LocationView({
 
   const record = location.value;
 
-  // Render the `location` union (URI or SmallBlob)
   const loc = record.location;
   const locType = loc?.$type as string | undefined;
 
   let locationContentDisplay: ReactNode = "—";
 
-  // URI-type location (AppCertifiedDefs.Uri)
   if (locType === "app.certified.defs#uri") {
     const uri = (loc as $Typed<Uri>).value;
-    locationContentDisplay = <URILink uri={uri} />;
-  }
-  // SmallBlob-type location
-  else if (
+    locationContentDisplay = <URILink uri={getPDSlsURI(uri)} label={uri} />;
+  } else if (
     locType === "app.certified.defs#smallBlob" ||
     locType === "smallBlob"
   ) {
@@ -108,9 +104,10 @@ export default function LocationView({
         {blobRef && (
           <>
             {" · "}
-            <span className="font-mono break-all">
-              {blobRef as unknown as string}
-            </span>
+            <URILink
+              uri={getBlobURL(loc, atProtoAgent?.assertDid)}
+              label={blobRef.toString()}
+            />
           </>
         )}
       </p>
@@ -165,7 +162,12 @@ export default function LocationView({
 
             <Field
               label="URI"
-              value={<URILink uri={location.uri || "—"} />}
+              value={
+                <URILink
+                  uri={getPDSlsURI(location.uri) || "—"}
+                  label={location.uri}
+                />
+              }
               mono
             />
             <Field label="CID" value={location.cid || "—"} mono />

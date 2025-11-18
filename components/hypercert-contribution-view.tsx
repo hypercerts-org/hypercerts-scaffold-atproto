@@ -11,7 +11,7 @@ import type {
   HypercertContributionData,
   HypercertRecordData,
 } from "@/lib/types";
-import { parseAtUri } from "@/lib/utils";
+import { getPDSlsURI, parseAtUri } from "@/lib/utils";
 import { URILink } from "./uri-link";
 
 export default function ContributionsView({
@@ -130,7 +130,7 @@ export default function ContributionsView({
 
                 <Field
                   label="URI"
-                  value={<URILink uri={contribution.uri || "—"} />}
+                  value={<URILink uri={getPDSlsURI(contribution.uri) || "—"} label={contribution.uri} />}
                   mono
                 />
                 <Field label="CID" value={contribution.cid || "—"} mono />

@@ -12,7 +12,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { getImageURL, parseAtUri } from "@/lib/utils";
+import { getBlobURL, parseAtUri } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -84,12 +84,12 @@ export default function MyHypercertsPage() {
                       </CardAction>
                     </CardHeader>
                     <CardContent>
-                      {!!getImageURL(cert?.image, session?.did) && (
+                      {!!getBlobURL(cert?.image, session?.did) && (
                         <div className="relative aspect-square max-w-md">
                           <Image
                             fill
                             alt="cover image"
-                            src={getImageURL(cert?.image, session?.did)!}
+                            src={getBlobURL(cert?.image, session?.did)!}
                           />
                         </div>
                       )}

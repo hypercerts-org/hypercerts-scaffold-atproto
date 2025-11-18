@@ -8,7 +8,7 @@ import { ReactNode, useEffect, useState } from "react";
 import { toast } from "sonner";
 
 import type { HypercertRecordData, HypercertRightsData } from "@/lib/types";
-import { parseAtUri } from "@/lib/utils";
+import { getPDSlsURI, parseAtUri } from "@/lib/utils";
 import { URILink } from "./uri-link";
 
 export default function RightsView({
@@ -112,7 +112,12 @@ export default function RightsView({
 
             <Field
               label="URI"
-              value={<URILink uri={rights.uri || "—"} />}
+              value={
+                <URILink
+                  uri={getPDSlsURI(rights.uri) || "—"}
+                  label={rights.uri}
+                />
+              }
               mono
             />
             <Field label="CID" value={rights.cid || "—"} mono />

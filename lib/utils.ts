@@ -9,7 +9,12 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export function getImageURL(
+export const getPDSlsURI = (uri?: string) => {
+  if (!uri) return;
+  return `https://pdsls.dev/${uri}`;
+};
+
+export function getBlobURL(
   blobRef: BlobRef | string | { $type: string } | undefined,
   did?: string
 ): string | undefined {
@@ -26,8 +31,7 @@ export function getImageURL(
     // when the ref is read then it becomes a string. forcefully cast as string to avoid ts errors for now
     const url = `${PDS_URL}xrpc/com.atproto.sync.getBlob?did=${encodeURIComponent(
       did
-    )}&cid=${encodeURIComponent(cid as unknown as string)}`;
-    console.log(url);
+    )}&cid=${encodeURIComponent(cid.toString())}`;
     return url;
   }
 
