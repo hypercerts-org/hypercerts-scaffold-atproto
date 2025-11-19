@@ -1,13 +1,5 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -15,12 +7,12 @@ import * as HypercertClaim from "@/lexicons/types/org/hypercerts/claim";
 import * as Evidence from "@/lexicons/types/org/hypercerts/claim/evidence";
 import { createEvidence, getHypercert, updateHypercert } from "@/lib/queries";
 import { useOAuthContext } from "@/providers/OAuthProviderSSR";
-import {
-  ComAtprotoRepoCreateRecord
-} from "@atproto/api";
-import { ArrowLeft, Link as LinkIcon, Upload } from "lucide-react";
+import { ComAtprotoRepoCreateRecord } from "@atproto/api";
+import { Link as LinkIcon, Upload } from "lucide-react";
 import { FormEventHandler, useState } from "react";
 import { toast } from "sonner";
+import FormFooter from "./form-footer";
+import FormInfo from "./form-info";
 
 type ContentMode = "link" | "file";
 
@@ -135,164 +127,114 @@ export default function HypercertEvidenceForm({
   };
 
   return (
-    <div className="p-6">
-      <div className="max-w-3xl mx-auto">
-        <Card className="shadow-lg">
-          <CardHeader className="pb-2">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs uppercase tracking-wide text-muted-foreground">
-                  Step 3 of 3 · Evidence
-                </p>
-                <CardTitle className="text-2xl mt-1">
-                  Add Hypercert Evidence
-                </CardTitle>
-                <CardDescription className="mt-1">
-                  Attach a link or file that backs up this hypercert claim.
-                </CardDescription>
-              </div>
+    <FormInfo
+      title="Add Hypercert Evidence"
+      description="Attach a link of file that backs up this hypercert claim"
+    >
+      <form onSubmit={handleSubmit} className="space-y-6">
+        <div className="space-y-2">
+          <Label htmlFor="title">Title (Optional)</Label>
+          <Input
+            id="title"
+            placeholder="e.g., Audit report, Research paper, Demo video"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            maxLength={256}
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="shortDescription">Short Description (Required)</Label>
+          <Textarea
+            id="shortDescription"
+            placeholder="Summarize what this evidence demonstrates..."
+            value={shortDescription}
+            onChange={(e) => setShortDescription(e.target.value)}
+            maxLength={3000}
+            rows={3}
+            required
+          />
+          <p className="text-xs text-muted-foreground">
+            {shortDescription.length} / 3000 characters
+          </p>
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="description">Detailed Description (Optional)</Label>
+          <Textarea
+            id="description"
+            placeholder="Provide more context on the evidence and how it supports the claim..."
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            maxLength={30000}
+            rows={5}
+          />
+          <p className="text-xs text-muted-foreground">
+            {description.length} / 30000 characters
+          </p>
+        </div>
+
+        <div className="space-y-3">
+          <Label>Evidence Content *</Label>
+
+          <div className="inline-flex rounded-md border divide-x overflow-hidden">
+            <button
+              type="button"
+              className={`flex items-center gap-2 px-3 py-1.5 text-sm ${
+                evidenceMode === "link"
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-background"
+              }`}
+              onClick={() => setEvidenceMode("link")}
+            >
+              <LinkIcon className="h-4 w-4" />
+              Link
+            </button>
+            <button
+              type="button"
+              className={`flex items-center gap-2 px-3 py-1.5 text-sm ${
+                evidenceMode === "file"
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-background"
+              }`}
+              onClick={() => setEvidenceMode("file")}
+            >
+              <Upload className="h-4 w-4" />
+              File
+            </button>
+          </div>
+
+          {evidenceMode === "link" ? (
+            <div className="space-y-2">
+              <Input
+                type="url"
+                placeholder="https://example.com/report"
+                onChange={(e) => setEvidenceUrl(e.target.value)}
+                required
+              />
+              <p className="text-xs text-muted-foreground">
+                Paste a URL to a public resource (report, article, repo, video,
+                etc.).
+              </p>
             </div>
-          </CardHeader>
-
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="space-y-2">
-                <Label htmlFor="title">Title (Optional)</Label>
-                <Input
-                  id="title"
-                  placeholder="e.g., Audit report, Research paper, Demo video"
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  maxLength={256}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="shortDescription">
-                  Short Description (Required)
-                </Label>
-                <Textarea
-                  id="shortDescription"
-                  placeholder="Summarize what this evidence demonstrates..."
-                  value={shortDescription}
-                  onChange={(e) => setShortDescription(e.target.value)}
-                  maxLength={3000}
-                  rows={3}
-                  required
-                />
-                <p className="text-xs text-muted-foreground">
-                  {shortDescription.length} / 3000 characters
-                </p>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="description">
-                  Detailed Description (Optional)
-                </Label>
-                <Textarea
-                  id="description"
-                  placeholder="Provide more context on the evidence and how it supports the claim..."
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  maxLength={30000}
-                  rows={5}
-                />
-                <p className="text-xs text-muted-foreground">
-                  {description.length} / 30000 characters
-                </p>
-              </div>
-
-              <div className="space-y-3">
-                <Label>Evidence Content *</Label>
-
-                <div className="inline-flex rounded-md border divide-x overflow-hidden">
-                  <button
-                    type="button"
-                    className={`flex items-center gap-2 px-3 py-1.5 text-sm ${
-                      evidenceMode === "link"
-                        ? "bg-primary text-primary-foreground"
-                        : "bg-background"
-                    }`}
-                    onClick={() => setEvidenceMode("link")}
-                  >
-                    <LinkIcon className="h-4 w-4" />
-                    Link
-                  </button>
-                  <button
-                    type="button"
-                    className={`flex items-center gap-2 px-3 py-1.5 text-sm ${
-                      evidenceMode === "file"
-                        ? "bg-primary text-primary-foreground"
-                        : "bg-background"
-                    }`}
-                    onClick={() => setEvidenceMode("file")}
-                  >
-                    <Upload className="h-4 w-4" />
-                    File
-                  </button>
-                </div>
-
-                {evidenceMode === "link" ? (
-                  <div className="space-y-2">
-                    <Input
-                      type="url"
-                      placeholder="https://example.com/report"
-                      onChange={(e) => setEvidenceUrl(e.target.value)}
-                      required
-                    />
-                    <p className="text-xs text-muted-foreground">
-                      Paste a URL to a public resource (report, article, repo,
-                      video, etc.).
-                    </p>
-                  </div>
-                ) : (
-                  <div className="space-y-2">
-                    <Input type="file" onChange={handleFileChange} required />
-                    <p className="text-xs text-muted-foreground">
-                      Upload a supporting file (PDF, image, etc.). It will be
-                      stored as a blob.
-                    </p>
-                  </div>
-                )}
-              </div>
-
-              <div className="flex items-center justify-end gap-4 pt-2">
-                {onBack ? (
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={onBack}
-                    className="gap-2"
-                  >
-                    <ArrowLeft className="h-4 w-4" />
-                    Back
-                  </Button>
-                ) : (
-                  <div />
-                )}
-                {!!onNext && (
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={onNext}
-                    className="gap-2"
-                  >
-                    <ArrowLeft className="h-4 w-4 rotate-180" />
-                    Skip
-                  </Button>
-                )}
-                <Button
-                  type="submit"
-                  disabled={saving}
-                  className="min-w-[180px]"
-                >
-                  {saving ? "Saving…" : "Save Evidence"}
-                </Button>
-              </div>
-            </form>
-          </CardContent>
-        </Card>
-      </div>
-    </div>
+          ) : (
+            <div className="space-y-2">
+              <Input type="file" onChange={handleFileChange} required />
+              <p className="text-xs text-muted-foreground">
+                Upload a supporting file (PDF, image, etc.). It will be stored
+                as a blob.
+              </p>
+            </div>
+          )}
+        </div>
+        <FormFooter
+          onBack={onBack}
+          onSkip={onNext}
+          submitLabel="Save & Next"
+          savingLabel="Saving…"
+          saving={saving}
+        />
+      </form>
+    </FormInfo>
   );
 }

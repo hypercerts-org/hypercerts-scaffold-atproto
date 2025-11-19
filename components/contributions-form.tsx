@@ -218,7 +218,7 @@ export default function HypercertContributionForm({
 
         <FormFooter
           onBack={onBack}
-          onSkip={onNext} // or onSkip / onNext / onSkip depending on step
+          onSkip={onNext} 
           submitLabel="Save & Next"
           savingLabel="Saving…"
           saving={saving}
