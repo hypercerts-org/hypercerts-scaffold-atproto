@@ -62,13 +62,14 @@ export default function HypercertContributionForm({
     hypercertRef: ReturnType<typeof buildStrongRef>
   ) => {
     if (!atProtoAgent) return;
+    const mappedContributors = contributors
+      .filter((contributor) => !!contributor)
+      .map(({ did }) => did);
     const contributionRecord = {
       $type: "org.hypercerts.claim.contribution",
       hypercert: hypercertRef || undefined,
       role,
-      contributors: contributors
-        .filter((contributor) => !!contributor)
-        .map(({ did }) => did),
+      contributors: mappedContributors.length ? mappedContributors : undefined,
       description: description || undefined,
       workTimeframeFrom: workTimeframeFrom?.toISOString(),
       workTimeframeTo: workTimeframeTo?.toISOString(),
@@ -76,7 +77,7 @@ export default function HypercertContributionForm({
     };
 
     const isValidContribution = validateContribution(contributionRecord);
-    if (!isValidContribution.success) {
+    if (!isValidContribution.success || !mappedContributors.length) {
       toast.error(isValidContribution.error || "Invalid contribution record");
       return;
     }
