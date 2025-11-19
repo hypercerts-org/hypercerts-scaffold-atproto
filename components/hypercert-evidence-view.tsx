@@ -18,6 +18,7 @@ import { $Typed } from "@atproto/api";
 import { Field, LabelSmall } from "./hypercert-field";
 import Loader from "./loader";
 import { URILink } from "./uri-link";
+import { BlobDisplay } from "./blob-display";
 
 export default function EvidenceView({
   hypercertData,
@@ -73,47 +74,6 @@ export default function EvidenceView({
     <div className="space-y-4">
       {evidenceList.map((evidence, idx) => {
         const record = evidence.value;
-
-        const content = record.content;
-        const contentType = content?.$type as string | undefined;
-
-        let contentDisplay: ReactNode = "—";
-
-        // Handle URI content
-        if (
-          content?.$type === "app.certified.defs#uri" &&
-          (content as $Typed<Uri>)?.value
-        ) {
-          const contentValue = (content as $Typed<Uri>).value;
-          contentDisplay = (
-            <URILink uri={getPDSlsURI(contentValue)} label={contentValue} />
-          );
-        }
-        // Handle smallBlob content
-        else if (contentType === "smallBlob") {
-          const contentValue = content as $Typed<SmallBlob>;
-          contentDisplay = (
-            <p className="text-sm">
-              Blob evidence
-              {contentValue?.ref && (
-                <>
-                  {" · "}
-                  <URILink
-                    uri={getBlobURL(contentValue, atProtoAgent?.assertDid)}
-                    label={contentValue.ref.toString()}
-                  />
-                </>
-              )}
-            </p>
-          );
-        }
-        // Fallback: show raw type
-        else if (contentType) {
-          contentDisplay = (
-            <span className="text-xs font-mono break-all">{contentType}</span>
-          );
-        }
-
         return (
           <Card key={idx} className="border">
             <CardContent className="py-4">
@@ -144,7 +104,10 @@ export default function EvidenceView({
 
                 <div className="md:col-span-2">
                   <LabelSmall>Evidence Content</LabelSmall>
-                  <div className="text-sm">{contentDisplay}</div>
+                  <BlobDisplay
+                    content={record.content}
+                    did={atProtoAgent?.assertDid}
+                  />
                 </div>
 
                 <Separator className="md:col-span-2" />

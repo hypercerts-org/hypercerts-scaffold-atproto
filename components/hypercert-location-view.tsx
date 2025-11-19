@@ -18,6 +18,7 @@ import { $Typed } from "@atproto/api";
 import { Field, LabelSmall } from "./hypercert-field";
 import Loader from "./loader";
 import { URILink } from "./uri-link";
+import { BlobDisplay } from "./blob-display";
 
 export default function LocationView({
   hypercertData,
@@ -72,40 +73,6 @@ export default function LocationView({
   }
 
   const record = location.value;
-
-  const loc = record.location;
-  const locType = loc?.$type as string | undefined;
-
-  let locationContentDisplay: ReactNode = "—";
-
-  if (locType === "app.certified.defs#uri") {
-    const uri = (loc as $Typed<Uri>).value;
-    locationContentDisplay = <URILink uri={getPDSlsURI(uri)} label={uri} />;
-  } else if (
-    locType === "app.certified.defs#smallBlob" ||
-    locType === "smallBlob"
-  ) {
-    const blobRef = (loc as $Typed<SmallBlob>).ref;
-    locationContentDisplay = (
-      <p className="text-sm">
-        Blob-based location data
-        {blobRef && (
-          <>
-            {" · "}
-            <URILink
-              uri={getBlobURL(loc, atProtoAgent?.assertDid)}
-              label={blobRef.toString()}
-            />
-          </>
-        )}
-      </p>
-    );
-  } else if (locType) {
-    locationContentDisplay = (
-      <span className="text-xs font-mono break-all">{locType}</span>
-    );
-  }
-
   return (
     <div className="space-y-4">
       <Card className="border">
@@ -141,7 +108,10 @@ export default function LocationView({
 
             <div className="md:col-span-2">
               <LabelSmall>Location Data</LabelSmall>
-              <div className="text-sm">{locationContentDisplay}</div>
+              <BlobDisplay
+                content={record.location}
+                did={atProtoAgent?.assertDid}
+              />
             </div>
 
             <Separator className="md:col-span-2" />

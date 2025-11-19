@@ -2,21 +2,20 @@
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { Spinner } from "@/components/ui/spinner";
 import { useOAuthContext } from "@/providers/OAuthProviderSSR";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
+import { getRecordWithURI } from "@/lib/queries";
 import {
   Collections,
   type HypercertContributionData,
   type HypercertRecordData,
 } from "@/lib/types";
-import { getPDSlsURI, parseAtUri } from "@/lib/utils";
+import { getPDSlsURI } from "@/lib/utils";
 import { Field, LabelSmall } from "./hypercert-field";
-import { URILink } from "./uri-link";
 import Loader from "./loader";
-import { getRecordWithURI } from "@/lib/queries";
+import { URILink } from "./uri-link";
 
 export default function ContributionsView({
   hypercertData,
