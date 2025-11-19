@@ -7,13 +7,13 @@ import { useOAuthContext } from "@/providers/OAuthProviderSSR";
 import { ReactNode, useEffect, useState } from "react";
 import { toast } from "sonner";
 
-import type { HypercertRecordData, HypercertLocationData } from "@/lib/types";
-import { getBlobURL, getPDSlsURI, parseAtUri } from "@/lib/utils";
-import { URILink } from "./uri-link";
-import { $Typed } from "@atproto/api";
 import { SmallBlob, Uri } from "@/lexicons/types/app/certified/defs";
-import { blob } from "stream/consumers";
+import type { HypercertLocationData, HypercertRecordData } from "@/lib/types";
+import { getBlobURL, getPDSlsURI, parseAtUri } from "@/lib/utils";
+import { $Typed } from "@atproto/api";
 import { Field, LabelSmall } from "./hypercert-field";
+import { URILink } from "./uri-link";
+import Loader from "./loader";
 
 export default function LocationView({
   hypercertData,
@@ -69,11 +69,7 @@ export default function LocationView({
   }
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center py-8">
-        <Spinner />
-      </div>
-    );
+    return <Loader />;
   }
 
   if (!location) {

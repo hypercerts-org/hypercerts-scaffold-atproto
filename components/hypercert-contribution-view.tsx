@@ -4,7 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Spinner } from "@/components/ui/spinner";
 import { useOAuthContext } from "@/providers/OAuthProviderSSR";
-import { ReactNode, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 import type {
@@ -12,8 +12,9 @@ import type {
   HypercertRecordData,
 } from "@/lib/types";
 import { getPDSlsURI, parseAtUri } from "@/lib/utils";
-import { URILink } from "./uri-link";
 import { Field, LabelSmall } from "./hypercert-field";
+import { URILink } from "./uri-link";
+import Loader from "./loader";
 
 export default function ContributionsView({
   hypercertData,
@@ -72,11 +73,7 @@ export default function ContributionsView({
   }
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center py-8">
-        <Spinner />
-      </div>
-    );
+    return <Loader />;
   }
 
   return (
@@ -131,7 +128,12 @@ export default function ContributionsView({
 
                 <Field
                   label="URI"
-                  value={<URILink uri={getPDSlsURI(contribution.uri) || "—"} label={contribution.uri} />}
+                  value={
+                    <URILink
+                      uri={getPDSlsURI(contribution.uri) || "—"}
+                      label={contribution.uri}
+                    />
+                  }
                   mono
                 />
                 <Field label="CID" value={contribution.cid || "—"} mono />

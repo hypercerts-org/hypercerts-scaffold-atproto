@@ -11,6 +11,7 @@ import type { HypercertRecordData, HypercertRightsData } from "@/lib/types";
 import { getPDSlsURI, parseAtUri } from "@/lib/utils";
 import { Field, LabelSmall } from "./hypercert-field";
 import { URILink } from "./uri-link";
+import Loader from "./loader";
 
 export default function RightsView({
   hypercertData,
@@ -65,11 +66,7 @@ export default function RightsView({
   }
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center py-8">
-        <Spinner />
-      </div>
-    );
+    return <Loader />;
   }
 
   if (!rights) {

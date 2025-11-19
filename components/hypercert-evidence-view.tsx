@@ -13,6 +13,7 @@ import { URILink } from "./uri-link";
 import { $Typed } from "@atproto/api";
 import { SmallBlob, Uri } from "@/lexicons/types/app/certified/defs";
 import { Field, LabelSmall } from "./hypercert-field";
+import Loader from "./loader";
 
 export default function EvidenceView({
   hypercertData,
@@ -68,11 +69,7 @@ export default function EvidenceView({
   }
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center py-8">
-        <Spinner />
-      </div>
-    );
+    return <Loader />;
   }
 
   return (
