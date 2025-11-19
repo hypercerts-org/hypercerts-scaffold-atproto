@@ -3,22 +3,19 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { useOAuthContext } from "@/providers/OAuthProviderSSR";
-import { ReactNode, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
-
-import { SmallBlob, Uri } from "@/lexicons/types/app/certified/defs";
 import { getRecordWithURI } from "@/lib/queries";
 import {
   type HypercertEvidenceData,
   type HypercertRecordData,
   Collections,
 } from "@/lib/types";
-import { getBlobURL, getPDSlsURI } from "@/lib/utils";
-import { $Typed } from "@atproto/api";
+import { getPDSlsURI } from "@/lib/utils";
+import { BlobDisplay } from "./blob-display";
 import { Field, LabelSmall } from "./hypercert-field";
 import Loader from "./loader";
 import { URILink } from "./uri-link";
-import { BlobDisplay } from "./blob-display";
 
 export default function EvidenceView({
   hypercertData,
