@@ -21,6 +21,7 @@ import { toast } from "sonner";
 import { DatePicker } from "./date-range-picker";
 import FormFooter from "./form-footer";
 import FormInfo from "./form-info";
+import UserSelection from "./user-selection";
 
 export default function HypercertContributionForm({
   hypercertId,
@@ -134,6 +135,9 @@ export default function HypercertContributionForm({
             maxLength={100}
             required
           />
+        </div>
+        <div className="space-y-2">
+          <UserSelection />
         </div>
 
         <div className="space-y-2">
