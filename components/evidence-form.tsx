@@ -8,11 +8,11 @@ import * as Evidence from "@/lexicons/types/org/hypercerts/claim/evidence";
 import { createEvidence, getHypercert, updateHypercert } from "@/lib/queries";
 import { useOAuthContext } from "@/providers/OAuthProviderSSR";
 import { ComAtprotoRepoCreateRecord } from "@atproto/api";
-import { Link as LinkIcon, Upload } from "lucide-react";
 import { FormEventHandler, useState } from "react";
 import { toast } from "sonner";
 import FormFooter from "./form-footer";
 import FormInfo from "./form-info";
+import LinkFileSelector from "./link-file-selector";
 
 type ContentMode = "link" | "file";
 
@@ -174,59 +174,17 @@ export default function HypercertEvidenceForm({
           </p>
         </div>
 
-        <div className="space-y-3">
-          <Label>Evidence Content *</Label>
-
-          <div className="inline-flex rounded-md border divide-x overflow-hidden">
-            <button
-              type="button"
-              className={`flex items-center gap-2 px-3 py-1.5 text-sm ${
-                evidenceMode === "link"
-                  ? "bg-primary text-primary-foreground"
-                  : "bg-background"
-              }`}
-              onClick={() => setEvidenceMode("link")}
-            >
-              <LinkIcon className="h-4 w-4" />
-              Link
-            </button>
-            <button
-              type="button"
-              className={`flex items-center gap-2 px-3 py-1.5 text-sm ${
-                evidenceMode === "file"
-                  ? "bg-primary text-primary-foreground"
-                  : "bg-background"
-              }`}
-              onClick={() => setEvidenceMode("file")}
-            >
-              <Upload className="h-4 w-4" />
-              File
-            </button>
-          </div>
-
-          {evidenceMode === "link" ? (
-            <div className="space-y-2">
-              <Input
-                type="url"
-                placeholder="https://example.com/report"
-                onChange={(e) => setEvidenceUrl(e.target.value)}
-                required
-              />
-              <p className="text-xs text-muted-foreground">
-                Paste a URL to a public resource (report, article, repo, video,
-                etc.).
-              </p>
-            </div>
-          ) : (
-            <div className="space-y-2">
-              <Input type="file" onChange={handleFileChange} required />
-              <p className="text-xs text-muted-foreground">
-                Upload a supporting file (PDF, image, etc.). It will be stored
-                as a blob.
-              </p>
-            </div>
-          )}
-        </div>
+        <LinkFileSelector
+          label="Evidence Content *"
+          mode={evidenceMode}
+          onModeChange={setEvidenceMode}
+          urlPlaceholder="https://example.com/location.json"
+          onUrlChange={setEvidenceUrl}
+          onFileChange={handleFileChange}
+          required
+          urlHelpText="Paste a URL to a public resource (report, article, repo, video, etc.)."
+          fileHelpText="Upload a supporting file (PDF, image, etc.). It will be stored as a blob."
+        />
         <FormFooter
           onBack={onBack}
           onSkip={onNext}

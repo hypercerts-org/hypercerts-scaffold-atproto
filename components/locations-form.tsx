@@ -9,11 +9,11 @@ import * as HypercertClaim from "@/lexicons/types/org/hypercerts/claim";
 import { createLocation, getHypercert, updateHypercert } from "@/lib/queries";
 import { validateHypercert } from "@/lib/utils";
 import { useOAuthContext } from "@/providers/OAuthProviderSSR";
-import { Link as LinkIcon, Upload } from "lucide-react";
 import { FormEventHandler, useState } from "react";
 import { toast } from "sonner";
 import FormFooter from "./form-footer";
 import FormInfo from "./form-info";
+import LinkFileSelector from "./link-file-selector";
 
 type LocationContentMode = "link" | "file";
 
@@ -185,7 +185,6 @@ export default function HypercertLocationForm({
             </p>
           </div>
         </div>
-
         <div className="space-y-2">
           <Label>Location Type *</Label>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
@@ -231,7 +230,6 @@ export default function HypercertLocationForm({
             </div>
           )}
         </div>
-
         <div className="space-y-2">
           <Label htmlFor="name">Location Name (Optional)</Label>
           <Input
@@ -242,7 +240,6 @@ export default function HypercertLocationForm({
             maxLength={256}
           />
         </div>
-
         <div className="space-y-2">
           <Label htmlFor="description">Location Description (Optional)</Label>
           <Textarea
@@ -253,60 +250,17 @@ export default function HypercertLocationForm({
             rows={4}
           />
         </div>
-
-        <div className="space-y-3">
-          <Label>Location Data *</Label>
-
-          <div className="inline-flex rounded-md border divide-x overflow-hidden">
-            <button
-              type="button"
-              className={`flex items-center gap-2 px-3 py-1.5 text-sm ${
-                contentMode === "link"
-                  ? "bg-primary text-primary-foreground"
-                  : "bg-background"
-              }`}
-              onClick={() => setContentMode("link")}
-            >
-              <LinkIcon className="h-4 w-4" />
-              Link
-            </button>
-            <button
-              type="button"
-              className={`flex items-center gap-2 px-3 py-1.5 text-sm ${
-                contentMode === "file"
-                  ? "bg-primary text-primary-foreground"
-                  : "bg-background"
-              }`}
-              onClick={() => setContentMode("file")}
-            >
-              <Upload className="h-4 w-4" />
-              File
-            </button>
-          </div>
-
-          {contentMode === "link" ? (
-            <div className="space-y-2">
-              <Input
-                type="url"
-                placeholder="https://example.com/location.json"
-                onChange={(e) => setLocationUrl(e.target.value)}
-                required
-              />
-              <p className="text-xs text-muted-foreground">
-                Link to a resource encoding the location (e.g., GeoJSON point,
-                CSV with coordinates).
-              </p>
-            </div>
-          ) : (
-            <div className="space-y-2">
-              <Input type="file" onChange={handleFileChange} required />
-              <p className="text-xs text-muted-foreground">
-                Upload a file that contains location data. It will be stored as
-                a blob.
-              </p>
-            </div>
-          )}
-        </div>
+        <LinkFileSelector
+          label="Location Data *"
+          mode={contentMode}
+          onModeChange={setContentMode}
+          urlPlaceholder="https://example.com/location.json"
+          onUrlChange={setLocationUrl}
+          onFileChange={handleFileChange}
+          required
+          urlHelpText="Link to a resource encoding the location (e.g., GeoJSON point, CSV with coordinates)."
+          fileHelpText="Upload a file that contains location data. It will be stored as a blob."
+        />
         <FormFooter
           onBack={onBack}
           onSkip={onNext}
