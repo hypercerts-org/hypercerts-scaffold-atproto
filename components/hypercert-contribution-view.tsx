@@ -7,14 +7,16 @@ import { useOAuthContext } from "@/providers/OAuthProviderSSR";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
-import type {
-  HypercertContributionData,
-  HypercertRecordData,
+import {
+  Collections,
+  type HypercertContributionData,
+  type HypercertRecordData,
 } from "@/lib/types";
 import { getPDSlsURI, parseAtUri } from "@/lib/utils";
 import { Field, LabelSmall } from "./hypercert-field";
 import { URILink } from "./uri-link";
 import Loader from "./loader";
+import { getRecordWithURI } from "@/lib/queries";
 
 export default function ContributionsView({
   hypercertData,
@@ -39,16 +41,11 @@ export default function ContributionsView({
       try {
         const results = await Promise.all(
           hypercertContributions.map(async (contribution) => {
-            const parsedURI = parseAtUri(contribution?.uri);
-            if (!parsedURI) return null;
-            const response = await atProtoAgent.com.atproto.repo.getRecord({
-              repo: parsedURI.did,
-              collection:
-                parsedURI.collection || "org.hypercerts.claim.contribution",
-              rkey: parsedURI.rkey,
-            });
-            const data = response?.data;
-            if (!data) return null;
+            const data = await getRecordWithURI<HypercertContributionData>(
+              contribution.uri,
+              atProtoAgent,
+              Collections.contribution
+            );
             return data;
           })
         );

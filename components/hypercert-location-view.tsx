@@ -2,18 +2,22 @@
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { Spinner } from "@/components/ui/spinner";
 import { useOAuthContext } from "@/providers/OAuthProviderSSR";
 import { ReactNode, useEffect, useState } from "react";
 import { toast } from "sonner";
 
 import { SmallBlob, Uri } from "@/lexicons/types/app/certified/defs";
-import type { HypercertLocationData, HypercertRecordData } from "@/lib/types";
-import { getBlobURL, getPDSlsURI, parseAtUri } from "@/lib/utils";
+import { getRecordWithURI } from "@/lib/queries";
+import {
+  Collections,
+  type HypercertLocationData,
+  type HypercertRecordData,
+} from "@/lib/types";
+import { getBlobURL, getPDSlsURI } from "@/lib/utils";
 import { $Typed } from "@atproto/api";
 import { Field, LabelSmall } from "./hypercert-field";
-import { URILink } from "./uri-link";
 import Loader from "./loader";
+import { URILink } from "./uri-link";
 
 export default function LocationView({
   hypercertData,
@@ -34,24 +38,12 @@ export default function LocationView({
 
       setLoading(true);
       try {
-        const parsedURI = parseAtUri(locationRef.uri);
-        if (!parsedURI) {
-          setLoading(false);
-          return;
-        }
-
-        const response = await atProtoAgent.com.atproto.repo.getRecord({
-          repo: parsedURI.did,
-          collection: parsedURI.collection || "app.certified.location",
-          rkey: parsedURI.rkey,
-        });
-
-        const data = response?.data;
-        if (!data) {
-          setLocation(null);
-        } else {
-          setLocation(data as HypercertLocationData);
-        }
+        const data = await getRecordWithURI<HypercertLocationData>(
+          locationRef.uri,
+          atProtoAgent,
+          Collections.location
+        );
+        setLocation(data);
       } catch (e) {
         console.error("Error loading location", e);
         toast.error("Failed to load location");
@@ -63,7 +55,6 @@ export default function LocationView({
     fetchLocation();
   }, [atProtoAgent, hypercertRecord?.location]);
 
-  // No location reference at all on the hypercert
   if (!hypercertRecord?.location) {
     return <p className="text-sm text-muted-foreground">No location linked.</p>;
   }
@@ -109,9 +100,7 @@ export default function LocationView({
         )}
       </p>
     );
-  }
-  // Fallback: unknown typed content
-  else if (locType) {
+  } else if (locType) {
     locationContentDisplay = (
       <span className="text-xs font-mono break-all">{locType}</span>
     );

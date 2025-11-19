@@ -4,6 +4,38 @@ import * as HypercertContribution from "@/lexicons/types/org/hypercerts/claim/co
 import * as HypercertEvidence from "@/lexicons/types/org/hypercerts/claim/evidence";
 import * as HypercertLocation from "@/lexicons/types/app/certified/location";
 import { Collections } from "./types";
+import { parseAtUri } from "./utils";
+
+export const getRecordWithURI = async <T>(
+  uri: string,
+  atProtoAgent: Agent,
+  fallbackCollection: string
+): Promise<T | null> => {
+  if (!atProtoAgent || !uri) return null;
+
+  const parsed = parseAtUri(uri);
+  if (!parsed) return null;
+  return getRecord<T>(
+    parsed.rkey,
+    parsed.did,
+    atProtoAgent,
+    parsed.collection || fallbackCollection
+  );
+};
+
+export const getRecord = async <T>(
+  rkey: string,
+  did: string,
+  atProtoAgent: Agent,
+  collection: string
+): Promise<T | null> => {
+  const response = await atProtoAgent.com.atproto.repo.getRecord({
+    repo: did,
+    collection: collection,
+    rkey: rkey,
+  });
+  return (response?.data as T) ?? null;
+};
 
 export const getHypercert = async (rkey: string, atProtoAgent: Agent) => {
   const data = await atProtoAgent.com.atproto.repo.getRecord({
@@ -46,7 +78,7 @@ export const createEvidence = async (
 ) => {
   const response = await atProtoAgent.com.atproto.repo.createRecord({
     record,
-    collection: "org.hypercerts.claim.evidence",
+    collection: Collections.evidence,
     repo: atProtoAgent.assertDid,
   });
   return response;
@@ -58,7 +90,7 @@ export const createLocation = async (
 ) => {
   const response = await atProtoAgent.com.atproto.repo.createRecord({
     record,
-    collection: "app.certified.location",
+    collection: Collections.location,
     repo: atProtoAgent.assertDid,
   });
   return response;

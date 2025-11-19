@@ -2,18 +2,22 @@
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { Spinner } from "@/components/ui/spinner";
 import { useOAuthContext } from "@/providers/OAuthProviderSSR";
 import { ReactNode, useEffect, useState } from "react";
 import { toast } from "sonner";
 
-import type { HypercertRecordData, HypercertEvidenceData } from "@/lib/types";
-import { getBlobURL, getPDSlsURI, parseAtUri } from "@/lib/utils";
-import { URILink } from "./uri-link";
-import { $Typed } from "@atproto/api";
 import { SmallBlob, Uri } from "@/lexicons/types/app/certified/defs";
+import { getRecordWithURI } from "@/lib/queries";
+import {
+  type HypercertEvidenceData,
+  type HypercertRecordData,
+  Collections,
+} from "@/lib/types";
+import { getBlobURL, getPDSlsURI } from "@/lib/utils";
+import { $Typed } from "@atproto/api";
 import { Field, LabelSmall } from "./hypercert-field";
 import Loader from "./loader";
+import { URILink } from "./uri-link";
 
 export default function EvidenceView({
   hypercertData,
@@ -36,18 +40,11 @@ export default function EvidenceView({
       try {
         const results = await Promise.all(
           hypercertEvidence.map(async (evidenceRef) => {
-            const parsedURI = parseAtUri(evidenceRef?.uri);
-            if (!parsedURI) return null;
-
-            const response = await atProtoAgent.com.atproto.repo.getRecord({
-              repo: parsedURI.did,
-              collection:
-                parsedURI.collection || "org.hypercerts.claim.evidence",
-              rkey: parsedURI.rkey,
-            });
-
-            const data = response?.data;
-            if (!data) return null;
+            const data = await getRecordWithURI<HypercertEvidenceData>(
+              evidenceRef.uri,
+              atProtoAgent,
+              Collections.evidence
+            );
             return data;
           })
         );

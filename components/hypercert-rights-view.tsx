@@ -2,16 +2,19 @@
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { Spinner } from "@/components/ui/spinner";
 import { useOAuthContext } from "@/providers/OAuthProviderSSR";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-
-import type { HypercertRecordData, HypercertRightsData } from "@/lib/types";
-import { getPDSlsURI, parseAtUri } from "@/lib/utils";
+import { getRecordWithURI } from "@/lib/queries";
+import {
+  Collections,
+  type HypercertRecordData,
+  type HypercertRightsData,
+} from "@/lib/types";
+import { getPDSlsURI } from "@/lib/utils";
 import { Field, LabelSmall } from "./hypercert-field";
-import { URILink } from "./uri-link";
 import Loader from "./loader";
+import { URILink } from "./uri-link";
 
 export default function RightsView({
   hypercertData,
@@ -29,27 +32,14 @@ export default function RightsView({
       if (!atProtoAgent) return;
       const rightsRef = hypercertRecord?.rights;
       if (!rightsRef?.uri) return;
-
       setLoading(true);
       try {
-        const parsedURI = parseAtUri(rightsRef.uri);
-        if (!parsedURI) {
-          setLoading(false);
-          return;
-        }
-
-        const response = await atProtoAgent.com.atproto.repo.getRecord({
-          repo: parsedURI.did,
-          collection: parsedURI.collection || "org.hypercerts.claim.rights",
-          rkey: parsedURI.rkey,
-        });
-
-        const data = response?.data;
-        if (!data) {
-          setRights(null);
-        } else {
-          setRights(data as HypercertRightsData);
-        }
+        const data = await getRecordWithURI<HypercertRightsData>(
+          rightsRef.uri,
+          atProtoAgent,
+          Collections.rights
+        );
+        setRights(data);
       } catch (e) {
         console.error("Error loading rights", e);
         toast.error("Failed to load rights");
