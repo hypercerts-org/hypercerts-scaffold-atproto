@@ -17,10 +17,10 @@ const id = 'org.hypercerts.claim.contribution'
 
 export interface Main {
   $type: 'org.hypercerts.claim.contribution'
-  hypercert?: ComAtprotoRepoStrongRef.Main
+  hypercert: ComAtprotoRepoStrongRef.Main
   /** Role or title of the contributor(s). */
-  role: string
-  /** List of DIDs identifying the contributors. If multiple are stored in the same hypercertContribution, then they would have the exact same role. */
+  role?: string
+  /** List of the contributors (names, pseudonyms, or DIDs). If multiple contributors are stored in the same hypercertContribution, then they would have the exact same role. */
   contributors: string[]
   /** What the contribution concretely achieved */
   description?: string

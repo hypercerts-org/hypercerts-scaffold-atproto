@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { Agent } from "@atproto/api";
-import { useOAuthSession } from "../providers/OAuthProvider";
+import { useOAuthSession } from "../providers/OAuthProviderSSR";
 
 export function useAtprotoClient() {
   const session = useOAuthSession();

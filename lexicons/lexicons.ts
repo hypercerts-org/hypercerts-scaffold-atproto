@@ -15,10 +15,16 @@ export const schemaDict = {
     id: "app.certified.defs",
     defs: {
       uri: {
-        type: "string",
-        format: "uri",
-        maxGraphemes: 1000,
-        description: "URI to external data",
+        type: "object",
+        properties: {
+          value: {
+            type: "string",
+            format: "uri",
+            maxGraphemes: 1000,
+            description: "URI to external data",
+          },
+        },
+        required: ["value"],
       },
       smallBlob: {
         type: "blob",
@@ -34,9 +40,9 @@ export const schemaDict = {
       },
     },
   },
-  OrgHypercertsClaimRecord: {
+  OrgHypercertsClaim: {
     lexicon: 1,
-    id: "org.hypercerts.claim.record",
+    id: "org.hypercerts.claim",
     defs: {
       main: {
         type: "record",
@@ -49,7 +55,7 @@ export const schemaDict = {
             "shortDescription",
             "createdAt",
             "workScope",
-            "workTimeframeFrom",
+            "workTimeFrameFrom",
             "workTimeFrameTo",
           ],
           properties: {
@@ -86,7 +92,7 @@ export const schemaDict = {
               maxLength: 5000,
               maxGraphemes: 1000,
             },
-            workTimeframeFrom: {
+            workTimeFrameFrom: {
               type: "string",
               format: "datetime",
               description: "When the work began",
@@ -150,13 +156,13 @@ export const schemaDict = {
         key: "any",
         record: {
           type: "object",
-          required: ["contributors", "role", "createdAt"],
+          required: ["hypercert", "contributors", "createdAt"],
           properties: {
             hypercert: {
               type: "ref",
               ref: "lex:com.atproto.repo.strongRef",
               description:
-                "A strong reference to the hypercert this contribution is for. The record referenced must conform with the lexicon org.hypercerts.claim.record",
+                "A strong reference to the hypercert this contribution is for. The record referenced must conform with the lexicon org.hypercerts.claim.",
             },
             role: {
               type: "string",
@@ -166,10 +172,9 @@ export const schemaDict = {
             contributors: {
               type: "array",
               description:
-                "List of DIDs identifying the contributors. If multiple are stored in the same hypercertContribution, then they would have the exact same role.",
+                "List of the contributors (names, pseudonyms, or DIDs). If multiple contributors are stored in the same hypercertContribution, then they would have the exact same role.",
               items: {
                 type: "string",
-                format: "did",
               },
             },
             description: {
@@ -310,56 +315,6 @@ export const schemaDict = {
       },
     },
   },
-  OrgHypercertsClaimLocation: {
-    lexicon: 1,
-    id: "org.hypercerts.claim.location",
-    defs: {
-      main: {
-        type: "record",
-        description: "A location reference for a hypercert",
-        key: "any",
-        record: {
-          type: "object",
-          required: ["value", "createdAt"],
-          properties: {
-            name: {
-              type: "string",
-              description: "Optional name for this location",
-              maxLength: 200,
-              maxGraphemes: 100,
-            },
-            description: {
-              type: "string",
-              description: "Optional description for this location",
-              maxLength: 2000,
-              maxGraphemes: 500,
-            },
-            srs: {
-              type: "string",
-              description:
-                "Spatial Reference System: the coordinate system within which the object is positioned (e.g ESPG:4326)",
-              maxLength: 20,
-            },
-            value: {
-              type: "union",
-              refs: [
-                "lex:app.certified.defs#uri",
-                "lex:app.certified.defs#smallBlob",
-              ],
-              description:
-                "The location of where the work was performed as a URI or blob.",
-            },
-            createdAt: {
-              type: "string",
-              format: "datetime",
-              description:
-                "Client-declared timestamp when this record was originally created",
-            },
-          },
-        },
-      },
-    },
-  },
   OrgHypercertsClaimMeasurement: {
     lexicon: 1,
     id: "org.hypercerts.claim.measurement",
@@ -376,12 +331,12 @@ export const schemaDict = {
               type: "ref",
               ref: "lex:com.atproto.repo.strongRef",
               description:
-                "A strong reference to the hypercert that this measurement is for. The record referenced must conform with the lexicon org.hypercerts.claim.record",
+                "A strong reference to the hypercert that this measurement is for. The record referenced must conform with the lexicon org.hypercerts.claim.",
             },
             measurers: {
               type: "array",
               description:
-                "DIDs of the entity (or entities) that measured this data. ",
+                "DIDs of the entity (or entities) that measured this data",
               items: {
                 type: "string",
                 format: "did",
@@ -467,6 +422,75 @@ export const schemaDict = {
       },
     },
   },
+  AppCertifiedLocation: {
+    lexicon: 1,
+    id: "app.certified.location",
+    defs: {
+      main: {
+        type: "record",
+        description: "A location reference",
+        key: "any",
+        record: {
+          type: "object",
+          required: [
+            "lpVersion",
+            "srs",
+            "locationType",
+            "location",
+            "createdAt",
+          ],
+          properties: {
+            lpVersion: {
+              type: "string",
+              description: "The version of the Location Protocol",
+              maxLength: 10,
+            },
+            srs: {
+              type: "string",
+              format: "uri",
+              description:
+                "The Spatial Reference System URI (e.g., http://www.opengis.net/def/crs/OGC/1.3/CRS84) that defines the coordinate system.",
+              maxLength: 100,
+            },
+            locationType: {
+              type: "string",
+              description:
+                "An identifier for the format of the location data (e.g., coordinate-decimal, geojson-point)",
+              knownValues: ["coordinate-decimal", "geojson-point"],
+              maxLength: 20,
+            },
+            location: {
+              type: "union",
+              refs: [
+                "lex:app.certified.defs#uri",
+                "lex:app.certified.defs#smallBlob",
+              ],
+              description:
+                "The location of where the work was performed as a URI or blob.",
+            },
+            name: {
+              type: "string",
+              description: "Optional name for this location",
+              maxLength: 1000,
+              maxGraphemes: 100,
+            },
+            description: {
+              type: "string",
+              description: "Optional description for this location",
+              maxLength: 2000,
+              maxGraphemes: 500,
+            },
+            createdAt: {
+              type: "string",
+              format: "datetime",
+              description:
+                "Client-declared timestamp when this record was originally created",
+            },
+          },
+        },
+      },
+    },
+  },
   ComAtprotoRepoStrongRef: {
     lexicon: 1,
     id: "com.atproto.repo.strongRef",
@@ -524,12 +548,12 @@ export function validate(
 
 export const ids = {
   AppCertifiedDefs: "app.certified.defs",
-  OrgHypercertsClaimRecord: "org.hypercerts.claim.record",
+  OrgHypercertsClaim: "org.hypercerts.claim",
   OrgHypercertsClaimContribution: "org.hypercerts.claim.contribution",
   OrgHypercertsClaimEvaluation: "org.hypercerts.claim.evaluation",
   OrgHypercertsClaimEvidence: "org.hypercerts.claim.evidence",
-  OrgHypercertsClaimLocation: "org.hypercerts.claim.location",
   OrgHypercertsClaimMeasurement: "org.hypercerts.claim.measurement",
   OrgHypercertsClaimRights: "org.hypercerts.claim.rights",
+  AppCertifiedLocation: "app.certified.location",
   ComAtprotoRepoStrongRef: "com.atproto.repo.strongRef",
 } as const;

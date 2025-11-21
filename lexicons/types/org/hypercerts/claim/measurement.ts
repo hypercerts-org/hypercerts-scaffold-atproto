@@ -18,7 +18,7 @@ const id = 'org.hypercerts.claim.measurement'
 export interface Main {
   $type: 'org.hypercerts.claim.measurement'
   hypercert: ComAtprotoRepoStrongRef.Main
-  /** DIDs of the entity (or entities) that measured this data. */
+  /** DIDs of the entity (or entities) that measured this data */
   measurers: string[]
   /** The metric being measured */
   metric: string

@@ -18,11 +18,13 @@ export function createServer(options?: XrpcOptions): Server {
 export class Server {
   xrpc: XrpcServer
   org: OrgNS
+  app: AppNS
   com: ComNS
 
   constructor(options?: XrpcOptions) {
     this.xrpc = createXrpcServer(schemas, options)
     this.org = new OrgNS(this)
+    this.app = new AppNS(this)
     this.com = new ComNS(this)
   }
 }
@@ -48,6 +50,24 @@ export class OrgHypercertsNS {
 }
 
 export class OrgHypercertsClaimNS {
+  _server: Server
+
+  constructor(server: Server) {
+    this._server = server
+  }
+}
+
+export class AppNS {
+  _server: Server
+  certified: AppCertifiedNS
+
+  constructor(server: Server) {
+    this._server = server
+    this.certified = new AppCertifiedNS(server)
+  }
+}
+
+export class AppCertifiedNS {
   _server: Server
 
   constructor(server: Server) {

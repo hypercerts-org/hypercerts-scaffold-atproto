@@ -10,8 +10,22 @@ const is$typed = _is$typed,
   validate = _validate
 const id = 'app.certified.defs'
 
-/** URI to external data */
-export type Uri = string
+export interface Uri {
+  $type?: 'app.certified.defs#uri'
+  /** URI to external data */
+  value: string
+}
+
+const hashUri = 'uri'
+
+export function isUri<V>(v: V) {
+  return is$typed(v, id, hashUri)
+}
+
+export function validateUri<V>(v: V) {
+  return validate<Uri & V>(v, id, hashUri)
+}
+
 /** Blob to external data (up to 10MB) */
 export type SmallBlob = BlobRef
 /** Blob to external data (up to 100MB) */

@@ -20,7 +20,6 @@ export interface DatePickerProps {
 
 export function DatePicker({ label, onChange, initDate }: DatePickerProps) {
   const [open, setOpen] = React.useState(false);
-  const [date, setDate] = React.useState<Date | undefined>(initDate);
 
   return (
     <div className="flex flex-col gap-3">
@@ -32,20 +31,19 @@ export function DatePicker({ label, onChange, initDate }: DatePickerProps) {
           <Button
             variant="outline"
             id="date"
-            className="w-48 justify-between font-normal"
+            className="w-full justify-between font-normal"
           >
-            {date ? date.toLocaleDateString() : "Select date"}
+            {initDate ? initDate.toLocaleDateString() : "Select date"}
             <ChevronDownIcon />
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-auto overflow-hidden p-0" align="start">
           <Calendar
             mode="single"
-            selected={date}
+            selected={initDate}
             captionLayout="dropdown"
             onSelect={(date) => {
               onChange(date!);
-              setDate(date);
               setOpen(false);
             }}
           />
