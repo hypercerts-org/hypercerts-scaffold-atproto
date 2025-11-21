@@ -17,7 +17,7 @@ export const getLoopBackCanonicalLocation = () => {
   }).href as `http://127.0.0.1/${string}`;
 };
 
-const baseUrl = "https://maearth-test.vercel.app";
+const baseUrl = "https://hypercerts-scaffold.vercel.app";
 export const METADATA = {
   client_id: `${baseUrl}/client-metadata.json`,
   client_name: "GainForest",
