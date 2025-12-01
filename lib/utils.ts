@@ -2,7 +2,7 @@ import { PDS_URL } from "@/utils/constants";
 import { BlobRef } from "@atproto/lexicon";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
-import * as Hypercert from "@/lexicons/types/org/hypercerts/claim";
+import * as Hypercert from "@/lexicons/types/org/hypercerts/claim/activity";
 import * as Contribution from "@/lexicons/types/org/hypercerts/claim/contribution";
 
 export function cn(...inputs: ClassValue[]) {

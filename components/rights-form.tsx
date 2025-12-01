@@ -3,7 +3,7 @@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import * as HypercertClaim from "@/lexicons/types/org/hypercerts/claim";
+import * as HypercertClaim from "@/lexicons/types/org/hypercerts/claim/activity";
 import * as Rights from "@/lexicons/types/org/hypercerts/claim/rights";
 import { getHypercert, updateHypercert } from "@/lib/queries";
 import { buildStrongRef, validateHypercert } from "@/lib/utils";

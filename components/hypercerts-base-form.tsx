@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
 import { Textarea } from "@/components/ui/textarea";
-import * as Hypercert from "@/lexicons/types/org/hypercerts/claim";
+import * as Hypercert from "@/lexicons/types/org/hypercerts/claim/activity";
 import { Label } from "@radix-ui/react-label";
 import { PlusIcon, XIcon } from "lucide-react";
 import { FormEventHandler, useState } from "react";
@@ -45,7 +45,9 @@ export default function HypercertsBaseForm({
     certInfo?.shortDescription || ""
   );
   const [buttonClicked, setButtonClicked] = useState<"saveNext" | "create">();
-  const [workScope, setWorkScope] = useState<string[]>(initialWorkScope || []);
+  const [workScope, setWorkScope] = useState<string[]>(
+    initialWorkScope || [""]
+  );
   const [workTimeframeFrom, setWorkTimeframeFrom] = useState<Date | null>(
     certInfo?.workTimeFrameFrom ? new Date(certInfo?.workTimeFrameFrom) : null
   );

@@ -1,4 +1,4 @@
-import * as HypercertRecord from "@/lexicons/types/org/hypercerts/claim";
+import * as HypercertRecord from "@/lexicons/types/org/hypercerts/claim/activity";
 import { parseAtUri } from "@/lib/utils";
 import { useOAuthContext } from "@/providers/OAuthProviderSSR";
 import { BlobRef } from "@atproto/lexicon";

@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import * as Location from "@/lexicons/types/app/certified/location";
-import * as HypercertClaim from "@/lexicons/types/org/hypercerts/claim";
+import * as HypercertClaim from "@/lexicons/types/org/hypercerts/claim/activity";
 import { createLocation, getHypercert, updateHypercert } from "@/lib/queries";
 import { buildStrongRef, validateHypercert } from "@/lib/utils";
 import { useOAuthContext } from "@/providers/OAuthProviderSSR";
