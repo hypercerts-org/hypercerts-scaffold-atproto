@@ -12,6 +12,8 @@ import { Collections, HypercertRecordData } from "@/lib/types";
 import EvidenceView from "@/components/hypercert-evidence-view";
 import RightsView from "@/components/hypercert-rights-view";
 import LocationView from "@/components/hypercert-location-view";
+import HypercertEvaluationForm from "@/components/evaluation-form";
+import { Button } from "@/components/ui/button";
 
 export default function HypercertDetailsPage() {
   const params = useParams<{ hypercertId: string }>();
@@ -21,6 +23,7 @@ export default function HypercertDetailsPage() {
 
   const [certData, setCertData] = useState<HypercertRecordData>();
   const [loading, setLoading] = useState(true);
+  const [showEvaluationForm, setShowEvaluationForm] = useState(false);
 
   useEffect(() => {
     if (!atProtoAgent || !session || !hypercertId) {
@@ -88,6 +91,7 @@ export default function HypercertDetailsPage() {
           <ContributionsView hypercertData={certData} />
         </CardContent>
       </Card>
+
       <Card>
         <CardHeader className="pb-2">
           <CardTitle className="text-2xl">Evidence</CardTitle>
@@ -96,6 +100,7 @@ export default function HypercertDetailsPage() {
           <EvidenceView hypercertData={certData} />
         </CardContent>
       </Card>
+
       <Card>
         <CardHeader className="pb-2">
           <CardTitle className="text-2xl">Rights</CardTitle>
@@ -104,12 +109,42 @@ export default function HypercertDetailsPage() {
           <RightsView hypercertData={certData} />
         </CardContent>
       </Card>
+
       <Card>
         <CardHeader className="pb-2">
           <CardTitle className="text-2xl">Location</CardTitle>
         </CardHeader>
         <CardContent>
           <LocationView hypercertData={certData} />
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader className="pb-2 flex items-center justify-between">
+          <CardTitle className="text-2xl">Evaluation</CardTitle>
+          {!showEvaluationForm && (
+            <Button size="sm" onClick={() => setShowEvaluationForm(true)}>
+              Evaluate Hypercert
+            </Button>
+          )}
+        </CardHeader>
+        <CardContent>
+          {showEvaluationForm ? (
+            <HypercertEvaluationForm
+              hypercertId={hypercertId}
+              onCancel={() => setShowEvaluationForm(false)}
+              onNext={() => {
+                // If you later add an evaluations view,
+                // you can refresh that data here as well.
+                setShowEvaluationForm(false);
+              }}
+            />
+          ) : (
+            <p className="text-sm text-muted-foreground">
+              No evaluation in progress. Click &ldquo;Evaluate Hypercert&rdquo;
+              to add your evaluation.
+            </p>
+          )}
         </CardContent>
       </Card>
     </div>

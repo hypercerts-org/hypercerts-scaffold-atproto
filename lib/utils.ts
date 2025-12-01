@@ -4,6 +4,7 @@ import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 import * as Hypercert from "@/lexicons/types/org/hypercerts/claim/activity";
 import * as Contribution from "@/lexicons/types/org/hypercerts/claim/contribution";
+import * as Evaluation from "@/lexicons/types/org/hypercerts/claim/evaluation";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -62,6 +63,19 @@ export const validateContribution = (data: unknown) => {
   }
 };
 
+export const validateEvaluation = (data: unknown) => {
+  if (Evaluation.isRecord(data) && Evaluation.validateRecord(data)) {
+    return { success: true, error: null };
+  } else {
+    const validation = Evaluation.validateRecord(data);
+    if (!validation.success) {
+      return { success: false, error: validation.error.message };
+    } else {
+      return { success: false, error: "Invalid Evaluation Record" };
+    }
+  }
+};
+
 export function parseAtUri(atUri?: string) {
   // at://did:plc:xyz/app.namespace.record/abc123
   if (!atUri) return;
@@ -72,7 +86,7 @@ export function parseAtUri(atUri?: string) {
 }
 
 export function buildStrongRef(cid?: string, uri?: string) {
-  if (!cid || !uri) return
+  if (!cid || !uri) return;
   return {
     $type: "com.atproto.repo.strongRef" as const,
     cid,

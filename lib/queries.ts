@@ -1,5 +1,6 @@
 import { Agent } from "@atproto/api";
-import * as HypercertClaim from "@/lexicons/types/org/hypercerts/claim";
+import * as HypercertClaim from "@/lexicons/types/org/hypercerts/claim/activity";
+import * as HypercertEvaluation from "@/lexicons/types/org/hypercerts/claim/evaluation";
 import * as HypercertContribution from "@/lexicons/types/org/hypercerts/claim/contribution";
 import * as HypercertEvidence from "@/lexicons/types/org/hypercerts/claim/evidence";
 import * as HypercertLocation from "@/lexicons/types/app/certified/location";
@@ -87,6 +88,18 @@ export const createContribution = async (
   const response = await atProtoAgent?.com.atproto.repo.createRecord({
     record,
     collection: Collections.contribution,
+    repo: atProtoAgent.assertDid,
+  });
+  return response;
+};
+
+export const createEvaluation = async (
+  atProtoAgent: Agent,
+  record: HypercertEvaluation.Record
+) => {
+  const response = await atProtoAgent?.com.atproto.repo.createRecord({
+    record,
+    collection: Collections.evaluation,
     repo: atProtoAgent.assertDid,
   });
   return response;

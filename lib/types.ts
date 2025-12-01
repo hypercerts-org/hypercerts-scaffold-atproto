@@ -45,4 +45,5 @@ export enum Collections {
   evidence = "org.hypercerts.claim.evidence",
   location = "app.certified.location",
   rights = "org.hypercerts.claim.rights",
+  evaluation = "org.hypercerts.claim.evaluation",
 }

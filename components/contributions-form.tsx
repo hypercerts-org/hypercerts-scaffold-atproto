@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import * as Claim from "@/lexicons/types/org/hypercerts/claim";
+import * as Claim from "@/lexicons/types/org/hypercerts/claim/activity";
 import * as Contribution from "@/lexicons/types/org/hypercerts/claim/contribution";
 import {
   createContribution,
