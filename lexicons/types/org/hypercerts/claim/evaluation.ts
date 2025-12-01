@@ -10,7 +10,7 @@ import {
   type OmitKey,
 } from '../../../../util'
 import type * as ComAtprotoRepoStrongRef from '../../../com/atproto/repo/strongRef.js'
-import type * as AppCertifiedDefs from '../../../app/certified/defs.js'
+import type * as OrgHypercertsDefs from '../defs.js'
 
 const is$typed = _is$typed,
   validate = _validate
@@ -23,12 +23,13 @@ export interface Main {
   evaluators: string[]
   /** Evaluation data (URIs or blobs) containing detailed reports or methodology */
   evaluations?: (
-    | $Typed<AppCertifiedDefs.Uri>
-    | $Typed<AppCertifiedDefs.SmallBlob>
+    | $Typed<OrgHypercertsDefs.Uri>
+    | $Typed<OrgHypercertsDefs.SmallBlob>
     | { $type: string }
   )[]
   /** Brief evaluation summary */
   summary: string
+  location?: ComAtprotoRepoStrongRef.Main
   /** Client-declared timestamp when this record was originally created */
   createdAt: string
   [k: string]: unknown

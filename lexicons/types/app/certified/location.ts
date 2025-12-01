@@ -5,7 +5,7 @@ import { type ValidationResult, BlobRef } from '@atproto/lexicon'
 import { CID } from 'multiformats/cid'
 import { validate as _validate } from '../../../lexicons'
 import { type $Typed, is$typed as _is$typed, type OmitKey } from '../../../util'
-import type * as AppCertifiedDefs from './defs.js'
+import type * as OrgHypercertsDefs from '../../org/hypercerts/defs.js'
 
 const is$typed = _is$typed,
   validate = _validate
@@ -20,8 +20,8 @@ export interface Main {
   /** An identifier for the format of the location data (e.g., coordinate-decimal, geojson-point) */
   locationType: 'coordinate-decimal' | 'geojson-point' | (string & {})
   location:
-    | $Typed<AppCertifiedDefs.Uri>
-    | $Typed<AppCertifiedDefs.SmallBlob>
+    | $Typed<OrgHypercertsDefs.Uri>
+    | $Typed<OrgHypercertsDefs.SmallBlob>
     | { $type: string }
   /** Optional name for this location */
   name?: string

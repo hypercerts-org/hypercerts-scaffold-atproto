@@ -17,43 +17,15 @@ export function createServer(options?: XrpcOptions): Server {
 
 export class Server {
   xrpc: XrpcServer
-  org: OrgNS
   app: AppNS
   com: ComNS
+  org: OrgNS
 
   constructor(options?: XrpcOptions) {
     this.xrpc = createXrpcServer(schemas, options)
-    this.org = new OrgNS(this)
     this.app = new AppNS(this)
     this.com = new ComNS(this)
-  }
-}
-
-export class OrgNS {
-  _server: Server
-  hypercerts: OrgHypercertsNS
-
-  constructor(server: Server) {
-    this._server = server
-    this.hypercerts = new OrgHypercertsNS(server)
-  }
-}
-
-export class OrgHypercertsNS {
-  _server: Server
-  claim: OrgHypercertsClaimNS
-
-  constructor(server: Server) {
-    this._server = server
-    this.claim = new OrgHypercertsClaimNS(server)
-  }
-}
-
-export class OrgHypercertsClaimNS {
-  _server: Server
-
-  constructor(server: Server) {
-    this._server = server
+    this.org = new OrgNS(this)
   }
 }
 
@@ -96,6 +68,34 @@ export class ComAtprotoNS {
 }
 
 export class ComAtprotoRepoNS {
+  _server: Server
+
+  constructor(server: Server) {
+    this._server = server
+  }
+}
+
+export class OrgNS {
+  _server: Server
+  hypercerts: OrgHypercertsNS
+
+  constructor(server: Server) {
+    this._server = server
+    this.hypercerts = new OrgHypercertsNS(server)
+  }
+}
+
+export class OrgHypercertsNS {
+  _server: Server
+  claim: OrgHypercertsClaimNS
+
+  constructor(server: Server) {
+    this._server = server
+    this.claim = new OrgHypercertsClaimNS(server)
+  }
+}
+
+export class OrgHypercertsClaimNS {
   _server: Server
 
   constructor(server: Server) {

@@ -9,7 +9,8 @@ import {
   is$typed as _is$typed,
   type OmitKey,
 } from '../../../../util'
-import type * as AppCertifiedDefs from '../../../app/certified/defs.js'
+import type * as ComAtprotoRepoStrongRef from '../../../com/atproto/repo/strongRef.js'
+import type * as OrgHypercertsDefs from '../defs.js'
 
 const is$typed = _is$typed,
   validate = _validate
@@ -17,9 +18,10 @@ const id = 'org.hypercerts.claim.evidence'
 
 export interface Main {
   $type: 'org.hypercerts.claim.evidence'
+  hypercert?: ComAtprotoRepoStrongRef.Main
   content:
-    | $Typed<AppCertifiedDefs.Uri>
-    | $Typed<AppCertifiedDefs.SmallBlob>
+    | $Typed<OrgHypercertsDefs.Uri>
+    | $Typed<OrgHypercertsDefs.SmallBlob>
     | { $type: string }
   /** Optional title to describe the nature of the evidence */
   title?: string

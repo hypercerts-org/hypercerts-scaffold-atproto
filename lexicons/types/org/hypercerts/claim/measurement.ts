@@ -28,6 +28,7 @@ export interface Main {
   measurementMethodURI?: string
   /** URIs to supporting evidence or data */
   evidenceURI?: string[]
+  location?: ComAtprotoRepoStrongRef.Main
   /** Client-declared timestamp when this record was originally created */
   createdAt: string
   [k: string]: unknown

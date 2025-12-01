@@ -3,17 +3,21 @@
  */
 import { type ValidationResult, BlobRef } from '@atproto/lexicon'
 import { CID } from 'multiformats/cid'
-import { validate as _validate } from '../../../lexicons'
-import { type $Typed, is$typed as _is$typed, type OmitKey } from '../../../util'
-import type * as AppCertifiedDefs from '../../app/certified/defs.js'
-import type * as ComAtprotoRepoStrongRef from '../../com/atproto/repo/strongRef.js'
+import { validate as _validate } from '../../../../lexicons'
+import {
+  type $Typed,
+  is$typed as _is$typed,
+  type OmitKey,
+} from '../../../../util'
+import type * as OrgHypercertsDefs from '../defs.js'
+import type * as ComAtprotoRepoStrongRef from '../../../com/atproto/repo/strongRef.js'
 
 const is$typed = _is$typed,
   validate = _validate
-const id = 'org.hypercerts.claim'
+const id = 'org.hypercerts.claim.activity'
 
 export interface Main {
-  $type: 'org.hypercerts.claim'
+  $type: 'org.hypercerts.claim.activity'
   /** Title of the hypercert */
   title: string
   /** Short blurb of the impact work done. */
@@ -21,8 +25,8 @@ export interface Main {
   /** Optional longer description of the impact work done. */
   description?: string
   image?:
-    | $Typed<AppCertifiedDefs.Uri>
-    | $Typed<AppCertifiedDefs.SmallBlob>
+    | $Typed<OrgHypercertsDefs.Uri>
+    | $Typed<OrgHypercertsDefs.SmallImage>
     | { $type: string }
   /** Scope of the work performed */
   workScope: string
