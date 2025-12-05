@@ -1,9 +1,6 @@
 "use client";
 
-import { useOAuthContext } from "@/providers/OAuthProviderSSR";
-import Image from "next/image";
-import { Record as Hypercert } from "@/lexicons/types/org/hypercerts/claim/activity";
-import { useEffect, useState } from "react";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardAction,
@@ -12,15 +9,16 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { getBlobURL, parseAtUri } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { Record as Hypercert } from "@/lexicons/types/org/hypercerts/claim/activity";
 import { Collections } from "@/lib/types";
+import { getBlobURL, parseAtUri } from "@/lib/utils";
+import { useOAuthContext } from "@/providers/OAuthProviderSSR";
+import Image from "next/image";
+import Link from "next/link";
+import { useEffect, useState } from "react";
 
 export default function MyHypercertsPage() {
   const { atProtoAgent, session } = useOAuthContext();
-  const router = useRouter();
   const [hypercerts, setMyHypercerts] = useState<
     (Hypercert & { uri: string })[]
   >([]);
@@ -73,15 +71,7 @@ export default function MyHypercertsPage() {
                         {cert?.shortDescription}
                       </CardDescription>
                       <CardAction>
-                        <Button
-                          onClick={() => {
-                            router.push(
-                              `/${parseAtUri(cert.uri)?.rkey || ""}/edit`
-                            );
-                          }}
-                        >
-                          Edit
-                        </Button>
+                        <Button>view</Button>
                       </CardAction>
                     </CardHeader>
                     <CardContent>
