@@ -1,9 +1,7 @@
 "use client";
 
-import { useOAuthContext } from "@/providers/OAuthProviderSSR";
-import Image from "next/image";
-import { Record as Hypercert } from "@/lexicons/types/org/hypercerts/claim/activity";
-import { useEffect, useState } from "react";
+import Loader from "@/components/loader";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardAction,
@@ -12,21 +10,24 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { getBlobURL, parseAtUri } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { Record as Hypercert } from "@/lexicons/types/org/hypercerts/claim/activity";
 import { Collections } from "@/lib/types";
+import { getBlobURL, parseAtUri } from "@/lib/utils";
+import { useOAuthContext } from "@/providers/OAuthProviderSSR";
+import Image from "next/image";
+import Link from "next/link";
+import { useEffect, useState } from "react";
 
 export default function MyHypercertsPage() {
   const { atProtoAgent, session } = useOAuthContext();
-  const router = useRouter();
+  const [fetching, setFetching] = useState(false);
   const [hypercerts, setMyHypercerts] = useState<
     (Hypercert & { uri: string })[]
   >([]);
 
   useEffect(() => {
     async function fetchMyHypercerts() {
+      setFetching(true);
       if (!atProtoAgent || !session) return;
 
       try {
@@ -44,6 +45,8 @@ export default function MyHypercertsPage() {
         setMyHypercerts(records);
       } catch (error) {
         console.error("Error fetching hypercerts:", error);
+      } finally {
+        setFetching(false);
       }
     }
 
@@ -55,53 +58,49 @@ export default function MyHypercertsPage() {
       <h1 className="scroll-m-20 text-center text-4xl font-extrabold tracking-tight text-balance">
         My Hypercerts
       </h1>
-      <div>
-        {hypercerts.length === 0 ? (
-          <p>No hypercerts found.</p>
-        ) : (
-          <div className="flex flex-col gap-4">
-            {hypercerts.map((cert) => {
-              return (
-                <Link
-                  key={cert.uri}
-                  href={`/${parseAtUri(cert.uri)?.rkey || ""}`}
-                >
-                  <Card key={cert.uri}>
-                    <CardHeader>
-                      <CardTitle>{cert?.title}</CardTitle>
-                      <CardDescription>
-                        {cert?.shortDescription}
-                      </CardDescription>
-                      <CardAction>
-                        <Button
-                          onClick={() => {
-                            router.push(
-                              `/${parseAtUri(cert.uri)?.rkey || ""}/edit`
-                            );
-                          }}
-                        >
-                          Edit
-                        </Button>
-                      </CardAction>
-                    </CardHeader>
-                    <CardContent>
-                      {!!getBlobURL(cert?.image, session?.did) && (
-                        <div className="relative aspect-square max-w-md">
-                          <Image
-                            fill
-                            alt="cover image"
-                            src={getBlobURL(cert?.image, session?.did)!}
-                          />
-                        </div>
-                      )}
-                    </CardContent>
-                  </Card>
-                </Link>
-              );
-            })}
-          </div>
-        )}
-      </div>
+      {fetching ? (
+        <Loader />
+      ) : (
+        <div>
+          {hypercerts.length === 0 ? (
+            <p>No hypercerts found.</p>
+          ) : (
+            <div className="flex flex-col gap-4">
+              {hypercerts.map((cert) => {
+                return (
+                  <Link
+                    key={cert.uri}
+                    href={`/${parseAtUri(cert.uri)?.rkey || ""}`}
+                  >
+                    <Card key={cert.uri}>
+                      <CardHeader>
+                        <CardTitle>{cert?.title}</CardTitle>
+                        <CardDescription>
+                          {cert?.shortDescription}
+                        </CardDescription>
+                        <CardAction>
+                          <Button>view</Button>
+                        </CardAction>
+                      </CardHeader>
+                      <CardContent>
+                        {!!getBlobURL(cert?.image, session?.did) && (
+                          <div className="relative aspect-square max-w-md">
+                            <Image
+                              fill
+                              alt="cover image"
+                              src={getBlobURL(cert?.image, session?.did)!}
+                            />
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
+                  </Link>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      )}
     </main>
   );
 }
