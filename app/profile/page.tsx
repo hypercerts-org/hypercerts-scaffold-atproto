@@ -12,12 +12,17 @@ import { toast } from "sonner";
 
 import ImageUploader from "@/components/image-uploader";
 import { uploadFile } from "@/lib/queries";
+import { ProfileViewDetailed } from "@atproto/api/dist/client/types/app/bsky/actor/defs";
+import { AppBskyActorProfile } from "@atproto/api";
 
 export default function ProfilePage() {
   const { atProtoAgent, session } = useOAuthContext();
   const router = useRouter();
 
   const [loading, setLoading] = useState(true);
+  const [profileView, setProfileView] = useState<ProfileViewDetailed>();
+  const [profileRecord, setProfileRecord] =
+    useState<AppBskyActorProfile.Record>();
   const [saving, setSaving] = useState(false);
   const [displayName, setDisplayName] = useState("");
   const [description, setDescription] = useState("");
@@ -33,23 +38,34 @@ export default function ProfilePage() {
       router.push("/");
       return;
     }
-
     async function getProfile() {
       if (!atProtoAgent || !session) return;
       try {
         setLoading(true);
-        const userProfile = await atProtoAgent.app.bsky.actor.getProfile({
-          actor: atProtoAgent.assertDid,
-        });
-        const value = userProfile?.data;
-        if (value) {
-          setDisplayName(value.displayName || "");
-          setDescription(value.description || "");
-          setWebsite(value.website || "");
-          setPronouns(value.pronouns || "");
-          setAvatarUrl(value.avatar || "");
-          setBannerUrl(value.banner || "");
-        }
+
+        const [userProfile, recordRes] = await Promise.all([
+          atProtoAgent.app.bsky.actor.getProfile({
+            actor: atProtoAgent.assertDid,
+          }),
+          atProtoAgent.com.atproto.repo.getRecord({
+            repo: atProtoAgent.assertDid,
+            collection: "app.bsky.actor.profile",
+            rkey: "self",
+          }),
+        ]);
+
+        setProfileView(userProfile.data);
+
+        const record = recordRes.data.value;
+        setProfileRecord(record as AppBskyActorProfile.Record);
+
+        const value = userProfile.data;
+        setDisplayName(value.displayName || "");
+        setDescription(value.description || "");
+        setWebsite(value.website || ""); // if you're using custom fields
+        setPronouns(value.pronouns || "");
+        setAvatarUrl(value.avatar || "");
+        setBannerUrl(value.banner || "");
       } catch (error) {
         console.error("Error fetching profile:", error);
         toast.error("Failed to load profile");
@@ -62,33 +78,43 @@ export default function ProfilePage() {
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    if (!atProtoAgent) return;
+    if (!atProtoAgent || !profileRecord) return;
 
     try {
       setSaving(true);
+
       let uploadedBanner;
       let uploadedAvatar;
+
       if (bannerImage) {
         uploadedBanner = await uploadFile(atProtoAgent, bannerImage);
       }
+
       if (avatarImage) {
         uploadedAvatar = await uploadFile(atProtoAgent, avatarImage);
       }
+
       const record = {
-        $type: "app.bsky.actor.profile",
+        ...profileRecord,
         description,
         displayName,
         website,
         pronouns,
-        banner: uploadedBanner ? { $type: "blob", ...uploadedBanner } : null,
-        avatar: uploadedAvatar ? { $type: "blob", ...uploadedAvatar } : null,
+        banner: uploadedBanner
+          ? { $type: "blob", ...uploadedBanner }
+          : profileRecord.banner,
+        avatar: uploadedAvatar
+          ? { $type: "blob", ...uploadedAvatar }
+          : profileRecord.avatar,
       };
+
       await atProtoAgent.com.atproto.repo.putRecord({
         repo: atProtoAgent.assertDid,
         collection: "app.bsky.actor.profile",
         rkey: "self",
         record,
       });
+
       toast.success("Profile successfully updated");
     } catch (error) {
       console.error("Error saving profile:", error);
