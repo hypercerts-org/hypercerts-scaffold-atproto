@@ -32,7 +32,7 @@ export default function RootLayout({
       >
         <OAuthProvider>
           <SignedInProvider>{children}</SignedInProvider>
-          <Toaster/>
+          <Toaster />
         </OAuthProvider>
       </body>
     </html>

@@ -10,14 +10,15 @@ import { Button } from "./ui/button";
 import { useOAuthContext } from "@/providers/OAuthProviderSSR";
 import { FormEventHandler, useState } from "react";
 import { PDS_URL } from "@/utils/constants";
+import { login } from "@/lib/actions";
 
 export default function LoginDialog() {
   const [handle, setHandle] = useState("");
   const { signIn } = useOAuthContext();
 
-  const handleSubmit: FormEventHandler<HTMLFormElement> = (e) => {
+  const handleSubmit: FormEventHandler<HTMLFormElement> = async (e) => {
     e.preventDefault();
-    signIn(handle);
+    await login(handle);
   };
 
   const redirectToAccountCreation = () => {
