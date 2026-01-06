@@ -11,14 +11,20 @@ import { useOAuthContext } from "@/providers/OAuthProviderSSR";
 import { FormEventHandler, useState } from "react";
 import { PDS_URL } from "@/utils/constants";
 import { login } from "@/lib/actions";
+import { useRouter } from "next/navigation";
 
 export default function LoginDialog() {
   const [handle, setHandle] = useState("");
   const { signIn } = useOAuthContext();
+  const router = useRouter();
 
   const handleSubmit: FormEventHandler<HTMLFormElement> = async (e) => {
     e.preventDefault();
-    await login(handle);
+    const response = await fetch("/api/auth/login", {
+      method: "POST",
+      body: JSON.stringify({ handle }),
+    });
+    router.push((await response.json()).authUrl);
   };
 
   const redirectToAccountCreation = () => {
