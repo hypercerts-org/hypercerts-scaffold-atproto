@@ -3,6 +3,7 @@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import type { HypercertEvidence } from "@hypercerts-org/sdk-core";
 import {
   Select,
   SelectContent,
@@ -47,7 +48,7 @@ export default function HypercertEvidenceForm({
   const [shortDescription, setShortDescription] = useState("");
   const [description, setDescription] = useState("");
   const [relationType, setRelationType] = useState<
-    Evidence.Record["relationType"] | ""
+    HypercertEvidence["relationType"] | ""
   >("supports");
 
   const [evidenceMode, setEvidenceMode] = useState<ContentMode>("link");
@@ -150,68 +151,42 @@ export default function HypercertEvidenceForm({
 
     return updatedHypercert;
   };
-
   const handleSubmit: FormEventHandler<HTMLFormElement> = async (e) => {
     e.preventDefault();
-    if (!atProtoAgent) return;
-
     try {
       setSaving(true);
-
       if (!validateTextFields()) {
-        setSaving(false);
         return;
       }
 
-      const content = await getEvidenceContent();
-      if (!content) {
-        setSaving(false);
-        return;
+      const formData = new FormData();
+      formData.append("title", title.trim());
+      formData.append("shortDescription", shortDescription.trim());
+      formData.append("description", description.trim());
+      if (relationType) {
+        formData.append("relationType", relationType);
       }
+      formData.append("hypercertUri", hypercertId);
 
-      const subject = await buildSubjectStrongRef();
-      if (!subject) {
-        setSaving(false);
-        return;
+      if (evidenceMode === "link") {
+        if (!evidenceUrl.trim()) {
+          toast.error("Please provide a link to the evidence.");
+          return;
+        }
+        formData.append("evidenceUrl", evidenceUrl.trim());
+      } else {
+        if (!evidenceFile) {
+          toast.error("Please upload an evidence file.");
+          return;
+        }
+        formData.append("evidenceFile", evidenceFile);
       }
-
-      const evidenceRecord: Evidence.Record = {
-        $type: "org.hypercerts.claim.evidence",
-        subject,
-        content,
-        title: title.trim(),
-        shortDescription: shortDescription.trim(),
-        description: description.trim() || undefined,
-        relationType: relationType || undefined,
-        createdAt: new Date().toISOString(),
-      };
-
-      const validation = Evidence.validateRecord(evidenceRecord);
-      if (!validation.success) {
-        toast.error(validation.error?.message || "Invalid evidence record");
-        setSaving(false);
-        return;
-      }
-
-      const createResponse = await createEvidence(atProtoAgent, evidenceRecord);
-
-      const updatedHypercert = await buildUpdatedHyperCert(createResponse);
-      if (!updatedHypercert) {
-        setSaving(false);
-        return;
-      }
-
-      await updateHypercert(
-        hypercertId,
-        atProtoAgent,
-        updatedHypercert as HypercertClaim.Record
-      );
-
-      toast.success("Evidence created and linked to hypercert!");
-      onNext?.();
-    } catch (error) {
-      console.error("Error saving evidence:", error);
-      toast.error("Failed to create evidence");
+      console.log("✅ Assembled FormData:", [...formData.entries()]);
+      toast.success("FormData assembled (no API calls made).");
+      // onNext?.();
+    } catch (err) {
+      console.error("Error assembling FormData:", err);
+      toast.error("Failed to assemble FormData");
     } finally {
       setSaving(false);
     }
@@ -240,7 +215,7 @@ export default function HypercertEvidenceForm({
           <Select
             value={relationType}
             onValueChange={(val) =>
-              setRelationType(val as Evidence.Record["relationType"])
+              setRelationType(val as HypercertEvidence["relationType"])
             }
           >
             <SelectTrigger id="relationType">
@@ -253,7 +228,8 @@ export default function HypercertEvidenceForm({
             </SelectContent>
           </Select>
           <p className="text-xs text-muted-foreground">
-            Specify whether this evidence supports, clarifies, or challenges the claim.
+            Specify whether this evidence supports, clarifies, or challenges the
+            claim.
           </p>
         </div>
 

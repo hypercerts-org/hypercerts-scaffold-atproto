@@ -20,9 +20,12 @@ importers:
       '@atproto/oauth-client-node':
         specifier: ^0.3.14
         version: 0.3.14
+      '@hypercerts-org/lexicon':
+        specifier: 0.10.0-beta.3
+        version: 0.10.0-beta.3(@atproto/xrpc@0.7.7)
       '@hypercerts-org/sdk-core':
-        specifier: 0.10.0-beta.0
-        version: 0.10.0-beta.0(@atproto/xrpc@0.7.7)
+        specifier: link:../hypercerts-sdk/packages/sdk-core
+        version: link:../hypercerts-sdk/packages/sdk-core
       '@hypercerts-org/sdk-react':
         specifier: 0.10.0-beta.0
         version: 0.10.0-beta.0(@atproto/xrpc@0.7.7)(@tanstack/react-query@5.90.6(react@19.2.0))(react@19.2.0)
@@ -132,6 +135,21 @@ packages:
   '@alloc/quick-lru@5.2.0':
     resolution: {integrity: sha512-UrcABB+4bUrFABwbluTIBErXwvbsU/V7TZWfmbgJfbkwiBuziS9gxdODUyuiecfdGQ85jglMW6juS3+z5TsKLw==}
     engines: {node: '>=10'}
+
+  '@atcute/atproto@3.1.10':
+    resolution: {integrity: sha512-+GKZpOc0PJcdWMQEkTfg/rSNDAAHxmAUGBl60g2az15etqJn5WaUPNGFE2sB7hKpwi5Ue2h/L0OacINcE/JDDQ==}
+
+  '@atcute/leaflet@1.0.15':
+    resolution: {integrity: sha512-soA4jGsY0UxTar8rhtfQNYFXPI+qoQGgjpeMKJaO8ZCBBMRoo4OU9gsFJpUm/BYSocOBvvWSq2GV9pYEgUehTw==}
+
+  '@atcute/lexicons@1.2.6':
+    resolution: {integrity: sha512-s76UQd8D+XmHIzrjD9CJ9SOOeeLPHc+sMmcj7UFakAW/dDFXc579fcRdRfuUKvXBL5v1Gs2VgDdlh/IvvQZAwA==}
+
+  '@atcute/uint8array@1.0.6':
+    resolution: {integrity: sha512-ucfRBQc7BFT8n9eCyGOzDHEMKF/nZwhS2pPao4Xtab1ML3HdFYcX2DM1tadCzas85QTGxHe5urnUAAcNKGRi9A==}
+
+  '@atcute/util-text@0.0.1':
+    resolution: {integrity: sha512-t1KZqvn0AYy+h2KcJyHnKF9aEqfRfMUmyY8j1ELtAEIgqN9CxINAjxnoRCJIFUlvWzb+oY3uElQL/Vyk3yss0g==}
 
   '@atproto-labs/did-resolver@0.2.2':
     resolution: {integrity: sha512-ca2B7xR43tVoQ8XxBvha58DXwIH8cIyKQl6lpOKGkPUrJuFoO4iCLlDiSDi2Ueh+yE1rMDPP/qveHdajgDX3WQ==}
@@ -432,6 +450,11 @@ packages:
   '@humanwhocodes/retry@0.4.3':
     resolution: {integrity: sha512-bV0Tgo9K4hfPCek+aMAn81RppFKv2ySDQeMoSZuvTASywNTnVJCArCZE2FWqpvIatKu7VMRLWlR1EazvVhDyhQ==}
     engines: {node: '>=18.18'}
+
+  '@hypercerts-org/lexicon@0.10.0-beta.3':
+    resolution: {integrity: sha512-mQKDeRVwvWrR5mkwAdFHJUZyxNDwaHiFX1emykQ7G1RJPTCTGS2Tqi3C2iR/vzCU4oUkaweQ9zDWogG/ViZXbg==}
+    peerDependencies:
+      '@atproto/xrpc': '*'
 
   '@hypercerts-org/lexicon@0.9.0-beta.0':
     resolution: {integrity: sha512-7daRB15zDv2KfK7ZiEd8j6wWVJgBduLgtjzHuBD1QzIn2XV19X6mr8VYibbcTmH/+2U2QaOq65K3h8SJAPTxGQ==}
@@ -1068,6 +1091,9 @@ packages:
 
   '@rtsao/scc@1.1.0':
     resolution: {integrity: sha512-zt6OdqaDoOnJ1ZYsCYGt9YmWzDXl4vQdKTyJev62gFhRGKdx7mcT54V9KIjg+d2wi9EXsPvAPKe7i7WjfVWB8g==}
+
+  '@standard-schema/spec@1.1.0':
+    resolution: {integrity: sha512-l2aFy5jALhniG5HgqrD6jXLi/rUWrKvqN/qJx6yoJsgKhblVd+iqqU4RCXavm/jPityDo5TCvKMnpjKnOriy0w==}
 
   '@swc/helpers@0.5.15':
     resolution: {integrity: sha512-JQ5TuMi45Owi4/BIMAJBoSQoOJu12oOk/gADqlcUL9JEdHB8vyjUSsxqeNXnmXHjYKMi2WcYtezGEEhqUI/E2g==}
@@ -1819,6 +1845,9 @@ packages:
     peerDependenciesMeta:
       jiti:
         optional: true
+
+  esm-env@1.2.2:
+    resolution: {integrity: sha512-Epxrv+Nr/CaL4ZcFGPJIYLWFom+YeV1DqMLHJoEd9SYRxNbaFruBwfEX/kkHUJf55j2+TUbmDcmuilbP1TmXHA==}
 
   espree@10.4.0:
     resolution: {integrity: sha512-j6PAQ2uUr79PZhBjP5C5fhl8e39FmRnOjsD5lGnWrFU8i2G776tBK7+nP8KuQUTTyAZUwfQqXAgrVH5MbH9CYQ==}
@@ -3072,6 +3101,28 @@ snapshots:
 
   '@alloc/quick-lru@5.2.0': {}
 
+  '@atcute/atproto@3.1.10':
+    dependencies:
+      '@atcute/lexicons': 1.2.6
+
+  '@atcute/leaflet@1.0.15':
+    dependencies:
+      '@atcute/atproto': 3.1.10
+      '@atcute/lexicons': 1.2.6
+
+  '@atcute/lexicons@1.2.6':
+    dependencies:
+      '@atcute/uint8array': 1.0.6
+      '@atcute/util-text': 0.0.1
+      '@standard-schema/spec': 1.1.0
+      esm-env: 1.2.2
+
+  '@atcute/uint8array@1.0.6': {}
+
+  '@atcute/util-text@0.0.1':
+    dependencies:
+      unicode-segmenter: 0.14.5
+
   '@atproto-labs/did-resolver@0.2.2':
     dependencies:
       '@atproto-labs/fetch': 0.2.3
@@ -3553,6 +3604,13 @@ snapshots:
   '@humanwhocodes/module-importer@1.0.1': {}
 
   '@humanwhocodes/retry@0.4.3': {}
+
+  '@hypercerts-org/lexicon@0.10.0-beta.3(@atproto/xrpc@0.7.7)':
+    dependencies:
+      '@atcute/leaflet': 1.0.15
+      '@atproto/lexicon': 0.6.0
+      '@atproto/xrpc': 0.7.7
+      multiformats: 13.4.1
 
   '@hypercerts-org/lexicon@0.9.0-beta.0(@atproto/xrpc@0.7.7)':
     dependencies:
@@ -4113,6 +4171,8 @@ snapshots:
       '@redis/client': 5.10.0
 
   '@rtsao/scc@1.1.0': {}
+
+  '@standard-schema/spec@1.1.0': {}
 
   '@swc/helpers@0.5.15':
     dependencies:
@@ -5019,6 +5079,8 @@ snapshots:
       jiti: 2.6.1
     transitivePeerDependencies:
       - supports-color
+
+  esm-env@1.2.2: {}
 
   espree@10.4.0:
     dependencies:
