@@ -12,6 +12,7 @@ import FormInfo from "./form-info";
 import { Collections } from "@/lib/types";
 import { title } from "process";
 import { createHypercertUsingSDK } from "@/lib/create-actions";
+import { CreateHypercertParams } from "@hypercerts-org/sdk-core";
 
 export interface IHypercertsCreateFormProps {
   setHypercertId: (id: string) => void;
@@ -22,23 +23,20 @@ export default function HypercertsCreateForm({
   setHypercertId,
   nextStepper,
 }: IHypercertsCreateFormProps) {
-  const { atProtoAgent, session } = useOAuthContext();
   const [creating, setCreating] = useState(false);
 
-  const handleCreate = async (certInfo: HypercertRecordForm) => {
+  const handleCreate = async (
+    certInfo: CreateHypercertParams,
+    advance?: boolean
+  ) => {
     try {
       setCreating(true);
-      await createHypercertUsingSDK({
-        title: certInfo.title,
-        shortDescription: certInfo.shortDescription,
-        description: certInfo.shortDescription,
-        startDate: certInfo.workTimeFrameFrom,
-        endDate: certInfo.workTimeFrameTo,
-        rights: {
-          name: "All Rights Reserved",
-          type: "CC-BY-239",
-          description: "RIghts reserverd",
+      await fetch("/api/certs/create", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
         },
+        body: JSON.stringify(certInfo),
       });
       toast.success("Hypercert created successfully!");
     } catch (e) {

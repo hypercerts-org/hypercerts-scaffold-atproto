@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
 import { Textarea } from "@/components/ui/textarea";
 import * as Hypercert from "@/lexicons/types/org/hypercerts/claim/activity";
+import { CreateHypercertParams } from "@hypercerts-org/sdk-core";
 import { Label } from "@radix-ui/react-label";
 import { PlusIcon, XIcon } from "lucide-react";
 import { FormEventHandler, useState } from "react";
@@ -13,7 +14,7 @@ import { FormEventHandler, useState } from "react";
 export interface HypercertsBaseFormProps {
   isSaving: boolean;
   saveDisabled: boolean;
-  onSave?: (record: HypercertRecordForm, advance?: boolean) => void;
+  onSave?: (record: CreateHypercertParams, advance?: boolean) => void;
   updateActions?: boolean;
   certInfo?: Hypercert.Record;
 }
@@ -48,10 +49,10 @@ export default function HypercertsBaseForm({
   const [workScope, setWorkScope] = useState<string[]>(
     initialWorkScope || [""]
   );
-  const [workTimeframeFrom, setWorkTimeframeFrom] = useState<Date | null>(
+  const [startDate, setStartDate] = useState<Date | null>(
     certInfo?.workTimeFrameFrom ? new Date(certInfo?.workTimeFrameFrom) : null
   );
-  const [workTimeframeTo, setWorkTimeframeTo] = useState<Date | null>(
+  const [endDate, setEndDate] = useState<Date | null>(
     certInfo?.workTimeFrameTo ? new Date(certInfo?.workTimeFrameTo) : null
   );
 
@@ -71,32 +72,28 @@ export default function HypercertsBaseForm({
     setWorkScope((prev) => prev.filter((_, idx) => idx !== index));
   };
 
-  const getRecord = (): HypercertRecordForm | undefined => {
-    const cleanedWorkScope = workScope
-      .map((w) => w.trim())
-      .filter(Boolean)
-      .join(",");
+  const getRecord = (): CreateHypercertParams | undefined => {
+    // const cleanedWorkScope = workScope
+    //   .map((w) => w.trim())
+    //   .filter(Boolean)
+    //   .join(",");
 
-    if (
-      !(
-        title &&
-        shortDescription &&
-        cleanedWorkScope &&
-        workTimeframeFrom &&
-        workTimeframeTo
-      )
-    ) {
+    if (!(title && shortDescription && startDate && endDate)) {
       return;
     }
 
-    const record: HypercertRecordForm = {
+    const record: CreateHypercertParams = {
       title,
       shortDescription,
-      workScope: cleanedWorkScope,
+      rights: {
+        name: "CC-BY-20",
+        type: "CC-dSD-231",
+        description: "All rights reserved",
+      },
+      description: shortDescription,
       image: backgroundImage,
-      workTimeFrameFrom: workTimeframeFrom.toISOString(),
-      workTimeFrameTo: workTimeframeTo.toISOString(),
-      createdAt: new Date().toISOString(),
+      startDate: startDate.toISOString(),
+      endDate: endDate.toISOString(),
     };
     return record;
   };
@@ -116,8 +113,33 @@ export default function HypercertsBaseForm({
     onSave?.(record, true);
   };
 
+  const handleAutofill = () => {
+    setTitle("Clean Energy Community Initiative");
+    setShortDescription(
+      "A community-driven initiative to distribute clean energy resources and fund renewable projects across rural regions."
+    );
+    setWorkScope(["clean-energy", "community", "renewables"]);
+    const from = new Date();
+    from.setMonth(from.getMonth() - 6);
+    const to = new Date();
+    to.setMonth(to.getMonth() + 6);
+    setStartDate(from);
+    setEndDate(to);
+  };
+
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-6">
+      <div className="flex">
+        <Button
+          type="button"
+          variant="outline"
+          onClick={handleAutofill}
+          aria-label="Autofill with dummy values"
+        >
+          Autofill
+        </Button>
+      </div>
+
       <div className="flex flex-col gap-1">
         <Label htmlFor="title">Hypercert Name</Label>
         <Input
@@ -141,9 +163,7 @@ export default function HypercertsBaseForm({
       </div>
 
       <div className="flex flex-col gap-1">
-        <Label htmlFor="background-image" aria-required>
-          Background Image *
-        </Label>
+        <Label htmlFor="background-image">Background Image</Label>
         <Input
           id="background-image"
           onChange={(e) => setBackgroundImage(e.target.files?.[0])}
@@ -194,15 +214,15 @@ export default function HypercertsBaseForm({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <DatePicker
-            initDate={workTimeframeFrom || undefined}
-            onChange={setWorkTimeframeFrom}
+            initDate={startDate || undefined}
+            onChange={setStartDate}
             label="Work Time Frame From"
           />
         </div>
         <div>
           <DatePicker
-            initDate={workTimeframeTo || undefined}
-            onChange={setWorkTimeframeTo}
+            initDate={endDate || undefined}
+            onChange={setEndDate}
             label="Work Time Frame To"
           />
         </div>
