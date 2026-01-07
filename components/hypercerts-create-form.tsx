@@ -31,14 +31,40 @@ export default function HypercertsCreateForm({
   ) => {
     try {
       setCreating(true);
-      await fetch("/api/certs/create", {
+
+      const formData = new FormData();
+
+      // Text fields
+      formData.append("title", certInfo.title);
+      formData.append("shortDescription", certInfo.shortDescription);
+      formData.append(
+        "description",
+        certInfo.description ?? certInfo.shortDescription
+      );
+      formData.append("startDate", certInfo.startDate);
+      formData.append("endDate", certInfo.endDate);
+
+      // Rights (send as JSON string)
+      formData.append("rights", JSON.stringify(certInfo.rights));
+
+      // File
+      if (certInfo.image) {
+        formData.append("image", certInfo.image);
+      }
+
+      const res = await fetch("/api/certs/create", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(certInfo),
+        body: formData,
       });
+
+      if (!res.ok) {
+        const errText = await res.text();
+        throw new Error(errText || "Failed to create hypercert");
+      }
+
       toast.success("Hypercert created successfully!");
+
+      if (advance) nextStepper();
     } catch (e) {
       console.error(e);
       toast.error("Failed to create hypercert please try again");

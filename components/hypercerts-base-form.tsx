@@ -169,7 +169,6 @@ export default function HypercertsBaseForm({
           onChange={(e) => setBackgroundImage(e.target.files?.[0])}
           type="file"
           placeholder="Add Background Image"
-          required
         />
       </div>
 
