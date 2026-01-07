@@ -24,6 +24,7 @@ import FormFooter from "./form-footer";
 import FormInfo from "./form-info";
 import UserAvatar from "./user-avatar";
 import UserSelection from "./user-selection";
+import { addContribution } from "@/lib/create-actions";
 
 export default function HypercertContributionForm({
   hypercertUri,
@@ -58,74 +59,64 @@ export default function HypercertContributionForm({
     setContributors(filtered);
   };
 
-  const handleContributionCreation = async (
-    hypercertRef: ReturnType<typeof buildStrongRef>
-  ) => {
-    if (!atProtoAgent) return;
+  const handleContributionCreation = async () => {
     const mappedContributors = contributors
       .filter((contributor) => !!contributor)
       .map(({ did }) => did);
+    if (!mappedContributors.length) return;
     const contributionRecord = {
-      $type: "org.hypercerts.claim.contribution",
-      hypercert: hypercertRef || undefined,
-      role,
-      contributors: mappedContributors.length ? mappedContributors : undefined,
-      description: description || undefined,
-      workTimeframeFrom: workTimeframeFrom?.toISOString(),
-      workTimeframeTo: workTimeframeTo?.toISOString(),
-      createdAt: new Date().toISOString(),
-    };
-
-    const isValidContribution = validateContribution(contributionRecord);
-    if (!isValidContribution.success || !mappedContributors.length) {
-      toast.error(isValidContribution.error || "Invalid contribution record");
-      return;
-    }
-    const response = await createContribution(
-      atProtoAgent,
-      contributionRecord as Contribution.Record
-    );
-    return response;
-  };
-
-  const handleHypercertUpdate = async (
-    contributionData: Awaited<ReturnType<typeof handleContributionCreation>>,
-    hypercertRecord: Claim.Record
-  ) => {
-    const contributionCid = contributionData?.data?.cid;
-    const contributionURI = contributionData?.data?.uri;
-    if (!contributionCid || !contributionURI) return;
-    const updatedHypercert = {
-      ...hypercertRecord,
-      contributions: [buildStrongRef(contributionCid, contributionURI)],
-    };
-    const isValidHypercert = validateHypercert(updatedHypercert);
-    if (!isValidHypercert.success) {
-      toast.error(isValidHypercert.error || "Invalid updated hypercert");
-      return;
-    }
-    await updateHypercert(
       hypercertUri,
-      atProtoAgent!,
-      updatedHypercert as Claim.Record
-    );
-    toast.success("Contribution updated and linked!");
-    onNext?.();
+      role,
+      contributors: mappedContributors,
+      description: description || undefined,
+      startDate: workTimeframeFrom?.toISOString(),
+      endDate: workTimeframeTo?.toISOString(),
+    };
+
+    const res = await addContribution(contributionRecord);
+
+    return res;
+
+    // const isValidContribution = validateContribution(contributionRecord);
+    // if (!isValidContribution.success || !mappedContributors.length) {
+    //   toast.error(isValidContribution.error || "Invalid contribution record");
+    //   return;
+    // }
+    // const response = await createContribution(atProtoAgent, contributionRecord);
   };
+
+  // const handleHypercertUpdate = async (
+  //   contributionData: Awaited<ReturnType<typeof handleContributionCreation>>,
+  //   hypercertRecord: Claim.Record
+  // ) => {
+  //   const contributionCid = contributionData?.data?.cid;
+  //   const contributionURI = contributionData?.data?.uri;
+  //   if (!contributionCid || !contributionURI) return;
+  //   const updatedHypercert = {
+  //     ...hypercertRecord,
+  //     contributions: [buildStrongRef(contributionCid, contributionURI)],
+  //   };
+  //   const isValidHypercert = validateHypercert(updatedHypercert);
+  //   if (!isValidHypercert.success) {
+  //     toast.error(isValidHypercert.error || "Invalid updated hypercert");
+  //     return;
+  //   }
+  //   await updateHypercert(
+  //     hypercertUri,
+  //     atProtoAgent!,
+  //     updatedHypercert as Claim.Record
+  //   );
+  //   toast.success("Contribution updated and linked!");
+  //   onNext?.();
+  // };
 
   const handleSubmit: FormEventHandler<HTMLFormElement> = async (e) => {
     e.preventDefault();
-    if (!atProtoAgent) return;
     setSaving(true);
     try {
-      const hypercertInfo = await getHypercert(hypercertUri, atProtoAgent);
-      const hypercertRef = buildStrongRef(
-        hypercertInfo.data.cid,
-        hypercertInfo.data.uri
-      );
-      const hypercertRecord = (hypercertInfo.data.value || {}) as Claim.Record;
-      const contributionData = await handleContributionCreation(hypercertRef);
-      await handleHypercertUpdate(contributionData, hypercertRecord);
+      const contributionData = await handleContributionCreation();
+      toast.success("Contribution created!");
+      onNext?.();
     } catch (error) {
       console.error("Error saving contribution:", error);
       toast.error("Failed to update contribution");

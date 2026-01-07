@@ -27,18 +27,18 @@ export default function UserSelection({ onUserSelect }: UserSelectionProps) {
 
   useEffect(() => {
     const fetchSuggestions = async () => {
-      if (!debouncedSearch.trim() || !atProtoAgent) {
+      if (!debouncedSearch.trim()) {
         setUserSuggestions([]);
         return;
       }
 
       try {
         setIsLoading(true);
-        const res = await atProtoAgent.app.bsky.actor.searchActors({
-          q: debouncedSearch,
-          limit: 10,
-        });
-        const actors = res?.data.actors;
+        const res = await fetch(
+          `https://public.api.bsky.app/xrpc/app.bsky.actor.searchActors?q=${debouncedSearch}&limit=10`
+        );
+        const data = await res.json();
+        const actors = data.actors;
         setUserSuggestions(actors || []);
       } catch (error) {
         console.error("Error fetching actors:", error);

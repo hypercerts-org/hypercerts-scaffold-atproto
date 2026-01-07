@@ -16,9 +16,22 @@ export const createHypercertUsingSDK = async (
 
 export const logout = async () => {
   const session = await getSession();
-  console.log(session);
   if (!session) {
     return;
   }
   sdk.revokeSession(session.sub);
+};
+
+export const addContribution = async (params: {
+  hypercertUri?: string;
+  contributors: string[];
+  role: string;
+  description?: string;
+}) => {
+  const personalRepository = await getAuthenticatedRepo("pds");
+  if (personalRepository) {
+    const data = await personalRepository.hypercerts.addContribution(params);
+    return data;
+  }
+  throw new Error("Unable to get authenticated repository");
 };

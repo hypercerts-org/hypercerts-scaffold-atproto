@@ -10,9 +10,11 @@ import HypercertRightsForm from "@/components/rights-form";
 import { useState } from "react";
 
 export default function Home() {
-  const [step, setStep] = useState<number>(1);
+  const [step, setStep] = useState<number>(2);
   const [hypercertId, setHypercertId] = useState<string>();
-  const [hypercertUri, setHypercertUri] = useState<string>();
+  const [hypercertUri, setHypercertUri] = useState<string>(
+    "at://did:plc:u7h3dstby64di67bxaotzxcz/org.hypercerts.claim.activity/3mbtojy336h2h"
+  );
 
   const nextStepper = () => {
     setStep((step) => step + 1);
@@ -31,7 +33,7 @@ export default function Home() {
           nextStepper={nextStepper}
         />
       )}
-      {step === 2 && hypercertId && (
+      {step === 2 && hypercertUri && (
         <HypercertContributionForm
           hypercertUri={hypercertUri}
           onNext={() => setStep((step) => step + 1)}
