@@ -12,6 +12,7 @@ import { useState } from "react";
 export default function Home() {
   const [step, setStep] = useState<number>(1);
   const [hypercertId, setHypercertId] = useState<string>();
+  const [hypercertUri, setHypercertUri] = useState<string>();
 
   const nextStepper = () => {
     setStep((step) => step + 1);
@@ -24,13 +25,15 @@ export default function Home() {
       <StepperHeader step={step} />
       {step === 1 && (
         <HypercertsCreateForm
+          hypercertUri={hypercertUri}
+          setHypercertUri={setHypercertUri}
           setHypercertId={setHypercertId}
           nextStepper={nextStepper}
         />
       )}
       {step === 2 && hypercertId && (
         <HypercertContributionForm
-          hypercertId={hypercertId}
+          hypercertUri={hypercertUri}
           onNext={() => setStep((step) => step + 1)}
           onBack={previousStepper}
         />

@@ -17,6 +17,8 @@ export interface HypercertsBaseFormProps {
   onSave?: (record: CreateHypercertParams, advance?: boolean) => void;
   updateActions?: boolean;
   certInfo?: Hypercert.Record;
+  hypercertUri?: string;
+  nextStepper: () => void;
 }
 
 export interface HypercertRecordForm {
@@ -36,6 +38,8 @@ export default function HypercertsBaseForm({
   onSave,
   updateActions,
   certInfo,
+  hypercertUri,
+  nextStepper,
 }: HypercertsBaseFormProps) {
   const initialWorkScope = certInfo?.workScope
     .split(",")
@@ -106,11 +110,12 @@ export default function HypercertsBaseForm({
     onSave?.(record, false);
   };
 
-  const handleSaveAndContinue = () => {
-    setButtonClicked("saveNext");
-    const record = getRecord();
-    if (!record) return;
-    onSave?.(record, true);
+  const next = () => {
+    // setButtonClicked("saveNext");
+    // const record = getRecord();
+    // if (!record) return;
+    // onSave?.(record, true);
+    nextStepper();
   };
 
   const handleAutofill = () => {
@@ -241,14 +246,12 @@ export default function HypercertsBaseForm({
 
           <Button
             type="button"
-            disabled={isSaving}
-            onClick={handleSaveAndContinue}
+            disabled={!hypercertUri || isSaving}
+            onClick={next}
             aria-label="Save and go to Contributions"
           >
             {isSaving && <Spinner className="mr-2" />}
-            {isSaving && buttonClicked === "saveNext"
-              ? "Creating…"
-              : "Create & Next"}
+            {isSaving && buttonClicked === "saveNext" ? "Creating…" : "Next"}
           </Button>
         </div>
       )}

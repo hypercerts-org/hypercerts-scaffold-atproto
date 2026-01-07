@@ -12,15 +12,22 @@ import FormInfo from "./form-info";
 import { Collections } from "@/lib/types";
 import { title } from "process";
 import { createHypercertUsingSDK } from "@/lib/create-actions";
-import { CreateHypercertParams } from "@hypercerts-org/sdk-core";
+import {
+  CreateHypercertParams,
+  CreateHypercertResult,
+} from "@hypercerts-org/sdk-core";
 
 export interface IHypercertsCreateFormProps {
   setHypercertId: (id: string) => void;
+  hypercertUri?: string;
+  setHypercertUri: (uri: string) => void;
   nextStepper: () => void;
 }
 
 export default function HypercertsCreateForm({
   setHypercertId,
+  hypercertUri,
+  setHypercertUri,
   nextStepper,
 }: IHypercertsCreateFormProps) {
   const [creating, setCreating] = useState(false);
@@ -31,10 +38,7 @@ export default function HypercertsCreateForm({
   ) => {
     try {
       setCreating(true);
-
       const formData = new FormData();
-
-      // Text fields
       formData.append("title", certInfo.title);
       formData.append("shortDescription", certInfo.shortDescription);
       formData.append(
@@ -43,11 +47,7 @@ export default function HypercertsCreateForm({
       );
       formData.append("startDate", certInfo.startDate);
       formData.append("endDate", certInfo.endDate);
-
-      // Rights (send as JSON string)
       formData.append("rights", JSON.stringify(certInfo.rights));
-
-      // File
       if (certInfo.image) {
         formData.append("image", certInfo.image);
       }
@@ -58,16 +58,20 @@ export default function HypercertsCreateForm({
       });
 
       if (!res.ok) {
-        const errText = await res.text();
-        throw new Error(errText || "Failed to create hypercert");
+        const error = (await res.json()).error;
+        throw new Error(error || "Failed to create hypercert");
       }
-
+      const data = (await res.json()) as CreateHypercertResult;
+      setHypercertUri(data.hypercertUri);
       toast.success("Hypercert created successfully!");
-
       if (advance) nextStepper();
     } catch (e) {
       console.error(e);
-      toast.error("Failed to create hypercert please try again");
+      if (e instanceof Error) {
+        toast.error(e.message);
+      } else {
+        toast.error("Failed to create hypercert please try again");
+      }
     } finally {
       setCreating(false);
     }
@@ -137,6 +141,8 @@ export default function HypercertsCreateForm({
     >
       <HypercertsBaseForm
         updateActions
+        hypercertUri={hypercertUri}
+        nextStepper={nextStepper}
         isSaving={creating}
         saveDisabled={false}
         onSave={handleCreate}

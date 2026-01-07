@@ -26,11 +26,11 @@ import UserAvatar from "./user-avatar";
 import UserSelection from "./user-selection";
 
 export default function HypercertContributionForm({
-  hypercertId,
+  hypercertUri,
   onBack,
   onNext,
 }: {
-  hypercertId: string;
+  hypercertUri?: string;
   onBack?: () => void;
   onNext?: () => void;
 }) {
@@ -105,7 +105,7 @@ export default function HypercertContributionForm({
       return;
     }
     await updateHypercert(
-      hypercertId,
+      hypercertUri,
       atProtoAgent!,
       updatedHypercert as Claim.Record
     );
@@ -118,7 +118,7 @@ export default function HypercertContributionForm({
     if (!atProtoAgent) return;
     setSaving(true);
     try {
-      const hypercertInfo = await getHypercert(hypercertId, atProtoAgent);
+      const hypercertInfo = await getHypercert(hypercertUri, atProtoAgent);
       const hypercertRef = buildStrongRef(
         hypercertInfo.data.cid,
         hypercertInfo.data.uri

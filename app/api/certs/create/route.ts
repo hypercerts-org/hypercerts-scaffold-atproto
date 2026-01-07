@@ -22,10 +22,6 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    if (!image) {
-      return NextResponse.json({ error: "Image is required" }, { status: 400 });
-    }
-
     const rights = rightsRaw ? JSON.parse(rightsRaw) : undefined;
 
     const hypercertParams: CreateHypercertParams = {
@@ -35,7 +31,7 @@ export async function POST(req: NextRequest) {
       startDate,
       endDate,
       rights,
-      image,
+      image: image || undefined,
     };
 
     const personalRepository = await getAuthenticatedRepo("pds");
@@ -47,6 +43,7 @@ export async function POST(req: NextRequest) {
     }
 
     const data = await personalRepository.hypercerts.create(hypercertParams);
+    console.log("Creation data", data);
 
     return NextResponse.json(data);
   } catch (e) {
