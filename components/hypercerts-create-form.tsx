@@ -22,12 +22,14 @@ export interface IHypercertsCreateFormProps {
   hypercertUri?: string;
   setHypercertUri: (uri: string) => void;
   nextStepper: () => void;
+  setHypercertInfo: (info: CreateHypercertResult) => void;
 }
 
 export default function HypercertsCreateForm({
   setHypercertId,
   hypercertUri,
   setHypercertUri,
+  setHypercertInfo,
   nextStepper,
 }: IHypercertsCreateFormProps) {
   const [creating, setCreating] = useState(false);
@@ -62,6 +64,7 @@ export default function HypercertsCreateForm({
         throw new Error(error || "Failed to create hypercert");
       }
       const data = (await res.json()) as CreateHypercertResult;
+      setHypercertInfo(data);
       setHypercertUri(data.hypercertUri);
       toast.success("Hypercert created successfully!");
       if (advance) nextStepper();

@@ -7,14 +7,17 @@ import HypercertCompletionStep from "@/components/hypercert-completion-step";
 import HypercertsCreateForm from "@/components/hypercerts-create-form";
 import HypercertLocationForm from "@/components/locations-form";
 import HypercertRightsForm from "@/components/rights-form";
+import { CreateHypercertResult } from "@hypercerts-org/sdk-core";
 import { useState } from "react";
 
 export default function Home() {
-  const [step, setStep] = useState<number>(2);
+  const [step, setStep] = useState<number>(3);
   const [hypercertId, setHypercertId] = useState<string>();
   const [hypercertUri, setHypercertUri] = useState<string>(
     "at://did:plc:u7h3dstby64di67bxaotzxcz/org.hypercerts.claim.activity/3mbtojy336h2h"
   );
+  const [hypercertInfo, setHypercertInfo] = useState<CreateHypercertResult>();
+  const [hypercertCid, setHypercertCid] = useState<string>();
 
   const nextStepper = () => {
     setStep((step) => step + 1);
@@ -27,6 +30,7 @@ export default function Home() {
       <StepperHeader step={step} />
       {step === 1 && (
         <HypercertsCreateForm
+          setHypercertInfo={setHypercertInfo}
           hypercertUri={hypercertUri}
           setHypercertUri={setHypercertUri}
           setHypercertId={setHypercertId}

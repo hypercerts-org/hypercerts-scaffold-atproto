@@ -2,8 +2,6 @@
 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import type { HypercertEvidence } from "@hypercerts-org/sdk-core";
 import {
   Select,
   SelectContent,
@@ -11,11 +9,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+import type { HypercertEvidence } from "@hypercerts-org/sdk-core";
 
-import * as HypercertClaim from "@/lexicons/types/org/hypercerts/claim/activity";
 import * as Evidence from "@/lexicons/types/org/hypercerts/claim/evidence";
 
-import { createEvidence, getHypercert, updateHypercert } from "@/lib/queries";
+import { getHypercert } from "@/lib/queries";
+import { buildStrongRef } from "@/lib/utils";
 import { useOAuthContext } from "@/providers/OAuthProviderSSR";
 import { ComAtprotoRepoCreateRecord } from "@atproto/api";
 import { FormEventHandler, useState } from "react";
@@ -23,7 +23,7 @@ import { toast } from "sonner";
 import FormFooter from "./form-footer";
 import FormInfo from "./form-info";
 import LinkFileSelector from "./link-file-selector";
-import { buildStrongRef } from "@/lib/utils";
+import { Button } from "./ui/button";
 
 type ContentMode = "link" | "file";
 
@@ -151,6 +151,25 @@ export default function HypercertEvidenceForm({
 
     return updatedHypercert;
   };
+
+  const handleAutofill = () => {
+    setTitle("Audit Report: Impact Verification");
+    setRelationType("supports");
+    setShortDescription(
+      "This audit report verifies the outputs and outcomes claimed by the hypercert, including methodology and third-party validation."
+    );
+    setDescription(
+      "This document provides an independent verification of the hypercert claim. It includes:\n\n- A breakdown of the methodology used\n- Supporting quantitative metrics\n- Third-party validation steps\n- References to supporting documentation and outcomes\n\nUse this evidence to substantiate the core claim and demonstrate credibility."
+    );
+
+    // Evidence: enforce link mode (files not supported yet)
+    setEvidenceMode("link");
+    setEvidenceUrl("https://example.com/audit-report.pdf");
+    setEvidenceFile(null);
+
+    toast.success("Autofilled evidence form with sample data.");
+  };
+
   const handleSubmit: FormEventHandler<HTMLFormElement> = async (e) => {
     e.preventDefault();
     try {
@@ -181,9 +200,11 @@ export default function HypercertEvidenceForm({
         }
         formData.append("evidenceFile", evidenceFile);
       }
-      console.log("✅ Assembled FormData:", [...formData.entries()]);
-      toast.success("FormData assembled (no API calls made).");
-      // onNext?.();
+      await fetch("/api/certs/add-evidence", {
+        method: "POST",
+        body: formData,
+      });
+      onNext?.();
     } catch (err) {
       console.error("Error assembling FormData:", err);
       toast.error("Failed to assemble FormData");
@@ -198,6 +219,16 @@ export default function HypercertEvidenceForm({
       description="Attach a link or file that backs up this hypercert claim"
     >
       <form onSubmit={handleSubmit} className="space-y-6">
+        <div className="flex">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={handleAutofill}
+          >
+            Autofill example
+          </Button>
+        </div>
         <div className="space-y-2">
           <Label htmlFor="title">Title *</Label>
           <Input

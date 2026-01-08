@@ -1,8 +1,8 @@
 {
-  "client_id": "https://520d7cb212a6.ngrok-free.app/client-metadata.json",
+  "client_id": "https://9f5e2e03c6df.ngrok-free.app/client-metadata.json",
   "client_name": "Hypercert Scaffold",
-  "client_uri": "https://520d7cb212a6.ngrok-free.app",
-  "redirect_uris": ["https://520d7cb212a6.ngrok-free.app/api/auth/callback"],
+  "client_uri": "https://9f5e2e03c6df.ngrok-free.app",
+  "redirect_uris": ["https://9f5e2e03c6df.ngrok-free.app/api/auth/callback"],
   "scope": "atproto transition:generic",
   "grant_types": ["authorization_code", "refresh_token"],
   "response_types": ["code"],
