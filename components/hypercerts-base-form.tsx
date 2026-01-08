@@ -1,5 +1,7 @@
 "use client";
-
+import HypercertRightsFields, {
+  RightsState,
+} from "@/components/hypercerts-rights-fields";
 import { DatePicker } from "@/components/date-range-picker";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -59,6 +61,11 @@ export default function HypercertsBaseForm({
   const [endDate, setEndDate] = useState<Date | null>(
     certInfo?.workTimeFrameTo ? new Date(certInfo?.workTimeFrameTo) : null
   );
+  const [rights, setRights] = useState<RightsState>({
+    name: "",
+    type: "",
+    description: "",
+  });
 
   const handleWorkScopeChange = (index: number, value: string) => {
     setWorkScope((prev) => {
@@ -82,6 +89,14 @@ export default function HypercertsBaseForm({
     //   .filter(Boolean)
     //   .join(",");
 
+    if (
+      !rights.name.trim() ||
+      !rights.type.trim() ||
+      !rights.description.trim()
+    ) {
+      return;
+    }
+
     if (!(title && shortDescription && startDate && endDate)) {
       return;
     }
@@ -90,9 +105,9 @@ export default function HypercertsBaseForm({
       title,
       shortDescription,
       rights: {
-        name: "CC-BY-20",
-        type: "CC-dSD-231",
-        description: "All rights reserved",
+        name: rights.name.trim(),
+        type: rights.type.trim(),
+        description: rights.description.trim(),
       },
       description: shortDescription,
       image: backgroundImage,
@@ -119,11 +134,20 @@ export default function HypercertsBaseForm({
   };
 
   const handleAutofill = () => {
-    setTitle("Clean Energy Community Initiative");
+    setRights({
+      name: "Creative Commons Attribution 4.0",
+      type: "cc-by-4.0",
+      description:
+        "This hypercert is licensed under CC BY 4.0. Attribution required.",
+    });
+    setTitle(
+      `Clean Energy Community Initiative ${(Math.random() * 100).toFixed(0)}`
+    );
     setShortDescription(
       "A community-driven initiative to distribute clean energy resources and fund renewable projects across rural regions."
     );
     setWorkScope(["clean-energy", "community", "renewables"]);
+
     const from = new Date();
     from.setMonth(from.getMonth() - 6);
     const to = new Date();
@@ -165,6 +189,14 @@ export default function HypercertsBaseForm({
           placeholder="Enter a short description"
           required
         />
+      </div>
+      <div className="rounded-lg border p-4 space-y-4">
+        <h3 className="text-lg font-semibold">Rights</h3>
+        <p className="text-sm text-muted-foreground">
+          Rights information is required to create a Hypercert.
+        </p>
+
+        <HypercertRightsFields value={rights} onChange={setRights} />
       </div>
 
       <div className="flex flex-col gap-1">
