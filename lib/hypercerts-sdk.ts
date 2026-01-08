@@ -1,7 +1,7 @@
 import { createATProtoSDK } from "@hypercerts-org/sdk-core";
 import { RedisSessionStore, RedisStateStore } from "./redis-state-store";
 
-if (!process.env.ATPROTO_JWK_PRIVATE || !process.env.NEXT_PUBLIC_APP_URL) {
+if (!process.env.ATPROTO_JWK_PRIVATE || !process.env.NEXT_PUBLIC_APP_URL || !process.env.NEXT_PUBLIC_PDS_URL) {
   throw new Error("Some environment vars missing");
 }
 
@@ -24,7 +24,7 @@ const sdk = createATProtoSDK({
     stateStore,
   },
   servers: {
-    pds: "https://shiitake.us-east.host.bsky.network",
+    pds: process.env.NEXT_PUBLIC_PDS_URL,
   },
 });
 
