@@ -18,11 +18,11 @@ import LinkFileSelector from "./link-file-selector";
 type LocationContentMode = "link" | "file";
 
 export default function HypercertLocationForm({
-  hypercertId,
+  hypercertUri,
   onBack,
   onNext,
 }: {
-  hypercertId: string;
+  hypercertUri: string;
   onBack?: () => void;
   onNext?: () => void;
 }) {
@@ -109,7 +109,7 @@ export default function HypercertLocationForm({
     locationURI: string
   ) => {
     if (!atProtoAgent) return;
-    const hypercert = await getHypercert(hypercertId, atProtoAgent);
+    const hypercert = await getHypercert(hypercertUri, atProtoAgent);
     const hypercertRecord = (hypercert.data.value ||
       {}) as HypercertClaim.Record;
     const updatedHypercert = {
@@ -125,27 +125,60 @@ export default function HypercertLocationForm({
       setSaving(false);
       return;
     }
-    await updateHypercert(hypercertId, atProtoAgent, updatedHypercert);
+    await updateHypercert(hypercertUri, atProtoAgent, updatedHypercert);
   };
 
   const handleSubmit: FormEventHandler<HTMLFormElement> = async (e) => {
     e.preventDefault();
-    if (!atProtoAgent) return;
     try {
       setSaving(true);
-      const { locationCid, locationURI } =
-        (await handleLocationCreation()) || {};
-      if (!locationCid || !locationURI) {
-        toast.error("Failed to create location record");
-        setSaving(false);
+      if (!lpVersion.trim()) {
+        toast.error("Location Protocol Version is required.");
         return;
       }
-      await handleUpdateHypercert(locationCid, locationURI);
-      toast.success("Location created and linked to hypercert!");
-      onNext?.();
+      if (!srs.trim()) {
+        toast.error("Spatial Reference System (SRS) is required.");
+        return;
+      }
+      if (!effectiveLocationType.trim()) {
+        toast.error("Location Type is required.");
+        return;
+      }
+      if (contentMode === "link" && !locationUrl.trim()) {
+        toast.error("Please provide a link to the location data.");
+        return;
+      }
+      if (contentMode === "file" && !locationFile) {
+        toast.error("Please upload a location file.");
+        return;
+      }
+      const formData = new FormData();
+      formData.append("lpVersion", lpVersion.trim());
+      formData.append("srs", srs.trim());
+      formData.append("locationType", effectiveLocationType.trim());
+      formData.append("createdAt", new Date().toISOString());
+
+      if (name.trim()) formData.append("name", name.trim());
+      if (description.trim())
+        formData.append("description", description.trim());
+      formData.append("contentMode", contentMode);
+
+      if (contentMode === "link") {
+        formData.append("locationUrl", locationUrl.trim());
+      } else {
+        formData.append("locationFile", locationFile as File);
+      }
+      formData.append("hypercertUri", hypercertUri);
+      await fetch("/api/certs/add-location", {
+        method: "POST",
+        body: formData,
+      });
+
+      toast.success("FormData prepared successfully (no API call yet).");
+      // onNext?.(); // Optional: leave commented until backend exists
     } catch (error) {
-      console.error("Error saving location:", error);
-      toast.error("Failed to create location");
+      console.error("Error assembling FormData:", error);
+      toast.error("Failed to assemble FormData");
     } finally {
       setSaving(false);
     }

@@ -11,7 +11,7 @@ import { CreateHypercertResult } from "@hypercerts-org/sdk-core";
 import { useState } from "react";
 
 export default function Home() {
-  const [step, setStep] = useState<number>(3);
+  const [step, setStep] = useState<number>(4);
   const [hypercertId, setHypercertId] = useState<string>();
   const [hypercertUri, setHypercertUri] = useState<string>(
     "at://did:plc:u7h3dstby64di67bxaotzxcz/org.hypercerts.claim.activity/3mbtojy336h2h"
@@ -55,7 +55,7 @@ export default function Home() {
         <HypercertLocationForm
           onNext={nextStepper}
           onBack={previousStepper}
-          hypercertId={hypercertUri}
+          hypercertUri={hypercertUri}
         />
       )}
       {step === 5 && hypercertUri && (
