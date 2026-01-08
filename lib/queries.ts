@@ -4,8 +4,8 @@ import * as HypercertEvaluation from "@/lexicons/types/org/hypercerts/claim/eval
 import * as HypercertContribution from "@/lexicons/types/org/hypercerts/claim/contribution";
 import * as HypercertEvidence from "@/lexicons/types/org/hypercerts/claim/evidence";
 import * as HypercertLocation from "@/lexicons/types/app/certified/location";
-import { Collections } from "./types";
-import { parseAtUri } from "./utils";
+import { Collections } from "@/lib/types";
+import { parseAtUri } from "@/lib/utils";
 
 export const getRecordWithURI = async <T>(
   uri: string,

@@ -170,7 +170,7 @@ export default function HypercertsBaseForm({
       </div>
 
       <div className="flex flex-col gap-1">
-        <Label htmlFor="title">Hypercert Name</Label>
+        <Label htmlFor="title">Hypercert Name *</Label>
         <Input
           id="title"
           onChange={(e) => setTitle(e.target.value)}
@@ -181,7 +181,7 @@ export default function HypercertsBaseForm({
       </div>
 
       <div className="flex flex-col gap-1">
-        <Label htmlFor="description">Short Description</Label>
+        <Label htmlFor="description">Short Description * </Label>
         <Textarea
           onChange={(e) => setShortDescription(e.target.value)}
           id="description"
@@ -210,7 +210,7 @@ export default function HypercertsBaseForm({
       </div>
 
       <div className="flex flex-col gap-1">
-        <Label htmlFor="workScope">Work Scope Tags</Label>
+        <Label htmlFor="workScope">Work Scope Tags * </Label>
         <div id="workScope" className="flex w-full flex-col gap-2">
           {workScope.map((value, index) => (
             <div key={index} className="flex w-full justify-between gap-2">

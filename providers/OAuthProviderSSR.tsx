@@ -12,7 +12,7 @@ import {
   BrowserOAuthClient,
   OAuthSession,
 } from "@atproto/oauth-client-browser";
-import { HANDLE_RESOLVER_URL } from "@/utils/constants";
+import { HANDLE_RESOLVER_URL, METADATA } from "@/utils/constants";
 import { buildClientMetadata } from "@/utils/oauthClient";
 import { Agent } from "@atproto/api";
 
@@ -42,7 +42,10 @@ export function OAuthProvider({ children }: PropsWithChildren) {
       // keep as true for now
       allowHttp: true,
       handleResolver: HANDLE_RESOLVER_URL,
-      clientMetadata: buildClientMetadata(),
+      clientMetadata:
+        process.env.NEXT_PUBLIC_VERCEL_ENV === "production"
+          ? METADATA
+          : buildClientMetadata(),
     });
   }, []);
 
