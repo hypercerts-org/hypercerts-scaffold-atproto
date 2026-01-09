@@ -1,5 +1,6 @@
 import HypercertDetailsView from "@/components/hypercert-detail-view";
-import { getAuthenticatedRepo } from "@/lib/atproto-session";
+import { getAuthenticatedRepo, getSession } from "@/lib/atproto-session";
+import { getBlobURL } from "@/lib/utils";
 
 export default async function HypercertViewPage({
   params,
@@ -14,10 +15,23 @@ export default async function HypercertViewPage({
 
   const cert = await personalRepo.hypercerts.get(decodedUri);
   if (!cert?.record) return <div>Record not found</div>;
+  let imageUri: string | undefined = undefined;
+  const { image, ...certWithoutImage } = cert.record;
+  if (image) {
+    const session = await getSession();
+    if (session) {
+      const sessionIssuer = session.serverMetadata.issuer;
+      imageUri = getBlobURL(image, session.did, sessionIssuer);
+    }
+  }
 
   return (
     <div className="max-w-4xl mx-auto py-8 px-4 space-y-6">
-      <HypercertDetailsView hypercertUri={decodedUri} record={cert.record} />
+      <HypercertDetailsView
+        hypercertUri={decodedUri}
+        record={certWithoutImage}
+        imageUri={imageUri}
+      />
     </div>
   );
 }
