@@ -21,8 +21,8 @@ export async function SignedInProvider({
 
   return (
     <>
-      <Navbar isSignedIn={!!session} avatarUrl={avatarUrl} handle={handle} />
-      {session ? (
+      <Navbar isSignedIn={!session} avatarUrl={avatarUrl} handle={handle} />
+      {!session ? (
         <>{children}</>
       ) : (
         <div className="flex grow flex-col items-center justify-center">
