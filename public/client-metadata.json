@@ -1,8 +1,8 @@
 {
-  "client_id": "https://hypercerts-scaffold.vercel.app/client-metadata.json",
+  "client_id": "https://399c91ac4d96.ngrok-free.app/client-metadata.json",
   "client_name": "Hypercert Scaffold",
-  "client_uri": "https://hypercerts-scaffold.vercel.app",
-  "redirect_uris": ["https://hypercerts-scaffold.vercel.app/api/auth/callback"],
+  "client_uri": "https://399c91ac4d96.ngrok-free.app",
+  "redirect_uris": ["https://399c91ac4d96.ngrok-free.app/api/auth/callback"],
   "scope": "atproto transition:generic",
   "grant_types": ["authorization_code", "refresh_token"],
   "response_types": ["code"],

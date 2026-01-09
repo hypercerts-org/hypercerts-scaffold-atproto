@@ -8,11 +8,8 @@ if (!process.env.NEXT_PUBLIC_APP_URL) {
 
 export async function GET(req: NextRequest) {
   const searchParams = req.nextUrl.searchParams;
-  console.log("session store", sessionStore);
-  console.log("state store", stateStore);
   try {
     const session = await sdk.callback(searchParams);
-    console.log("Authenticated session:", session);
     const cookieStore = await cookies();
     cookieStore.set("user-did", session.did, {
       httpOnly: true,

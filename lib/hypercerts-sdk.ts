@@ -8,9 +8,6 @@ if (!process.env.ATPROTO_JWK_PRIVATE || !process.env.NEXT_PUBLIC_APP_URL || !pro
 export const sessionStore = new RedisSessionStore();
 export const stateStore = new RedisStateStore();
 
-console.log("Session Store", sessionStore);
-console.log("State Store", stateStore);
-
 const sdk = createATProtoSDK({
   oauth: {
     clientId: `${process.env.NEXT_PUBLIC_APP_URL}/client-metadata.json`,

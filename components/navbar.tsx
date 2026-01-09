@@ -17,6 +17,7 @@ import {
 import Link from "next/link";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import { Spinner } from "./ui/spinner";
 
 export default function Navbar({ isSignedIn }: { isSignedIn: boolean }) {
   const userHandle = useUserHandle();
@@ -50,8 +51,20 @@ export default function Navbar({ isSignedIn }: { isSignedIn: boolean }) {
   };
 
   const handleLogout = async () => {
-    // TODO implement revoke session
-    // await signOut();
+    setLoading(true);
+    try {
+      const res = await fetch(`/api/auth/logout`);
+      if (res.ok) {
+        router.refresh();
+      } else {
+        toast.error("Logout failed");
+      }
+    } catch (e) {
+      console.error("logout failed", e);
+      toast.error("logout failed");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -76,7 +89,13 @@ export default function Navbar({ isSignedIn }: { isSignedIn: boolean }) {
                 @{userHandle}
               </span>
             )}
-            <Button onClick={handleLogout} variant="outline" size="sm">
+            <Button
+              disabled={loading}
+              onClick={handleLogout}
+              variant="outline"
+              size="sm"
+            >
+              {loading && <Spinner />}
               Logout
             </Button>
           </div>
