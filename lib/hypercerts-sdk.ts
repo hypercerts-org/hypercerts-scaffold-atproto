@@ -1,7 +1,12 @@
 import { createATProtoSDK } from "@hypercerts-org/sdk-core";
 import { RedisSessionStore, RedisStateStore } from "./redis-state-store";
 
-if (!process.env.ATPROTO_JWK_PRIVATE || !process.env.NEXT_PUBLIC_APP_URL || !process.env.NEXT_PUBLIC_PDS_URL) {
+if (
+  !process.env.ATPROTO_JWK_PRIVATE ||
+  !process.env.NEXT_PUBLIC_APP_URL ||
+  !process.env.NEXT_PUBLIC_PDS_URL ||
+  !process.env.NEXT_PUBLIC_SDS_URL
+) {
   throw new Error("Some environment vars missing");
 }
 
@@ -22,6 +27,7 @@ const sdk = createATProtoSDK({
   },
   servers: {
     pds: process.env.NEXT_PUBLIC_PDS_URL,
+    sds: process.env.NEXT_PUBLIC_SDS_URL,
   },
 });
 
