@@ -1,95 +1,64 @@
-"use client";
-
 import Loader from "@/components/loader";
-import { Button } from "@/components/ui/button";
 import {
   Card,
-  CardAction,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Record as Hypercert } from "@/lexicons/types/org/hypercerts/claim/activity";
-import { Collections } from "@/lib/types";
-import { getBlobURL, parseAtUri } from "@/lib/utils";
-import { useOAuthContext } from "@/providers/OAuthProviderSSR";
+import { getAuthenticatedRepo, getSession } from "@/lib/atproto-session";
+import { getBlobURL } from "@/lib/utils";
+import { cookies } from "next/headers";
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { redirect } from "next/navigation";
 
-export default function MyHypercertsPage() {
-  const { atProtoAgent, session } = useOAuthContext();
-  const [fetching, setFetching] = useState(false);
-  const [hypercerts, setMyHypercerts] = useState<
-    (Hypercert & { uri: string })[]
-  >([]);
+export default async function MyHypercertsPage() {
+  const repo = await getAuthenticatedRepo("pds");
+  const session = await getSession();
 
-  useEffect(() => {
-    async function fetchMyHypercerts() {
-      setFetching(true);
-      if (!atProtoAgent || !session) return;
+  if (!repo || !session) {
+    redirect("/");
+  }
 
-      try {
-        const response = await atProtoAgent.com.atproto.repo.listRecords({
-          repo: atProtoAgent.assertDid,
-          collection: Collections.claim,
-          limit: 100,
-        });
-
-        const records = response.data.records.map((record) => {
-          return { uri: record.uri, ...record.value } as Hypercert & {
-            uri: string;
-          };
-        });
-        setMyHypercerts(records);
-      } catch (error) {
-        console.error("Error fetching hypercerts:", error);
-      } finally {
-        setFetching(false);
-      }
-    }
-
-    fetchMyHypercerts();
-  }, [atProtoAgent, session]);
+  const cookieStore = await cookies();
+  const did = cookieStore.get("user-did")?.value;
+  const { records } = await repo.hypercerts.list({ limit: 100 });
+  const sessionIssuer = session.serverMetadata.issuer;
 
   return (
     <main className="max-w-md mx-auto py-10 gap-4 flex flex-col">
       <h1 className="scroll-m-20 text-center text-4xl font-extrabold tracking-tight text-balance">
         My Hypercerts
       </h1>
-      {fetching ? (
+
+      {!records ? (
         <Loader />
       ) : (
         <div>
-          {hypercerts.length === 0 ? (
+          {records.length === 0 ? (
             <p>No hypercerts found.</p>
           ) : (
             <div className="flex flex-col gap-4">
-              {hypercerts.map((cert) => {
+              {records.map(({ record: cert, uri }) => {
+                const imageUrl =
+                  did && cert.image
+                    ? getBlobURL(cert.image, did, sessionIssuer)
+                    : null;
                 return (
-                  <Link
-                    key={cert.uri}
-                    href={`/${parseAtUri(cert.uri)?.rkey || ""}`}
-                  >
-                    <Card key={cert.uri}>
+                  <Link key={uri} href={`/${encodeURIComponent(uri)}`}>
+                    <Card>
                       <CardHeader>
-                        <CardTitle>{cert?.title}</CardTitle>
+                        <CardTitle>{cert.title}</CardTitle>
                         <CardDescription>
                           {cert?.shortDescription}
                         </CardDescription>
-                        <CardAction>
-                          <Button>view</Button>
-                        </CardAction>
                       </CardHeader>
+
                       <CardContent>
-                        {!!getBlobURL(cert?.image, session?.did) && (
+                        {!!imageUrl && (
                           <div className="relative aspect-square max-w-md">
-                            <Image
-                              fill
-                              alt="cover image"
-                              src={getBlobURL(cert?.image, session?.did)!}
-                            />
+                            <Image fill alt="cover image" src={imageUrl} />
                           </div>
                         )}
                       </CardContent>

@@ -1,32 +1,31 @@
-"use client";
-
 import Link from "next/link";
-import { useMemo } from "react";
-import { useOAuthContext } from "@/providers/OAuthProviderSSR";
 
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
+  CardDescription,
   CardHeader,
   CardTitle,
-  CardDescription,
 } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import {
   ExternalLink,
-  PlusCircle,
   ListOrdered,
-  Shield,
   Pencil,
+  PlusCircle,
+  Shield,
 } from "lucide-react";
+import { getAuthenticatedRepo, getSession } from "@/lib/atproto-session";
 
-export default function Home() {
-  const { atProtoAgent, session } = useOAuthContext();
-
-  const userDid = atProtoAgent?.assertDid || undefined;
-
+export default async function Home() {
+  const personalRepo = await getAuthenticatedRepo("pds");
+  const session = await getSession();
+  if (!personalRepo) {
+    return <div>Please Login to continue</div>;
+  }
+  const profile = await personalRepo.profile.get();
   return (
     <div className="max-w-5xl mx-auto px-4 py-10 space-y-8">
       {/* Header */}
@@ -73,9 +72,17 @@ export default function Home() {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-2">
-          <div className="text-sm">
+          <div className="text-sm flex flex-col gap-2">
             <span className="text-muted-foreground">DID:&nbsp;</span>
-            <span className="font-mono break-all">{userDid || "—"}</span>
+            <span className="font-mono break-all">{session?.did || "—"}</span>
+            <span className="text-muted-foreground">Display Name: </span>
+            <span className="font-mono break-all">
+              {profile?.displayName || "—"}
+            </span>
+            <span className="text-muted-foreground">Handle: </span>
+            <span className="font-mono break-all">
+              {profile?.handle || "—"}
+            </span>
           </div>
           {!session && (
             <p className="text-sm text-muted-foreground">

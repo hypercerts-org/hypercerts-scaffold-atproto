@@ -17,7 +17,8 @@ export const getPDSlsURI = (uri?: string) => {
 
 export function getBlobURL(
   blobRef: BlobRef | string | { $type: string } | undefined,
-  did?: string
+  did?: string,
+  pdsUrl?: string
 ): string | undefined {
   if (typeof blobRef === "string") {
     return blobRef;
@@ -29,7 +30,9 @@ export function getBlobURL(
     const cid = blobRef.ref ?? undefined;
     if (!did || !cid) return undefined;
 
-    const url = `${PDS_URL}xrpc/com.atproto.sync.getBlob?did=${encodeURIComponent(
+    const url = `${
+      pdsUrl || PDS_URL
+    }/xrpc/com.atproto.sync.getBlob?did=${encodeURIComponent(
       did
     )}&cid=${encodeURIComponent(cid.toString())}`;
     return url;

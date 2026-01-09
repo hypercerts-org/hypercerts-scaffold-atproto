@@ -9,9 +9,11 @@ import type { HypercertClaim } from "@hypercerts-org/sdk-core";
 export default function HypercertDetailsView({
   hypercertUri,
   record,
+  imageUri,
 }: {
   hypercertUri: string;
   record: HypercertClaim;
+  imageUri?: string;
 }) {
   return (
     <div className="space-y-4">
@@ -79,6 +81,15 @@ export default function HypercertDetailsView({
             <URILink uri={getPDSlsURI(hypercertUri)} label={hypercertUri} />
           </dd>
         </div>
+
+        {!!imageUri && (
+          <div className="space-y-1 md:col-span-2">
+            <dt className="text-xs text-muted-foreground">Image URI</dt>
+            <dd className="text-sm break-all">
+              <URILink uri={imageUri} label={imageUri || ""} />
+            </dd>
+          </div>
+        )}
 
         {record.description ? (
           <div className="space-y-1 md:col-span-2">

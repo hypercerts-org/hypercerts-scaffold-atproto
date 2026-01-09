@@ -1,8 +1,5 @@
 "use client";
 
-import { AtSignIcon } from "lucide-react";
-import { useState, FormEventHandler } from "react";
-import { useUserHandle } from "@/queries/use-user-handle";
 import { Button } from "@/components/ui/button";
 import {
   InputGroup,
@@ -14,12 +11,33 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { AtSignIcon, LogOut, User } from "lucide-react";
 import Link from "next/link";
-import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import { FormEventHandler, useState } from "react";
+import { toast } from "sonner";
 
-export default function Navbar({ isSignedIn }: { isSignedIn: boolean }) {
-  const userHandle = useUserHandle();
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+
+export interface NavbarProps {
+  isSignedIn: boolean;
+  avatarUrl?: string;
+  handle?: string;
+}
+
+export default function Navbar({
+  isSignedIn,
+  avatarUrl,
+  handle: userHandle,
+}: NavbarProps) {
   const [handle, setHandle] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
@@ -45,14 +63,23 @@ export default function Navbar({ isSignedIn }: { isSignedIn: boolean }) {
     }
   };
 
-  const redirectToAccountCreation = () => {
-    setOpen(false);
-  };
-
   const handleLogout = async () => {
-    // TODO implement revoke session
-    // await signOut();
+    setLoading(true);
+    try {
+      const res = await fetch(`/api/auth/logout`);
+      if (res.ok) {
+        router.refresh();
+      } else {
+        toast.error("Logout failed");
+      }
+    } catch (e) {
+      console.error("logout failed", e);
+      toast.error("logout failed");
+    } finally {
+      setLoading(false);
+    }
   };
+  const fallback = userHandle?.slice(0, 2).toUpperCase() || "ME";
 
   return (
     <nav className="border-b bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60">
@@ -62,23 +89,57 @@ export default function Navbar({ isSignedIn }: { isSignedIn: boolean }) {
             <Link href={`/create`} className="underline hover:text-gray-500">
               Create
             </Link>
-            <Link href={`/profile`} className="underline hover:text-gray-500">
-              Profile
-            </Link>
             <Link
               href={`/my-hypercerts`}
               className="underline hover:text-gray-500"
             >
               My Hypercerts
             </Link>
-            {userHandle && (
-              <span className="text-sm text-muted-foreground">
-                @{userHandle}
-              </span>
-            )}
-            <Button onClick={handleLogout} variant="outline" size="sm">
-              Logout
-            </Button>
+
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button
+                  className="rounded-full focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+                  aria-label="Open user menu"
+                >
+                  <Avatar className="h-9 w-9">
+                    <AvatarImage src={avatarUrl} />
+                    <AvatarFallback>{fallback}</AvatarFallback>
+                  </Avatar>
+                </button>
+              </DropdownMenuTrigger>
+
+              <DropdownMenuContent align="end" className="w-48">
+                <DropdownMenuLabel className="flex flex-col gap-1">
+                  <span className="text-sm font-medium">My Account</span>
+                  {userHandle && (
+                    <span className="text-xs text-muted-foreground">
+                      @{userHandle}
+                    </span>
+                  )}
+                </DropdownMenuLabel>
+
+                <DropdownMenuSeparator />
+
+                <DropdownMenuItem>
+                  <Link className="flex gap-2" href={`/profile`}>
+                    <User className="mr-2 h-4 w-4" />
+                    Profile
+                  </Link>
+                </DropdownMenuItem>
+
+                <DropdownMenuSeparator />
+
+                <DropdownMenuItem
+                  disabled={loading}
+                  onClick={handleLogout}
+                  className="text-red-600 focus:text-red-600"
+                >
+                  <LogOut className="mr-2 h-4 w-4" />
+                  {loading ? "Logging out..." : "Log out"}
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         ) : (
           <Popover open={open} onOpenChange={setOpen}>
@@ -111,7 +172,6 @@ export default function Navbar({ isSignedIn }: { isSignedIn: boolean }) {
                     Login
                   </Button>
                   <Button
-                    onClick={redirectToAccountCreation}
                     variant="link"
                     type="button"
                     size="sm"
