@@ -68,3 +68,15 @@ export const addCollaboratorToOrganization = async (
   const result = await sdsRepository.collaborators.grant(params);
   return result;
 };
+
+export const removeCollaborator = async (params: {
+  userDid: string;
+  repoDid: string;
+}) => {
+  const sdsRepository = await getAuthenticatedRepo("sds");
+  if (!sdsRepository) {
+    throw new Error("Unable to get authenticated repository");
+  }
+  const result = await sdsRepository.collaborators.revoke(params);
+  return result;
+};

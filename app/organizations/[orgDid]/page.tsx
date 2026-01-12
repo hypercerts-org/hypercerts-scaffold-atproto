@@ -33,12 +33,12 @@ export default async function OrganizationPage({
   params: Promise<{ orgDid: string }>;
 }) {
   const { orgDid } = await params;
-  const decodedDid = decodeURIComponent(orgDid);
+  const decodedOrgDid = decodeURIComponent(orgDid);
 
   const sdsRepo = await getAuthenticatedRepo("sds");
   if (!sdsRepo) return <div>Please log in to view organizations.</div>;
 
-  const org = await sdsRepo.organizations.get(decodedDid);
+  const org = await sdsRepo.organizations.get(decodedOrgDid);
   if (!org) return <div>Organization not found</div>;
 
   let collaborators: (RepositoryAccessGrant & {
@@ -47,7 +47,7 @@ export default async function OrganizationPage({
 
   try {
     const result = await sdsRepo.collaborators.list({
-      repoDid: decodedDid,
+      repoDid: decodedOrgDid,
       limit: 50,
     });
 
@@ -71,7 +71,10 @@ export default async function OrganizationPage({
   return (
     <div className="max-w-4xl mx-auto py-8 px-4 space-y-6">
       <OrganizationDetailsView organization={org} />
-      <CollaboratorsList collaborators={collaborators} />
+      <CollaboratorsList
+        repoDid={decodedOrgDid}
+        collaborators={collaborators}
+      />
     </div>
   );
 }

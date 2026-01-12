@@ -1,5 +1,6 @@
 "use client";
 
+import * as React from "react";
 import {
   Card,
   CardContent,
@@ -11,6 +12,10 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import type { RepositoryAccessGrant } from "@hypercerts-org/sdk-core";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+
+import { removeCollaborator as removeCollaboratorAction } from "@/lib/create-actions";
+import { toast } from "sonner";
 
 type BskyProfile = {
   did: string;
@@ -24,6 +29,7 @@ interface CollaboratorsListProps {
   collaborators: (RepositoryAccessGrant & {
     userProfile?: BskyProfile | null;
   })[];
+  repoDid: string;
 }
 
 function initials(name?: string) {
@@ -35,8 +41,22 @@ function initials(name?: string) {
 
 export default function CollaboratorsList({
   collaborators,
+  repoDid = "did:repo:dummy", // ✅ dummy repoDid for now
 }: CollaboratorsListProps) {
+  const queryClient = useQueryClient();
   const activeCollaborators = collaborators.filter((c) => !c.revokedAt);
+
+  const removeMutation = useMutation({
+    mutationFn: (params: { userDid: string; repoDid: string }) =>
+      removeCollaboratorAction(params),
+
+    onSuccess: () => {
+      toast.success("Successfully removed collaborator");
+      queryClient.invalidateQueries({
+        queryKey: ["collaborators", repoDid],
+      });
+    },
+  });
 
   return (
     <Card>
@@ -63,6 +83,17 @@ export default function CollaboratorsList({
               const displayName =
                 profile?.displayName?.trim() || profile?.handle || c.userDid;
               const handle = profile?.handle ? `@${profile.handle}` : "—";
+
+              const isThisRowPending =
+                removeMutation.isPending &&
+                removeMutation.variables?.userDid === c.userDid;
+
+              const revoke = () => {
+                removeMutation.mutate({
+                  userDid: c.userDid,
+                  repoDid,
+                });
+              };
 
               return (
                 <div
@@ -108,12 +139,25 @@ export default function CollaboratorsList({
                           </Badge>
                         ))}
                       </div>
+
+                      {/* Optional: inline error message for this row */}
+                      {removeMutation.isError && isThisRowPending === false ? (
+                        <div className="text-sm text-destructive">
+                          {(removeMutation.error as Error)?.message ??
+                            "Failed to revoke access."}
+                        </div>
+                      ) : null}
                     </div>
                   </div>
 
                   <div className="flex gap-2">
-                    <Button variant="destructive" size="sm" disabled>
-                      Revoke access
+                    <Button
+                      onClick={revoke}
+                      variant="destructive"
+                      size="sm"
+                      disabled={removeMutation.isPending}
+                    >
+                      {isThisRowPending ? "Revoking..." : "Revoke access"}
                     </Button>
                   </div>
                 </div>
