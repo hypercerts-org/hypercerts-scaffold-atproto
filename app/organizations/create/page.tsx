@@ -11,6 +11,8 @@ import { createOrganization } from "@/lib/create-actions";
 import OrganizationCreationSuccess from "@/components/organization-creation-success";
 import { OrganizationInfo } from "@hypercerts-org/sdk-core";
 import AddContributorsForm from "@/components/add-contributors-form";
+import Link from "next/link";
+import { Link2 } from "lucide-react";
 
 export default function CreateOrganizationPage() {
   const [createdOrg, setCreatedOrg] = useState<OrganizationInfo | null>(null);
@@ -47,6 +49,29 @@ export default function CreateOrganizationPage() {
     return (
       <div className="max-w-7xl mx-auto py-8 px-4">
         <AddContributorsForm orgInfo={createdOrg} />
+        <FormInfo title="Organization Information">
+          <div className="space-y-4">
+            <div>
+              <p className="font-semibold">Name</p>
+              <p>{createdOrg.name}</p>
+            </div>
+            <div>
+              <p className="font-semibold">Handle</p>
+              <p>{createdOrg.handle}</p>
+            </div>
+
+            <div>
+              <p className="font-semibold">DID</p>
+              <p>{createdOrg.did}</p>
+            </div>
+
+            <div className="pt-4">
+              <Link className="underline text-blue-400 flex gap-2" href={`/organizations/${createdOrg.did}`}>
+                <Link2/> View Organization
+              </Link>
+            </div>
+          </div>
+        </FormInfo>
       </div>
     );
   }
