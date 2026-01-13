@@ -95,14 +95,29 @@ export default function Navbar({
       <div className="flex h-14 items-center justify-end gap-3 px-4 max-w-7xl mx-auto">
         {isSignedIn ? (
           <div className="gap-4 flex items-center">
-            <Link href={`/create`} className="underline hover:text-gray-500">
-              Create
+            <Link
+              href={`/organizations`}
+              className="underline hover:text-gray-500"
+            >
+              Organizations
+            </Link>
+            <Link
+              href={`/organizations/create`}
+              className="underline hover:text-gray-500"
+            >
+              Create Organization
+            </Link>
+            <Link
+              href={`/hypercerts/create`}
+              className="underline hover:text-gray-500"
+            >
+              Create Hypercert
             </Link>
             <Link
               href={`/hypercerts`}
               className="underline hover:text-gray-500"
             >
-              Hypercerts
+              View Hypercerts
             </Link>
 
             <DropdownMenu>
