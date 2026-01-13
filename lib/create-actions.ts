@@ -1,9 +1,7 @@
 "use server";
 import { getRepoContext } from "@/lib/repo-context";
 
-import {
-  RepositoryRole
-} from "@hypercerts-org/sdk-core";
+import { RepositoryRole } from "@hypercerts-org/sdk-core";
 import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
 import { getAuthenticatedRepo, getSession } from "./atproto-session";
@@ -14,6 +12,31 @@ export interface GrantAccessParams {
   userDid: string;
   role: RepositoryRole;
 }
+export const getActiveProfileInfo = async () => {
+  const ctx = await getRepoContext();
+  if (!ctx) return null;
+
+  if (ctx.server === "pds") {
+    const profile = await ctx.scopedRepo.profile.get();
+    console.log(profile);
+    if (!profile) return null;
+    return {
+      name: profile.displayName || profile.handle,
+      handle: profile.handle,
+      isOrganization: false,
+    };
+  } else {
+    const org = await ctx.repository.organizations.get(ctx.targetDid);
+    console.log(org);
+    if (!org) return null;
+    return {
+      did: org.did,
+      name: org.name,
+      handle: org.handle,
+      isOrganization: true,
+    };
+  }
+};
 export const switchActiveProfile = async (did: string) => {
   const cookieStore = await cookies();
   cookieStore.set("active-did", did, {

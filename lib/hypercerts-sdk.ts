@@ -29,6 +29,7 @@ const sdk = createATProtoSDK({
     pds: process.env.NEXT_PUBLIC_PDS_URL,
     sds: process.env.NEXT_PUBLIC_SDS_URL,
   },
+  logger: console,
 });
 
 export default sdk;

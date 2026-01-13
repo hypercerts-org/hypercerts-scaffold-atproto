@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -9,15 +9,13 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Label } from "@/components/ui/label";
-import { BuildingIcon, UserIcon } from "lucide-react";
-import { listOrgs } from "@/lib/create-actions";
+import { listOrgs, switchActiveProfile } from "@/lib/create-actions";
 import { Organization } from "@hypercerts-org/sdk-core";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { BuildingIcon, UserIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { switchActiveProfile } from "@/lib/create-actions";
+import { useState } from "react";
+import { toast } from "sonner";
 
 interface ProfileSwitchDialogProps {
   children: React.ReactNode;
@@ -34,6 +32,7 @@ export default function ProfileSwitchDialog({
 }: ProfileSwitchDialogProps) {
   const [isOpen, setIsOpen] = useState(false);
   const router = useRouter();
+  const queryClient = useQueryClient();
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ["organizations-for-profile-switch"],
@@ -41,7 +40,7 @@ export default function ProfileSwitchDialog({
       const orgsResult = await listOrgs();
       return orgsResult?.organizations || [];
     },
-    enabled: isOpen, // Only fetch when the dialog is open
+    enabled: isOpen,
   });
 
   const organizations: Organization[] = data || [];
@@ -49,12 +48,15 @@ export default function ProfileSwitchDialog({
   const mutation = useMutation({
     mutationFn: (did: string) => switchActiveProfile(did),
     onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["active-profile"],
+      });
       router.refresh();
       setIsOpen(false);
     },
     onError: (error) => {
       console.error("Failed to switch profile", error);
-      // Here you could add a toast notification to inform the user
+      toast.error("Failed to switch profile, please try again");
     },
   });
 
@@ -80,15 +82,15 @@ export default function ProfileSwitchDialog({
           ) : (
             <div className="space-y-2">
               {/* Personal Profile */}
-              <div
-                className="flex items-center justify-between space-x-3 p-2 border rounded-md"
-              >
+              <div className="flex items-center justify-between space-x-3 p-2 border rounded-md">
                 <div className="flex items-center space-x-2">
                   <UserIcon className="h-5 w-5 text-gray-500" />
                   <span>{personalHandle} (Personal)</span>
                 </div>
                 {userDid === currentActiveDid ? (
-                  <span className="text-sm font-semibold text-blue-600 px-3">Current</span>
+                  <span className="text-sm font-semibold text-blue-600 px-3">
+                    Current
+                  </span>
                 ) : (
                   <Button
                     size="sm"
@@ -114,7 +116,9 @@ export default function ProfileSwitchDialog({
                     <span>{org.name}</span>
                   </div>
                   {currentActiveDid === org.did ? (
-                    <span className="text-sm font-semibold text-blue-600 px-3">Current</span>
+                    <span className="text-sm font-semibold text-blue-600 px-3">
+                      Current
+                    </span>
                   ) : (
                     <Button
                       size="sm"
@@ -136,4 +140,3 @@ export default function ProfileSwitchDialog({
     </Dialog>
   );
 }
-
