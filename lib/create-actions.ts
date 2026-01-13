@@ -2,13 +2,12 @@
 import { getRepoContext } from "@/lib/repo-context";
 
 import {
-  CreateHypercertParams,
-  RepositoryRole,
+  RepositoryRole
 } from "@hypercerts-org/sdk-core";
-import { getAuthenticatedRepo, getSession } from "./atproto-session";
-import sdk from "./hypercerts-sdk";
 import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
+import { getAuthenticatedRepo, getSession } from "./atproto-session";
+import sdk from "./hypercerts-sdk";
 
 export interface GrantAccessParams {
   repoDid: string;

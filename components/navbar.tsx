@@ -99,10 +99,10 @@ export default function Navbar({
               Create
             </Link>
             <Link
-              href={`/my-hypercerts`}
+              href={`/hypercerts`}
               className="underline hover:text-gray-500"
             >
-              My Hypercerts
+              Hypercerts
             </Link>
 
             <DropdownMenu>
@@ -131,7 +131,9 @@ export default function Navbar({
                   <>
                     <DropdownMenuSeparator />
                     <DropdownMenuLabel className="flex flex-col gap-1">
-                      <span className="text-sm font-medium">Active Profile</span>
+                      <span className="text-sm font-medium">
+                        Active Profile
+                      </span>
                       <span className="text-xs text-muted-foreground">
                         {activeProfileName}
                       </span>
