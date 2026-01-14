@@ -4,6 +4,7 @@ import { Separator } from "@/components/ui/separator";
 import { URILink } from "./uri-link";
 import { getPDSlsURI } from "@/lib/utils";
 
+import HypercertMeasurementsSection from "./hypercert-measurements-section";
 import type { HypercertClaim } from "@hypercerts-org/sdk-core";
 
 export default function HypercertDetailsView({
@@ -16,7 +17,7 @@ export default function HypercertDetailsView({
   imageUri?: string;
 }) {
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       <div>
         <div className="flex items-center gap-2">
           <h2 className="text-xl font-semibold">
@@ -100,6 +101,9 @@ export default function HypercertDetailsView({
           </div>
         ) : null}
       </dl>
+
+      <HypercertMeasurementsSection hypercertUri={hypercertUri} />
     </div>
   );
 }
+
