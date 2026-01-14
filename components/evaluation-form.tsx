@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Trash, PlusCircle, Plus } from "lucide-react";
+import { Trash, PlusCircle, Plus, Wand2 } from "lucide-react";
 import UserSelection from "./user-selection";
 import UserAvatar from "./user-avatar";
 import FormInfo from "./form-info";
@@ -58,6 +58,52 @@ export default function EvaluationForm({
       toast.error("Failed to add evaluation");
     },
   });
+
+  const handleAutofill = () => {
+    // Fill manual DIDs
+    setManualDids([
+      "did:plc:z72i7hdynmk6r22z27h6tvur",
+      "did:plc:ragtjsm2j2vknwkz3zp4oxrd",
+    ]);
+
+    // Fill summary
+    setSummary(
+      "This evaluation assesses the significant environmental impact of the reforestation project. " +
+        "The project successfully planted 5,000 native trees across 25 hectares of degraded land, " +
+        "contributing to carbon sequestration and biodiversity restoration. Independent verification " +
+        "confirmed a 95% survival rate after 6 months. The project engaged local communities through " +
+        "educational workshops and created sustainable employment opportunities. Impact metrics show " +
+        "an estimated 125 tons of CO2 will be sequestered annually once trees reach maturity."
+    );
+
+    // Enable and fill score
+    setUseScore(true);
+    setScoreMin(1);
+    setScoreMax(10);
+    setScoreValue(8);
+
+    // Enable and fill content URIs
+    setUseContent(true);
+    setContentUris([
+      "https://example.com/evaluation-report.pdf",
+      "https://example.com/field-verification-photos.zip",
+    ]);
+
+    // Enable and fill measurement URIs
+    setUseMeasurements(true);
+    setMeasurementUris([
+      "at://did:plc:z72i7hdynmk6r22z27h6tvur/org.hypercerts.claim.measurement/3jzfcijpqzk2a",
+      "at://did:plc:z72i7hdynmk6r22z27h6tvur/org.hypercerts.claim.measurement/3jzfcijpqzk2b",
+    ]);
+
+    // Enable and fill location
+    setUseLocation(true);
+    setLocationUri(
+      "at://did:plc:z72i7hdynmk6r22z27h6tvur/app.certified.location/3jzfcijpqzk2c"
+    );
+
+    toast.success("Form autofilled with dummy data");
+  };
 
   const addEvaluator = (user: ProfileView) => {
     if (!evaluators.find((e) => e.did === user.did)) {
@@ -149,6 +195,19 @@ export default function EvaluationForm({
       title="Add Evaluation"
       description="Provide an evaluation of the hypercert's impact."
     >
+      <div className="mb-6">
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={handleAutofill}
+          disabled={mutation.isPending}
+        >
+          <Wand2 className="mr-2 h-4 w-4" />
+          Autofill with Dummy Data
+        </Button>
+      </div>
+
       <form onSubmit={handleSubmit} className="space-y-8">
         {/* Evaluators */}
         <div className="space-y-2">
