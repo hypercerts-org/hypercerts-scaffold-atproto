@@ -21,7 +21,7 @@ export default function HypercertCompletionStep({
   onCreateAnother?: () => void;
 }) {
   const viewHref = hypercertInfo?.hypercertUri
-    ? `/${encodeURIComponent(hypercertInfo.hypercertUri)}`
+    ? `/hypercerts/${encodeURIComponent(hypercertInfo.hypercertUri)}`
     : "/hypercerts";
   return (
     <div className="p-6">
