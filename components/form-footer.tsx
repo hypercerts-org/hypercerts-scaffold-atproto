@@ -9,12 +9,14 @@ export default function FormFooter({
   submitLabel,
   savingLabel,
   saving,
+  submitDisabled,
 }: {
   onBack?: () => void;
-  onSkip?: () => void; 
+  onSkip?: () => void;
   submitLabel: string;
   savingLabel: string;
   saving: boolean;
+  submitDisabled?: boolean;
 }) {
   return (
     <div className="flex items-center justify-end gap-4 pt-2">
@@ -46,7 +48,7 @@ export default function FormFooter({
         </Button>
       )}
 
-      <Button type="submit" disabled={saving} className="min-w-[180px]">
+      <Button type="submit" disabled={saving || submitDisabled} className="min-w-[180px]">
         {saving ? savingLabel : submitLabel}
       </Button>
     </div>

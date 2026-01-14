@@ -1,6 +1,7 @@
 "use client";
 
 import ActiveProfileInfoBox from "@/components/active-profile-info-box";
+import EvaluationForm from "@/components/evaluation-form";
 import HypercertContributionForm from "@/components/contributions-form";
 import { StepperHeader } from "@/components/edit-cert-stepper";
 import HypercertEvidenceForm from "@/components/evidence-form";
@@ -9,6 +10,7 @@ import HypercertsCreateForm from "@/components/hypercerts-create-form";
 import HypercertLocationForm from "@/components/locations-form";
 import { CreateHypercertResult } from "@hypercerts-org/sdk-core";
 import { useState } from "react";
+import MeasurementForm from "@/components/measurement-form";
 
 export default function Home() {
   const [step, setStep] = useState<number>(1);
@@ -52,7 +54,17 @@ export default function Home() {
           hypercertInfo={hypercertInfo}
         />
       )}
-      {step === 5 && (
+      {step === 5 && hypercertInfo && (
+        <EvaluationForm
+          hypercertInfo={hypercertInfo}
+          onNext={nextStepper}
+          onBack={previousStepper}
+        />
+      )}
+      {step === 6 && (
+        <MeasurementForm onNext={nextStepper} onBack={previousStepper} />
+      )}
+      {step === 7 && (
         <HypercertCompletionStep
           onCreateAnother={() => setStep(1)}
           onBack={previousStepper}

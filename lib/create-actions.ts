@@ -70,6 +70,28 @@ export const addContribution = async (params: {
   return ctx.scopedRepo.hypercerts.addContribution(params);
 };
 
+export const addEvaluation = async (params: {
+  hypercertUri: string;
+  evaluators: string[];
+  summary: string;
+  score?: { min: number; max: number; value: number };
+  content?: string[];
+  measurements?: string[];
+  location?: string;
+}) => {
+  const ctx = await getRepoContext();
+  if (!ctx) {
+    throw new Error("Unable to get repository context");
+  }
+
+  const { hypercertUri, ...evaluationData } = params;
+
+  return ctx.scopedRepo.hypercerts.addEvaluation({
+    ...evaluationData,
+    subjectUri: hypercertUri,
+  });
+};
+
 export const createOrganization = async (params: {
   handlePrefix: string;
   description: string;
