@@ -130,6 +130,20 @@ export const getMeasurementRecord = async (params: {
   return data
 };
 
+export const getEvaluationRecord = async (params: {
+  did: string;
+  collection: string;
+  rkey: string;
+}) => {
+  const { did, collection, rkey } = params;
+  const ctx = await getRepoContext({ targetDid: did });
+  if (!ctx) {
+    throw new Error("Unable to get repository context");
+  }
+
+  return ctx.scopedRepo.records.get({ collection, rkey });
+};
+
 export const createOrganization = async (params: {
   handlePrefix: string;
   description: string;

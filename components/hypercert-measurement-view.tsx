@@ -1,5 +1,6 @@
 "use client";
 
+import { getPDSlsURI } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { URILink } from "./uri-link";
 
@@ -39,7 +40,7 @@ export default function HypercertMeasurementView({
               <dd className="break-all">
                 <URILink
                   label={measurement.measurementMethodURI}
-                  uri={measurement.measurementMethodURI}
+                  uri={getPDSlsURI(measurement.measurementMethodURI)}
                 />
               </dd>
             </div>
@@ -68,7 +69,7 @@ export default function HypercertMeasurementView({
                 <ul className="list-disc list-inside">
                   {measurement.evidenceURI.map((uri, index) => (
                     <li key={index} className="break-all">
-                      <URILink label={uri} uri={uri} />
+                      <URILink label={uri} uri={uri?.includes("https") ? uri : getPDSlsURI(uri)} />
                     </li>
                   ))}
                 </ul>
