@@ -41,7 +41,7 @@ function initials(name?: string) {
 
 export default function CollaboratorsList({
   collaborators,
-  repoDid = "did:repo:dummy", // ✅ dummy repoDid for now
+  repoDid,
 }: CollaboratorsListProps) {
   const queryClient = useQueryClient();
   const activeCollaborators = collaborators.filter((c) => !c.revokedAt);
@@ -148,7 +148,7 @@ export default function CollaboratorsList({
                       ) : null}
                     </div>
                   </div>
-{/* 
+                  {/* 
 commented out for now revoke has some issues
                   <div className="flex gap-2">
                     <Button

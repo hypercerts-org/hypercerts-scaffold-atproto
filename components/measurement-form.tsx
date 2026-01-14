@@ -195,7 +195,7 @@ export default function EvaluationForm({
       title="Add Evaluation"
       description="Provide an evaluation of the hypercert's impact."
     >
-      <div className="mb-6">
+      <div className="mb-4">
         <Button
           type="button"
           variant="outline"

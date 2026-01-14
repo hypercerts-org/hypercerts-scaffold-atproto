@@ -1,5 +1,4 @@
 "use client";
-
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -67,36 +66,47 @@ export default function ProfileSwitchDialog({
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>{children}</DialogTrigger>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="max-w-4xl w-full max-h-[80vh] flex flex-col sm:max-w-4xl">
         <DialogHeader>
           <DialogTitle>Switch Profile</DialogTitle>
           <DialogDescription>
             Select the profile you want to operate as.
           </DialogDescription>
         </DialogHeader>
-        <div className="grid gap-2 py-4">
-          {isLoading ? (
-            <p>Loading organizations...</p>
-          ) : isError ? (
-            <p className="text-red-500">Failed to load organizations.</p>
-          ) : (
-            <div className="space-y-2">
+
+        {isLoading ? (
+          <div className="py-8 text-center text-muted-foreground">
+            Loading organizations...
+          </div>
+        ) : isError ? (
+          <div className="py-8 text-center text-destructive">
+            Failed to load organizations.
+          </div>
+        ) : (
+          <div className="overflow-y-auto pr-2 -mr-2">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               {/* Personal Profile */}
-              <div className="flex items-center justify-between space-x-3 p-2 border rounded-md">
-                <div className="flex items-center space-x-2">
-                  <UserIcon className="h-5 w-5 text-gray-500" />
-                  <span>{personalHandle} (Personal)</span>
+              <div className="flex items-center justify-between p-4 border rounded-lg hover:bg-accent transition-colors">
+                <div className="flex items-center gap-3 min-w-0 flex-1">
+                  <div className="shrink-0 w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                    <UserIcon className="w-5 h-5 text-primary" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="font-medium truncate">{personalHandle}</p>
+                    <p className="text-sm text-muted-foreground">Personal</p>
+                  </div>
                 </div>
                 {userDid === currentActiveDid ? (
-                  <span className="text-sm font-semibold text-blue-600 px-3">
+                  <span className="text-sm font-medium text-blue-500 ml-2 shrink-0">
                     Current
                   </span>
                 ) : (
                   <Button
-                    size="sm"
                     variant="outline"
+                    size="sm"
                     onClick={() => handleSwitchProfile(userDid)}
                     disabled={mutation.isPending}
+                    className="ml-2 shrink-0"
                   >
                     {mutation.isPending && mutation.variables === userDid
                       ? "Switching..."
@@ -109,22 +119,30 @@ export default function ProfileSwitchDialog({
               {organizations.map((org) => (
                 <div
                   key={org.did}
-                  className="flex items-center justify-between space-x-3 p-2 border rounded-md"
+                  className="flex items-center justify-between p-4 border rounded-lg hover:bg-accent transition-colors"
                 >
-                  <div className="flex items-center space-x-2">
-                    <BuildingIcon className="h-5 w-5 text-gray-500" />
-                    <span>{org.name}</span>
+                  <div className="flex items-center gap-3 min-w-0 flex-1">
+                    <div className="shrink-0 w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                      <BuildingIcon className="w-5 h-5 text-primary" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="font-medium truncate">{org.name}</p>
+                      <p className="text-sm text-muted-foreground">
+                        Organization
+                      </p>
+                    </div>
                   </div>
                   {currentActiveDid === org.did ? (
-                    <span className="text-sm font-semibold text-blue-600 px-3">
+                    <span className="text-sm font-medium text-blue-500 ml-2 shrink-0">
                       Current
                     </span>
                   ) : (
                     <Button
-                      size="sm"
                       variant="outline"
+                      size="sm"
                       onClick={() => handleSwitchProfile(org.did)}
                       disabled={mutation.isPending}
+                      className="ml-2 shrink-0"
                     >
                       {mutation.isPending && mutation.variables === org.did
                         ? "Switching..."
@@ -134,8 +152,8 @@ export default function ProfileSwitchDialog({
                 </div>
               ))}
             </div>
-          )}
-        </div>
+          </div>
+        )}
       </DialogContent>
     </Dialog>
   );

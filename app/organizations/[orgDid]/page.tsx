@@ -3,10 +3,9 @@ import CollaboratorsList from "@/components/collaborators-list-view";
 import OrganizationDetailsView from "@/components/organization-detail-view";
 import {
   Card,
-  CardHeader,
-  CardTitle,
-  CardDescription,
   CardContent,
+  CardHeader,
+  CardTitle
 } from "@/components/ui/card";
 import { getAuthenticatedRepo } from "@/lib/atproto-session";
 import type { RepositoryAccessGrant } from "@hypercerts-org/sdk-core";
