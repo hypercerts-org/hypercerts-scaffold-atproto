@@ -140,7 +140,6 @@ export default function CollaboratorsList({
                         ))}
                       </div>
 
-                      {/* Optional: inline error message for this row */}
                       {removeMutation.isError && isThisRowPending === false ? (
                         <div className="text-sm text-destructive">
                           {(removeMutation.error as Error)?.message ??
@@ -149,7 +148,8 @@ export default function CollaboratorsList({
                       ) : null}
                     </div>
                   </div>
-
+{/* 
+commented out for now revoke has some issues
                   <div className="flex gap-2">
                     <Button
                       onClick={revoke}
@@ -159,7 +159,7 @@ export default function CollaboratorsList({
                     >
                       {isThisRowPending ? "Revoking..." : "Revoke access"}
                     </Button>
-                  </div>
+                  </div> */}
                 </div>
               );
             })}
