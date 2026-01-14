@@ -47,7 +47,7 @@ export default function CreateOrganizationPage() {
       );
     }
     return (
-      <div className="max-w-7xl mx-auto py-8 px-4">
+      <div className="max-w-7xl mx-auto py-8 px-4 gap-4">
         <AddContributorsForm orgInfo={createdOrg} />
         <FormInfo title="Organization Information">
           <div className="space-y-4">
