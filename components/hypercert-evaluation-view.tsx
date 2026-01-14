@@ -1,6 +1,13 @@
 "use client";
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
+import { getPDSlsURI } from "@/lib/utils";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "./ui/card";
 import { URILink } from "./uri-link";
 
 // Placeholder type based on the evaluation lexicon
@@ -18,7 +25,11 @@ export interface Evaluation {
   location?: string;
 }
 
-export default function HypercertEvaluationView({ evaluation }: { evaluation?: Evaluation }) {
+export default function HypercertEvaluationView({
+  evaluation,
+}: {
+  evaluation?: Evaluation;
+}) {
   if (!evaluation) {
     return null;
   }
@@ -70,7 +81,10 @@ export default function HypercertEvaluationView({ evaluation }: { evaluation?: E
                 <ul className="list-disc list-inside">
                   {evaluation.content.map((uri, index) => (
                     <li key={index} className="break-all">
-                      <URILink uri={uri} />
+                      <URILink
+                        label={uri}
+                        uri={uri.includes("https") ? uri : getPDSlsURI(uri)}
+                      />
                     </li>
                   ))}
                 </ul>
@@ -79,13 +93,18 @@ export default function HypercertEvaluationView({ evaluation }: { evaluation?: E
           )}
 
           {evaluation.measurements && evaluation.measurements.length > 0 && (
-             <div className="space-y-1">
-              <dt className="text-xs text-muted-foreground">Referenced Measurements</dt>
+            <div className="space-y-1">
+              <dt className="text-xs text-muted-foreground">
+                Referenced Measurements
+              </dt>
               <dd>
                 <ul className="list-disc list-inside">
                   {evaluation.measurements.map((uri, index) => (
                     <li key={index} className="break-all">
-                      <URILink uri={uri} />
+                      <URILink
+                        label={uri}
+                        uri={uri.includes("https") ? uri : getPDSlsURI(uri)}
+                      />
                     </li>
                   ))}
                 </ul>
@@ -97,7 +116,14 @@ export default function HypercertEvaluationView({ evaluation }: { evaluation?: E
             <div className="space-y-1">
               <dt className="text-xs text-muted-foreground">Location</dt>
               <dd className="break-all">
-                <URILink uri={evaluation.location} />
+                <URILink
+                  label={evaluation.location}
+                  uri={
+                    evaluation.location.includes("https")
+                      ? evaluation.location
+                      : getPDSlsURI(evaluation.location)
+                  }
+                />
               </dd>
             </div>
           )}
