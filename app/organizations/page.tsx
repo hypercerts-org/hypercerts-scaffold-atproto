@@ -6,12 +6,12 @@ import {
   CardDescription,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { getAuthenticatedRepo } from "@/lib/atproto-session";
+import { getRepoContext } from "@/lib/repo-context";
 
 export default async function OrganizationsList() {
-  const sdsRepo = await getAuthenticatedRepo("sds");
+  const ctx = await getRepoContext({ serverOverride: "sds" });
 
-  if (!sdsRepo) {
+  if (!ctx) {
     return (
       <div className="max-w-7xl mx-auto py-8 px-4">
         <div className="flex justify-between items-center mb-6">
@@ -25,7 +25,9 @@ export default async function OrganizationsList() {
     );
   }
 
-  const { organizations } = await sdsRepo.organizations.list({ limit: 50 });
+  const { organizations } = await ctx.repository.organizations.list({
+    limit: 50,
+  });
 
   return (
     <div className="max-w-7xl mx-auto py-8 px-4">

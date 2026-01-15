@@ -1,4 +1,5 @@
 import { getAuthenticatedRepo } from "@/lib/atproto-session";
+import { AttachLocationParams } from "@hypercerts-org/sdk-core"
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
@@ -14,6 +15,20 @@ export async function POST(req: NextRequest) {
     const description =
       (data.get("description") as string | null)?.trim() ?? undefined;
 
+    const locationType = (data.get("locationType") as string | null)?.trim();
+    const lpVersion = (data.get("lpVersion") as string | null)?.trim();
+
+    if (!locationType || !lpVersion || !srs) {
+      return NextResponse.json(
+        {
+          error: `Missing${locationType ? " locationType" : ""}. ${
+            lpVersion ? "lpVersion" : ""
+          }. ${srs ? "srs" : ""}. `,
+        },
+        { status: 400 }
+      );
+    }
+
     if (!hypercertUri) {
       return NextResponse.json(
         { error: "Missing hypercertUri." },
@@ -21,19 +36,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    if (!srs) {
-      return NextResponse.json({ error: "Missing srs." }, { status: 400 });
-    }
-
-    // Build attachLocation payload
-    let locationPayload: {
-      value: string;
-      srs: string;
-      name?: string;
-      description?: string;
-      geojson?: Blob;
-    };
-
+    let locationPayload: AttachLocationParams;
     if (contentMode === "link") {
       const locationUrl = (data.get("locationUrl") as string | null)?.trim();
 
@@ -45,8 +48,10 @@ export async function POST(req: NextRequest) {
       }
 
       locationPayload = {
-        value: locationUrl,
+        lpVersion,
         srs,
+        locationType,
+        location: locationUrl,
         name,
         description,
       };
@@ -61,11 +66,10 @@ export async function POST(req: NextRequest) {
       }
 
       locationPayload = {
-        value: file.name || "uploaded-location.geojson",
+        lpVersion,
         srs,
-        name,
-        description,
-        geojson: file,
+        locationType,
+        location: file,
       };
     } else {
       return NextResponse.json(

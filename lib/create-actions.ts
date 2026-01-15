@@ -5,7 +5,7 @@ import { resolveRecordBlobs } from "./blob-utils";
 import { RepositoryRole } from "@hypercerts-org/sdk-core";
 import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
-import { getAuthenticatedRepo, getSession } from "./atproto-session";
+import { getSession } from "./atproto-session";
 import sdk from "./hypercerts-sdk";
 
 export interface GrantAccessParams {
@@ -173,22 +173,22 @@ export const createOrganization = async (params: {
   description: string;
   name: string;
 }) => {
-  const sdsRepository = await getAuthenticatedRepo("sds");
-  if (!sdsRepository) {
-    throw new Error("Unable to get authenticated repository");
+  const ctx = await getRepoContext({ serverOverride: "sds" });
+  if (!ctx) {
+    throw new Error("Unable to get repository context");
   }
-  const org = await sdsRepository.organizations.create(params);
+  const org = await ctx.repository.organizations.create(params);
   return org;
 };
 
 export const addCollaboratorToOrganization = async (
   params: GrantAccessParams
 ) => {
-  const sdsRepository = await getAuthenticatedRepo("sds");
-  if (!sdsRepository) {
-    throw new Error("Unable to get authenticated repository");
+  const ctx = await getRepoContext({ serverOverride: "sds" });
+  if (!ctx) {
+    throw new Error("Unable to get repository context");
   }
-  const result = await sdsRepository.collaborators.grant(params);
+  const result = await ctx.repository.collaborators.grant(params);
   revalidatePath(`/organizations/${encodeURIComponent(params.repoDid)}`);
   return result;
 };
@@ -197,20 +197,20 @@ export const removeCollaborator = async (params: {
   userDid: string;
   repoDid: string;
 }) => {
-  const sdsRepository = await getAuthenticatedRepo("sds");
-  if (!sdsRepository) {
-    throw new Error("Unable to get authenticated repository");
+  const ctx = await getRepoContext({ serverOverride: "sds" });
+  if (!ctx) {
+    throw new Error("Unable to get repository context");
   }
-  const result = await sdsRepository.collaborators.revoke(params);
+  const result = await ctx.repository.collaborators.revoke(params);
   revalidatePath(`/organizations/[orgDid]`, "page");
   return result;
 };
 
 export const listOrgs = async () => {
-  const sdsRepository = await getAuthenticatedRepo("sds");
-  if (!sdsRepository) {
-    throw new Error("Unable to get authenticated repository");
+  const ctx = await getRepoContext({ serverOverride: "sds" });
+  if (!ctx) {
+    throw new Error("Unable to get repository context");
   }
-  const orgs = await sdsRepository.organizations.list({ limit: 100 });
+  const orgs = await ctx.repository.organizations.list({ limit: 100 });
   return orgs;
 };

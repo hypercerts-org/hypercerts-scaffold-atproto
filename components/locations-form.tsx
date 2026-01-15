@@ -100,7 +100,7 @@ export default function HypercertLocationForm({
       const result = await response.json();
       console.log(result);
       toast.success("Location Added Successfully");
-      onNext?.(); // Optional: leave commented until backend exists
+      onNext?.(); 
     } catch (error) {
       console.error("Error assembling FormData:", error);
       toast.error("Failed to assemble FormData");
