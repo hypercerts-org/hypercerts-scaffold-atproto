@@ -3,6 +3,7 @@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Link as LinkIcon, Upload } from "lucide-react";
+import { Button } from "./ui/button";
 
 type Mode = "link" | "file";
 
@@ -16,6 +17,7 @@ export default function LinkFileSelector({
   required,
   urlHelpText,
   fileHelpText,
+  fileUploadDisabled = true,
 }: {
   label: string;
   mode: Mode;
@@ -26,37 +28,30 @@ export default function LinkFileSelector({
   required?: boolean;
   urlHelpText: string;
   fileHelpText: string;
+  fileUploadDisabled?: boolean;
 }) {
   return (
     <div className="space-y-3">
       <Label>{label}</Label>
 
-      <div className="inline-flex rounded-md border divide-x overflow-hidden">
-        <button
+      <div className="inline-flex rounded-md border gap-2 px-2 py-1 divide-x overflow-hidden">
+        <Button
           type="button"
-          className={`flex items-center gap-2 px-3 py-1.5 text-sm ${
-            mode === "link"
-              ? "bg-primary text-primary-foreground"
-              : "bg-background"
-          }`}
+          variant={mode === "link" ? "default" : "outline"}
           onClick={() => onModeChange("link")}
         >
           <LinkIcon className="h-4 w-4" />
           Link
-        </button>
-        <button
-          disabled
+        </Button>
+        <Button
+          disabled={fileUploadDisabled}
+          variant={mode === "file" ? "default" : "outline"}
           type="button"
-          className={`flex items-center gap-2 px-3 py-1.5 opacity-50 text-sm pointer-events-none ${
-            mode === "file"
-              ? "bg-primary text-primary-foreground opacity-50"
-              : "bg-background"
-          }`}
           onClick={() => onModeChange("file")}
         >
           <Upload className="h-4 w-4" />
-          File (Coming Soon)
-        </button>
+          File {fileUploadDisabled ? "(Coming Soon)" : ""}
+        </Button>
       </div>
 
       {mode === "link" ? (
