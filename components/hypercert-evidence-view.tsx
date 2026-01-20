@@ -1,130 +1,101 @@
 "use client";
 
-import { Card, CardContent } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
-import { useOAuthContext } from "@/providers/OAuthProviderSSR";
-import { useEffect, useState } from "react";
-import { toast } from "sonner";
-import { getRecordWithURI } from "@/lib/queries";
-import {
-  type HypercertEvidenceData,
-  type HypercertRecordData,
-  Collections,
-} from "@/lib/types";
 import { getPDSlsURI } from "@/lib/utils";
-import { BlobDisplay } from "./blob-display";
-import { Field, LabelSmall } from "./hypercert-field";
-import Loader from "./loader";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "./ui/card";
 import { URILink } from "./uri-link";
+import { Badge } from "./ui/badge";
 
-export default function EvidenceView({
-  hypercertData,
+export interface Evidence {
+  title: string;
+  shortDescription: string;
+  description?: string;
+  relationType: "supports" | "clarifies" | "challenges";
+  content: {
+    $type: string;
+    uri?: string;
+    blob?: string;
+  };
+  createdAt: string;
+}
+
+export default function HypercertEvidenceView({
+  evidence,
 }: {
-  hypercertData?: HypercertRecordData;
+  evidence?: Evidence;
 }) {
-  const { atProtoAgent } = useOAuthContext();
-  const hypercertRecord = hypercertData?.value;
+  if (!evidence) {
+    return null;
+  }
 
-  const [loading, setLoading] = useState(false);
-  const [evidenceList, setEvidenceList] = useState<HypercertEvidenceData[]>([]);
+  const evidenceUrl = evidence.content.uri || evidence.content.blob || "";
 
-  useEffect(() => {
-    async function fetchAll() {
-      if (!atProtoAgent) return;
-      const hypercertEvidence = hypercertRecord?.evidence || [];
-      if (!hypercertEvidence.length) return;
-
-      setLoading(true);
-      try {
-        const results = await Promise.all(
-          hypercertEvidence.map(async (evidenceRef) => {
-            const data = await getRecordWithURI<HypercertEvidenceData>(
-              evidenceRef.uri,
-              atProtoAgent,
-              Collections.evidence
-            );
-            return data;
-          })
-        );
-
-        setEvidenceList(results.filter(Boolean) as HypercertEvidenceData[]);
-      } catch (e) {
-        console.error("Error loading evidence", e);
-        toast.error("Failed to load evidence");
-      } finally {
-        setLoading(false);
-      }
+  const getRelationColor = (relation: Evidence["relationType"]) => {
+    switch (relation) {
+      case "supports":
+        return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100";
+      case "challenges":
+        return "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-100";
+      case "clarifies":
+        return "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-100";
+      default:
+        return "";
     }
-
-    fetchAll();
-  }, [atProtoAgent, hypercertRecord?.evidence]);
-
-  if (!hypercertRecord?.evidence?.length) {
-    return <p className="text-sm text-muted-foreground">No evidence linked.</p>;
-  }
-
-  if (loading) {
-    return <Loader />;
-  }
+  };
 
   return (
-    <div className="space-y-4">
-      {evidenceList.map((evidence) => {
-        const evidenceRecord = evidence.value;
-        return (
-          <Card key={evidence.uri} className="border">
-            <CardContent className="py-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Field label="Title" value={evidenceRecord.title || "—"} />
-                <Field
-                  label="Created At"
-                  value={
-                    evidenceRecord.createdAt
-                      ? new Date(evidenceRecord.createdAt).toLocaleString()
-                      : "—"
-                  }
-                />
+    <Card>
+      <CardHeader className="pb-3">
+        <div className="flex items-start justify-between gap-4">
+          <div className="space-y-1">
+            <CardTitle className="text-lg">{evidence.title}</CardTitle>
+            <CardDescription>
+              {new Date(evidence.createdAt).toLocaleString()}
+            </CardDescription>
+          </div>
+          <Badge className={getRelationColor(evidence.relationType)}>
+            {evidence.relationType.charAt(0).toUpperCase() +
+              evidence.relationType.slice(1)}
+          </Badge>
+        </div>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="space-y-2">
+          <p className="text-sm font-medium">{evidence.shortDescription}</p>
+          {evidence.description && (
+            <p className="text-sm text-muted-foreground whitespace-pre-wrap">
+              {evidence.description}
+            </p>
+          )}
+        </div>
 
-                <div className="md:col-span-2">
-                  <LabelSmall>Short Description</LabelSmall>
-                  <p className="text-sm whitespace-pre-wrap">
-                    {evidenceRecord.shortDescription || "—"}
-                  </p>
-                </div>
-
-                <div className="md:col-span-2">
-                  <LabelSmall>Detailed Description</LabelSmall>
-                  <p className="text-sm whitespace-pre-wrap">
-                    {evidenceRecord.description || "—"}
-                  </p>
-                </div>
-
-                <div className="md:col-span-2">
-                  <LabelSmall>Evidence Content</LabelSmall>
-                  <BlobDisplay
-                    content={evidenceRecord.content}
-                    did={atProtoAgent?.assertDid}
-                  />
-                </div>
-
-                <Separator className="md:col-span-2" />
-
-                <Field
-                  label="URI"
-                  value={
-                    <URILink
-                      uri={getPDSlsURI(evidence.uri) || "—"}
-                      label={evidence.uri}
-                    />
-                  }
-                  mono
-                />
-                <Field label="CID" value={evidence.cid || "—"} mono />
-              </div>
-            </CardContent>
-          </Card>
-        );
-      })}
-    </div>
+        <div className="pt-2">
+          <dt className="text-xs text-muted-foreground mb-1 uppercase tracking-wider font-semibold">
+            Evidence Source
+          </dt>
+          <dd className="break-all text-sm font-medium">
+            {evidenceUrl ? (
+              <URILink
+                label={evidenceUrl}
+                uri={
+                  evidenceUrl.startsWith("at://")
+                    ? getPDSlsURI(evidenceUrl)
+                    : evidenceUrl
+                }
+              />
+            ) : (
+              <span className="text-muted-foreground italic">
+                No source link available
+              </span>
+            )}
+          </dd>
+        </div>
+      </CardContent>
+    </Card>
   );
 }

@@ -1,8 +1,4 @@
 import { getRepoContext } from "@/lib/repo-context";
-import {
-  HYPERCERT_COLLECTIONS,
-  HypercertEvidence,
-} from "@hypercerts-org/sdk-core";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
@@ -10,10 +6,6 @@ export async function POST(req: NextRequest) {
     const data = await req.formData();
 
     const title = (data.get("title") as string | null)?.trim() ?? "";
-    const createdAt =
-      (data.get("createdAt") as string | null)?.trim() ??
-      new Date().toISOString();
-
     const shortDescription =
       (data.get("shortDescription") as string | null)?.trim() ?? undefined;
     const description =
@@ -26,8 +18,6 @@ export async function POST(req: NextRequest) {
 
     const hypercertUri =
       (data.get("hypercertUri") as string | null)?.trim() ?? undefined;
-    const hypercertCid =
-      (data.get("hypercertCid") as string | null)?.trim() ?? undefined;
 
     if (!hypercertUri) {
       return NextResponse.json(
@@ -36,15 +26,11 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const subject =
-      hypercertUri && hypercertCid
-        ? {
-            uri: hypercertUri,
-            cid: hypercertCid,
-          }
-        : undefined;
+    if (!title) {
+      return NextResponse.json({ error: "Missing title." }, { status: 400 });
+    }
 
-    let content: HypercertEvidence["content"];
+    let content: string | Blob;
 
     if (evidenceMode === "link") {
       const evidenceUrl =
@@ -56,11 +42,7 @@ export async function POST(req: NextRequest) {
           { status: 400 }
         );
       }
-
-      content = {
-        $type: "org.hypercerts.defs#uri",
-        uri: evidenceUrl,
-      };
+      content = evidenceUrl;
     } else if (evidenceMode === "file") {
       const file = data.get("evidenceFile") as File | null;
 
@@ -70,33 +52,13 @@ export async function POST(req: NextRequest) {
           { status: 400 }
         );
       }
-
-      // TODO: replace this with your upload flow
-      content = {
-        $type: "org.hypercerts.defs#uri",
-        uri: "https://youchoseafilebutheresauri.com",
-      };
+      content = file;
     } else {
       return NextResponse.json(
         { error: `Invalid evidenceMode: ${evidenceMode}` },
         { status: 400 }
       );
     }
-
-    if (!title) {
-      return NextResponse.json({ error: "Missing title." }, { status: 400 });
-    }
-
-    const evidenceRecord: HypercertEvidence = {
-      $type: HYPERCERT_COLLECTIONS.EVIDENCE,
-      subject,
-      content,
-      title,
-      shortDescription,
-      description,
-      relationType: relationType as HypercertEvidence["relationType"],
-      createdAt,
-    };
 
     const ctx = await getRepoContext(); // defaults targetDid=activeDid
     if (!ctx) {
@@ -106,9 +68,14 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const response = await ctx.scopedRepo.hypercerts.addEvidence(hypercertUri, [
-      evidenceRecord,
-    ]);
+    const response = await ctx.scopedRepo.hypercerts.addEvidence({
+      subjectUri: hypercertUri,
+      content,
+      title,
+      shortDescription,
+      description,
+      relationType: relationType as any,
+    });
 
     return NextResponse.json(response);
   } catch (e) {

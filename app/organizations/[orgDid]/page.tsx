@@ -1,13 +1,9 @@
 import AddContributorsForm from "@/components/add-contributors-form";
 import CollaboratorsList from "@/components/collaborators-list-view";
 import OrganizationDetailsView from "@/components/organization-detail-view";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getAuthenticatedRepo } from "@/lib/atproto-session";
+import { getRepoContext } from "@/lib/repo-context";
 import type { RepositoryAccessGrant } from "@hypercerts-org/sdk-core";
 
 type BskyProfile = {
@@ -42,10 +38,13 @@ export default async function OrganizationPage({
   const { orgDid } = await params;
   const decodedOrgDid = decodeURIComponent(orgDid);
 
-  const sdsRepo = await getAuthenticatedRepo("sds");
+  const sdsRepo = await getRepoContext({
+    serverOverride: "sds",
+    targetDid: decodedOrgDid,
+  });
   if (!sdsRepo) return <div>Please log in to view organizations.</div>;
 
-  const org = await sdsRepo.organizations.get(decodedOrgDid);
+  const org = await sdsRepo.scopedRepo.organizations.get(decodedOrgDid);
   if (!org) return <div>Organization not found</div>;
 
   let collaborators: (RepositoryAccessGrant & {
@@ -53,8 +52,7 @@ export default async function OrganizationPage({
   })[] = [];
 
   try {
-    const result = await sdsRepo.collaborators.list({
-      repoDid: decodedOrgDid,
+    const result = await sdsRepo.scopedRepo.collaborators.list({
       limit: 50,
     });
 

@@ -120,6 +120,7 @@ export default function HypercertEvidenceForm({
         formData.append("relationType", relationType);
       }
       formData.append("hypercertUri", hypercertInfo?.hypercertUri);
+      formData.append("evidenceMode", evidenceMode);
 
       if (evidenceMode === "link") {
         if (!evidenceUrl.trim()) {
@@ -134,11 +135,17 @@ export default function HypercertEvidenceForm({
         }
         formData.append("evidenceFile", evidenceFile);
       }
-      await fetch("/api/certs/add-evidence", {
+      const result = await fetch("/api/certs/add-evidence", {
         method: "POST",
         body: formData,
       });
-      onNext?.();
+      if (result.ok) {
+        toast.success("Evidence added");
+        onNext?.();
+      } else {
+        console.log(result);
+        toast.error("Failed to add evidence");
+      }
     } catch (err) {
       console.error("Error assembling FormData:", err);
       toast.error("Failed to assemble FormData");
@@ -230,6 +237,7 @@ export default function HypercertEvidenceForm({
         </div>
 
         <LinkFileSelector
+          fileUploadDisabled={false}
           label="Evidence Content *"
           mode={evidenceMode}
           onModeChange={setEvidenceMode}
