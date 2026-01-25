@@ -95,9 +95,10 @@ export default async function MyHypercertsPage({
           ) : (
             <div className="flex flex-col gap-4">
               {records.map(({ record: cert, uri }) => {
+                  // fix for now for interop demo
                 const imageUrl =
                   viewCtx.targetDid && cert.image
-                    ? getBlobURL(cert.image, viewCtx.targetDid, sessionIssuer)
+                    ? getBlobURL((cert.image as any).image, viewCtx.targetDid, sessionIssuer)
                     : null;
 
                 return (
