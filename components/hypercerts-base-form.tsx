@@ -49,17 +49,17 @@ export default function HypercertsBaseForm({
   const [title, setTitle] = useState(certInfo?.title || "");
   const [backgroundImage, setBackgroundImage] = useState<File | undefined>();
   const [shortDescription, setShortDescription] = useState(
-    certInfo?.shortDescription || ""
+    certInfo?.shortDescription || "",
   );
   const [buttonClicked, setButtonClicked] = useState<"saveNext" | "create">();
   const [workScope, setWorkScope] = useState<string[]>(
-    initialWorkScope || [""]
+    initialWorkScope || [""],
   );
   const [startDate, setStartDate] = useState<Date | null>(
-    certInfo?.workTimeFrameFrom ? new Date(certInfo?.workTimeFrameFrom) : null
+    certInfo?.workTimeFrameFrom ? new Date(certInfo?.workTimeFrameFrom) : null,
   );
   const [endDate, setEndDate] = useState<Date | null>(
-    certInfo?.workTimeFrameTo ? new Date(certInfo?.workTimeFrameTo) : null
+    certInfo?.workTimeFrameTo ? new Date(certInfo?.workTimeFrameTo) : null,
   );
   const [rights, setRights] = useState<RightsState>({
     name: "",
@@ -84,10 +84,7 @@ export default function HypercertsBaseForm({
   };
 
   const getRecord = (): CreateHypercertParams | undefined => {
-    // const cleanedWorkScope = workScope
-    //   .map((w) => w.trim())
-    //   .filter(Boolean)
-    //   .join(",");
+    const cleanedWorkScope = workScope.map((w) => w.trim()).filter(Boolean);
 
     if (
       !rights.name.trim() ||
@@ -108,6 +105,9 @@ export default function HypercertsBaseForm({
         name: rights.name.trim(),
         type: rights.type.trim(),
         description: rights.description.trim(),
+      },
+      workScope: {
+        withinAnyOf: cleanedWorkScope,
       },
       description: shortDescription,
       image: backgroundImage,
@@ -141,10 +141,10 @@ export default function HypercertsBaseForm({
         "This hypercert is licensed under CC BY 4.0. Attribution required.",
     });
     setTitle(
-      `Clean Energy Community Initiative ${(Math.random() * 100).toFixed(0)}`
+      `Clean Energy Community Initiative ${(Math.random() * 100).toFixed(0)}`,
     );
     setShortDescription(
-      "A community-driven initiative to distribute clean energy resources and fund renewable projects across rural regions."
+      "A community-driven initiative to distribute clean energy resources and fund renewable projects across rural regions.",
     );
     setWorkScope(["clean-energy", "community", "renewables"]);
 

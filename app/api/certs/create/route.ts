@@ -11,6 +11,7 @@ export async function POST(req: NextRequest) {
     const startDate = formData.get("startDate") as string | null;
     const endDate = formData.get("endDate") as string | null;
     const rightsRaw = formData.get("rights") as string | null;
+    const workScopeRaw = formData.get("workScope") as string | null;
 
     const image = formData.get("image") as File | null;
 
@@ -22,11 +23,13 @@ export async function POST(req: NextRequest) {
     }
 
     const rights = rightsRaw ? JSON.parse(rightsRaw) : undefined;
+    const workScope = workScopeRaw ? JSON.parse(workScopeRaw) : undefined;
 
     const hypercertParams: CreateHypercertParams = {
       title,
       shortDescription,
       description: description ?? shortDescription,
+      workScope,
       startDate,
       endDate,
       rights,

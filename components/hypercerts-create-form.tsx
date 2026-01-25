@@ -39,6 +39,7 @@ export default function HypercertsCreateForm({
       if (certInfo.image) {
         formData.append("image", certInfo.image);
       }
+      formData.append("workScope", JSON.stringify(certInfo.workScope));
 
       const res = await fetch("/api/certs/create", {
         method: "POST",

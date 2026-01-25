@@ -47,13 +47,13 @@ export default async function Home() {
 
         <div className="flex items-center gap-2">
           <Button asChild>
-            <Link href="/create" className="gap-2">
+            <Link href="/hypercerts/create" className="gap-2">
               <PlusCircle className="h-4 w-4" />
               Create Hypercert
             </Link>
           </Button>
           <Button variant="outline" asChild>
-            <Link href="/my-hypercerts" className="gap-2">
+            <Link href="/hypercerts" className="gap-2">
               <ListOrdered className="h-4 w-4" />
               My Hypercerts
             </Link>
@@ -115,7 +115,7 @@ export default async function Home() {
                 </p>
               </div>
               <Button asChild>
-                <Link href="/create" className="gap-2">
+                <Link href="/hypercerts/create" className="gap-2">
                   <PlusCircle className="h-4 w-4" />
                   /create
                 </Link>
