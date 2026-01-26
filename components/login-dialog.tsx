@@ -10,16 +10,13 @@ import { Button } from "./ui/button";
 import { useOAuthContext } from "@/providers/OAuthProviderSSR";
 import { FormEventHandler, useState } from "react";
 import { PDS_URL } from "@/utils/constants";
-// import { useRouter } from "next/navigation";
 import { Spinner } from "./ui/spinner";
-import { toast } from "sonner";
-import { useRouter } from "next/navigation";
+import { useLoginMutation } from "@/queries/auth";
 
 export default function LoginDialog() {
   const [handle, setHandle] = useState("");
-  const [loading, setLoading] = useState(false);
-  const router = useRouter();
   const { signIn } = useOAuthContext();
+  const loginMutation = useLoginMutation();
 
   const pdsUrl = process.env.NEXT_PUBLIC_PDS_URL;
   let hostname = "";
@@ -33,34 +30,19 @@ export default function LoginDialog() {
 
   const handleSubmit: FormEventHandler<HTMLFormElement> = async (e) => {
     e.preventDefault();
-    setLoading(true);
     let finalHandle = handle;
     if (hostname && !handle.includes(hostname)) {
-      // Remove trailing dot if user typed it? Or just assume simple handle.
-      // If user typed "user." and we append ".hostname", we get "user..hostname"
-      // Let's strip trailing dot from handle just in case.
       const cleanHandle = handle.endsWith(".") ? handle.slice(0, -1) : handle;
       finalHandle = `${cleanHandle}.${hostname}`;
     }
 
-    try {
-      const response = await fetch("/api/auth/login", {
-        method: "POST",
-        body: JSON.stringify({ handle: finalHandle }),
-      });
-      const data = await response.json();
-      router.push(data.authUrl);
-    } catch (e) {
-      console.error(e);
-      toast.error("An error occurred while logging in.");
-    } finally {
-      setLoading(false);
-    }
+    loginMutation.mutate(finalHandle);
   };
 
   const redirectToAccountCreation = () => {
     signIn(PDS_URL);
   };
+
   return (
     <form onSubmit={handleSubmit} className="grid w-full max-w-sm gap-6 py-10">
       <InputGroup>
@@ -78,12 +60,12 @@ export default function LoginDialog() {
         </p>
       )}
 
-      <Button type="submit" disabled={loading}>
-        {loading && <Spinner />}
+      <Button type="submit" disabled={loginMutation.isPending}>
+        {loginMutation.isPending && <Spinner />}
         Login
       </Button>
       <Button
-        disabled={loading}
+        disabled={loginMutation.isPending}
         onClick={redirectToAccountCreation}
         variant={"link"}
         type="button"

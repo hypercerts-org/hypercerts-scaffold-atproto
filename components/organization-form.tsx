@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -9,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Spinner } from "@/components/ui/spinner";
 import useDebounce from "@/lib/use-debounce";
 import { CheckIcon, XIcon } from "lucide-react";
+import { useCheckHandleQuery } from "@/queries/organizations";
 
 export interface OrganizationFormParams {
   name: string;
@@ -30,40 +30,13 @@ export default function OrganizationForm({
   const [description, setDescription] = useState("");
   const debouncedHandle = useDebounce(handlePrefix, 500);
 
-  const sdsUrl = process.env.NEXT_PUBLIC_SDS_URL?.replace(/^https?:\/\//, "");
+  const sdsUrl = process.env.NEXT_PUBLIC_SDS_URL?.replace(/^https?:\/\//, "") || "";
 
   const {
     data: handleAvailable,
     isLoading: isCheckingHandle,
     error,
-  } = useQuery({
-    queryKey: ["checkHandle", debouncedHandle],
-    queryFn: async () => {
-      if (!debouncedHandle) {
-        return null;
-      }
-      const res = await fetch(
-        `https://${sdsUrl}/xrpc/com.atproto.identity.resolveHandle?handle=${debouncedHandle}.${sdsUrl}`
-      );
-      if (res.ok) {
-        // 200 OK means handle is taken
-        return false;
-      }
-      const errorData = await res.json();
-      // if handle isnt resolved api seems to send InvalidRequest
-      if (
-        res.status === 400 &&
-        (errorData.error === "HandleNotFound" ||
-          errorData.error === "InvalidRequest")
-      ) {
-        // 400 with handleNotFound means handle is available
-        return true;
-      }
-      throw new Error(errorData.message || "Failed to check handle");
-    },
-    enabled: !!debouncedHandle,
-    retry: 1,
-  });
+  } = useCheckHandleQuery(debouncedHandle, sdsUrl);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();

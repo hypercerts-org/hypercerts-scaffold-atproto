@@ -1,35 +1,12 @@
 "use client";
-import { useQuery, useQueries } from "@tanstack/react-query";
+
 import HypercertEvidenceView, { Evidence } from "./hypercert-evidence-view";
 import { Skeleton } from "./ui/skeleton";
 import { Separator } from "./ui/separator";
-import { getEvidenceRecord } from "@/lib/create-actions";
-
-interface BacklinksResponse {
-  records: {
-    did: string;
-    collection: string;
-    rkey: string;
-  }[];
-}
-
-const fetchEvidenceLinks = async (
-  hypercertUri: string
-): Promise<BacklinksResponse["records"]> => {
-  const url = new URL(
-    "https://constellation.microcosm.blue/xrpc/blue.microcosm.links.getBacklinks"
-  );
-  url.searchParams.set("subject", hypercertUri);
-  url.searchParams.set("source", "org.hypercerts.claim.evidence:subject.uri");
-  url.searchParams.set("limit", "50");
-
-  const response = await fetch(url.toString());
-  if (!response.ok) {
-    throw new Error("Network response was not ok");
-  }
-  const data: BacklinksResponse = await response.json();
-  return data.records;
-};
+import {
+  useEvidenceLinksQuery,
+  useEvidenceRecordsQuery,
+} from "@/queries/hypercerts";
 
 const EvidenceSkeleton = () => (
   <div className="p-4 border rounded-lg space-y-3">
@@ -51,22 +28,9 @@ export default function HypercertEvidenceSection({
     data: evidenceLinks,
     isLoading: isLoadingLinks,
     isError: isErrorLinks,
-  } = useQuery({
-    queryKey: ["evidence-links", hypercertUri],
-    queryFn: () => fetchEvidenceLinks(hypercertUri),
-  });
+  } = useEvidenceLinksQuery(hypercertUri);
 
-  const evidenceQueries = useQueries({
-    queries: (evidenceLinks || []).map((link) => ({
-      queryKey: ["evidence-record", link.did, link.rkey],
-      queryFn: () =>
-        getEvidenceRecord({
-          did: link.did,
-          collection: link.collection,
-          rkey: link.rkey,
-        }),
-    })),
-  });
+  const evidenceQueries = useEvidenceRecordsQuery(evidenceLinks);
 
   const isLoadingDetails = evidenceQueries.some((q) => q.isLoading);
   const isErrorDetails = evidenceQueries.some((q) => q.isError);

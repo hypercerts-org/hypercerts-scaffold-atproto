@@ -9,6 +9,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { listOrgs, switchActiveProfile } from "@/lib/create-actions";
+import { queryKeys } from "@/lib/api/query-keys";
 import { Organization } from "@hypercerts-org/sdk-core";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { BuildingIcon, UserIcon } from "lucide-react";
@@ -34,7 +35,7 @@ export default function ProfileSwitchDialog({
   const queryClient = useQueryClient();
 
   const { data, isLoading, isError } = useQuery({
-    queryKey: ["organizations-for-profile-switch"],
+    queryKey: queryKeys.organizations.forProfileSwitch(),
     queryFn: async () => {
       const orgsResult = await listOrgs();
       return orgsResult?.organizations || [];
@@ -48,7 +49,7 @@ export default function ProfileSwitchDialog({
     mutationFn: (did: string) => switchActiveProfile(did),
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ["active-profile"],
+        queryKey: queryKeys.profile.active(),
       });
       router.refresh();
       setIsOpen(false);

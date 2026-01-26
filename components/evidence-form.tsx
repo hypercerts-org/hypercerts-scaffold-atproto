@@ -18,6 +18,7 @@ import FormInfo from "./form-info";
 import LinkFileSelector from "./link-file-selector";
 import { Button } from "./ui/button";
 import { BaseHypercertFormProps } from "@/lib/types";
+import { useAddEvidenceMutation } from "@/queries/hypercerts";
 
 type ContentMode = "link" | "file";
 
@@ -45,7 +46,12 @@ export default function HypercertEvidenceForm({
   const [evidenceMode, setEvidenceMode] = useState<ContentMode>("link");
   const [evidenceUrl, setEvidenceUrl] = useState("");
   const [evidenceFile, setEvidenceFile] = useState<File | null>(null);
-  const [saving, setSaving] = useState(false);
+
+  const addEvidenceMutation = useAddEvidenceMutation({
+    onSuccess: () => {
+      onNext?.();
+    },
+  });
 
   const handleFileChange: React.ChangeEventHandler<HTMLInputElement> = (e) => {
     const file = e.target.files?.[0];
@@ -106,52 +112,30 @@ export default function HypercertEvidenceForm({
 
   const handleSubmit: FormEventHandler<HTMLFormElement> = async (e) => {
     e.preventDefault();
-    try {
-      setSaving(true);
-      if (!validateTextFields() || !hypercertInfo?.hypercertUri) {
-        return;
-      }
 
-      const formData = new FormData();
-      formData.append("title", title.trim());
-      formData.append("shortDescription", shortDescription.trim());
-      formData.append("description", description.trim());
-      if (relationType) {
-        formData.append("relationType", relationType);
-      }
-      formData.append("hypercertUri", hypercertInfo?.hypercertUri);
-      formData.append("evidenceMode", evidenceMode);
-
-      if (evidenceMode === "link") {
-        if (!evidenceUrl.trim()) {
-          toast.error("Please provide a link to the evidence.");
-          return;
-        }
-        formData.append("evidenceUrl", evidenceUrl.trim());
-      } else {
-        if (!evidenceFile) {
-          toast.error("Please upload an evidence file.");
-          return;
-        }
-        formData.append("evidenceFile", evidenceFile);
-      }
-      const result = await fetch("/api/certs/add-evidence", {
-        method: "POST",
-        body: formData,
-      });
-      if (result.ok) {
-        toast.success("Evidence added");
-        onNext?.();
-      } else {
-        console.log(result);
-        toast.error("Failed to add evidence");
-      }
-    } catch (err) {
-      console.error("Error assembling FormData:", err);
-      toast.error("Failed to assemble FormData");
-    } finally {
-      setSaving(false);
+    if (!validateTextFields() || !hypercertInfo?.hypercertUri) {
+      return;
     }
+
+    if (evidenceMode === "link" && !evidenceUrl.trim()) {
+      toast.error("Please provide a link to the evidence.");
+      return;
+    }
+    if (evidenceMode === "file" && !evidenceFile) {
+      toast.error("Please upload an evidence file.");
+      return;
+    }
+
+    addEvidenceMutation.mutate({
+      title: title.trim(),
+      shortDescription: shortDescription.trim(),
+      description: description.trim(),
+      relationType: relationType || undefined,
+      hypercertUri: hypercertInfo.hypercertUri,
+      evidenceMode,
+      evidenceUrl: evidenceMode === "link" ? evidenceUrl.trim() : undefined,
+      evidenceFile: evidenceMode === "file" ? evidenceFile ?? undefined : undefined,
+    });
   };
 
   return (
@@ -253,8 +237,8 @@ export default function HypercertEvidenceForm({
           onBack={onBack}
           onSkip={onNext}
           submitLabel="Save & Next"
-          savingLabel="Saving…"
-          saving={saving}
+          savingLabel="Saving..."
+          saving={addEvidenceMutation.isPending}
         />
       </form>
     </FormInfo>

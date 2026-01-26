@@ -13,9 +13,7 @@ import {
 } from "@/components/ui/popover";
 import { AtSignIcon, LogOut, User, GlobeIcon } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { FormEventHandler, useState } from "react";
-import { toast } from "sonner";
 import ProfileSwitchDialog from "./profile-switch-dialog";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -27,6 +25,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useLoginMutation, useLogoutMutation } from "@/queries/auth";
 
 export interface NavbarProps {
   isSignedIn: boolean;
@@ -48,46 +47,27 @@ export default function Navbar({
   activeProfileHandle,
 }: NavbarProps) {
   const [handle, setHandle] = useState("");
-  const [loading, setLoading] = useState(false);
-  const router = useRouter();
   const [open, setOpen] = useState(false);
+
+  const loginMutation = useLoginMutation();
+  const logoutMutation = useLogoutMutation();
+
+  const isLoading = loginMutation.isPending || logoutMutation.isPending;
 
   const handleSubmit: FormEventHandler<HTMLFormElement> = async (e) => {
     e.preventDefault();
-    setLoading(true);
-    try {
-      const response = await fetch("/api/auth/login", {
-        method: "POST",
-        body: JSON.stringify({ handle }),
-      });
-      const data = await response.json();
-      router.push(data.authUrl);
-      setOpen(false);
-      setHandle("");
-    } catch (e) {
-      console.error(e);
-      toast.error("Login failed");
-    } finally {
-      setLoading(false);
-    }
+    loginMutation.mutate(handle, {
+      onSuccess: () => {
+        setOpen(false);
+        setHandle("");
+      },
+    });
   };
 
-  const handleLogout = async () => {
-    setLoading(true);
-    try {
-      const res = await fetch(`/api/auth/logout`);
-      if (res.ok) {
-        router.refresh();
-      } else {
-        toast.error("Logout failed");
-      }
-    } catch (e) {
-      console.error("logout failed", e);
-      toast.error("logout failed");
-    } finally {
-      setLoading(false);
-    }
+  const handleLogout = () => {
+    logoutMutation.mutate();
   };
+
   const fallback = userHandle?.slice(0, 2).toUpperCase() || "ME";
 
   return (
@@ -193,12 +173,12 @@ export default function Navbar({
                 <DropdownMenuSeparator />
 
                 <DropdownMenuItem
-                  disabled={loading}
+                  disabled={isLoading}
                   onClick={handleLogout}
                   className="text-red-600 focus:text-red-600"
                 >
                   <LogOut className="mr-2 h-4 w-4" />
-                  {loading ? "Logging out..." : "Log out"}
+                  {logoutMutation.isPending ? "Logging out..." : "Log out"}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -206,7 +186,7 @@ export default function Navbar({
         ) : (
           <Popover open={open} onOpenChange={setOpen}>
             <PopoverTrigger asChild>
-              <Button disabled={loading} variant="default" size="sm">
+              <Button disabled={isLoading} variant="default" size="sm">
                 Login
               </Button>
             </PopoverTrigger>
@@ -230,8 +210,8 @@ export default function Navbar({
                   </InputGroupAddon>
                 </InputGroup>
                 <div className="flex flex-col gap-2">
-                  <Button type="submit" size="sm">
-                    Login
+                  <Button type="submit" size="sm" disabled={loginMutation.isPending}>
+                    {loginMutation.isPending ? "Logging in..." : "Login"}
                   </Button>
                   <Button
                     variant="link"
