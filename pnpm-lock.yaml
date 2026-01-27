@@ -24,8 +24,8 @@ importers:
         specifier: 0.10.0-beta.3
         version: 0.10.0-beta.3(@atproto/xrpc@0.7.7)
       '@hypercerts-org/sdk-core':
-        specifier: file:vendor/hypercerts-org-sdk-core-0.10.0-beta.4.tgz
-        version: file:vendor/hypercerts-org-sdk-core-0.10.0-beta.4.tgz(@atproto/xrpc@0.7.7)
+        specifier: file:./vendor/hypercerts-org-sdk-core-0.10.0-beta.6.tgz
+        version: file:vendor/hypercerts-org-sdk-core-0.10.0-beta.6.tgz(@atproto/xrpc@0.7.7)
       '@radix-ui/react-avatar':
         specifier: ^1.1.11
         version: 1.1.11(@types/react-dom@19.2.3(@types/react@19.2.7))(@types/react@19.2.7)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
@@ -144,6 +144,9 @@ packages:
 
   '@atcute/atproto@3.1.10':
     resolution: {integrity: sha512-+GKZpOc0PJcdWMQEkTfg/rSNDAAHxmAUGBl60g2az15etqJn5WaUPNGFE2sB7hKpwi5Ue2h/L0OacINcE/JDDQ==}
+
+  '@atcute/bluesky@3.2.15':
+    resolution: {integrity: sha512-H4RW3WffjfdKvOZ9issEUQnuSR4KfuAwwJnYu0fclA9VDa99JTJ+pa8tTl9lFeBV9DINtWJAx7rdIbICoVCstQ==}
 
   '@atcute/leaflet@1.0.15':
     resolution: {integrity: sha512-soA4jGsY0UxTar8rhtfQNYFXPI+qoQGgjpeMKJaO8ZCBBMRoo4OU9gsFJpUm/BYSocOBvvWSq2GV9pYEgUehTw==}
@@ -434,14 +437,19 @@ packages:
     resolution: {integrity: sha512-bV0Tgo9K4hfPCek+aMAn81RppFKv2ySDQeMoSZuvTASywNTnVJCArCZE2FWqpvIatKu7VMRLWlR1EazvVhDyhQ==}
     engines: {node: '>=18.18'}
 
+  '@hypercerts-org/lexicon@0.10.0-beta.13':
+    resolution: {integrity: sha512-QXgHZjn6ngbcmTh3QV/T7yu2sxgeCKURUcOGcXjRoY+M9Gnld40KVsiJ+KFR5iH3sIXOCd5uuo5KAvB1sLpkSg==}
+    peerDependencies:
+      '@atproto/xrpc': '*'
+
   '@hypercerts-org/lexicon@0.10.0-beta.3':
     resolution: {integrity: sha512-mQKDeRVwvWrR5mkwAdFHJUZyxNDwaHiFX1emykQ7G1RJPTCTGS2Tqi3C2iR/vzCU4oUkaweQ9zDWogG/ViZXbg==}
     peerDependencies:
       '@atproto/xrpc': '*'
 
-  '@hypercerts-org/sdk-core@file:vendor/hypercerts-org-sdk-core-0.10.0-beta.4.tgz':
-    resolution: {integrity: sha512-06ZD6P0fKTSR+hDrAFBrA/1E3LWbm7QzRcwhE/xZxgARTKqNz+RP/F35sLkuWV3IFa8gg788n+cWQJ3RYKXqUQ==, tarball: file:vendor/hypercerts-org-sdk-core-0.10.0-beta.4.tgz}
-    version: 0.10.0-beta.4
+  '@hypercerts-org/sdk-core@file:vendor/hypercerts-org-sdk-core-0.10.0-beta.6.tgz':
+    resolution: {integrity: sha512-J9qhMWXm3QoReAmIle0sQYcqmhrv7GFeKgeYb7egwtXJWLTNlnZRYVxL97ec5dhVo/0CZHmt+zznd6Gba+2FVA==, tarball: file:vendor/hypercerts-org-sdk-core-0.10.0-beta.6.tgz}
+    version: 0.10.0-beta.6
 
   '@img/colour@1.0.0':
     resolution: {integrity: sha512-A5P/LfWGFSl6nsckYtjw9da+19jB8hkJ6ACTGcDfEJ0aE+l2n2El7dsVM7UVHZQ9s2lmYMWlrS21YLy2IR1LUw==}
@@ -1927,8 +1935,8 @@ packages:
     resolution: {integrity: sha512-i/2XbnSz/uxRCU6+NdVJgKWDTM427+MqYbkQzD321DuCQJUqOuJKIA0IM2+W2xtYHdKOmZ4dR6fExsd4SXL+WQ==}
     engines: {node: '>=6'}
 
-  eventemitter3@5.0.1:
-    resolution: {integrity: sha512-GWkBvjiSZK87ELrYOSESUYeVIc9mvLLf/nXalMOS5dYrgZq9o5OVkbZAVM06CVxYsCwH9BDZFPlQTlPA1j4ahA==}
+  eventemitter3@5.0.4:
+    resolution: {integrity: sha512-mlsTRyGaPBjPedk6Bvw+aqbsXDtoAyAzm5MO7JgU+yVRyMQ5O8bD4Kcci7BS85f93veegeCPkL8R4GLClnjLFw==}
 
   events@3.3.0:
     resolution: {integrity: sha512-mQw+2fkQbALzQ7V0MY0IqdnXNOeTtP4r0lN9z7AAawCXgqea7bDii20AYrIBrFd/Hx0M2Ocz6S111CaFkUcb0Q==}
@@ -2937,6 +2945,10 @@ packages:
     resolution: {integrity: sha512-ot0WnXS9fgdkgIcePe6RHNk1WA8+muPa6cSjeR3V8K27q9BB1rTE3R1p7Hv0z1ZyAc8s6Vvv8DIyWf681MAt0w==}
     engines: {node: '>= 0.4'}
 
+  tagged-tag@1.0.0:
+    resolution: {integrity: sha512-yEFYrVhod+hdNyx7g5Bnkkb0G6si8HJurOoOEgC8B/O0uXLHlaey/65KRv6cuWBNhBgHKAROVpc7QyYqE5gFng==}
+    engines: {node: '>=20'}
+
   tailwind-merge@3.4.0:
     resolution: {integrity: sha512-uSaO4gnW+b3Y2aWoWfFpX62vn2sR3skfhbjsEnaBI81WD1wBLlHZe5sWf0AqjksNdYTbGBEd0UasQMT3SNV15g==}
 
@@ -2987,6 +2999,10 @@ packages:
   type-check@0.4.0:
     resolution: {integrity: sha512-XleUoc9uwGXqjWwXaUTZAmzMcFZ5858QA2vvx1Ur5xIcixXIP+8LnFDgRplU30us6teqdlskFfu+ae4K79Ooew==}
     engines: {node: '>= 0.8.0'}
+
+  type-fest@5.4.1:
+    resolution: {integrity: sha512-xygQcmneDyzsEuKZrFbRMne5HDqMs++aFzefrJTgEIKjQ3rekM+RPfFCVq2Gp1VIDqddoYeppCj4Pcb+RZW0GQ==}
+    engines: {node: '>=20'}
 
   type-is@1.6.18:
     resolution: {integrity: sha512-TkRKr9sUTxEH8MdfuCSP7VizJyzRNMjj2J2do2Jr3Kym598JVdEksuzPQCnlFPW4ky9Q+iA+ma9BGm06XQBy8g==}
@@ -3151,6 +3167,11 @@ snapshots:
 
   '@atcute/atproto@3.1.10':
     dependencies:
+      '@atcute/lexicons': 1.2.6
+
+  '@atcute/bluesky@3.2.15':
+    dependencies:
+      '@atcute/atproto': 3.1.10
       '@atcute/lexicons': 1.2.6
 
   '@atcute/leaflet@1.0.15':
@@ -3601,6 +3622,14 @@ snapshots:
 
   '@humanwhocodes/retry@0.4.3': {}
 
+  '@hypercerts-org/lexicon@0.10.0-beta.13(@atproto/xrpc@0.7.7)':
+    dependencies:
+      '@atcute/bluesky': 3.2.15
+      '@atcute/leaflet': 1.0.15
+      '@atproto/lexicon': 0.6.0
+      '@atproto/xrpc': 0.7.7
+      multiformats: 13.4.2
+
   '@hypercerts-org/lexicon@0.10.0-beta.3(@atproto/xrpc@0.7.7)':
     dependencies:
       '@atcute/leaflet': 1.0.15
@@ -3608,14 +3637,15 @@ snapshots:
       '@atproto/xrpc': 0.7.7
       multiformats: 13.4.2
 
-  '@hypercerts-org/sdk-core@file:vendor/hypercerts-org-sdk-core-0.10.0-beta.4.tgz(@atproto/xrpc@0.7.7)':
+  '@hypercerts-org/sdk-core@file:vendor/hypercerts-org-sdk-core-0.10.0-beta.6.tgz(@atproto/xrpc@0.7.7)':
     dependencies:
       '@atproto/api': 0.17.7
       '@atproto/lexicon': 0.5.2
       '@atproto/oauth-client': 0.5.13
       '@atproto/oauth-client-node': 0.3.15
-      '@hypercerts-org/lexicon': 0.10.0-beta.3(@atproto/xrpc@0.7.7)
-      eventemitter3: 5.0.1
+      '@hypercerts-org/lexicon': 0.10.0-beta.13(@atproto/xrpc@0.7.7)
+      eventemitter3: 5.0.4
+      type-fest: 5.4.1
       zod: 3.25.76
     transitivePeerDependencies:
       - '@atproto/xrpc'
@@ -5173,7 +5203,7 @@ snapshots:
 
   event-target-shim@5.0.1: {}
 
-  eventemitter3@5.0.1: {}
+  eventemitter3@5.0.4: {}
 
   events@3.3.0: {}
 
@@ -6252,6 +6282,8 @@ snapshots:
 
   supports-preserve-symlinks-flag@1.0.0: {}
 
+  tagged-tag@1.0.0: {}
+
   tailwind-merge@3.4.0: {}
 
   tailwindcss@4.1.18: {}
@@ -6298,6 +6330,10 @@ snapshots:
   type-check@0.4.0:
     dependencies:
       prelude-ls: 1.2.1
+
+  type-fest@5.4.1:
+    dependencies:
+      tagged-tag: 1.0.0
 
   type-is@1.6.18:
     dependencies:

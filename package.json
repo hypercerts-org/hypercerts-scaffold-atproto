@@ -14,7 +14,7 @@
     "@atproto/oauth-client-browser": "^0.3.34",
     "@atproto/oauth-client-node": "^0.3.14",
     "@hypercerts-org/lexicon": "0.10.0-beta.3",
-    "@hypercerts-org/sdk-core": "file:vendor/hypercerts-org-sdk-core-0.10.0-beta.4.tgz",
+    "@hypercerts-org/sdk-core": "file:./vendor/hypercerts-org-sdk-core-0.10.0-beta.6.tgz",
     "@radix-ui/react-avatar": "^1.1.11",
     "@radix-ui/react-dialog": "^1.1.15",
     "@radix-ui/react-dropdown-menu": "^2.1.16",

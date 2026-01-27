@@ -7,15 +7,12 @@ import {
   InputGroupInput,
 } from "@/components/ui/input-group";
 import { Button } from "./ui/button";
-import { useOAuthContext } from "@/providers/OAuthProviderSSR";
 import { FormEventHandler, useState } from "react";
-import { PDS_URL } from "@/utils/constants";
 import { Spinner } from "./ui/spinner";
 import { useLoginMutation } from "@/queries/auth";
 
 export default function LoginDialog() {
   const [handle, setHandle] = useState("");
-  const { signIn } = useOAuthContext();
   const loginMutation = useLoginMutation();
 
   const pdsUrl = process.env.NEXT_PUBLIC_PDS_URL;
@@ -40,7 +37,10 @@ export default function LoginDialog() {
   };
 
   const redirectToAccountCreation = () => {
-    signIn(PDS_URL);
+    if (!process.env.NEXT_PUBLIC_PDS_URL) {
+      throw new Error("NEXT_PUBLIC_PDS_URL is not defined");
+    }
+    loginMutation.mutate(process.env.NEXT_PUBLIC_PDS_URL);
   };
 
   return (
