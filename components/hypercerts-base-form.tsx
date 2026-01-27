@@ -10,8 +10,12 @@ import { Textarea } from "@/components/ui/textarea";
 import * as Hypercert from "@/lexicons/types/org/hypercerts/claim/activity";
 import { CreateHypercertParams } from "@hypercerts-org/sdk-core";
 import { Label } from "@radix-ui/react-label";
-import { PlusIcon, XIcon } from "lucide-react";
+import { PlusIcon, XIcon, Trash, ChevronDown, ChevronUp } from "lucide-react";
 import { FormEventHandler, useState } from "react";
+import { ProfileView } from "@atproto/api/dist/client/types/app/bsky/actor/defs";
+import UserSelection from "./user-selection";
+import UserAvatar from "./user-avatar";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 
 export interface HypercertsBaseFormProps {
   isSaving: boolean;
@@ -67,6 +71,15 @@ export default function HypercertsBaseForm({
     description: "",
   });
 
+  // Contributions state
+  const [showContributions, setShowContributions] = useState(false);
+  const [contributionRole, setContributionRole] = useState("");
+  const [contributors, setContributors] = useState<ProfileView[]>([]);
+  const [manualContributors, setManualContributors] = useState<string[]>([""]);
+  const [contributionDescription, setContributionDescription] = useState("");
+  const [contributionStartDate, setContributionStartDate] = useState<Date | null>(null);
+  const [contributionEndDate, setContributionEndDate] = useState<Date | null>(null);
+
   const handleWorkScopeChange = (index: number, value: string) => {
     setWorkScope((prev) => {
       const copy = [...prev];
@@ -83,6 +96,40 @@ export default function HypercertsBaseForm({
     setWorkScope((prev) => prev.filter((_, idx) => idx !== index));
   };
 
+  // Contributor helper functions
+  const addContributor = (user: ProfileView) => {
+    const isAdded = contributors.find(
+      (contributor) => contributor.did === user.did
+    );
+    if (!isAdded) {
+      setContributors((prev) => [...prev, user]);
+    }
+  };
+
+  const removeContributor = (user: ProfileView) => {
+    const filtered = contributors.filter(
+      (contributor) => contributor.did !== user.did
+    );
+    setContributors(filtered);
+  };
+
+  const addManualContributor = () => {
+    setManualContributors([...manualContributors, ""]);
+  };
+
+  const removeManualContributor = (index: number) => {
+    setManualContributors(manualContributors.filter((_, i) => i !== index));
+  };
+
+  const updateManualContributor = (index: number, value: string) => {
+    const newManualContributors = [...manualContributors];
+    newManualContributors[index] = value;
+    setManualContributors(newManualContributors);
+  };
+
+  const hasContributors =
+    contributors.length > 0 || manualContributors.some((c) => c.trim() !== "");
+
   const getRecord = (): CreateHypercertParams | undefined => {
     const cleanedWorkScope = workScope.map((w) => w.trim()).filter(Boolean);
 
@@ -98,6 +145,27 @@ export default function HypercertsBaseForm({
       return;
     }
 
+    // Build contributions array if contributors exist
+    let contributions: CreateHypercertParams["contributions"] = undefined;
+    if (hasContributors && contributionRole.trim()) {
+      const mappedContributors = [
+        ...contributors.map(({ did }) => did),
+        ...manualContributors.filter((uri) => uri.trim() !== ""),
+      ];
+
+      contributions = [
+        {
+          contributors: mappedContributors,
+          contributionDetails: {
+            role: contributionRole,
+            contributionDescription: contributionDescription || undefined,
+            startDate: contributionStartDate?.toISOString(),
+            endDate: contributionEndDate?.toISOString(),
+          },
+        },
+      ];
+    }
+
     const record: CreateHypercertParams = {
       title,
       shortDescription,
@@ -106,13 +174,19 @@ export default function HypercertsBaseForm({
         type: rights.type.trim(),
         description: rights.description.trim(),
       },
-      workScope: {
-        withinAnyOf: cleanedWorkScope,
-      },
+      workScope: cleanedWorkScope.length > 0 ? {
+        $type: "org.hypercerts.defs#workScopeAny",
+        op: "any" as const,
+        args: cleanedWorkScope.map(label => ({
+          $type: "org.hypercerts.defs#workScopeAtom" as const,
+          label,
+        })),
+      } : undefined,
       description: shortDescription,
       image: backgroundImage,
       startDate: startDate.toISOString(),
       endDate: endDate.toISOString(),
+      contributions,
     };
     return record;
   };
@@ -262,6 +336,144 @@ export default function HypercertsBaseForm({
             label="Work Time Frame To"
           />
         </div>
+      </div>
+
+      {/* Contributors Section (Optional) */}
+      <div className="rounded-lg border p-4 space-y-4">
+        <div 
+          className="flex justify-between items-center cursor-pointer"
+          onClick={() => setShowContributions(!showContributions)}
+        >
+          <div>
+            <h3 className="text-lg font-semibold">Contributors (Optional)</h3>
+            <p className="text-sm text-muted-foreground">
+              Add contributors and their roles for this hypercert
+            </p>
+          </div>
+          {showContributions ? (
+            <ChevronUp className="h-5 w-5" />
+          ) : (
+            <ChevronDown className="h-5 w-5" />
+          )}
+        </div>
+
+        {showContributions && (
+          <div className="space-y-4 pt-2">
+            <div className="space-y-2">
+              <Label htmlFor="contribution-role">Role / Title</Label>
+              <Input
+                id="contribution-role"
+                placeholder="e.g., Developer, Designer, Researcher"
+                value={contributionRole}
+                onChange={(e) => setContributionRole(e.target.value)}
+                maxLength={100}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label>Contributors</Label>
+              <Tabs defaultValue="search" className="w-full">
+                <TabsList className="grid w-full grid-cols-2">
+                  <TabsTrigger value="search">Search Users</TabsTrigger>
+                  <TabsTrigger value="manual">Enter URI or DID</TabsTrigger>
+                </TabsList>
+                <TabsContent value="search" className="space-y-2 pt-2">
+                  <UserSelection onUserSelect={addContributor} />
+                  <div className="flex flex-col gap-2">
+                    {contributors.map((contributor) => (
+                      <div
+                        key={contributor.did}
+                        className="flex justify-between items-center gap-4 border p-2 rounded-md"
+                      >
+                        <UserAvatar user={contributor} />
+                        <Button
+                          onClick={() => removeContributor(contributor)}
+                          variant={"outline"}
+                          size={"icon"}
+                          aria-label="delete"
+                          type="button"
+                        >
+                          <Trash className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                </TabsContent>
+                <TabsContent value="manual" className="space-y-2 pt-2">
+                  {manualContributors.map((uri, index) => (
+                    <div key={index} className="flex items-center gap-2">
+                      <Input
+                        type="text"
+                        placeholder="at://did:plc:..., https://..., did:eth:..."
+                        value={uri}
+                        onChange={(e) =>
+                          updateManualContributor(index, e.target.value)
+                        }
+                      />
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => removeManualContributor(index)}
+                        disabled={manualContributors.length === 1}
+                        type="button"
+                      >
+                        <Trash className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ))}
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={addManualContributor}
+                    type="button"
+                  >
+                    <PlusIcon className="mr-2 h-4 w-4" /> Add Contributor
+                  </Button>
+                </TabsContent>
+              </Tabs>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="contribution-description">
+                Contribution Description (Optional)
+              </Label>
+              <Textarea
+                id="contribution-description"
+                placeholder="What the contribution concretely achieved..."
+                value={contributionDescription}
+                onChange={(e) => setContributionDescription(e.target.value)}
+                maxLength={2000}
+                rows={4}
+              />
+              <p className="text-xs text-muted-foreground">
+                {contributionDescription.length} / 2000 characters
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <DatePicker
+                  label="Contribution Started"
+                  initDate={contributionStartDate || undefined}
+                  onChange={setContributionStartDate}
+                />
+              </div>
+              <div className="space-y-2">
+                <DatePicker
+                  label="Contribution Finished"
+                  initDate={contributionEndDate || undefined}
+                  onChange={setContributionEndDate}
+                />
+              </div>
+            </div>
+
+            {hasContributors && !contributionRole.trim() && (
+              <p className="text-sm text-amber-600">
+                Please enter a role for the contributors
+              </p>
+            )}
+          </div>
+        )}
       </div>
 
       {!!updateActions && (
