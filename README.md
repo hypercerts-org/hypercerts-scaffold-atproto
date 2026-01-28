@@ -4,8 +4,9 @@ A Next.js scaffold for building applications on ATProto using the Hypercerts SDK
 
 ## Prerequisites
 
-- Node.js 20+ 
-- Redis instance (for session & state storage)
+- Node.js 20+
+- Redis instance (for session & state storage), e.g.
+  `docker run -d -p 6379:6379 redis:alpine`
 - A PDS/SDS account for testing
 
 ## Quick Start
@@ -55,29 +56,22 @@ Once you have the URL from ngrok replace `NEXT_PUBLIC_APP_URL` with ngrok url
 
 ### Generating the JWK Private Key
 
-The `ATPROTO_JWK_PRIVATE` is a JSON Web Key used for OAuth authentication. Generate one using the `jose` library:
+The `ATPROTO_JWK_PRIVATE` is a JSON Web Key used for OAuth authentication. Generate one using the included script:
 
-```typescript
-import { generateKeyPair, exportJWK } from 'jose';
+```bash
+# Install dependencies first
+pnpm install
 
-const { privateKey } = await generateKeyPair('ES256');
-const jwk = await exportJWK(privateKey);
+# Generate and display the key
+pnpm run generate-jwk
 
-// Add required properties
-jwk.kid = crypto.randomUUID();
-jwk.alg = 'ES256';
-jwk.use = 'sig';
-
-console.log(JSON.stringify({ keys: [jwk] }));
+# Or append directly to .env.local
+pnpm run --silent generate-jwk >> .env.local
 ```
 
-The resulting JWK should look like this:
+The script outputs the complete environment variable line. You can either copy it manually or append directly to your `.env.local` file using `>>`.
 
-```json
-{"keys":[{"kty":"EC","x":"...","y":"...","crv":"P-256","d":"...","kid":"...","alg":"ES256","use":"sig"}]}
-```
-
-Set this as your `ATPROTO_JWK_PRIVATE` environment variable (wrap in single quotes in `.env.local`).
+⚠️ **Important**: Keep this key secure and never commit it to git!
 
 ## Architecture Overview
 
