@@ -24,8 +24,8 @@ importers:
         specifier: 0.10.0-beta.3
         version: 0.10.0-beta.3(@atproto/xrpc@0.7.7)
       '@hypercerts-org/sdk-core':
-        specifier: 0.10.0-beta.5-hotfix.3
-        version: 0.10.0-beta.5-hotfix.3(@atproto/xrpc@0.7.7)
+        specifier: 0.10.0-beta.5-hotfix.4
+        version: 0.10.0-beta.5-hotfix.4(@atproto/xrpc@0.7.7)
       '@radix-ui/react-avatar':
         specifier: ^1.1.11
         version: 1.1.11(@types/react-dom@19.2.3(@types/react@19.2.7))(@types/react@19.2.7)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
@@ -450,8 +450,8 @@ packages:
     peerDependencies:
       '@atproto/xrpc': '*'
 
-  '@hypercerts-org/sdk-core@0.10.0-beta.5-hotfix.3':
-    resolution: {integrity: sha512-/PWzp2MRo3lWH6wIOzAlV8WODSTuVrj8Tdc9SbyIl06vffuKXZlWgx3m2YzSKlWiDptkV8A8sJQPMA+1GCcECQ==}
+  '@hypercerts-org/sdk-core@0.10.0-beta.5-hotfix.4':
+    resolution: {integrity: sha512-RrdE7iDfTPPC8CLLyXm35D6disd4h28i0Cchs88M7SlIZMFzK5mFp2tHzf0O/HAS8qolvCHL4ihCM94ULtfGHw==}
 
   '@img/colour@1.0.0':
     resolution: {integrity: sha512-A5P/LfWGFSl6nsckYtjw9da+19jB8hkJ6ACTGcDfEJ0aE+l2n2El7dsVM7UVHZQ9s2lmYMWlrS21YLy2IR1LUw==}
@@ -3631,7 +3631,7 @@ snapshots:
       '@atproto/xrpc': 0.7.7
       multiformats: 13.4.2
 
-  '@hypercerts-org/sdk-core@0.10.0-beta.5-hotfix.3(@atproto/xrpc@0.7.7)':
+  '@hypercerts-org/sdk-core@0.10.0-beta.5-hotfix.4(@atproto/xrpc@0.7.7)':
     dependencies:
       '@atproto/api': 0.17.7
       '@atproto/lexicon': 0.5.2
