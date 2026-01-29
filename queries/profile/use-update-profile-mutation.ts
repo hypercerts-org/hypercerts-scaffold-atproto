@@ -6,10 +6,12 @@ import { updateProfile } from "@/lib/api/profile";
 import { queryKeys } from "@/lib/api/query-keys";
 
 interface UpdateProfileParams {
-  displayName: string;
-  description: string;
-  avatar?: File;
-  banner?: File;
+  displayName?: string | null;
+  description?: string | null;
+  pronouns?: string | null;
+  website?: string | null;
+  avatar?: File | null;
+  banner?: File | null;
 }
 
 interface UseUpdateProfileMutationOptions {

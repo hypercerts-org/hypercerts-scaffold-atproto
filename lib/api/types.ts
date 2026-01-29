@@ -82,14 +82,21 @@ export interface AddLocationResponse {
 
 // Profile types
 export interface UpdateProfileRequest {
-  displayName: string;
-  description: string;
-  avatar?: File;
-  banner?: File;
+  displayName?: string | null;
+  description?: string | null;
+  pronouns?: string | null;
+  website?: string | null;
+  avatar?: File | null;
+  banner?: File | null;
 }
 
 export interface UpdateProfileResponse {
+  ok: boolean;
   profile: {
+    displayName?: string;
+    description?: string;
+    pronouns?: string;
+    website?: string;
     avatar?: string;
     banner?: string;
   };

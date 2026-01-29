@@ -36,7 +36,7 @@ export default function ImageUploader({
       <div
         className={cn(
           "relative bg-muted flex items-center justify-center rounded-md",
-          containerStyles
+          containerStyles,
         )}
       >
         {/* If image exists, show it */}
@@ -48,7 +48,7 @@ export default function ImageUploader({
               fill
               className={cn(
                 "object-cover rounded-md",
-                aspect !== "banner" && "rounded-full"
+                aspect !== "banner" && "rounded-full",
               )}
             />
 

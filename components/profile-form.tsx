@@ -17,12 +17,16 @@ export default function ProfileForm({
   initialProfile: {
     displayName: string;
     description: string;
+    pronouns: string;
+    website: string;
     avatarUrl: string;
     bannerUrl: string;
   };
 }) {
   const [displayName, setDisplayName] = useState(initialProfile.displayName);
   const [description, setDescription] = useState(initialProfile.description);
+  const [pronouns, setPronouns] = useState(initialProfile.pronouns);
+  const [website, setWebsite] = useState(initialProfile.website);
 
   const [avatarUrl, setAvatarUrl] = useState(initialProfile.avatarUrl);
   const [bannerUrl, setBannerUrl] = useState(initialProfile.bannerUrl);
@@ -44,10 +48,13 @@ export default function ProfileForm({
     updateProfileMutation.mutate({
       displayName,
       description,
+      pronouns,
+      website,
       avatar: avatarImage,
       banner: bannerImage,
     });
   };
+
 
   return (
     <div className="max-w-2xl mx-auto py-8 px-4 space-y-6">
@@ -97,6 +104,20 @@ export default function ProfileForm({
         </div>
 
         <div className="space-y-2">
+          <Label htmlFor="pronouns">Pronouns (optional)</Label>
+          <Input
+            id="pronouns"
+            placeholder="e.g., they/them"
+            value={pronouns}
+            onChange={(e) => setPronouns(e.target.value)}
+            maxLength={20}
+          />
+          <p className="text-xs text-muted-foreground">
+            Max 20 characters
+          </p>
+        </div>
+
+        <div className="space-y-2">
           <Label htmlFor="description">Bio</Label>
           <Textarea
             id="description"
@@ -104,6 +125,17 @@ export default function ProfileForm({
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             rows={4}
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="website">Website (optional)</Label>
+          <Input
+            id="website"
+            type="url"
+            placeholder="https://example.com"
+            value={website}
+            onChange={(e) => setWebsite(e.target.value)}
           />
         </div>
 
