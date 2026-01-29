@@ -1,6 +1,5 @@
 import { Toaster } from "@/components/ui/sonner";
 import AllProviders from "@/providers/AllProviders";
-import { OAuthProvider } from "@/providers/OAuthProviderSSR";
 import { SignedInProvider } from "@/providers/SignedInProvider";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
@@ -32,10 +31,8 @@ export default async function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <AllProviders>
-          <OAuthProvider>
-            <SignedInProvider>{children}</SignedInProvider>
-            <Toaster />
-          </OAuthProvider>
+          <SignedInProvider>{children}</SignedInProvider>
+          <Toaster />
         </AllProviders>
       </body>
     </html>

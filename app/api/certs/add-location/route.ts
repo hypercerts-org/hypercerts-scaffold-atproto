@@ -1,5 +1,5 @@
 import { getAuthenticatedRepo } from "@/lib/atproto-session";
-import { AttachLocationParams } from "@hypercerts-org/sdk-core"
+import { LocationParams } from "@hypercerts-org/sdk-core"
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
@@ -36,7 +36,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    let locationPayload: AttachLocationParams;
+    let locationPayload: LocationParams;
     if (contentMode === "link") {
       const locationUrl = (data.get("locationUrl") as string | null)?.trim();
 

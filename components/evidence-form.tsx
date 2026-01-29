@@ -10,7 +10,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import type { HypercertEvidence } from "@hypercerts-org/sdk-core";
 import { FormEventHandler, useState } from "react";
 import { toast } from "sonner";
 import FormFooter from "./form-footer";
@@ -18,14 +17,19 @@ import FormInfo from "./form-info";
 import LinkFileSelector from "./link-file-selector";
 import { Button } from "./ui/button";
 import { BaseHypercertFormProps } from "@/lib/types";
+import { useAddAttachmentMutation } from "@/queries/hypercerts";
+import { AttachmentLocationParam } from "@/lib/api/types";
+import { MapPin } from "lucide-react";
 
 type ContentMode = "link" | "file";
 
-const RELATION_TYPES: HypercertEvidence["relationType"][] = [
-  "supports",
-  "challenges",
-  "clarifies",
-];
+const CONTENT_TYPES = [
+  "evidence",
+  "report",
+  "audit",
+  "testimonial",
+  "methodology",
+] as const;
 
 export default function HypercertEvidenceForm({
   hypercertInfo,
@@ -38,18 +42,84 @@ export default function HypercertEvidenceForm({
   const [title, setTitle] = useState("");
   const [shortDescription, setShortDescription] = useState("");
   const [description, setDescription] = useState("");
-  const [relationType, setRelationType] = useState<
-    HypercertEvidence["relationType"] | ""
-  >("supports");
+  const [contentType, setContentType] = useState<string>("evidence");
 
   const [evidenceMode, setEvidenceMode] = useState<ContentMode>("link");
   const [evidenceUrl, setEvidenceUrl] = useState("");
   const [evidenceFile, setEvidenceFile] = useState<File | null>(null);
-  const [saving, setSaving] = useState(false);
+
+  // Location state
+  const [locationMode, setLocationMode] = useState<"none" | "string" | "create">("none");
+  const [locationString, setLocationString] = useState("");
+
+  // For create mode
+  const [lpVersion, setLpVersion] = useState("1.0.0");
+  const [srs, setSrs] = useState("http://www.opengis.net/def/crs/OGC/1.3/CRS84");
+  const [locationType, setLocationType] = useState<"coordinate-decimal" | "geojson-point" | "other">("coordinate-decimal");
+  const [locationTypeCustom, setLocationTypeCustom] = useState("");
+  const [locationName, setLocationName] = useState("");
+  const [locationDescription, setLocationDescription] = useState("");
+  const [locationContentMode, setLocationContentMode] = useState<"link" | "file">("link");
+  const [locationUrl, setLocationUrl] = useState("");
+  const [locationFile, setLocationFile] = useState<File | null>(null);
+
+  const addAttachmentMutation = useAddAttachmentMutation({
+    onSuccess: () => {
+      onNext?.();
+    },
+  });
 
   const handleFileChange: React.ChangeEventHandler<HTMLInputElement> = (e) => {
     const file = e.target.files?.[0];
     setEvidenceFile(file ?? null);
+  };
+
+  const handleLocationFileChange: React.ChangeEventHandler<HTMLInputElement> = (e) => {
+    const file = e.target.files?.[0];
+    setLocationFile(file ?? null);
+  };
+
+  const handleLocationModeChange = (mode: "string" | "create") => {
+    // Clear data when switching modes
+    if (mode === "string") {
+      // Clear create mode data
+      setLocationName("");
+      setLocationDescription("");
+      setLocationUrl("");
+      setLocationFile(null);
+    } else {
+      // Clear string mode data
+      setLocationString("");
+    }
+    setLocationMode(mode);
+  };
+
+  const buildLocationParam = (): AttachmentLocationParam | undefined => {
+    if (locationMode === "none") return undefined;
+    
+    if (locationMode === "string") {
+      return locationString.trim() || undefined;
+    }
+    
+    // Create mode
+    const effectiveLocationType = locationType === "other" 
+      ? locationTypeCustom.trim() || "coordinate-decimal"
+      : locationType;
+    
+    const locationData = locationContentMode === "link" 
+      ? locationUrl.trim()
+      : locationFile;
+    
+    if (!locationData) return undefined;
+    
+    return {
+      lpVersion,
+      srs,
+      locationType: effectiveLocationType,
+      location: locationData,
+      ...(locationName.trim() && { name: locationName.trim() }),
+      ...(locationDescription.trim() && { description: locationDescription.trim() }),
+    };
   };
 
   const validateTextFields = () => {
@@ -78,8 +148,8 @@ export default function HypercertEvidenceForm({
       return false;
     }
 
-    if (relationType && !RELATION_TYPES.includes(relationType)) {
-      toast.error("Invalid relation type.");
+    if (contentType && !CONTENT_TYPES.includes(contentType as any)) {
+      toast.error("Invalid content type.");
       return false;
     }
 
@@ -88,7 +158,7 @@ export default function HypercertEvidenceForm({
 
   const handleAutofill = () => {
     setTitle("Audit Report: Impact Verification");
-    setRelationType("supports");
+    setContentType("audit");
     setShortDescription(
       "This audit report verifies the outputs and outcomes claimed by the hypercert, including methodology and third-party validation."
     );
@@ -96,67 +166,55 @@ export default function HypercertEvidenceForm({
       "This document provides an independent verification of the hypercert claim. It includes:\n\n- A breakdown of the methodology used\n- Supporting quantitative metrics\n- Third-party validation steps\n- References to supporting documentation and outcomes\n\nUse this evidence to substantiate the core claim and demonstrate credibility."
     );
 
-    // Evidence: enforce link mode (files not supported yet)
+    // Evidence: enforce link mode
     setEvidenceMode("link");
     setEvidenceUrl("https://example.com/audit-report.pdf");
     setEvidenceFile(null);
+
+    // Location: add example location
+    setLocationMode("create");
+    setLocationName("Project Site");
+    setLocationDescription("Primary verification location");
+    setLocationContentMode("link");
+    setLocationUrl("https://example.com/location.geojson");
 
     toast.success("Autofilled evidence form with sample data.");
   };
 
   const handleSubmit: FormEventHandler<HTMLFormElement> = async (e) => {
     e.preventDefault();
-    try {
-      setSaving(true);
-      if (!validateTextFields() || !hypercertInfo?.hypercertUri) {
-        return;
-      }
 
-      const formData = new FormData();
-      formData.append("title", title.trim());
-      formData.append("shortDescription", shortDescription.trim());
-      formData.append("description", description.trim());
-      if (relationType) {
-        formData.append("relationType", relationType);
-      }
-      formData.append("hypercertUri", hypercertInfo?.hypercertUri);
-      formData.append("evidenceMode", evidenceMode);
-
-      if (evidenceMode === "link") {
-        if (!evidenceUrl.trim()) {
-          toast.error("Please provide a link to the evidence.");
-          return;
-        }
-        formData.append("evidenceUrl", evidenceUrl.trim());
-      } else {
-        if (!evidenceFile) {
-          toast.error("Please upload an evidence file.");
-          return;
-        }
-        formData.append("evidenceFile", evidenceFile);
-      }
-      const result = await fetch("/api/certs/add-evidence", {
-        method: "POST",
-        body: formData,
-      });
-      if (result.ok) {
-        toast.success("Evidence added");
-        onNext?.();
-      } else {
-        console.log(result);
-        toast.error("Failed to add evidence");
-      }
-    } catch (err) {
-      console.error("Error assembling FormData:", err);
-      toast.error("Failed to assemble FormData");
-    } finally {
-      setSaving(false);
+    if (!validateTextFields() || !hypercertInfo?.hypercertUri) {
+      return;
     }
+
+    if (evidenceMode === "link" && !evidenceUrl.trim()) {
+      toast.error("Please provide a link to the evidence.");
+      return;
+    }
+    if (evidenceMode === "file" && !evidenceFile) {
+      toast.error("Please upload an evidence file.");
+      return;
+    }
+
+    const location = buildLocationParam();
+
+    addAttachmentMutation.mutate({
+      title: title.trim(),
+      shortDescription: shortDescription.trim(),
+      description: description.trim(),
+      contentType: contentType || undefined,
+      hypercertUri: hypercertInfo.hypercertUri,
+      evidenceMode,
+      evidenceUrl: evidenceMode === "link" ? evidenceUrl.trim() : undefined,
+      evidenceFile: evidenceMode === "file" ? evidenceFile ?? undefined : undefined,
+      location,
+    });
   };
 
   return (
     <FormInfo
-      title="Add Hypercert Evidence"
+      title="Add Hypercert Attachment"
       description="Attach a link or file that backs up this hypercert claim"
     >
       <form onSubmit={handleSubmit} className="space-y-6">
@@ -183,25 +241,24 @@ export default function HypercertEvidenceForm({
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="relationType">Relation Type *</Label>
+          <Label htmlFor="contentType">Attachment Type *</Label>
           <Select
-            value={relationType}
-            onValueChange={(val) =>
-              setRelationType(val as HypercertEvidence["relationType"])
-            }
+            value={contentType}
+            onValueChange={(val) => setContentType(val)}
           >
-            <SelectTrigger id="relationType">
-              <SelectValue placeholder="Choose how this evidence relates..." />
+            <SelectTrigger id="contentType">
+              <SelectValue placeholder="Choose the type of attachment..." />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="supports">Supports</SelectItem>
-              <SelectItem value="clarifies">Clarifies</SelectItem>
-              <SelectItem value="challenges">Challenges</SelectItem>
+              <SelectItem value="evidence">Evidence</SelectItem>
+              <SelectItem value="report">Report</SelectItem>
+              <SelectItem value="audit">Audit</SelectItem>
+              <SelectItem value="testimonial">Testimonial</SelectItem>
+              <SelectItem value="methodology">Methodology</SelectItem>
             </SelectContent>
           </Select>
           <p className="text-xs text-muted-foreground">
-            Specify whether this evidence supports, clarifies, or challenges the
-            claim.
+            Specify the type of attachment you are providing.
           </p>
         </div>
 
@@ -249,12 +306,179 @@ export default function HypercertEvidenceForm({
           fileHelpText="Upload a supporting file (PDF, image, etc.). It will be stored as a blob."
         />
 
+        {/* Location Section */}
+        <div className="space-y-6 pt-6 border-t">
+          <div className="flex items-center gap-2">
+            <MapPin className="h-5 w-5" />
+            <h3 className="text-lg font-semibold">Location (Optional)</h3>
+          </div>
+          <p className="text-sm text-muted-foreground">
+            Add geographic location information for this attachment
+          </p>
+
+          {/* Mode selector */}
+          <div className="space-y-2">
+            <Label>Location Mode</Label>
+            <div className="flex gap-2">
+              <Button
+                type="button"
+                variant={locationMode === "string" ? "default" : "outline"}
+                size="sm"
+                onClick={() => handleLocationModeChange("string")}
+              >
+                Reference (AT-URI)
+              </Button>
+              <Button
+                type="button"
+                variant={locationMode === "create" ? "default" : "outline"}
+                size="sm"
+                onClick={() => handleLocationModeChange("create")}
+              >
+                Create New Location
+              </Button>
+              {locationMode !== "none" && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    setLocationMode("none");
+                    setLocationString("");
+                    setLocationName("");
+                    setLocationDescription("");
+                    setLocationUrl("");
+                    setLocationFile(null);
+                  }}
+                >
+                  Clear
+                </Button>
+              )}
+            </div>
+          </div>
+
+          {/* String mode */}
+          {locationMode === "string" && (
+            <div className="space-y-2">
+              <Label htmlFor="locationString">Location Reference</Label>
+              <Input
+                id="locationString"
+                type="text"
+                placeholder="at://did:plc:xxx/app.certified.location/xxx"
+                value={locationString}
+                onChange={(e) => setLocationString(e.target.value)}
+              />
+              <p className="text-xs text-muted-foreground">
+                Enter an AT-URI to an existing location record
+              </p>
+            </div>
+          )}
+
+          {/* Create mode */}
+          {locationMode === "create" && (
+            <div className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="lpVersion">Location Protocol Version</Label>
+                  <Input
+                    id="lpVersion"
+                    value={lpVersion}
+                    onChange={(e) => setLpVersion(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="srs">Spatial Reference System (SRS)</Label>
+                  <Input
+                    id="srs"
+                    value={srs}
+                    onChange={(e) => setSrs(e.target.value)}
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    e.g., http://www.opengis.net/def/crs/OGC/1.3/CRS84
+                  </p>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Location Type</Label>
+                <div className="flex flex-wrap gap-2">
+                  <Button
+                    type="button"
+                    variant={locationType === "coordinate-decimal" ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setLocationType("coordinate-decimal")}
+                  >
+                    coordinate-decimal
+                  </Button>
+                  <Button
+                    type="button"
+                    variant={locationType === "geojson-point" ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setLocationType("geojson-point")}
+                  >
+                    geojson-point
+                  </Button>
+                  <Button
+                    type="button"
+                    variant={locationType === "other" ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setLocationType("other")}
+                  >
+                    Other
+                  </Button>
+                </div>
+                {locationType === "other" && (
+                  <Input
+                    placeholder="Custom locationType identifier"
+                    value={locationTypeCustom}
+                    onChange={(e) => setLocationTypeCustom(e.target.value)}
+                    className="mt-2"
+                  />
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="locationName">Location Name (Optional)</Label>
+                <Input
+                  id="locationName"
+                  placeholder="e.g., Project Site, Field Location"
+                  value={locationName}
+                  onChange={(e) => setLocationName(e.target.value)}
+                  maxLength={256}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="locationDescription">Location Description (Optional)</Label>
+                <Textarea
+                  id="locationDescription"
+                  placeholder="Describe the location context..."
+                  value={locationDescription}
+                  onChange={(e) => setLocationDescription(e.target.value)}
+                  rows={2}
+                />
+              </div>
+
+              <LinkFileSelector
+                label="Location Data"
+                fileUploadDisabled={false}
+                mode={locationContentMode}
+                onModeChange={setLocationContentMode}
+                urlPlaceholder="https://example.com/location.geojson"
+                onUrlChange={setLocationUrl}
+                onFileChange={handleLocationFileChange}
+                urlHelpText="Link to a resource encoding the location (e.g., GeoJSON, coordinates)."
+                fileHelpText="Upload a file containing location data."
+              />
+            </div>
+          )}
+        </div>
+
         <FormFooter
           onBack={onBack}
           onSkip={onNext}
           submitLabel="Save & Next"
-          savingLabel="Saving…"
-          saving={saving}
+          savingLabel="Saving..."
+          saving={addAttachmentMutation.isPending}
         />
       </form>
     </FormInfo>

@@ -1,17 +1,19 @@
 import "server-only";
 import { createClient } from "redis";
-if (!process.env.REDIS_PASSWORD) {
-  throw new Error("REDIS_PASSWORD is not defined in environment variables");
+
+const redisConfig: Parameters<typeof createClient>[0] = {
+  socket: {
+    host: process.env.REDIS_HOST || "localhost",
+    port: parseInt(process.env.REDIS_PORT || "6379", 10),
+  },
+};
+
+if (process.env.REDIS_PASSWORD) {
+  redisConfig.username = process.env.REDIS_USERNAME || "default";
+  redisConfig.password = process.env.REDIS_PASSWORD;
 }
 
-export const redisClient = createClient({
-  username: "default",
-  password: process.env.REDIS_PASSWORD,
-  socket: {
-    host: "redis-19069.c292.ap-southeast-1-1.ec2.cloud.redislabs.com",
-    port: 19069,
-  },
-});
+export const redisClient = createClient(redisConfig);
 
 export async function ensureRedis() {
   if (!redisClient.isOpen) {

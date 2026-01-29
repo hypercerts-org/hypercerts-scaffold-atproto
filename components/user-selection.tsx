@@ -1,8 +1,8 @@
 "use client";
+
 import useDebounce from "@/lib/use-debounce";
-import { useOAuthContext } from "@/providers/OAuthProviderSSR";
 import { ProfileView } from "@atproto/api/dist/client/types/app/bsky/actor/defs";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   Command,
   CommandEmpty,
@@ -13,48 +13,21 @@ import {
   CommandSeparator,
 } from "./ui/command";
 import UserAvatar from "./user-avatar";
+import { useUserSearchQuery } from "@/queries/external";
 
 export interface UserSelectionProps {
   onUserSelect: (profile: ProfileView) => void;
 }
 
 export default function UserSelection({ onUserSelect }: UserSelectionProps) {
-  const { atProtoAgent } = useOAuthContext();
   const [search, setSearch] = useState("");
   const debouncedSearch = useDebounce(search, 300);
-  const [userSuggestions, setUserSuggestions] = useState<ProfileView[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
 
-  useEffect(() => {
-    const fetchSuggestions = async () => {
-      if (!debouncedSearch.trim()) {
-        setUserSuggestions([]);
-        return;
-      }
-
-      try {
-        setIsLoading(true);
-        const res = await fetch(
-          `https://public.api.bsky.app/xrpc/app.bsky.actor.searchActors?q=${debouncedSearch}&limit=10`
-        );
-        const data = await res.json();
-        const actors = data.actors;
-        setUserSuggestions(actors || []);
-      } catch (error) {
-        console.error("Error fetching actors:", error);
-        setUserSuggestions([]);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchSuggestions();
-  }, [debouncedSearch, atProtoAgent]);
+  const { data: userSuggestions = [], isLoading } = useUserSearchQuery(debouncedSearch);
 
   const handleSelect = (profile: ProfileView) => {
     onUserSelect(profile);
     setSearch("");
-    setUserSuggestions([]);
   };
 
   return (
@@ -72,8 +45,8 @@ export default function UserSelection({ onUserSelect }: UserSelectionProps) {
         {!isLoading && !!userSuggestions.length && (
           <CommandGroup heading="Suggestions">
             {userSuggestions.map((user) => (
-              <CommandItem onSelect={() => handleSelect(user)} key={user.did}>
-                <UserAvatar user={user} />
+              <CommandItem onSelect={() => handleSelect(user as ProfileView)} key={user.did}>
+                <UserAvatar user={user as ProfileView} />
               </CommandItem>
             ))}
           </CommandGroup>

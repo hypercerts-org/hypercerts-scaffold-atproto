@@ -1,38 +1,14 @@
 "use client";
 
-import { useQuery, useQueries } from "@tanstack/react-query";
 import HypercertEvaluationView, {
   Evaluation,
 } from "./hypercert-evaluation-view";
 import { Skeleton } from "./ui/skeleton";
 import { Separator } from "./ui/separator";
-import { getEvaluationRecord } from "@/lib/create-actions";
-
-interface BacklinksResponse {
-  records: {
-    did: string;
-    collection: string;
-    rkey: string;
-  }[];
-}
-
-const fetchEvaluationLinks = async (
-  hypercertUri: string
-): Promise<BacklinksResponse["records"]> => {
-  const url = new URL(
-    "https://constellation.microcosm.blue/xrpc/blue.microcosm.links.getBacklinks"
-  );
-  url.searchParams.set("subject", hypercertUri);
-  url.searchParams.set("source", "org.hypercerts.claim.evaluation:subject.uri");
-  url.searchParams.set("limit", "50");
-
-  const response = await fetch(url.toString());
-  if (!response.ok) {
-    throw new Error("Network response was not ok");
-  }
-  const data: BacklinksResponse = await response.json();
-  return data.records;
-};
+import {
+  useEvaluationLinksQuery,
+  useEvaluationRecordsQuery,
+} from "@/queries/hypercerts";
 
 const EvaluationSkeleton = () => (
   <div className="p-4 border rounded-lg space-y-3">
@@ -51,22 +27,9 @@ export default function HypercertEvaluationsSection({
     data: evaluationLinks,
     isLoading: isLoadingLinks,
     isError: isErrorLinks,
-  } = useQuery({
-    queryKey: ["evaluation-links", hypercertUri],
-    queryFn: () => fetchEvaluationLinks(hypercertUri),
-  });
+  } = useEvaluationLinksQuery(hypercertUri);
 
-  const evaluationQueries = useQueries({
-    queries: (evaluationLinks || []).map((link) => ({
-      queryKey: ["evaluation-record", link.did, link.rkey],
-      queryFn: () =>
-        getEvaluationRecord({
-          did: link.did,
-          collection: link.collection,
-          rkey: link.rkey,
-        }),
-    })),
-  });
+  const evaluationQueries = useEvaluationRecordsQuery(evaluationLinks);
 
   const isLoadingDetails = evaluationQueries.some((q) => q.isLoading);
   const isErrorDetails = evaluationQueries.some((q) => q.isError);

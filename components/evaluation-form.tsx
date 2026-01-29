@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Trash, PlusCircle, Plus, Wand2 } from "lucide-react";
+import { Trash, PlusCircle, Plus, Wand2, MapPin } from "lucide-react";
 import UserSelection from "./user-selection";
 import UserAvatar from "./user-avatar";
 import FormInfo from "./form-info";
@@ -491,8 +491,16 @@ export default function EvaluationForm({
           )}
         </div>
 
-        {/* Location URI - Toggle */}
-        <div className="space-y-4">
+        {/* Location Section */}
+        <div className="space-y-6 pt-6 border-t">
+          <div className="flex items-center gap-2">
+            <MapPin className="h-5 w-5" />
+            <h3 className="text-lg font-semibold">Location (Optional)</h3>
+          </div>
+          <p className="text-sm text-muted-foreground">
+            Add geographic location information for this evaluation
+          </p>
+
           <div className="flex items-center gap-2">
             <Button
               type="button"
@@ -511,7 +519,7 @@ export default function EvaluationForm({
           </div>
 
           {useLocation && (
-            <div className="space-y-2 pl-4 border-l-2">
+            <div className="space-y-2">
               <Label htmlFor="location">Location URI</Label>
               <Input
                 id="location"

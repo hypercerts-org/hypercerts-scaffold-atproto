@@ -93,25 +93,38 @@ export const addEvaluation = async (params: {
   });
 };
 
+// Location parameter for measurements - can be a string (AT-URI) or full location creation params
+export type MeasurementLocationParam =
+  | string
+  | {
+      lpVersion: string;
+      srs: string;
+      locationType: string;
+      location: string | File;
+      name?: string;
+      description?: string;
+    };
+
 export const addMeasurement = async (params: {
-  hypercertUri: string;
-  measurers: string[];
+  subject: string;
   metric: string;
   value: string;
-  methodUri?: string;
-  evidenceUris?: string[];
+  unit: string;
+  measurers?: string[];
+  startDate?: string;
+  endDate?: string;
+  methodType?: string;
+  methodURI?: string;
+  evidenceURI?: string[];
+  locations?: MeasurementLocationParam[];
+  comment?: string;
 }) => {
   const ctx = await getRepoContext();
   if (!ctx) {
     throw new Error("Unable to get repository context");
   }
 
-  const { hypercertUri, ...measurementData } = params;
-
-  return ctx.scopedRepo.hypercerts.addMeasurement({
-    ...measurementData,
-    hypercertUri,
-  });
+  return ctx.scopedRepo.hypercerts.addMeasurement(params);
 };
 
 export const getMeasurementRecord = async (params: {

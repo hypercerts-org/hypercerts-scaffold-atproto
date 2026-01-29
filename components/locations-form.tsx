@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import FormFooter from "./form-footer";
 import FormInfo from "./form-info";
 import LinkFileSelector from "./link-file-selector";
+import { useAddLocationMutation } from "@/queries/hypercerts";
 
 type LocationContentMode = "link" | "file";
 
@@ -37,7 +38,11 @@ export default function HypercertLocationForm({
   const [locationUrl, setLocationUrl] = useState("");
   const [locationFile, setLocationFile] = useState<File | null>(null);
 
-  const [saving, setSaving] = useState(false);
+  const addLocationMutation = useAddLocationMutation({
+    onSuccess: () => {
+      onNext?.();
+    },
+  });
 
   const effectiveLocationType =
     locationTypePreset === "other"
@@ -54,59 +59,40 @@ export default function HypercertLocationForm({
     if (!hypercertInfo?.hypercertUri) {
       return;
     }
-    try {
-      setSaving(true);
-      if (!lpVersion.trim()) {
-        toast.error("Location Protocol Version is required.");
-        return;
-      }
-      if (!srs.trim()) {
-        toast.error("Spatial Reference System (SRS) is required.");
-        return;
-      }
-      if (!effectiveLocationType.trim()) {
-        toast.error("Location Type is required.");
-        return;
-      }
-      if (contentMode === "link" && !locationUrl.trim()) {
-        toast.error("Please provide a link to the location data.");
-        return;
-      }
-      if (contentMode === "file" && !locationFile) {
-        toast.error("Please upload a location file.");
-        return;
-      }
-      const formData = new FormData();
-      formData.append("lpVersion", lpVersion.trim());
-      formData.append("srs", srs.trim());
-      formData.append("locationType", effectiveLocationType.trim());
-      formData.append("createdAt", new Date().toISOString());
 
-      if (name.trim()) formData.append("name", name.trim());
-      if (description.trim())
-        formData.append("description", description.trim());
-      formData.append("contentMode", contentMode);
-
-      if (contentMode === "link") {
-        formData.append("locationUrl", locationUrl.trim());
-      } else {
-        formData.append("locationFile", locationFile as File);
-      }
-      formData.append("hypercertUri", hypercertInfo?.hypercertUri);
-      const response = await fetch("/api/certs/add-location", {
-        method: "POST",
-        body: formData,
-      });
-      const result = await response.json();
-      console.log(result);
-      toast.success("Location Added Successfully");
-      onNext?.();
-    } catch (error) {
-      console.error("Error assembling FormData:", error);
-      toast.error("Failed to assemble FormData");
-    } finally {
-      setSaving(false);
+    if (!lpVersion.trim()) {
+      toast.error("Location Protocol Version is required.");
+      return;
     }
+    if (!srs.trim()) {
+      toast.error("Spatial Reference System (SRS) is required.");
+      return;
+    }
+    if (!effectiveLocationType.trim()) {
+      toast.error("Location Type is required.");
+      return;
+    }
+    if (contentMode === "link" && !locationUrl.trim()) {
+      toast.error("Please provide a link to the location data.");
+      return;
+    }
+    if (contentMode === "file" && !locationFile) {
+      toast.error("Please upload a location file.");
+      return;
+    }
+
+    addLocationMutation.mutate({
+      lpVersion: lpVersion.trim(),
+      srs: srs.trim(),
+      locationType: effectiveLocationType.trim(),
+      createdAt: new Date().toISOString(),
+      name: name.trim() || undefined,
+      description: description.trim() || undefined,
+      contentMode,
+      locationUrl: contentMode === "link" ? locationUrl.trim() : undefined,
+      locationFile: contentMode === "file" ? locationFile ?? undefined : undefined,
+      hypercertUri: hypercertInfo.hypercertUri,
+    });
   };
 
   return (
@@ -220,8 +206,8 @@ export default function HypercertLocationForm({
           onBack={onBack}
           onSkip={onNext}
           submitLabel="Save & Next"
-          savingLabel="Saving…"
-          saving={saving}
+          savingLabel="Saving..."
+          saving={addLocationMutation.isPending}
         />
       </form>
     </FormInfo>

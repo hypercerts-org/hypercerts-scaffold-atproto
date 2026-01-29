@@ -1,42 +1,14 @@
 "use client";
 
-import { useQuery, useQueries } from "@tanstack/react-query";
 import HypercertMeasurementView, {
   Measurement,
 } from "./hypercert-measurement-view";
 import { Skeleton } from "./ui/skeleton";
 import { Separator } from "./ui/separator";
-import { getMeasurementRecord } from "@/lib/create-actions";
-
-// The response from the backlinks API, which gives us references to records
-interface BacklinksResponse {
-  records: {
-    did: string;
-    collection: string;
-    rkey: string;
-  }[];
-}
-
-const fetchMeasurementLinks = async (
-  hypercertUri: string
-): Promise<BacklinksResponse["records"]> => {
-  const url = new URL(
-    "https://constellation.microcosm.blue/xrpc/blue.microcosm.links.getBacklinks"
-  );
-  url.searchParams.set("subject", hypercertUri);
-  url.searchParams.set(
-    "source",
-    "org.hypercerts.claim.measurement:hypercert.uri"
-  );
-  url.searchParams.set("limit", "50");
-
-  const response = await fetch(url.toString());
-  if (!response.ok) {
-    throw new Error("Network response was not ok");
-  }
-  const data: BacklinksResponse = await response.json();
-  return data.records;
-};
+import {
+  useMeasurementLinksQuery,
+  useMeasurementRecordsQuery,
+} from "@/queries/hypercerts";
 
 const MeasurementSkeleton = () => (
   <div className="p-4 border rounded-lg space-y-3">
@@ -64,23 +36,9 @@ export default function HypercertMeasurementsSection({
     data: measurementLinks,
     isLoading: isLoadingLinks,
     isError: isErrorLinks,
-  } = useQuery({
-    queryKey: ["measurement-links", hypercertUri],
-    queryFn: () => fetchMeasurementLinks(hypercertUri),
-  });
-  console.log(measurementLinks);
+  } = useMeasurementLinksQuery(hypercertUri);
 
-  const measurementQueries = useQueries({
-    queries: (measurementLinks || []).map((link) => ({
-      queryKey: ["measurement-record", link.did, link.rkey],
-      queryFn: () =>
-        getMeasurementRecord({
-          did: link.did,
-          collection: link.collection,
-          rkey: link.rkey,
-        }),
-    })),
-  });
+  const measurementQueries = useMeasurementRecordsQuery(measurementLinks);
 
   const isLoadingDetails = measurementQueries.some((q) => q.isLoading);
   const isErrorDetails = measurementQueries.some((q) => q.isError);

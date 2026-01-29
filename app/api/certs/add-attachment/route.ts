@@ -10,8 +10,8 @@ export async function POST(req: NextRequest) {
       (data.get("shortDescription") as string | null)?.trim() ?? undefined;
     const description =
       (data.get("description") as string | null)?.trim() ?? undefined;
-    const relationType =
-      (data.get("relationType") as string | null)?.trim() ?? undefined;
+    const contentType =
+      (data.get("contentType") as string | null)?.trim() ?? undefined;
 
     const evidenceMode =
       (data.get("evidenceMode") as string | null)?.trim() ?? "link";
@@ -68,18 +68,56 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const response = await ctx.scopedRepo.hypercerts.addEvidence({
-      subjectUri: hypercertUri,
+    // Parse location if provided
+    let location: any = undefined;
+    const locationMode = (data.get("locationMode") as string | null)?.trim();
+
+    if (locationMode === "string") {
+      const locationString = (data.get("locationString") as string | null)?.trim();
+      if (locationString) {
+        location = locationString;
+      }
+    } else if (locationMode === "create") {
+      const lpVersion = (data.get("lpVersion") as string | null)?.trim();
+      const srs = (data.get("srs") as string | null)?.trim();
+      const locationType = (data.get("locationType") as string | null)?.trim();
+      const locationContentMode = (data.get("locationContentMode") as string | null)?.trim();
+      
+      if (lpVersion && srs && locationType) {
+        let locationData: string | File | undefined;
+        
+        if (locationContentMode === "link") {
+          locationData = (data.get("locationUrl") as string | null)?.trim();
+        } else if (locationContentMode === "file") {
+          locationData = data.get("locationFile") as File | null ?? undefined;
+        }
+        
+        if (locationData) {
+          location = {
+            lpVersion,
+            srs,
+            locationType,
+            location: locationData,
+            ...(data.get("locationName") && { name: (data.get("locationName") as string).trim() }),
+            ...(data.get("locationDescription") && { description: (data.get("locationDescription") as string).trim() }),
+          };
+        }
+      }
+    }
+
+    const response = await ctx.scopedRepo.hypercerts.addAttachment({
+      subjects: hypercertUri,
       content,
       title,
       shortDescription,
       description,
-      relationType: relationType as any,
+      contentType: contentType as any,
+      ...(location && { location }),
     });
 
     return NextResponse.json(response);
   } catch (e) {
-    console.error("Error in add-evidence API:", e);
+    console.error("Error in add-attachment API:", e);
     return NextResponse.json(
       { error: "Internal server error", details: (e as Error).message },
       { status: 500 }

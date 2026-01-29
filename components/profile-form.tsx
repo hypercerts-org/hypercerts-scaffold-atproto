@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 
 import ImageUploader from "@/components/image-uploader";
+import { useUpdateProfileMutation } from "@/queries/profile";
 
 export default function ProfileForm({
   initialProfile,
@@ -29,44 +30,23 @@ export default function ProfileForm({
   const [avatarImage, setAvatarImage] = useState<File>();
   const [bannerImage, setBannerImage] = useState<File>();
 
-  const [saving, setSaving] = useState(false);
+  const updateProfileMutation = useUpdateProfileMutation({
+    onSuccess: (data) => {
+      // update UI to reflect stored profile URLs
+      setAvatarUrl(data.profile.avatar || "");
+      setBannerUrl(data.profile.banner || "");
+    },
+  });
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
 
-    try {
-      setSaving(true);
-
-      const formData = new FormData();
-      formData.set("displayName", displayName);
-      formData.set("description", description);
-
-      if (avatarImage) formData.set("avatar", avatarImage);
-      if (bannerImage) formData.set("banner", bannerImage);
-
-      const res = await fetch("/api/profile/update", {
-        method: "POST",
-        body: formData,
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        toast.error(data.error || "Failed to update profile");
-        return;
-      }
-
-      toast.success("Profile successfully updated");
-
-      // update UI to reflect stored profile URLs
-      setAvatarUrl(data.profile.avatar || "");
-      setBannerUrl(data.profile.banner || "");
-    } catch (err) {
-      console.error(err);
-      toast.error("Failed to save profile");
-    } finally {
-      setSaving(false);
-    }
+    updateProfileMutation.mutate({
+      displayName,
+      description,
+      avatar: avatarImage,
+      banner: bannerImage,
+    });
   };
 
   return (
@@ -120,7 +100,7 @@ export default function ProfileForm({
           <Label htmlFor="description">Bio</Label>
           <Textarea
             id="description"
-            placeholder="Tell the world about yourself…"
+            placeholder="Tell the world about yourself..."
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             rows={4}
@@ -128,8 +108,8 @@ export default function ProfileForm({
         </div>
 
         <div className="flex justify-end">
-          <Button type="submit" disabled={saving}>
-            {saving ? "Saving…" : "Save"}
+          <Button type="submit" disabled={updateProfileMutation.isPending}>
+            {updateProfileMutation.isPending ? "Saving..." : "Save"}
           </Button>
         </div>
       </form>

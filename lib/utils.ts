@@ -1,4 +1,3 @@
-import { PDS_URL } from "@/utils/constants";
 import { BlobRef } from "@atproto/lexicon";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
@@ -31,7 +30,7 @@ export function getBlobURL(
     if (!did || !cid) return undefined;
 
     const url = `${
-      pdsUrl || PDS_URL
+      pdsUrl || process.env.NEXT_PUBLIC_PDS_URL
     }/xrpc/com.atproto.sync.getBlob?did=${encodeURIComponent(
       did
     )}&cid=${encodeURIComponent(cid.toString())}`;
