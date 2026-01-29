@@ -17,6 +17,7 @@ export default async function ProfilePage() {
   // Convert blob references to URLs, matching the pattern used in hypercerts page
   // Profile avatar/banner can be Uri objects or SmallImage/LargeImage objects
   // fix for now for interop demo - same pattern as hypercerts page
+  // TODO: have a proper fix for this
   const avatarUrl = profile.avatar
     ? getBlobURL((profile.avatar as any).image, userDid, sessionIssuer) || ""
     : "";

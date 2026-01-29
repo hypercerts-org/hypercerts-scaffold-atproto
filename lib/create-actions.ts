@@ -124,7 +124,12 @@ export const addMeasurement = async (params: {
     throw new Error("Unable to get repository context");
   }
 
-  return ctx.scopedRepo.hypercerts.addMeasurement(params);
+  return ctx.scopedRepo.hypercerts.addMeasurement({
+    ...params,
+    measurers: (params.measurers || []).map((measurer) => {
+      return { did: measurer };
+    }),
+  });
 };
 
 export const getMeasurementRecord = async (params: {
@@ -195,9 +200,12 @@ export const createOrganization = async (params: {
 };
 
 export const addCollaboratorToOrganization = async (
-  params: GrantAccessParams
+  params: GrantAccessParams,
 ) => {
-  const ctx = await getRepoContext({ serverOverride: "sds", targetDid: params.repoDid });
+  const ctx = await getRepoContext({
+    serverOverride: "sds",
+    targetDid: params.repoDid,
+  });
   if (!ctx) {
     throw new Error("Unable to get repository context");
   }
@@ -210,7 +218,10 @@ export const removeCollaborator = async (params: {
   userDid: string;
   repoDid: string;
 }) => {
-  const ctx = await getRepoContext({ serverOverride: "sds", targetDid: params.repoDid });
+  const ctx = await getRepoContext({
+    serverOverride: "sds",
+    targetDid: params.repoDid,
+  });
   if (!ctx) {
     throw new Error("Unable to get repository context");
   }

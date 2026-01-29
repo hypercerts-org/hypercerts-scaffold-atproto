@@ -21,7 +21,7 @@ export async function SignedInProvider({
   if (session) {
     const repo = await getAuthenticatedRepo("pds");
     const profile = repo ? await repo.profile.get() : null;
-    avatarUrl = profile?.avatar ? getBlobURL(profile.avatar, session.did, session.serverMetadata.issuer) : "";
+    avatarUrl = profile?.avatar ? getBlobURL((profile.avatar as any).image, session.did, session.serverMetadata.issuer) : "";
     handle = profile?.handle || "";
 
     if (activeDid && activeDid !== session.did) {
