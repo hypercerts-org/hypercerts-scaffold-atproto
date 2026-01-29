@@ -1,26 +1,22 @@
 "use client";
 
-import { FormEventHandler, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
-import { Textarea } from "@/components/ui/textarea";
+import { addMeasurement, MeasurementLocationParam } from "@/lib/create-actions";
 import { ProfileView } from "@atproto/api/dist/client/types/app/bsky/actor/defs";
-import { Calendar, MapPin, Plus, PlusCircle, Trash, Wand2 } from "lucide-react";
-import { Calendar, MapPin, Plus, PlusCircle, Trash, Wand2 } from "lucide-react";
-import FormFooter from "./form-footer";
-import FormInfo from "./form-info";
-import UserAvatar from "./user-avatar";
-import UserSelection from "./user-selection";
-import LinkFileSelector from "./link-file-selector";
-import LinkFileSelector from "./link-file-selector";
 import { CreateHypercertResult } from "@hypercerts-org/sdk-core";
 import { useMutation } from "@tanstack/react-query";
-import { addMeasurement, MeasurementLocationParam } from "@/lib/create-actions";
-import { addMeasurement, MeasurementLocationParam } from "@/lib/create-actions";
+import { Calendar, MapPin, Plus, PlusCircle, Trash, Wand2 } from "lucide-react";
+import { FormEventHandler, useState } from "react";
 import { toast } from "sonner";
+import FormFooter from "./form-footer";
+import FormInfo from "./form-info";
+import LinkFileSelector from "./link-file-selector";
+import UserAvatar from "./user-avatar";
+import UserSelection from "./user-selection";
 
 // Location entry type for the form
 type LocationEntryMode = "string" | "create";
@@ -43,27 +39,6 @@ interface LocationEntry {
   locationUrl: string;
   locationFile: File | null;
 }
-
-const createEmptyLocationEntry = (): LocationEntry => ({
-  id: crypto.randomUUID(),
-  mode: "string",
-  stringValue: "",
-  lpVersion: "1.0.0",
-  srs: "http://www.opengis.net/def/crs/OGC/1.3/CRS84",
-  locationType: "coordinate-decimal",
-  locationTypeCustom: "",
-  name: "",
-  description: "",
-  contentMode: "link",
-  locationUrl: "",
-  locationFile: null,
-});
-
-// Location entry type for the form
-type LocationEntryMode = "string" | "create";
-type LocationTypePreset = "coordinate-decimal" | "geojson-point" | "other";
-type LocationContentMode = "link" | "file";
-
 interface LocationEntry {
   id: string;
   mode: LocationEntryMode;
@@ -268,26 +243,6 @@ export default function MeasurementForm({
     setter(newUris);
   };
 
-  // Location entry helpers
-  const addLocationEntry = () => {
-    setLocationEntries([...locationEntries, createEmptyLocationEntry()]);
-  };
-
-  const removeLocationEntry = (id: string) => {
-    setLocationEntries(locationEntries.filter((entry) => entry.id !== id));
-  };
-
-  const updateLocationEntry = (
-    id: string,
-    updates: Partial<LocationEntry>
-  ) => {
-    setLocationEntries(
-      locationEntries.map((entry) =>
-        entry.id === id ? { ...entry, ...updates } : entry
-      )
-    );
-  };
-
   // Build location params for submission
   const buildLocationParams = (): MeasurementLocationParam[] => {
     return locationEntries
@@ -344,44 +299,6 @@ export default function MeasurementForm({
         entry.id === id ? { ...entry, ...updates } : entry
       )
     );
-  };
-
-  // Build location params for submission
-  const buildLocationParams = (): MeasurementLocationParam[] => {
-    return locationEntries
-      .map((entry) => {
-        if (entry.mode === "string") {
-          return entry.stringValue.trim();
-        } else {
-          const effectiveLocationType =
-            entry.locationType === "other"
-              ? entry.locationTypeCustom.trim() || "coordinate-decimal"
-              : entry.locationType;
-
-          const locationData =
-            entry.contentMode === "link"
-              ? entry.locationUrl.trim()
-              : entry.locationFile;
-
-          if (!locationData) return null;
-
-          return {
-            lpVersion: entry.lpVersion,
-            srs: entry.srs,
-            locationType: effectiveLocationType,
-            location: locationData,
-            ...(entry.name.trim() && { name: entry.name.trim() }),
-            ...(entry.description.trim() && {
-              description: entry.description.trim(),
-            }),
-          };
-        }
-      })
-      .filter((loc): loc is MeasurementLocationParam => {
-        if (loc === null) return false;
-        if (typeof loc === "string") return loc !== "";
-        return true;
-      });
   };
 
   const handleSubmit: FormEventHandler<HTMLFormElement> = (e) => {
