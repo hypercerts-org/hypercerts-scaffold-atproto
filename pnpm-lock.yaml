@@ -448,13 +448,14 @@ packages:
     peerDependencies:
       '@atproto/xrpc': '*'
 
-  '@hypercerts-org/lexicon@file:../hypercerts-lexicon':
-    resolution: {directory: ../hypercerts-lexicon, type: directory}
+  '@hypercerts-org/lexicon@file:hypercerts-org-lexicon-0.10.0-beta.13.tgz':
+    resolution: {integrity: sha512-cMUnZ7aqs+BPD51k8bX76MAAcyzv8DQ67GMp5yUXZhAGWxgc/pqOf4LjJQyjCZ1pv8cBiXwa8pe3qH6A7GHKIg==, tarball: file:hypercerts-org-lexicon-0.10.0-beta.13.tgz}
+    version: 0.10.0-beta.13
     peerDependencies:
       '@atproto/xrpc': '*'
 
   '@hypercerts-org/sdk-core@file:vendor/hypercerts-org-sdk-core-0.10.0-beta.8.tgz':
-    resolution: {integrity: sha512-jN+/nfVBSraPNS9s3rGj0Ft61NBfOHYWYskmZ+IwlBOcFnixQutn9qYRC657Of5PkwLgfzWIFkQRoGccFnkG7Q==, tarball: file:vendor/hypercerts-org-sdk-core-0.10.0-beta.8.tgz}
+    resolution: {integrity: sha512-/N71LMBZ32TrMnlQSzrRa2BfGyzAfv35r3n/jyEqCdj9J177Fhj8thOPQKcDL/D1bdOzEW/j91hR6cLsBFYYYw==, tarball: file:vendor/hypercerts-org-sdk-core-0.10.0-beta.8.tgz}
     version: 0.10.0-beta.8
 
   '@img/colour@1.0.0':
@@ -3661,7 +3662,7 @@ snapshots:
       '@atproto/xrpc': 0.7.7
       multiformats: 13.4.2
 
-  '@hypercerts-org/lexicon@file:../hypercerts-lexicon(@atproto/xrpc@0.7.7)':
+  '@hypercerts-org/lexicon@file:hypercerts-org-lexicon-0.10.0-beta.13.tgz(@atproto/xrpc@0.7.7)':
     dependencies:
       '@atcute/bluesky': 3.2.15
       '@atcute/leaflet': 1.0.15
@@ -3675,7 +3676,7 @@ snapshots:
       '@atproto/lexicon': 0.5.2
       '@atproto/oauth-client': 0.5.13
       '@atproto/oauth-client-node': 0.3.15
-      '@hypercerts-org/lexicon': file:../hypercerts-lexicon(@atproto/xrpc@0.7.7)
+      '@hypercerts-org/lexicon': file:hypercerts-org-lexicon-0.10.0-beta.13.tgz(@atproto/xrpc@0.7.7)
       eventemitter3: 5.0.4
       type-fest: 5.4.1
       zod: 3.25.76

@@ -21,13 +21,13 @@ export async function SignedInProvider({
   if (session) {
     const repo = await getAuthenticatedRepo("pds");
     const profile = repo ? await repo.profile.get() : null;
-    avatarUrl = profile?.avatar ? getBlobURL((profile.avatar as any).image, session.did, session.serverMetadata.issuer) : "";
+    avatarUrl = profile?.avatar
     handle = profile?.handle || "";
 
     if (activeDid && activeDid !== session.did) {
       const orgRepo = await getAuthenticatedRepo("sds");
       const org = orgRepo ? await orgRepo.organizations.get(activeDid) : null;
-      if (org) {
+      if (org)  {
         activeProfileName = org.name;
         activeProfileHandle = org.handle;
       }

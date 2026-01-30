@@ -19,7 +19,6 @@ export const getActiveProfileInfo = async () => {
 
   if (ctx.server === "pds") {
     const profile = await ctx.scopedRepo.profile.get();
-    console.log(profile);
     if (!profile) return null;
     return {
       name: profile.displayName || profile.handle,
