@@ -21,7 +21,6 @@ import {
 import { getAuthenticatedRepo, getSession } from "@/lib/atproto-session";
 
 export const metadata: Metadata = {
-  title: "Home",
   description:
     "A minimal demo using AT Protocol and Hypercerts lexicons to create, edit, and view hypercert claims.",
   openGraph: {
