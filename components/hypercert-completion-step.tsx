@@ -2,14 +2,7 @@
 
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { CheckCircle2, ArrowLeft, Plus } from "lucide-react";
+import { ArrowLeft, Plus, ExternalLink } from "lucide-react";
 import { BaseHypercertFormProps } from "@/lib/types";
 
 export default function HypercertCompletionStep({
@@ -23,75 +16,99 @@ export default function HypercertCompletionStep({
   const viewHref = hypercertInfo?.hypercertUri
     ? `/hypercerts/${encodeURIComponent(hypercertInfo.hypercertUri)}`
     : "/hypercerts";
-  return (
-    <div className="p-6">
-      <div className="max-w-3xl mx-auto">
-        <Card className="shadow-lg">
-          <CardHeader className="pb-2">
-            <div className="flex items-center gap-3">
-              <div className="rounded-full bg-emerald-100 dark:bg-emerald-900/40 p-2">
-                <CheckCircle2 className="h-6 w-6 text-emerald-600 dark:text-emerald-400" />
-              </div>
-              <div>
-                <CardTitle className="text-2xl mt-1">
-                  Hypercert created!
-                </CardTitle>
-                <CardDescription className="mt-1">
-                  Your hypercert is now live. You can view it, share it, or
-                  start creating another one.
-                </CardDescription>
-              </div>
-            </div>
-          </CardHeader>
 
-          <CardContent className="space-y-6">
-            {hypercertInfo?.hypercertCid ? (
-              <div className="rounded-md border bg-muted/40 px-4 py-3 text-sm text-muted-foreground">
-                <span className="font-mono text-xs">CID:</span>{" "}
-                <span className="font-mono break-all">
-                  {hypercertInfo.hypercertCid}
-                </span>
+  return (
+    <div className="relative overflow-hidden rounded-2xl gradient-mesh">
+      {/* Noise overlay */}
+      <div className="noise-bg relative">
+        <div className="relative z-10 px-8 py-12 lg:py-16 text-center">
+          {/* Animated success icon */}
+          <div className="inline-flex items-center justify-center mb-6 animate-scale-in">
+            <div className="relative">
+              <div className="h-20 w-20 rounded-2xl bg-create-accent/15 flex items-center justify-center">
+                <svg
+                  className="h-10 w-10 text-create-accent"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth={2.5}
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <polyline
+                    points="20 6 9 17 4 12"
+                    className="animate-draw-check"
+                  />
+                </svg>
               </div>
-            ) : (
-              <p className="text-sm text-muted-foreground">
-                We couldn&apos;t resolve a specific hypercert ID, but your
-                record should now be available in your hypercerts list.
+              {/* Glow ring */}
+              <div className="absolute inset-0 rounded-2xl bg-create-accent/10 blur-xl -z-10" />
+            </div>
+          </div>
+
+          {/* Title */}
+          <h2 className="text-2xl lg:text-3xl font-[family-name:var(--font-syne)] font-bold tracking-tight text-foreground mb-2 animate-fade-in-up">
+            Hypercert Created
+          </h2>
+          <p className="text-sm font-[family-name:var(--font-outfit)] text-muted-foreground max-w-md mx-auto mb-8 animate-fade-in-up" style={{ animationDelay: "100ms" }}>
+            Your impact claim is now live. Share it, view the details, or create another one.
+          </p>
+
+          {/* CID display */}
+          {hypercertInfo?.hypercertCid && (
+            <div className="inline-block glass-panel rounded-xl px-5 py-3 mb-8 animate-fade-in-up" style={{ animationDelay: "200ms" }}>
+              <p className="text-[11px] uppercase tracking-wider font-[family-name:var(--font-outfit)] font-medium text-muted-foreground mb-1">
+                Content Identifier
               </p>
+              <p className="font-mono text-xs text-foreground break-all max-w-lg">
+                {hypercertInfo.hypercertCid}
+              </p>
+            </div>
+          )}
+
+          {!hypercertInfo?.hypercertCid && (
+            <p className="text-sm font-[family-name:var(--font-outfit)] text-muted-foreground mb-8 animate-fade-in-up" style={{ animationDelay: "200ms" }}>
+              We couldn&apos;t resolve a specific hypercert ID, but your
+              record should now be available in your hypercerts list.
+            </p>
+          )}
+
+          {/* Actions */}
+          <div className="flex flex-wrap items-center justify-center gap-3 animate-fade-in-up" style={{ animationDelay: "300ms" }}>
+            {onBack && (
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={onBack}
+                className="gap-2 font-[family-name:var(--font-outfit)] text-muted-foreground hover:text-foreground"
+              >
+                <ArrowLeft className="h-4 w-4" />
+                Back
+              </Button>
             )}
 
-            <div className="flex flex-wrap items-center justify-end gap-3 pt-2">
-              {onBack && (
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={onBack}
-                  className="gap-2"
-                >
-                  <ArrowLeft className="h-4 w-4" />
-                  Back
+            {hypercertInfo?.hypercertCid && (
+              <Link href={viewHref}>
+                <Button className="gap-2 bg-create-accent hover:bg-create-accent/90 text-create-accent-foreground font-[family-name:var(--font-outfit)] font-medium shadow-sm">
+                  <ExternalLink className="h-4 w-4" />
+                  View Hypercert
                 </Button>
-              )}
+              </Link>
+            )}
 
-              {hypercertInfo?.hypercertCid && (
-                <Link href={viewHref}>
-                  <Button className="gap-2">View hypercert</Button>
-                </Link>
-              )}
-
-              {onCreateAnother && (
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="gap-2"
-                  onClick={onCreateAnother}
-                >
-                  <Plus className="h-4 w-4" />
-                  Create another
-                </Button>
-              )}
-            </div>
-          </CardContent>
-        </Card>
+            {onCreateAnother && (
+              <Button
+                type="button"
+                variant="outline"
+                className="gap-2 font-[family-name:var(--font-outfit)]"
+                onClick={onCreateAnother}
+              >
+                <Plus className="h-4 w-4" />
+                Create Another
+              </Button>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );

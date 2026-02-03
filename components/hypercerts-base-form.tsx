@@ -10,7 +10,19 @@ import { Textarea } from "@/components/ui/textarea";
 import * as Hypercert from "@/lexicons/types/org/hypercerts/claim/activity";
 import type { CreateHypercertParams } from "@hypercerts-org/sdk-core";
 import { Label } from "@radix-ui/react-label";
-import { PlusIcon, XIcon, Trash, ChevronDown, ChevronUp } from "lucide-react";
+import {
+  PlusIcon,
+  XIcon,
+  Trash,
+  ChevronDown,
+  ChevronUp,
+  Wand2,
+  Upload,
+  Shield,
+  Tag,
+  Calendar,
+  Users as UsersIcon,
+} from "lucide-react";
 import { FormEventHandler, useState } from "react";
 import type { ProfileView } from "@atproto/api/dist/client/types/app/bsky/actor/defs";
 import UserSelection from "./user-selection";
@@ -79,6 +91,9 @@ export default function HypercertsBaseForm({
   const [contributionDescription, setContributionDescription] = useState("");
   const [contributionStartDate, setContributionStartDate] = useState<Date | null>(null);
   const [contributionEndDate, setContributionEndDate] = useState<Date | null>(null);
+
+  // Image preview
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
 
   const handleWorkScopeChange = (index: number, value: string) => {
     setWorkScope((prev) => {
@@ -175,15 +190,6 @@ export default function HypercertsBaseForm({
         type: rights.type.trim(),
         description: rights.description.trim(),
       },
-      // TODO map properly once fixed on sdk side
-      // workScope: cleanedWorkScope.length > 0 ? {
-      //   $type: "org.hypercerts.defs#workScopeAny",
-      //   op: "any" as const,
-      //   args: cleanedWorkScope.map(label => ({
-      //     $type: "org.hypercerts.defs#workScopeAtom" as const,
-      //     label,
-      //   })),
-      // } : undefined,
       description: shortDescription,
       image: backgroundImage,
       startDate: startDate.toISOString(),
@@ -202,11 +208,21 @@ export default function HypercertsBaseForm({
   };
 
   const next = () => {
-    // setButtonClicked("saveNext");
-    // const record = getRecord();
-    // if (!record) return;
-    // onSave?.(record, true);
     nextStepper();
+  };
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    setBackgroundImage(file);
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    } else {
+      setImagePreview(null);
+    }
   };
 
   const handleAutofill = () => {
@@ -233,89 +249,177 @@ export default function HypercertsBaseForm({
   };
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-6">
-      <div className="flex">
+    <form onSubmit={handleSubmit} className="flex flex-col gap-8">
+      {/* Autofill */}
+      <div className="flex justify-end">
         <Button
           type="button"
           variant="outline"
+          size="sm"
           onClick={handleAutofill}
           aria-label="Autofill with dummy values"
+          className="gap-2 text-xs font-[family-name:var(--font-outfit)]"
         >
-          Autofill
+          <Wand2 className="h-3.5 w-3.5" />
+          Autofill Demo
         </Button>
       </div>
 
-      <div className="flex flex-col gap-1">
-        <Label htmlFor="title">Hypercert Name *</Label>
-        <Input
-          id="title"
-          onChange={(e) => setTitle(e.target.value)}
-          value={title}
-          placeholder="Enter the hypercert name"
-          required
-        />
+      {/* ── Section: Core Details ── */}
+      <div className="space-y-5">
+        <div className="flex items-center gap-2 mb-1">
+          <div className="h-6 w-6 rounded-lg bg-create-accent/10 flex items-center justify-center">
+            <Tag className="h-3.5 w-3.5 text-create-accent" />
+          </div>
+          <h3 className="text-sm font-[family-name:var(--font-syne)] font-semibold uppercase tracking-wider text-muted-foreground">
+            Core Details
+          </h3>
+        </div>
+
+        <div className="flex flex-col gap-1.5">
+          <Label htmlFor="title" className="text-sm font-[family-name:var(--font-outfit)] font-medium">
+            Hypercert Name *
+          </Label>
+          <Input
+            id="title"
+            onChange={(e) => setTitle(e.target.value)}
+            value={title}
+            placeholder="Enter the hypercert name"
+            required
+            className="font-[family-name:var(--font-outfit)]"
+          />
+        </div>
+
+        <div className="flex flex-col gap-1.5">
+          <Label htmlFor="description" className="text-sm font-[family-name:var(--font-outfit)] font-medium">
+            Short Description *
+          </Label>
+          <Textarea
+            onChange={(e) => setShortDescription(e.target.value)}
+            id="description"
+            value={shortDescription}
+            placeholder="Enter a short description"
+            required
+            className="font-[family-name:var(--font-outfit)] min-h-[100px]"
+          />
+        </div>
       </div>
 
-      <div className="flex flex-col gap-1">
-        <Label htmlFor="description">Short Description * </Label>
-        <Textarea
-          onChange={(e) => setShortDescription(e.target.value)}
-          id="description"
-          value={shortDescription}
-          placeholder="Enter a short description"
-          required
-        />
-      </div>
-      <div className="rounded-lg border p-4 space-y-4">
-        <h3 className="text-lg font-semibold">Rights</h3>
-        <p className="text-sm text-muted-foreground">
-          Rights information is required to create a Hypercert.
-        </p>
-
-        <HypercertRightsFields value={rights} onChange={setRights} />
-      </div>
-
-      <div className="flex flex-col gap-1">
-        <Label htmlFor="background-image">Background Image</Label>
-        <Input
-          id="background-image"
-          onChange={(e) => setBackgroundImage(e.target.files?.[0])}
-          type="file"
-          placeholder="Add Background Image"
-        />
+      {/* ── Section: Rights ── */}
+      <div className="space-y-4">
+        <div className="flex items-center gap-2 mb-1">
+          <div className="h-6 w-6 rounded-lg bg-create-accent/10 flex items-center justify-center">
+            <Shield className="h-3.5 w-3.5 text-create-accent" />
+          </div>
+          <h3 className="text-sm font-[family-name:var(--font-syne)] font-semibold uppercase tracking-wider text-muted-foreground">
+            Rights
+          </h3>
+        </div>
+        <div className="rounded-xl border border-border/60 bg-muted/30 p-5 space-y-4">
+          <p className="text-xs font-[family-name:var(--font-outfit)] text-muted-foreground">
+            Rights information is required to create a Hypercert.
+          </p>
+          <HypercertRightsFields value={rights} onChange={setRights} />
+        </div>
       </div>
 
-      <div className="flex flex-col gap-1">
-        <Label htmlFor="workScope">Work Scope Tags * </Label>
-        <div id="workScope" className="flex w-full flex-col gap-2">
+      {/* ── Section: Background Image ── */}
+      <div className="space-y-3">
+        <div className="flex items-center gap-2 mb-1">
+          <div className="h-6 w-6 rounded-lg bg-create-accent/10 flex items-center justify-center">
+            <Upload className="h-3.5 w-3.5 text-create-accent" />
+          </div>
+          <h3 className="text-sm font-[family-name:var(--font-syne)] font-semibold uppercase tracking-wider text-muted-foreground">
+            Background Image
+          </h3>
+        </div>
+
+        <label
+          htmlFor="background-image"
+          className="relative flex flex-col items-center justify-center w-full h-36 rounded-xl border-2 border-dashed border-border/60 bg-muted/20 hover:bg-muted/40 hover:border-create-accent/40 transition-all duration-200 cursor-pointer group overflow-hidden"
+        >
+          {imagePreview ? (
+            <>
+              <img
+                src={imagePreview}
+                alt="Preview"
+                className="absolute inset-0 w-full h-full object-cover opacity-60 group-hover:opacity-40 transition-opacity"
+              />
+              <div className="relative z-10 flex flex-col items-center gap-1">
+                <Upload className="h-5 w-5 text-foreground/70" />
+                <span className="text-xs font-[family-name:var(--font-outfit)] text-foreground/70">
+                  Click to change image
+                </span>
+              </div>
+            </>
+          ) : (
+            <div className="flex flex-col items-center gap-2">
+              <div className="h-10 w-10 rounded-xl bg-muted flex items-center justify-center group-hover:bg-create-accent/10 transition-colors">
+                <Upload className="h-5 w-5 text-muted-foreground group-hover:text-create-accent transition-colors" />
+              </div>
+              <div className="text-center">
+                <span className="text-sm font-[family-name:var(--font-outfit)] font-medium text-muted-foreground">
+                  Drop image here or click to upload
+                </span>
+                <p className="text-[11px] text-muted-foreground/60 mt-0.5">
+                  PNG, JPG, WebP up to 5MB
+                </p>
+              </div>
+            </div>
+          )}
+          <Input
+            id="background-image"
+            onChange={handleImageChange}
+            type="file"
+            accept="image/*"
+            className="sr-only"
+          />
+        </label>
+      </div>
+
+      {/* ── Section: Work Scope ── */}
+      <div className="space-y-4">
+        <div className="flex items-center gap-2 mb-1">
+          <div className="h-6 w-6 rounded-lg bg-create-accent/10 flex items-center justify-center">
+            <Tag className="h-3.5 w-3.5 text-create-accent" />
+          </div>
+          <h3 className="text-sm font-[family-name:var(--font-syne)] font-semibold uppercase tracking-wider text-muted-foreground">
+            Work Scope
+          </h3>
+        </div>
+
+        <div id="workScope" className="flex flex-wrap gap-2">
           {workScope.map((value, index) => (
-            <div key={index} className="flex w-full justify-between gap-2">
+            <div key={index} className="flex items-center gap-1.5">
               <Input
                 value={value}
                 onChange={(e) => handleWorkScopeChange(index, e.target.value)}
                 placeholder="Enter a tag"
                 required={index === 0}
+                className="w-40 font-[family-name:var(--font-outfit)] text-sm h-9"
               />
               {workScope.length > 1 && index !== 0 && (
                 <Button
                   type="button"
-                  variant="outline"
-                  size={"icon"}
+                  variant="ghost"
+                  size="icon"
                   onClick={() => removeWorkScopeField(index)}
                   aria-label="Remove tag"
+                  className="h-9 w-9 text-muted-foreground hover:text-destructive"
                 >
-                  <XIcon />
+                  <XIcon className="h-3.5 w-3.5" />
                 </Button>
               )}
               {!!workScope[index] && index === workScope.length - 1 && (
                 <Button
                   type="button"
                   variant="outline"
-                  size={"icon"}
+                  size="icon"
                   onClick={addWorkScopeField}
                   aria-label="Add another work scope tag"
+                  className="h-9 w-9"
                 >
-                  <PlusIcon />
+                  <PlusIcon className="h-3.5 w-3.5" />
                 </Button>
               )}
             </div>
@@ -323,57 +427,80 @@ export default function HypercertsBaseForm({
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <DatePicker
-            initDate={startDate || undefined}
-            onChange={setStartDate}
-            label="Work Time Frame From"
-          />
+      {/* ── Section: Work Timeframe ── */}
+      <div className="space-y-4">
+        <div className="flex items-center gap-2 mb-1">
+          <div className="h-6 w-6 rounded-lg bg-create-accent/10 flex items-center justify-center">
+            <Calendar className="h-3.5 w-3.5 text-create-accent" />
+          </div>
+          <h3 className="text-sm font-[family-name:var(--font-syne)] font-semibold uppercase tracking-wider text-muted-foreground">
+            Work Timeframe
+          </h3>
         </div>
-        <div>
-          <DatePicker
-            initDate={endDate || undefined}
-            onChange={setEndDate}
-            label="Work Time Frame To"
-          />
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <DatePicker
+              initDate={startDate || undefined}
+              onChange={setStartDate}
+              label="From"
+            />
+          </div>
+          <div>
+            <DatePicker
+              initDate={endDate || undefined}
+              onChange={setEndDate}
+              label="To"
+            />
+          </div>
         </div>
       </div>
 
-      {/* Contributors Section (Optional) */}
-      <div className="rounded-lg border p-4 space-y-4">
-        <div 
-          className="flex justify-between items-center cursor-pointer"
+      {/* ── Section: Contributors (Optional, Collapsible) ── */}
+      <div className="space-y-4">
+        <button
+          type="button"
+          className="flex items-center justify-between w-full group"
           onClick={() => setShowContributions(!showContributions)}
         >
-          <div>
-            <h3 className="text-lg font-semibold">Contributors (Optional)</h3>
-            <p className="text-sm text-muted-foreground">
-              Add contributors and their roles for this hypercert
-            </p>
+          <div className="flex items-center gap-2">
+            <div className="h-6 w-6 rounded-lg bg-create-accent/10 flex items-center justify-center">
+              <UsersIcon className="h-3.5 w-3.5 text-create-accent" />
+            </div>
+            <h3 className="text-sm font-[family-name:var(--font-syne)] font-semibold uppercase tracking-wider text-muted-foreground">
+              Contributors
+            </h3>
+            <span className="text-[11px] font-[family-name:var(--font-outfit)] text-muted-foreground/60 ml-1">
+              Optional
+            </span>
           </div>
-          {showContributions ? (
-            <ChevronUp className="h-5 w-5" />
-          ) : (
-            <ChevronDown className="h-5 w-5" />
-          )}
-        </div>
+          <div className="h-7 w-7 rounded-lg bg-muted flex items-center justify-center group-hover:bg-muted/80 transition-colors">
+            {showContributions ? (
+              <ChevronUp className="h-4 w-4 text-muted-foreground" />
+            ) : (
+              <ChevronDown className="h-4 w-4 text-muted-foreground" />
+            )}
+          </div>
+        </button>
 
         {showContributions && (
-          <div className="space-y-4 pt-2">
+          <div className="rounded-xl border border-border/60 bg-muted/20 p-5 space-y-5 animate-fade-in-up">
             <div className="space-y-2">
-              <Label htmlFor="contribution-role">Role / Title</Label>
+              <Label htmlFor="contribution-role" className="text-sm font-[family-name:var(--font-outfit)] font-medium">
+                Role / Title
+              </Label>
               <Input
                 id="contribution-role"
                 placeholder="e.g., Developer, Designer, Researcher"
                 value={contributionRole}
                 onChange={(e) => setContributionRole(e.target.value)}
                 maxLength={100}
+                className="font-[family-name:var(--font-outfit)]"
               />
             </div>
 
             <div className="space-y-2">
-              <Label>Contributors</Label>
+              <Label className="text-sm font-[family-name:var(--font-outfit)] font-medium">Contributors</Label>
               <Tabs defaultValue="search" className="w-full">
                 <TabsList className="grid w-full grid-cols-2">
                   <TabsTrigger value="search">Search Users</TabsTrigger>
@@ -385,15 +512,16 @@ export default function HypercertsBaseForm({
                     {contributors.map((contributor) => (
                       <div
                         key={contributor.did}
-                        className="flex justify-between items-center gap-4 border p-2 rounded-md"
+                        className="flex justify-between items-center gap-4 border border-border/60 p-3 rounded-lg bg-background/50"
                       >
                         <UserAvatar user={contributor} />
                         <Button
                           onClick={() => removeContributor(contributor)}
-                          variant={"outline"}
-                          size={"icon"}
+                          variant="ghost"
+                          size="icon"
                           aria-label="delete"
                           type="button"
+                          className="text-muted-foreground hover:text-destructive"
                         >
                           <Trash className="h-4 w-4" />
                         </Button>
@@ -411,6 +539,7 @@ export default function HypercertsBaseForm({
                         onChange={(e) =>
                           updateManualContributor(index, e.target.value)
                         }
+                        className="font-[family-name:var(--font-outfit)]"
                       />
                       <Button
                         variant="ghost"
@@ -418,6 +547,7 @@ export default function HypercertsBaseForm({
                         onClick={() => removeManualContributor(index)}
                         disabled={manualContributors.length === 1}
                         type="button"
+                        className="text-muted-foreground hover:text-destructive"
                       >
                         <Trash className="h-4 w-4" />
                       </Button>
@@ -428,15 +558,16 @@ export default function HypercertsBaseForm({
                     size="sm"
                     onClick={addManualContributor}
                     type="button"
+                    className="gap-2 font-[family-name:var(--font-outfit)]"
                   >
-                    <PlusIcon className="mr-2 h-4 w-4" /> Add Contributor
+                    <PlusIcon className="h-3.5 w-3.5" /> Add Contributor
                   </Button>
                 </TabsContent>
               </Tabs>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="contribution-description">
+              <Label htmlFor="contribution-description" className="text-sm font-[family-name:var(--font-outfit)] font-medium">
                 Contribution Description (Optional)
               </Label>
               <Textarea
@@ -446,8 +577,9 @@ export default function HypercertsBaseForm({
                 onChange={(e) => setContributionDescription(e.target.value)}
                 maxLength={2000}
                 rows={4}
+                className="font-[family-name:var(--font-outfit)]"
               />
-              <p className="text-xs text-muted-foreground">
+              <p className="text-[11px] font-[family-name:var(--font-outfit)] text-muted-foreground">
                 {contributionDescription.length} / 2000 characters
               </p>
             </div>
@@ -470,7 +602,7 @@ export default function HypercertsBaseForm({
             </div>
 
             {hasContributors && !contributionRole.trim() && (
-              <p className="text-sm text-amber-600">
+              <p className="text-sm text-amber-600 font-[family-name:var(--font-outfit)]">
                 Please enter a role for the contributors
               </p>
             )}
@@ -478,32 +610,42 @@ export default function HypercertsBaseForm({
         )}
       </div>
 
+      {/* ── Actions ── */}
       {!!updateActions && (
-        <div className="flex gap-3 justify-end pt-2">
-          <Button
-            type="submit"
-            variant="outline"
-            disabled={isSaving}
-            aria-label="Save"
-          >
-            {isSaving && <Spinner className="mr-2" />}
-            {isSaving && buttonClicked === "create" ? "Creating…" : "Create"}
-          </Button>
+        <div className="flex items-center justify-between gap-4 pt-6 mt-2 border-t border-border/50">
+          <div />
+          <div className="flex gap-3">
+            <Button
+              type="submit"
+              variant="outline"
+              disabled={isSaving}
+              aria-label="Save"
+              className="font-[family-name:var(--font-outfit)]"
+            >
+              {isSaving && <Spinner className="mr-2" />}
+              {isSaving && buttonClicked === "create" ? "Creating..." : "Create"}
+            </Button>
 
-          <Button
-            type="button"
-            disabled={!hypercertUri || isSaving}
-            onClick={next}
-            aria-label="Save and go to Contributions"
-          >
-            {isSaving && <Spinner className="mr-2" />}
-            {isSaving && buttonClicked === "saveNext" ? "Creating…" : "Next"}
-          </Button>
+            <Button
+              type="button"
+              disabled={!hypercertUri || isSaving}
+              onClick={next}
+              aria-label="Save and go to Contributions"
+              className="bg-create-accent hover:bg-create-accent/90 text-create-accent-foreground font-[family-name:var(--font-outfit)] font-medium min-w-[120px]"
+            >
+              {isSaving && <Spinner className="mr-2" />}
+              {isSaving && buttonClicked === "saveNext" ? "Creating..." : "Next"}
+            </Button>
+          </div>
         </div>
       )}
 
       {!updateActions && (
-        <Button disabled={saveDisabled || isSaving} type="submit">
+        <Button
+          disabled={saveDisabled || isSaving}
+          type="submit"
+          className="bg-create-accent hover:bg-create-accent/90 text-create-accent-foreground font-[family-name:var(--font-outfit)] font-medium"
+        >
           {isSaving && <Spinner />}
           {isSaving ? "Creating Hypercert" : "Create Hypercert"}
         </Button>

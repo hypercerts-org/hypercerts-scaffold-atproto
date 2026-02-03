@@ -5,7 +5,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { addContribution } from "@/lib/create-actions";
 import { BaseHypercertFormProps } from "@/lib/types";
 import type { ProfileView } from "@atproto/api/dist/client/types/app/bsky/actor/defs";
-import { Trash, PlusCircle } from "lucide-react";
+import { Trash, PlusCircle, Users } from "lucide-react";
 import { FormEventHandler, useState } from "react";
 import { toast } from "sonner";
 import { DatePicker } from "./date-range-picker";
@@ -107,13 +107,16 @@ export default function HypercertContributionForm({
 
   return (
     <FormInfo
-      stepLabel="Step 2 of 5 . Evidence"
-      title="Add Hypercert Contribution"
-      description="Link roles,contributors and timeframes"
+      stepLabel="Step 2 of 6"
+      title="Add Contributions"
+      description="Link roles, contributors, and timeframes to your hypercert."
     >
       <form onSubmit={handleSubmit} className="space-y-6">
+        {/* Role */}
         <div className="space-y-2">
-          <Label htmlFor="role">Role / Title *</Label>
+          <Label htmlFor="role" className="text-sm font-[family-name:var(--font-outfit)] font-medium">
+            Role / Title *
+          </Label>
           <Input
             id="role"
             placeholder="e.g., Developer, Designer, Researcher"
@@ -122,11 +125,20 @@ export default function HypercertContributionForm({
             maxLength={100}
             required
             disabled={saving}
+            className="font-[family-name:var(--font-outfit)]"
           />
         </div>
 
-        <div className="space-y-2">
-          <Label>Contributors *</Label>
+        {/* Contributors */}
+        <div className="space-y-3">
+          <div className="flex items-center gap-2">
+            <div className="h-6 w-6 rounded-lg bg-create-accent/10 flex items-center justify-center">
+              <Users className="h-3.5 w-3.5 text-create-accent" />
+            </div>
+            <Label className="text-sm font-[family-name:var(--font-outfit)] font-medium">
+              Contributors *
+            </Label>
+          </div>
           <Tabs defaultValue="search" className="w-full">
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="search">Search Users</TabsTrigger>
@@ -138,16 +150,17 @@ export default function HypercertContributionForm({
                 {contributors.map((contributor) => (
                   <div
                     key={contributor.did}
-                    className="flex justify-between items-center gap-4 border p-2 rounded-md"
+                    className="flex justify-between items-center gap-4 border border-border/60 p-3 rounded-lg bg-background/50"
                   >
                     <UserAvatar user={contributor} />
                     <Button
                       onClick={() => removeContributor(contributor)}
-                      variant={"outline"}
-                      size={"icon"}
+                      variant="ghost"
+                      size="icon"
                       aria-label="delete"
                       type="button"
                       disabled={saving}
+                      className="text-muted-foreground hover:text-destructive"
                     >
                       <Trash className="h-4 w-4" />
                     </Button>
@@ -166,12 +179,14 @@ export default function HypercertContributionForm({
                       updateManualContributor(index, e.target.value)
                     }
                     disabled={saving}
+                    className="font-[family-name:var(--font-outfit)]"
                   />
                   <Button
                     variant="ghost"
                     size="icon"
                     onClick={() => removeManualContributor(index)}
                     disabled={manualContributors.length === 1 || saving}
+                    className="text-muted-foreground hover:text-destructive"
                   >
                     <Trash className="h-4 w-4" />
                   </Button>
@@ -182,15 +197,19 @@ export default function HypercertContributionForm({
                 size="sm"
                 onClick={addManualContributor}
                 disabled={saving}
+                className="gap-2 font-[family-name:var(--font-outfit)]"
               >
-                <PlusCircle className="mr-2 h-4 w-4" /> Add Contributor
+                <PlusCircle className="h-3.5 w-3.5" /> Add Contributor
               </Button>
             </TabsContent>
           </Tabs>
         </div>
 
+        {/* Description */}
         <div className="space-y-2">
-          <Label htmlFor="description">Description (Optional)</Label>
+          <Label htmlFor="description" className="text-sm font-[family-name:var(--font-outfit)] font-medium">
+            Description (Optional)
+          </Label>
           <Textarea
             id="description"
             placeholder="What the contribution concretely achieved..."
@@ -199,12 +218,14 @@ export default function HypercertContributionForm({
             maxLength={2000}
             rows={4}
             disabled={saving}
+            className="font-[family-name:var(--font-outfit)]"
           />
-          <p className="text-xs text-muted-foreground">
+          <p className="text-[11px] font-[family-name:var(--font-outfit)] text-muted-foreground">
             {description.length} / 2000 characters
           </p>
         </div>
 
+        {/* Dates */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2">
             <DatePicker
@@ -226,7 +247,7 @@ export default function HypercertContributionForm({
           onBack={onBack}
           onSkip={onNext}
           submitLabel="Save & Next"
-          savingLabel="Saving…"
+          savingLabel="Saving..."
           saving={saving}
           submitDisabled={!hasContributors || !role || saving}
         />

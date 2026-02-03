@@ -8,7 +8,7 @@ export interface Measurement {
   value: string;
   metric: string;
   createdAt: string;
-  measurers: string[];
+  measurers: (string | { did: string })[];
   evidenceURI?: string[];
   measurementMethodURI?: string;
 }
@@ -52,14 +52,17 @@ export default function HypercertMeasurementView({
             <dt className="text-xs text-muted-foreground">Measurers</dt>
             <dd>
               <ul className="list-disc list-inside">
-                {measurement.measurers.map((measurer, index) => (
-                  <li key={index} className="break-all">
-                    <URILink
-                      uri={`https://bsky.app/profile/${measurer}`}
-                      label={measurer}
-                    />
-                  </li>
-                ))}
+                {measurement.measurers.map((measurer, index) => {
+                  const did = typeof measurer === "object" ? measurer.did : measurer;
+                  return (
+                    <li key={index} className="break-all">
+                      <URILink
+                        uri={`https://bsky.app/profile/${did}`}
+                        label={did}
+                      />
+                    </li>
+                  );
+                })}
               </ul>
             </dd>
           </div>

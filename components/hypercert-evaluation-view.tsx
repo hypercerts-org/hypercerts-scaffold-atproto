@@ -14,7 +14,7 @@ import { URILink } from "./uri-link";
 export interface Evaluation {
   summary: string;
   createdAt: string;
-  evaluators: string[];
+  evaluators: (string | { did: string })[];
   score?: {
     min: number;
     max: number;
@@ -64,14 +64,17 @@ export default function HypercertEvaluationView({
             <dt className="text-xs text-muted-foreground">Evaluators</dt>
             <dd>
               <ul className="list-disc list-inside">
-                {evaluation.evaluators.map((evaluator, index) => (
-                  <li key={index} className="break-all">
-                    <URILink
-                      uri={`https://bsky.app/profile/${evaluator}`}
-                      label={evaluator}
-                    />
-                  </li>
-                ))}
+                {evaluation.evaluators.map((evaluator, index) => {
+                  const did = typeof evaluator === "object" ? evaluator.did : evaluator;
+                  return (
+                    <li key={index} className="break-all">
+                      <URILink
+                        uri={`https://bsky.app/profile/${did}`}
+                        label={did}
+                      />
+                    </li>
+                  );
+                })}
               </ul>
             </dd>
           </div>

@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Trash, PlusCircle, Plus, Wand2, MapPin } from "lucide-react";
+import { Trash, PlusCircle, Plus, Wand2, MapPin, Users, ClipboardCheck, BarChart3, FileCheck, Hash } from "lucide-react";
 import UserSelection from "./user-selection";
 import UserAvatar from "./user-avatar";
 import FormInfo from "./form-info";
@@ -34,7 +34,6 @@ export default function EvaluationForm({
   const [manualDids, setManualDids] = useState<string[]>([]);
   const [summary, setSummary] = useState("");
 
-  // Optional fields
   const [useScore, setUseScore] = useState(false);
   const [scoreMin, setScoreMin] = useState<number>(0);
   const [scoreMax, setScoreMax] = useState<number>(10);
@@ -67,13 +66,10 @@ export default function EvaluationForm({
   });
 
   const handleAutofill = () => {
-    // Fill manual DIDs
     setManualDids([
       "did:plc:z72i7hdynmk6r22z27h6tvur",
       "did:plc:ragtjsm2j2vknwkz3zp4oxrd",
     ]);
-
-    // Fill summary
     setSummary(
       "This evaluation assesses the significant environmental impact of the reforestation project. " +
         "The project successfully planted 5,000 native trees across 25 hectares of degraded land, " +
@@ -82,33 +78,24 @@ export default function EvaluationForm({
         "educational workshops and created sustainable employment opportunities. Impact metrics show " +
         "an estimated 125 tons of CO2 will be sequestered annually once trees reach maturity."
     );
-
-    // Enable and fill score
     setUseScore(true);
     setScoreMin(1);
     setScoreMax(10);
     setScoreValue(8);
-
-    // Enable and fill content URIs
     setUseContent(true);
     setContentUris([
       "https://example.com/evaluation-report.pdf",
       "https://example.com/field-verification-photos.zip",
     ]);
-
-    // Enable and fill measurement URIs
     setUseMeasurements(true);
     setMeasurementUris([
       "at://did:plc:z72i7hdynmk6r22z27h6tvur/org.hypercerts.claim.measurement/3jzfcijpqzk2a",
       "at://did:plc:z72i7hdynmk6r22z27h6tvur/org.hypercerts.claim.measurement/3jzfcijpqzk2b",
     ]);
-
-    // Enable and fill location
     setUseLocation(true);
     setLocationUri(
       "at://did:plc:z72i7hdynmk6r22z27h6tvur/app.certified.location/3jzfcijpqzk2c"
     );
-
     toast.success("Form autofilled with dummy data");
   };
 
@@ -202,26 +189,36 @@ export default function EvaluationForm({
 
   return (
     <FormInfo
+      stepLabel="Step 6 of 6"
       title="Add Evaluation"
       description="Provide an evaluation of the hypercert's impact."
     >
-      <div className="mb-6">
+      {/* Autofill */}
+      <div className="flex justify-end mb-6">
         <Button
           type="button"
           variant="outline"
           size="sm"
           onClick={handleAutofill}
           disabled={mutation.isPending}
+          className="gap-2 text-xs font-[family-name:var(--font-outfit)]"
         >
-          <Wand2 className="mr-2 h-4 w-4" />
-          Autofill with Dummy Data
+          <Wand2 className="h-3.5 w-3.5" />
+          Autofill Demo
         </Button>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-8">
         {/* Evaluators */}
-        <div className="space-y-2">
-          <Label>Evaluators *</Label>
+        <div className="space-y-3">
+          <div className="flex items-center gap-2">
+            <div className="h-6 w-6 rounded-lg bg-create-accent/10 flex items-center justify-center">
+              <Users className="h-3.5 w-3.5 text-create-accent" />
+            </div>
+            <Label className="text-sm font-[family-name:var(--font-syne)] font-semibold uppercase tracking-wider text-muted-foreground">
+              Evaluators *
+            </Label>
+          </div>
           <Tabs defaultValue="search" className="w-full">
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="search">Search Users</TabsTrigger>
@@ -235,15 +232,16 @@ export default function EvaluationForm({
                   {evaluators.map((evaluator) => (
                     <div
                       key={evaluator.did}
-                      className="flex justify-between items-center gap-4 border p-2 rounded-md"
+                      className="flex justify-between items-center gap-4 border border-border/60 p-3 rounded-lg bg-background/50"
                     >
                       <UserAvatar user={evaluator} />
                       <Button
                         onClick={() => removeEvaluator(evaluator)}
-                        variant="outline"
+                        variant="ghost"
                         size="icon"
                         aria-label="Remove evaluator"
                         disabled={mutation.isPending}
+                        className="text-muted-foreground hover:text-destructive"
                       >
                         <Trash className="h-4 w-4" />
                       </Button>
@@ -262,12 +260,14 @@ export default function EvaluationForm({
                     value={did}
                     onChange={(e) => updateManualDid(index, e.target.value)}
                     disabled={mutation.isPending}
+                    className="font-[family-name:var(--font-outfit)]"
                   />
                   <Button
                     variant="ghost"
                     size="icon"
                     onClick={() => removeManualDid(index)}
                     disabled={manualDids.length === 1 || mutation.isPending}
+                    className="text-muted-foreground hover:text-destructive"
                   >
                     <Trash className="h-4 w-4" />
                   </Button>
@@ -278,8 +278,9 @@ export default function EvaluationForm({
                 size="sm"
                 onClick={addManualDid}
                 disabled={mutation.isPending}
+                className="gap-2 font-[family-name:var(--font-outfit)]"
               >
-                <PlusCircle className="mr-2 h-4 w-4" /> Add DID
+                <PlusCircle className="h-3.5 w-3.5" /> Add DID
               </Button>
             </TabsContent>
           </Tabs>
@@ -287,7 +288,14 @@ export default function EvaluationForm({
 
         {/* Summary */}
         <div className="space-y-2">
-          <Label htmlFor="summary">Summary *</Label>
+          <div className="flex items-center gap-2 mb-1">
+            <div className="h-6 w-6 rounded-lg bg-create-accent/10 flex items-center justify-center">
+              <ClipboardCheck className="h-3.5 w-3.5 text-create-accent" />
+            </div>
+            <Label htmlFor="summary" className="text-sm font-[family-name:var(--font-syne)] font-semibold uppercase tracking-wider text-muted-foreground">
+              Summary *
+            </Label>
+          </div>
           <Textarea
             id="summary"
             value={summary}
@@ -297,37 +305,30 @@ export default function EvaluationForm({
             rows={5}
             required
             disabled={mutation.isPending}
+            className="font-[family-name:var(--font-outfit)]"
           />
         </div>
 
-        {/* Score - Toggle */}
+        {/* Score Toggle */}
         <div className="space-y-4">
-          <div className="flex items-center gap-2">
-            <Button
-              type="button"
-              variant={useScore ? "default" : "outline"}
-              size="sm"
-              onClick={() => setUseScore(!useScore)}
-              disabled={mutation.isPending}
-            >
-              {useScore ? (
-                <Trash className="mr-2 h-4 w-4" />
-              ) : (
-                <Plus className="mr-2 h-4 w-4" />
-              )}
-              {useScore ? "Remove Score" : "Add Score"}
-            </Button>
-          </div>
+          <Button
+            type="button"
+            variant={useScore ? "default" : "outline"}
+            size="sm"
+            onClick={() => setUseScore(!useScore)}
+            disabled={mutation.isPending}
+            className="gap-2 font-[family-name:var(--font-outfit)]"
+          >
+            {useScore ? <Trash className="h-3.5 w-3.5" /> : <Hash className="h-3.5 w-3.5" />}
+            {useScore ? "Remove Score" : "Add Score"}
+          </Button>
 
           {useScore && (
-            <div className="space-y-4 pl-4 border-l-2">
-              <Label>Numeric Score</Label>
+            <div className="space-y-4 pl-4 border-l-2 border-create-accent/30 animate-fade-in-up">
+              <Label className="text-sm font-[family-name:var(--font-outfit)] font-medium">Numeric Score</Label>
               <div className="grid grid-cols-3 gap-4">
                 <div className="space-y-1">
-                  <Label
-                    htmlFor="score-min"
-                    className="text-xs text-muted-foreground"
-                  >
+                  <Label htmlFor="score-min" className="text-[11px] font-[family-name:var(--font-outfit)] text-muted-foreground">
                     Min
                   </Label>
                   <Input
@@ -336,30 +337,24 @@ export default function EvaluationForm({
                     value={scoreMin}
                     onChange={(e) => setScoreMin(parseInt(e.target.value) || 0)}
                     disabled={mutation.isPending}
+                    className="font-[family-name:var(--font-outfit)]"
                   />
                 </div>
                 <div className="space-y-1">
-                  <Label
-                    htmlFor="score-value"
-                    className="text-xs text-muted-foreground"
-                  >
+                  <Label htmlFor="score-value" className="text-[11px] font-[family-name:var(--font-outfit)] text-muted-foreground">
                     Value
                   </Label>
                   <Input
                     id="score-value"
                     type="number"
                     value={scoreValue}
-                    onChange={(e) =>
-                      setScoreValue(parseInt(e.target.value) || 0)
-                    }
+                    onChange={(e) => setScoreValue(parseInt(e.target.value) || 0)}
                     disabled={mutation.isPending}
+                    className="font-[family-name:var(--font-outfit)]"
                   />
                 </div>
                 <div className="space-y-1">
-                  <Label
-                    htmlFor="score-max"
-                    className="text-xs text-muted-foreground"
-                  >
+                  <Label htmlFor="score-max" className="text-[11px] font-[family-name:var(--font-outfit)] text-muted-foreground">
                     Max
                   </Label>
                   <Input
@@ -368,6 +363,7 @@ export default function EvaluationForm({
                     value={scoreMax}
                     onChange={(e) => setScoreMax(parseInt(e.target.value) || 0)}
                     disabled={mutation.isPending}
+                    className="font-[family-name:var(--font-outfit)]"
                   />
                 </div>
               </div>
@@ -375,28 +371,23 @@ export default function EvaluationForm({
           )}
         </div>
 
-        {/* Content URIs - Toggle */}
+        {/* Content URIs Toggle */}
         <div className="space-y-4">
-          <div className="flex items-center gap-2">
-            <Button
-              type="button"
-              variant={useContent ? "default" : "outline"}
-              size="sm"
-              onClick={() => setUseContent(!useContent)}
-              disabled={mutation.isPending}
-            >
-              {useContent ? (
-                <Trash className="mr-2 h-4 w-4" />
-              ) : (
-                <Plus className="mr-2 h-4 w-4" />
-              )}
-              {useContent ? "Remove Content" : "Add Content"}
-            </Button>
-          </div>
+          <Button
+            type="button"
+            variant={useContent ? "default" : "outline"}
+            size="sm"
+            onClick={() => setUseContent(!useContent)}
+            disabled={mutation.isPending}
+            className="gap-2 font-[family-name:var(--font-outfit)]"
+          >
+            {useContent ? <Trash className="h-3.5 w-3.5" /> : <FileCheck className="h-3.5 w-3.5" />}
+            {useContent ? "Remove Content" : "Add Content"}
+          </Button>
 
           {useContent && (
-            <div className="space-y-2 pl-4 border-l-2">
-              <Label>Content URIs</Label>
+            <div className="space-y-2 pl-4 border-l-2 border-create-accent/30 animate-fade-in-up">
+              <Label className="text-sm font-[family-name:var(--font-outfit)] font-medium">Content URIs</Label>
               {contentUris.map((uri, index) => (
                 <div key={index} className="flex items-center gap-2">
                   <Input
@@ -404,22 +395,17 @@ export default function EvaluationForm({
                     placeholder="https://example.com/report.pdf"
                     value={uri}
                     onChange={(e) =>
-                      handleUriChange(
-                        index,
-                        e.target.value,
-                        contentUris,
-                        setContentUris
-                      )
+                      handleUriChange(index, e.target.value, contentUris, setContentUris)
                     }
                     disabled={mutation.isPending}
+                    className="font-[family-name:var(--font-outfit)]"
                   />
                   <Button
                     variant="ghost"
                     size="icon"
-                    onClick={() =>
-                      removeUriInput(index, contentUris, setContentUris)
-                    }
+                    onClick={() => removeUriInput(index, contentUris, setContentUris)}
                     disabled={contentUris.length === 1 || mutation.isPending}
+                    className="text-muted-foreground hover:text-destructive"
                   >
                     <Trash className="h-4 w-4" />
                   </Button>
@@ -430,35 +416,31 @@ export default function EvaluationForm({
                 size="sm"
                 onClick={() => addUriInput(contentUris, setContentUris)}
                 disabled={mutation.isPending}
+                className="gap-2 font-[family-name:var(--font-outfit)]"
               >
-                <PlusCircle className="mr-2 h-4 w-4" /> Add Content URI
+                <PlusCircle className="h-3.5 w-3.5" /> Add Content URI
               </Button>
             </div>
           )}
         </div>
 
-        {/* Measurement URIs - Toggle */}
+        {/* Measurement URIs Toggle */}
         <div className="space-y-4">
-          <div className="flex items-center gap-2">
-            <Button
-              type="button"
-              variant={useMeasurements ? "default" : "outline"}
-              size="sm"
-              onClick={() => setUseMeasurements(!useMeasurements)}
-              disabled={mutation.isPending}
-            >
-              {useMeasurements ? (
-                <Trash className="mr-2 h-4 w-4" />
-              ) : (
-                <Plus className="mr-2 h-4 w-4" />
-              )}
-              {useMeasurements ? "Remove Measurements" : "Add Measurements"}
-            </Button>
-          </div>
+          <Button
+            type="button"
+            variant={useMeasurements ? "default" : "outline"}
+            size="sm"
+            onClick={() => setUseMeasurements(!useMeasurements)}
+            disabled={mutation.isPending}
+            className="gap-2 font-[family-name:var(--font-outfit)]"
+          >
+            {useMeasurements ? <Trash className="h-3.5 w-3.5" /> : <BarChart3 className="h-3.5 w-3.5" />}
+            {useMeasurements ? "Remove Measurements" : "Add Measurements"}
+          </Button>
 
           {useMeasurements && (
-            <div className="space-y-2 pl-4 border-l-2">
-              <Label>Measurement URIs</Label>
+            <div className="space-y-2 pl-4 border-l-2 border-create-accent/30 animate-fade-in-up">
+              <Label className="text-sm font-[family-name:var(--font-outfit)] font-medium">Measurement URIs</Label>
               {measurementUris.map((uri, index) => (
                 <div key={index} className="flex items-center gap-2">
                   <Input
@@ -466,24 +448,17 @@ export default function EvaluationForm({
                     placeholder="at://did:plc:xxx/org.hypercerts.claim.measurement/xxx"
                     value={uri}
                     onChange={(e) =>
-                      handleUriChange(
-                        index,
-                        e.target.value,
-                        measurementUris,
-                        setMeasurementUris
-                      )
+                      handleUriChange(index, e.target.value, measurementUris, setMeasurementUris)
                     }
                     disabled={mutation.isPending}
+                    className="font-[family-name:var(--font-outfit)]"
                   />
                   <Button
                     variant="ghost"
                     size="icon"
-                    onClick={() =>
-                      removeUriInput(index, measurementUris, setMeasurementUris)
-                    }
-                    disabled={
-                      measurementUris.length === 1 || mutation.isPending
-                    }
+                    onClick={() => removeUriInput(index, measurementUris, setMeasurementUris)}
+                    disabled={measurementUris.length === 1 || mutation.isPending}
+                    className="text-muted-foreground hover:text-destructive"
                   >
                     <Trash className="h-4 w-4" />
                   </Button>
@@ -494,58 +469,60 @@ export default function EvaluationForm({
                 size="sm"
                 onClick={() => addUriInput(measurementUris, setMeasurementUris)}
                 disabled={mutation.isPending}
+                className="gap-2 font-[family-name:var(--font-outfit)]"
               >
-                <PlusCircle className="mr-2 h-4 w-4" /> Add Measurement URI
+                <PlusCircle className="h-3.5 w-3.5" /> Add Measurement URI
               </Button>
             </div>
           )}
         </div>
 
         {/* Location Section */}
-        <div className="space-y-6 pt-6 border-t">
+        <div className="space-y-5 pt-6 border-t border-border/50">
           <div className="flex items-center gap-2">
-            <MapPin className="h-5 w-5" />
-            <h3 className="text-lg font-semibold">Location (Optional)</h3>
+            <div className="h-6 w-6 rounded-lg bg-create-accent/10 flex items-center justify-center">
+              <MapPin className="h-3.5 w-3.5 text-create-accent" />
+            </div>
+            <h3 className="text-sm font-[family-name:var(--font-syne)] font-semibold uppercase tracking-wider text-muted-foreground">
+              Location
+            </h3>
+            <span className="text-[11px] font-[family-name:var(--font-outfit)] text-muted-foreground/60">
+              Optional
+            </span>
           </div>
-          <p className="text-sm text-muted-foreground">
-            Add geographic location information for this evaluation
-          </p>
 
-          <div className="flex items-center gap-2">
-            <Button
-              type="button"
-              variant={useLocation ? "default" : "outline"}
-              size="sm"
-              onClick={() => setUseLocation(!useLocation)}
-              disabled={mutation.isPending}
-            >
-              {useLocation ? (
-                <Trash className="mr-2 h-4 w-4" />
-              ) : (
-                <Plus className="mr-2 h-4 w-4" />
-              )}
-              {useLocation ? "Remove Location" : "Add Location"}
-            </Button>
-          </div>
+          <Button
+            type="button"
+            variant={useLocation ? "default" : "outline"}
+            size="sm"
+            onClick={() => setUseLocation(!useLocation)}
+            disabled={mutation.isPending}
+            className="gap-2 font-[family-name:var(--font-outfit)]"
+          >
+            {useLocation ? <Trash className="h-3.5 w-3.5" /> : <Plus className="h-3.5 w-3.5" />}
+            {useLocation ? "Remove Location" : "Add Location"}
+          </Button>
 
           {useLocation && (
-            <div className="space-y-2">
-              <Label htmlFor="location">Location URI</Label>
+            <div className="space-y-2 animate-fade-in-up">
+              <Label htmlFor="location" className="text-sm font-[family-name:var(--font-outfit)] font-medium">Location URI</Label>
               <Input
                 id="location"
                 value={locationUri}
                 onChange={(e) => setLocationUri(e.target.value)}
                 placeholder="at://did:plc:xxx/app.certified.location/xxx"
                 disabled={mutation.isPending}
+                className="font-[family-name:var(--font-outfit)]"
               />
             </div>
           )}
         </div>
+
         <FormFooter
           onBack={onBack}
           onSkip={onNext}
           submitLabel="Save & Next"
-          savingLabel="Saving…"
+          savingLabel="Saving..."
           saving={mutation.isPending}
           submitDisabled={mutation.isPending || !hasEvaluators || !summary}
         />

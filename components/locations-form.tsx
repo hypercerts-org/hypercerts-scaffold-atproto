@@ -11,6 +11,7 @@ import FormFooter from "./form-footer";
 import FormInfo from "./form-info";
 import LinkFileSelector from "./link-file-selector";
 import { useAddLocationMutation } from "@/queries/hypercerts";
+import { MapPin, Globe } from "lucide-react";
 
 type LocationContentMode = "link" | "file";
 
@@ -97,36 +98,64 @@ export default function HypercertLocationForm({
 
   return (
     <FormInfo
-      title="Add Hypercert Location"
+      stepLabel="Step 4 of 6"
+      title="Add Location"
       description="Define the spatial context for this hypercert claim using a URI or uploaded location file."
     >
       <form onSubmit={handleSubmit} className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Label htmlFor="lpVersion">Location Protocol Version *</Label>
-            <Input
-              id="lpVersion"
-              value={lpVersion}
-              onChange={(e) => setLpVersion(e.target.value)}
-              required
-            />
+        {/* Protocol & SRS */}
+        <div className="space-y-4">
+          <div className="flex items-center gap-2 mb-1">
+            <div className="h-6 w-6 rounded-lg bg-create-accent/10 flex items-center justify-center">
+              <Globe className="h-3.5 w-3.5 text-create-accent" />
+            </div>
+            <h3 className="text-sm font-[family-name:var(--font-syne)] font-semibold uppercase tracking-wider text-muted-foreground">
+              Spatial Configuration
+            </h3>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="srs">Spatial Reference System (SRS) URI *</Label>
-            <Input
-              id="srs"
-              value={srs}
-              onChange={(e) => setSrs(e.target.value)}
-              required
-            />
-            <p className="text-xs text-muted-foreground">
-              e.g., http://www.opengis.net/def/crs/OGC/1.3/CRS84
-            </p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="lpVersion" className="text-sm font-[family-name:var(--font-outfit)] font-medium">
+                Location Protocol Version *
+              </Label>
+              <Input
+                id="lpVersion"
+                value={lpVersion}
+                onChange={(e) => setLpVersion(e.target.value)}
+                required
+                className="font-[family-name:var(--font-outfit)]"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="srs" className="text-sm font-[family-name:var(--font-outfit)] font-medium">
+                Spatial Reference System (SRS) URI *
+              </Label>
+              <Input
+                id="srs"
+                value={srs}
+                onChange={(e) => setSrs(e.target.value)}
+                required
+                className="font-[family-name:var(--font-outfit)]"
+              />
+              <p className="text-[11px] font-[family-name:var(--font-outfit)] text-muted-foreground">
+                e.g., http://www.opengis.net/def/crs/OGC/1.3/CRS84
+              </p>
+            </div>
           </div>
         </div>
-        <div className="space-y-2">
-          <Label>Location Type *</Label>
+
+        {/* Location Type */}
+        <div className="space-y-3">
+          <div className="flex items-center gap-2 mb-1">
+            <div className="h-6 w-6 rounded-lg bg-create-accent/10 flex items-center justify-center">
+              <MapPin className="h-3.5 w-3.5 text-create-accent" />
+            </div>
+            <Label className="text-sm font-[family-name:var(--font-syne)] font-semibold uppercase tracking-wider text-muted-foreground">
+              Location Type *
+            </Label>
+          </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
             <Button
               type="button"
@@ -136,6 +165,7 @@ export default function HypercertLocationForm({
                   : "outline"
               }
               onClick={() => setLocationTypePreset("coordinate-decimal")}
+              className="font-[family-name:var(--font-outfit)]"
             >
               coordinate-decimal
             </Button>
@@ -145,6 +175,7 @@ export default function HypercertLocationForm({
                 locationTypePreset === "geojson-point" ? "default" : "outline"
               }
               onClick={() => setLocationTypePreset("geojson-point")}
+              className="font-[family-name:var(--font-outfit)]"
             >
               geojson-point
             </Button>
@@ -152,44 +183,58 @@ export default function HypercertLocationForm({
               type="button"
               variant={locationTypePreset === "other" ? "default" : "outline"}
               onClick={() => setLocationTypePreset("other")}
+              className="font-[family-name:var(--font-outfit)]"
             >
               Other
             </Button>
           </div>
           {locationTypePreset === "other" && (
-            <div className="space-y-1 mt-2">
+            <div className="space-y-1 mt-2 animate-fade-in-up">
               <Input
                 placeholder="Custom locationType identifier"
                 value={locationTypeCustom}
                 onChange={(e) => setLocationTypeCustom(e.target.value)}
+                className="font-[family-name:var(--font-outfit)]"
               />
-              <p className="text-xs text-muted-foreground">
+              <p className="text-[11px] font-[family-name:var(--font-outfit)] text-muted-foreground">
                 Provide a format identifier, e.g., coordinate-utm,
                 geojson-feature, etc.
               </p>
             </div>
           )}
         </div>
-        <div className="space-y-2">
-          <Label htmlFor="name">Location Name (Optional)</Label>
-          <Input
-            id="name"
-            placeholder="e.g., Kathmandu Office, Field Site A"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            maxLength={256}
-          />
+
+        {/* Name & Description */}
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="name" className="text-sm font-[family-name:var(--font-outfit)] font-medium">
+              Location Name (Optional)
+            </Label>
+            <Input
+              id="name"
+              placeholder="e.g., Kathmandu Office, Field Site A"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              maxLength={256}
+              className="font-[family-name:var(--font-outfit)]"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="description" className="text-sm font-[family-name:var(--font-outfit)] font-medium">
+              Location Description (Optional)
+            </Label>
+            <Textarea
+              id="description"
+              placeholder="Describe the location, region coverage, or context..."
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              rows={4}
+              className="font-[family-name:var(--font-outfit)]"
+            />
+          </div>
         </div>
-        <div className="space-y-2">
-          <Label htmlFor="description">Location Description (Optional)</Label>
-          <Textarea
-            id="description"
-            placeholder="Describe the location, region coverage, or context..."
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            rows={4}
-          />
-        </div>
+
+        {/* Location Data */}
         <LinkFileSelector
           label="Location Data *"
           fileUploadDisabled={false}
@@ -202,6 +247,7 @@ export default function HypercertLocationForm({
           urlHelpText="Link to a resource encoding the location (e.g., GeoJSON point, CSV with coordinates)."
           fileHelpText="Upload a file that contains location data. It will be stored as a blob."
         />
+
         <FormFooter
           onBack={onBack}
           onSkip={onNext}
