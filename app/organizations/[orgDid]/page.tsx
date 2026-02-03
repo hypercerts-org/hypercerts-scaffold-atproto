@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import AddContributorsForm from "@/components/add-contributors-form";
 import CollaboratorsList from "@/components/collaborators-list-view";
 import OrganizationDetailsView from "@/components/organization-detail-view";
@@ -5,6 +6,45 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getAuthenticatedRepo } from "@/lib/atproto-session";
 import { getRepoContext } from "@/lib/repo-context";
 import type { RepositoryAccessGrant } from "@hypercerts-org/sdk-core";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ orgDid: string }>;
+}): Promise<Metadata> {
+  const { orgDid } = await params;
+  const decodedOrgDid = decodeURIComponent(orgDid);
+
+  try {
+    const sdsRepo = await getRepoContext({
+      serverOverride: "sds",
+      targetDid: decodedOrgDid,
+    });
+    if (!sdsRepo) {
+      return { title: "Organization" };
+    }
+
+    const org = await sdsRepo.scopedRepo.organizations.get(decodedOrgDid);
+    if (!org) {
+      return { title: "Organization Not Found" };
+    }
+
+    const title = org.name || "Organization";
+    const description =
+      org.description || "View this organization on Hypercerts Scaffold.";
+
+    return {
+      title,
+      description,
+      openGraph: {
+        title,
+        description,
+      },
+    };
+  } catch {
+    return { title: "Organization" };
+  }
+}
 
 type BskyProfile = {
   did: string;

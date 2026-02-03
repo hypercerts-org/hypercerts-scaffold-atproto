@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 
 import { Badge } from "@/components/ui/badge";
@@ -18,6 +19,17 @@ import {
   Shield,
 } from "lucide-react";
 import { getAuthenticatedRepo, getSession } from "@/lib/atproto-session";
+
+export const metadata: Metadata = {
+  title: "Home",
+  description:
+    "A minimal demo using AT Protocol and Hypercerts lexicons to create, edit, and view hypercert claims.",
+  openGraph: {
+    title: "Hypercerts Scaffold",
+    description:
+      "A minimal demo using AT Protocol and Hypercerts lexicons to create, edit, and view hypercert claims.",
+  },
+};
 
 export default async function Home() {
   const personalRepo = await getAuthenticatedRepo("pds");

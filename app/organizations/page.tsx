@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import {
   Card,
@@ -7,6 +8,17 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { getRepoContext } from "@/lib/repo-context";
+
+export const metadata: Metadata = {
+  title: "Organizations",
+  description:
+    "Browse and manage organizations on the Hypercerts platform. Create shared workspaces for collaborative impact claims.",
+  openGraph: {
+    title: "Organizations",
+    description:
+      "Browse and manage organizations on the Hypercerts platform.",
+  },
+};
 
 export default async function OrganizationsList() {
   const ctx = await getRepoContext({ serverOverride: "sds" });

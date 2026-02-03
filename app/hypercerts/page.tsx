@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Loader from "@/components/loader";
 import {
   Card,
@@ -14,6 +15,17 @@ import Image from "next/image";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { listOrgs } from "@/lib/create-actions";
+
+export const metadata: Metadata = {
+  title: "Hypercerts",
+  description:
+    "Browse and manage your hypercert impact claims. View personal and organization hypercerts.",
+  openGraph: {
+    title: "Hypercerts",
+    description:
+      "Browse and manage your hypercert impact claims.",
+  },
+};
 
 const shortDid = (did: string) =>
   did.length > 28 ? `${did.slice(0, 18)}…${did.slice(-6)}` : did;
