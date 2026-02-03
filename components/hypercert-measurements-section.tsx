@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo } from "react";
 import HypercertMeasurementView, {
   Measurement,
 } from "./hypercert-measurement-view";
@@ -40,14 +41,20 @@ export default function HypercertMeasurementsSection({
 
   const measurementQueries = useMeasurementRecordsQuery(measurementLinks);
 
-  const isLoadingDetails = measurementQueries.some((q) => q.isLoading);
-  const isErrorDetails = measurementQueries.some((q) => q.isError);
+  const { isLoadingDetails, isErrorDetails, measurements } = useMemo(() => {
+    let loading = false;
+    let error = false;
+    const items: Measurement[] = [];
+    for (const q of measurementQueries) {
+      if (q.isLoading) loading = true;
+      if (q.isError) error = true;
+      if (q.isSuccess && q.data) items.push(q.data.value as Measurement);
+    }
+    return { isLoadingDetails: loading, isErrorDetails: error, measurements: items };
+  }, [measurementQueries]);
+
   const isLoading = isLoadingLinks || isLoadingDetails;
   const isError = isErrorLinks || isErrorDetails;
-
-  const measurements = measurementQueries
-    .filter((q) => q.isSuccess && q.data)
-    .map((q) => q.data?.value as Measurement);
 
   return (
     <div>

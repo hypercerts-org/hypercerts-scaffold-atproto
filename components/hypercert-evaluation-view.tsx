@@ -39,13 +39,15 @@ export default function HypercertEvaluationView({
       <CardHeader>
         <CardTitle className="text-lg">Evaluation</CardTitle>
         <CardDescription>
-          {new Date(evaluation.createdAt).toLocaleString()}
+          <time dateTime={evaluation.createdAt} suppressHydrationWarning>
+            {new Date(evaluation.createdAt).toLocaleString()}
+          </time>
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <p className="text-sm whitespace-pre-wrap">{evaluation.summary}</p>
 
-        {evaluation.score && (
+        {evaluation.score != null && (
           <div className="p-3 bg-muted rounded-md">
             <p className="text-xs text-muted-foreground">Score</p>
             <p className="text-2xl font-bold">

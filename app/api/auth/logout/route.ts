@@ -4,8 +4,10 @@ import { NextResponse } from "next/server";
 
 export async function GET() {
   try {
-    const session = await getSession();
-    const cookieStore = await cookies();
+    const [session, cookieStore] = await Promise.all([
+      getSession(),
+      cookies(),
+    ]);
     if (session) {
       session.signOut();
       cookieStore.delete("user-did");

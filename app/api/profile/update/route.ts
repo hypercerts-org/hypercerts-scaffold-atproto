@@ -74,10 +74,10 @@ export async function POST(req: Request) {
     }
     revalidatePath("/profile");
 
-    const updated = await repo.profile.get();
-    
-    // Get session for blob URL resolution
-    const session = await getSession();
+    const [updated, session] = await Promise.all([
+      repo.profile.get(),
+      getSession(),
+    ]);
     const userDid = session?.did;
     const sessionIssuer = session?.serverMetadata.issuer;
 

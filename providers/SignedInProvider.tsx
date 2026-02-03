@@ -9,8 +9,10 @@ export async function SignedInProvider({
 }: {
   children?: React.ReactNode;
 }) {
-  const session = await getSession();
-  const cookieStore = await cookies();
+  const [session, cookieStore] = await Promise.all([
+    getSession(),
+    cookies(),
+  ]);
   const activeDid = cookieStore.get("active-did")?.value || session?.did;
 
   let avatarUrl: string | undefined = undefined;
@@ -19,18 +21,26 @@ export async function SignedInProvider({
   let activeProfileHandle: string | undefined = undefined;
 
   if (session) {
-    const repo = await getAuthenticatedRepo("pds");
-    const profile = repo ? await repo.profile.get() : null;
-    avatarUrl = profile?.avatar
+    const [repo, orgRepo] = await Promise.all([
+      getAuthenticatedRepo("pds"),
+      activeDid && activeDid !== session.did
+        ? getAuthenticatedRepo("sds")
+        : Promise.resolve(null),
+    ]);
+
+    const [profile, org] = await Promise.all([
+      repo ? repo.profile.get() : Promise.resolve(null),
+      orgRepo && activeDid && activeDid !== session.did
+        ? orgRepo.organizations.get(activeDid)
+        : Promise.resolve(null),
+    ]);
+
+    avatarUrl = profile?.avatar;
     handle = profile?.handle || "";
 
-    if (activeDid && activeDid !== session.did) {
-      const orgRepo = await getAuthenticatedRepo("sds");
-      const org = orgRepo ? await orgRepo.organizations.get(activeDid) : null;
-      if (org)  {
-        activeProfileName = org.name;
-        activeProfileHandle = org.handle;
-      }
+    if (org) {
+      activeProfileName = org.name;
+      activeProfileHandle = org.handle;
     }
   }
 

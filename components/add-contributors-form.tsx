@@ -4,10 +4,10 @@ import {
   addCollaboratorToOrganization,
   GrantAccessParams,
 } from "@/lib/create-actions";
-import { ProfileView } from "@atproto/api/dist/client/types/app/bsky/actor/defs";
-import { OrganizationInfo, RepositoryRole } from "@hypercerts-org/sdk-core";
-import { useMutation } from "@tanstack/react-query";
-import { useMemo, useState } from "react";
+import type { ProfileView } from "@atproto/api/dist/client/types/app/bsky/actor/defs";
+import type { OrganizationInfo, RepositoryRole } from "@hypercerts-org/sdk-core";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
 import { toast } from "sonner";
 import FormInfo from "./form-info";
 import { Button } from "./ui/button";
@@ -18,6 +18,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import UserAvatar from "./user-avatar";
 import UserSelection from "./user-selection";
 
+const DID_RE = /^did:[a-z0-9]+:[A-Za-z0-9._:%-]+$/;
+
 interface AddContributorsFormProps {
   orgInfo: OrganizationInfo;
 }
@@ -27,6 +29,7 @@ type UserMode = "search" | "did";
 export default function AddContributorsForm({
   orgInfo,
 }: AddContributorsFormProps) {
+  const queryClient = useQueryClient();
   const [selectedUserDid, setSelectedUserDid] = useState<string | null>(null);
   const [selectedProfile, setSelectedProfile] = useState<ProfileView | null>(
     null
@@ -43,7 +46,7 @@ export default function AddContributorsForm({
     // did:<method>:<id>
     // method: lowercase letters/digits
     // id: conservative allowed chars
-    return /^did:[a-z0-9]+:[A-Za-z0-9._:%-]+$/.test(v);
+    return DID_RE.test(v);
   };
 
   const mutation = useMutation({
@@ -51,6 +54,9 @@ export default function AddContributorsForm({
       addCollaboratorToOrganization(params),
     onSuccess: () => {
       toast.success("Contributor added successfully!");
+      queryClient.invalidateQueries({
+        queryKey: ["organizations", orgInfo.did],
+      });
       setSelectedUserDid(null);
       setSelectedProfile(null);
       setRawDid("");
@@ -128,7 +134,7 @@ export default function AddContributorsForm({
                       // If user is entering a DID, clear any profile selection to enforce "one selected user"
                       setSelectedProfile(null);
                     }
-                    if (/^did:[a-z0-9]+:[A-Za-z0-9._:%-]+$/.test(trimmed)) {
+                    if (DID_RE.test(trimmed)) {
                       setSelectedUserDid(trimmed);
                     } else {
                       setSelectedUserDid(null);

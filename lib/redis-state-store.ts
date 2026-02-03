@@ -7,9 +7,6 @@ const SESSION_PREFIX = "session:";
 const STATE_EXPIRATION_SECONDS = 600; // 10 minutes for temporary OAuth state
 
 export class RedisStateStore implements StateStore {
-  constructor() {
-    console.log("RedisStateStore initialized.");
-  }
 
   async set(state: string, data: NodeSavedState): Promise<void> {
     await ensureRedis();
@@ -34,9 +31,6 @@ export class RedisStateStore implements StateStore {
 }
 
 export class RedisSessionStore implements SessionStore {
-  constructor() {
-    console.log("RedisSessionStore initialized.");
-  }
 
   async set(did: string, session: NodeSavedSession): Promise<void> {
     await ensureRedis();

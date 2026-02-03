@@ -9,7 +9,7 @@ import OrganizationForm, {
 import FormInfo from "@/components/form-info";
 import { createOrganization } from "@/lib/create-actions";
 import OrganizationCreationSuccess from "@/components/organization-creation-success";
-import { OrganizationInfo } from "@hypercerts-org/sdk-core";
+import type { OrganizationInfo } from "@hypercerts-org/sdk-core";
 import AddContributorsForm from "@/components/add-contributors-form";
 import Link from "next/link";
 import { Link2 } from "lucide-react";

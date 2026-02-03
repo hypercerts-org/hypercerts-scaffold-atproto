@@ -5,6 +5,7 @@ import { resolveRecordBlobs } from "./blob-utils";
 import { RepositoryRole } from "@hypercerts-org/sdk-core";
 import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
+import { after } from "next/server";
 import { getSession } from "./atproto-session";
 import sdk from "./hypercerts-sdk";
 
@@ -27,7 +28,6 @@ export const getActiveProfileInfo = async () => {
     };
   } else {
     const org = await ctx.repository.organizations.get(ctx.targetDid);
-    console.log(org);
     if (!org) return null;
     return {
       did: org.did,
@@ -38,6 +38,11 @@ export const getActiveProfileInfo = async () => {
   }
 };
 export const switchActiveProfile = async (did: string) => {
+  const session = await getSession();
+  if (!session) {
+    throw new Error("Authentication required to switch profiles");
+  }
+
   const cookieStore = await cookies();
   cookieStore.set("active-did", did, {
     httpOnly: true,
@@ -209,7 +214,9 @@ export const addCollaboratorToOrganization = async (
     throw new Error("Unable to get repository context");
   }
   const result = await ctx.scopedRepo.collaborators.grant(params);
-  revalidatePath(`/organizations/${encodeURIComponent(params.repoDid)}`);
+  after(() => {
+    revalidatePath(`/organizations/${encodeURIComponent(params.repoDid)}`);
+  });
   return result;
 };
 
@@ -225,7 +232,9 @@ export const removeCollaborator = async (params: {
     throw new Error("Unable to get repository context");
   }
   const result = await ctx.scopedRepo.collaborators.revoke(params);
-  revalidatePath(`/organizations/[orgDid]`, "page");
+  after(() => {
+    revalidatePath(`/organizations/[orgDid]`, "page");
+  });
   return result;
 };
 

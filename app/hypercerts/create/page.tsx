@@ -1,16 +1,27 @@
 "use client";
 
 import ActiveProfileInfoBox from "@/components/active-profile-info-box";
-import EvaluationForm from "@/components/evaluation-form";
-import HypercertContributionForm from "@/components/contributions-form";
 import { StepperHeader } from "@/components/edit-cert-stepper";
-import HypercertEvidenceForm from "@/components/evidence-form";
-import HypercertCompletionStep from "@/components/hypercert-completion-step";
 import HypercertsCreateForm from "@/components/hypercerts-create-form";
-import HypercertLocationForm from "@/components/locations-form";
-import { CreateHypercertResult } from "@hypercerts-org/sdk-core";
+import type { CreateHypercertResult } from "@hypercerts-org/sdk-core";
+import dynamic from "next/dynamic";
 import { useState } from "react";
-import MeasurementForm from "@/components/measurement-form";
+
+// Dynamically import heavy step components (only loaded when their step is active)
+const HypercertContributionForm = dynamic(
+  () => import("@/components/contributions-form")
+);
+const HypercertEvidenceForm = dynamic(
+  () => import("@/components/evidence-form")
+);
+const HypercertLocationForm = dynamic(
+  () => import("@/components/locations-form")
+);
+const MeasurementForm = dynamic(() => import("@/components/measurement-form"));
+const EvaluationForm = dynamic(() => import("@/components/evaluation-form"));
+const HypercertCompletionStep = dynamic(
+  () => import("@/components/hypercert-completion-step")
+);
 
 export default function Home() {
   const [step, setStep] = useState<number>(1);

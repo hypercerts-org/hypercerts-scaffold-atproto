@@ -31,7 +31,9 @@ export default function HypercertMeasurementView({
         <dl className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-2 text-sm">
           <div className="space-y-1">
             <dt className="text-xs text-muted-foreground">Measured On</dt>
-            <dd>{new Date(measurement.createdAt).toLocaleString()}</dd>
+            <dd suppressHydrationWarning>
+              {new Date(measurement.createdAt).toLocaleString()}
+            </dd>
           </div>
 
           {measurement.measurementMethodURI && (

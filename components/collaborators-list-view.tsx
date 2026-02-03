@@ -53,7 +53,7 @@ export default function CollaboratorsList({
     onSuccess: () => {
       toast.success("Successfully removed collaborator");
       queryClient.invalidateQueries({
-        queryKey: ["collaborators", repoDid],
+        queryKey: ["organizations", repoDid],
       });
     },
   });

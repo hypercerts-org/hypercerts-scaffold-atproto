@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/dialog";
 import { listOrgs, switchActiveProfile } from "@/lib/create-actions";
 import { queryKeys } from "@/lib/api/query-keys";
-import { Organization } from "@hypercerts-org/sdk-core";
+import type { Organization } from "@hypercerts-org/sdk-core";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { BuildingIcon, UserIcon } from "lucide-react";
 import { useRouter } from "next/navigation";

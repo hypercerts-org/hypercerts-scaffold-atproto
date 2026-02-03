@@ -20,7 +20,10 @@ export default async function HypercertViewPage({
   const ownerDid = extractDidFromAtUri(decodedUri);
   if (!ownerDid) return <div>Invalid hypercert URI.</div>;
 
-  const viewCtx = await getRepoContext({ targetDid: ownerDid });
+  const [viewCtx, session] = await Promise.all([
+    getRepoContext({ targetDid: ownerDid }),
+    getSession(),
+  ]);
   if (!viewCtx) return <div>Please log in to view hypercerts.</div>;
 
   const cert = await viewCtx.scopedRepo.hypercerts.get(decodedUri);
@@ -29,18 +32,15 @@ export default async function HypercertViewPage({
   let imageUri: string | undefined;
   const { image, ...certWithoutImage } = cert.record;
 
-  if (image) {
-    const session = await getSession();
-    if (session) {
-      const sessionIssuer = session.serverMetadata.issuer;
+  if (image && session) {
+    const sessionIssuer = session.serverMetadata.issuer;
 
-      const blobBase =
-        ownerDid === viewCtx.userDid
-          ? sessionIssuer
-          : process.env.NEXT_PUBLIC_SDS_URL || sessionIssuer;
+    const blobBase =
+      ownerDid === viewCtx.userDid
+        ? sessionIssuer
+        : process.env.NEXT_PUBLIC_SDS_URL || sessionIssuer;
 
-      imageUri = getBlobURL(image, ownerDid, blobBase);
-    }
+    imageUri = getBlobURL(image, ownerDid, blobBase);
   }
 
   return (

@@ -4,7 +4,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { addContribution } from "@/lib/create-actions";
 import { BaseHypercertFormProps } from "@/lib/types";
-import { ProfileView } from "@atproto/api/dist/client/types/app/bsky/actor/defs";
+import type { ProfileView } from "@atproto/api/dist/client/types/app/bsky/actor/defs";
 import { Trash, PlusCircle } from "lucide-react";
 import { FormEventHandler, useState } from "react";
 import { toast } from "sonner";
@@ -41,24 +41,25 @@ export default function HypercertContributionForm({
   };
 
   const removeContributor = (user: ProfileView) => {
-    const filtered = contributors.filter(
-      (contributor) => contributor.did !== user.did
+    setContributors((prev) =>
+      prev.filter((contributor) => contributor.did !== user.did)
     );
-    setContributors(filtered);
   };
 
   const addManualContributor = () => {
-    setManualContributors([...manualContributors, ""]);
+    setManualContributors((prev) => [...prev, ""]);
   };
 
   const removeManualContributor = (index: number) => {
-    setManualContributors(manualContributors.filter((_, i) => i !== index));
+    setManualContributors((prev) => prev.filter((_, i) => i !== index));
   };
 
   const updateManualContributor = (index: number, value: string) => {
-    const newManualContributors = [...manualContributors];
-    newManualContributors[index] = value;
-    setManualContributors(newManualContributors);
+    setManualContributors((prev) => {
+      const updated = [...prev];
+      updated[index] = value;
+      return updated;
+    });
   };
 
   const handleContributionCreation = async () => {

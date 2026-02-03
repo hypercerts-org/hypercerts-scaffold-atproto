@@ -40,42 +40,36 @@ export function getBlobURL(
 }
 
 export const validateHypercert = (data: unknown) => {
-  if (Hypercert.isRecord(data) && Hypercert.validateRecord(data)) {
-    return { success: true, error: null };
-  } else {
-    const validation = Hypercert.validateRecord(data);
-    if (!validation.success) {
-      return { success: false, error: validation.error.message };
-    } else {
-      return { success: false, error: "Invalid Hypercert Record" };
-    }
+  if (!Hypercert.isRecord(data)) {
+    return { success: false, error: "Invalid Hypercert Record" };
   }
+  const validation = Hypercert.validateRecord(data);
+  if (validation.success) {
+    return { success: true, error: null };
+  }
+  return { success: false, error: validation.error.message };
 };
 
 export const validateContribution = (data: unknown) => {
-  if (Contribution.isRecord(data) && Contribution.validateRecord(data)) {
-    return { success: true, error: null };
-  } else {
-    const validation = Contribution.validateRecord(data);
-    if (!validation.success) {
-      return { success: false, error: validation.error.message };
-    } else {
-      return { success: false, error: "Invalid Contribution Record" };
-    }
+  if (!Contribution.isRecord(data)) {
+    return { success: false, error: "Invalid Contribution Record" };
   }
+  const validation = Contribution.validateRecord(data);
+  if (validation.success) {
+    return { success: true, error: null };
+  }
+  return { success: false, error: validation.error.message };
 };
 
 export const validateEvaluation = (data: unknown) => {
-  if (Evaluation.isRecord(data) && Evaluation.validateRecord(data)) {
-    return { success: true, error: null };
-  } else {
-    const validation = Evaluation.validateRecord(data);
-    if (!validation.success) {
-      return { success: false, error: validation.error.message };
-    } else {
-      return { success: false, error: "Invalid Evaluation Record" };
-    }
+  if (!Evaluation.isRecord(data)) {
+    return { success: false, error: "Invalid Evaluation Record" };
   }
+  const validation = Evaluation.validateRecord(data);
+  if (validation.success) {
+    return { success: true, error: null };
+  }
+  return { success: false, error: validation.error.message };
 };
 
 export function parseAtUri(atUri?: string) {

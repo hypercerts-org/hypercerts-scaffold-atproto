@@ -1,6 +1,6 @@
 import { CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { OrganizationInfo } from "@hypercerts-org/sdk-core";
+import type { OrganizationInfo } from "@hypercerts-org/sdk-core";
 import Image from "next/image";
 
 interface OrganizationCreationSuccessProps {
@@ -59,7 +59,7 @@ export default function OrganizationCreationSuccess({
             <InfoRow label="DID" value={orgInfo.did} mono />
             <InfoRow
               label="Created"
-              value={new Date(orgInfo.createdAt).toLocaleString()}
+              value={orgInfo.createdAt}
             />
           </div>
 

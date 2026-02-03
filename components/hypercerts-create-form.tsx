@@ -1,4 +1,4 @@
-import {
+import type {
   CreateHypercertParams,
   CreateHypercertResult,
 } from "@hypercerts-org/sdk-core";

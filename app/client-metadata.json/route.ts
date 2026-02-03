@@ -1,3 +1,5 @@
+import { HYPERCERT_REPO_SCOPE, OAUTH_SCOPE } from "@/lib/hypercerts-sdk";
+import { ATPROTO_SCOPE } from "@hypercerts-org/sdk-core";
 import { NextResponse } from "next/server";
 
 export async function GET() {
@@ -6,7 +8,7 @@ export async function GET() {
   if (!baseUrl) {
     return NextResponse.json(
       { error: "Missing PUBLIC_BASE_URL or NGROK_URL" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 
@@ -15,7 +17,7 @@ export async function GET() {
     client_name: "Hypercert Scaffold",
     client_uri: baseUrl,
     redirect_uris: [`${baseUrl}/api/auth/callback`],
-    scope: "atproto transition:generic",
+    scope: OAUTH_SCOPE,
     grant_types: ["authorization_code", "refresh_token"],
     response_types: ["code"],
     token_endpoint_auth_method: "none",

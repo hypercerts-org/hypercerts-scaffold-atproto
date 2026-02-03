@@ -8,11 +8,11 @@ import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
 import { Textarea } from "@/components/ui/textarea";
 import * as Hypercert from "@/lexicons/types/org/hypercerts/claim/activity";
-import { CreateHypercertParams } from "@hypercerts-org/sdk-core";
+import type { CreateHypercertParams } from "@hypercerts-org/sdk-core";
 import { Label } from "@radix-ui/react-label";
 import { PlusIcon, XIcon, Trash, ChevronDown, ChevronUp } from "lucide-react";
 import { FormEventHandler, useState } from "react";
-import { ProfileView } from "@atproto/api/dist/client/types/app/bsky/actor/defs";
+import type { ProfileView } from "@atproto/api/dist/client/types/app/bsky/actor/defs";
 import UserSelection from "./user-selection";
 import UserAvatar from "./user-avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
@@ -107,24 +107,25 @@ export default function HypercertsBaseForm({
   };
 
   const removeContributor = (user: ProfileView) => {
-    const filtered = contributors.filter(
-      (contributor) => contributor.did !== user.did
+    setContributors((prev) =>
+      prev.filter((contributor) => contributor.did !== user.did)
     );
-    setContributors(filtered);
   };
 
   const addManualContributor = () => {
-    setManualContributors([...manualContributors, ""]);
+    setManualContributors((prev) => [...prev, ""]);
   };
 
   const removeManualContributor = (index: number) => {
-    setManualContributors(manualContributors.filter((_, i) => i !== index));
+    setManualContributors((prev) => prev.filter((_, i) => i !== index));
   };
 
   const updateManualContributor = (index: number, value: string) => {
-    const newManualContributors = [...manualContributors];
-    newManualContributors[index] = value;
-    setManualContributors(newManualContributors);
+    setManualContributors((prev) => {
+      const updated = [...prev];
+      updated[index] = value;
+      return updated;
+    });
   };
 
   const hasContributors =

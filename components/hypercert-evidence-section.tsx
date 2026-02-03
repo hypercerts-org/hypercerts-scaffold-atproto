@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo } from "react";
 import HypercertEvidenceView, { Evidence } from "./hypercert-evidence-view";
 import { Skeleton } from "./ui/skeleton";
 import { Separator } from "./ui/separator";
@@ -32,14 +33,20 @@ export default function HypercertEvidenceSection({
 
   const evidenceQueries = useEvidenceRecordsQuery(evidenceLinks);
 
-  const isLoadingDetails = evidenceQueries.some((q) => q.isLoading);
-  const isErrorDetails = evidenceQueries.some((q) => q.isError);
+  const { isLoadingDetails, isErrorDetails, evidences } = useMemo(() => {
+    let loading = false;
+    let error = false;
+    const items: Evidence[] = [];
+    for (const q of evidenceQueries) {
+      if (q.isLoading) loading = true;
+      if (q.isError) error = true;
+      if (q.isSuccess && q.data) items.push(q.data.value as Evidence);
+    }
+    return { isLoadingDetails: loading, isErrorDetails: error, evidences: items };
+  }, [evidenceQueries]);
+
   const isLoading = isLoadingLinks || isLoadingDetails;
   const isError = isErrorLinks || isErrorDetails;
-
-  const evidences = evidenceQueries
-    .filter((q) => q.isSuccess && q.data)
-    .map((q) => q.data?.value as Evidence);
 
   return (
     <div>

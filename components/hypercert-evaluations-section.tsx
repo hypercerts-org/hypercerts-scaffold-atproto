@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo } from "react";
 import HypercertEvaluationView, {
   Evaluation,
 } from "./hypercert-evaluation-view";
@@ -31,14 +32,20 @@ export default function HypercertEvaluationsSection({
 
   const evaluationQueries = useEvaluationRecordsQuery(evaluationLinks);
 
-  const isLoadingDetails = evaluationQueries.some((q) => q.isLoading);
-  const isErrorDetails = evaluationQueries.some((q) => q.isError);
+  const { isLoadingDetails, isErrorDetails, evaluations } = useMemo(() => {
+    let loading = false;
+    let error = false;
+    const items: Evaluation[] = [];
+    for (const q of evaluationQueries) {
+      if (q.isLoading) loading = true;
+      if (q.isError) error = true;
+      if (q.isSuccess && q.data) items.push(q.data.value as Evaluation);
+    }
+    return { isLoadingDetails: loading, isErrorDetails: error, evaluations: items };
+  }, [evaluationQueries]);
+
   const isLoading = isLoadingLinks || isLoadingDetails;
   const isError = isErrorLinks || isErrorDetails;
-
-  const evaluations = evaluationQueries
-    .filter((q) => q.isSuccess && q.data)
-    .map((q) => q.data?.value as Evaluation);
 
   return (
     <div>

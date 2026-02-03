@@ -20,8 +20,10 @@ import {
 import { getAuthenticatedRepo, getSession } from "@/lib/atproto-session";
 
 export default async function Home() {
-  const personalRepo = await getAuthenticatedRepo("pds");
-  const session = await getSession();
+  const [personalRepo, session] = await Promise.all([
+    getAuthenticatedRepo("pds"),
+    getSession(),
+  ]);
   if (!personalRepo) {
     return <div>Please Login to continue</div>;
   }

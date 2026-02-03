@@ -55,7 +55,9 @@ export default function HypercertEvidenceView({
           <div className="space-y-1">
             <CardTitle className="text-lg">{evidence.title}</CardTitle>
             <CardDescription>
-              {new Date(evidence.createdAt).toLocaleString()}
+              <time dateTime={evidence.createdAt} suppressHydrationWarning>
+                {new Date(evidence.createdAt).toLocaleString()}
+              </time>
             </CardDescription>
           </div>
           <Badge className={getRelationColor(evidence.relationType)}>

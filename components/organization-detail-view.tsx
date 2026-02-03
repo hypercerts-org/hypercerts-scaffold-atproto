@@ -10,17 +10,21 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
-import { OrganizationInfo } from "@hypercerts-org/sdk-core";
+import type { OrganizationInfo } from "@hypercerts-org/sdk-core";
 import { toast } from "sonner";
 
 interface OrganizationDetailsViewProps {
   organization: OrganizationInfo;
 }
 
-function formatIso(iso: string) {
+function FormatIso({ iso }: { iso: string }) {
   const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return iso;
-  return d.toLocaleString();
+  if (Number.isNaN(d.getTime())) return <>{iso}</>;
+  return (
+    <time dateTime={iso} suppressHydrationWarning>
+      {d.toLocaleString()}
+    </time>
+  );
 }
 
 export default function OrganizationDetailsView({
@@ -97,7 +101,9 @@ export default function OrganizationDetailsView({
 
             <div className="space-y-1">
               <div className="text-sm text-muted-foreground">Created</div>
-              <div className="text-sm">{formatIso(organization.createdAt)}</div>
+              <div className="text-sm">
+                <FormatIso iso={organization.createdAt} />
+              </div>
             </div>
 
             <div className="space-y-2 sm:col-span-2">

@@ -1,9 +1,10 @@
 import "server-only";
+import { cache } from "react";
 import { cookies } from "next/headers";
 import sdk from "@/lib/hypercerts-sdk";
-import { Repository } from "@hypercerts-org/sdk-core";
+import type { Repository } from "@hypercerts-org/sdk-core";
 
-export async function getAuthenticatedRepo(
+export const getAuthenticatedRepo = cache(async function getAuthenticatedRepo(
   serverOverride?: "pds" | "sds"
 ): Promise<Repository | null> {
   const cookieStore = await cookies();
@@ -32,9 +33,9 @@ export async function getAuthenticatedRepo(
     console.error(`Failed to restore session for DID ${userDid}:`, error);
     return null;
   }
-}
+});
 
-export async function getSession() {
+export const getSession = cache(async function getSession() {
   const cookieStore = await cookies();
   const did = cookieStore.get("user-did")?.value;
 
@@ -49,4 +50,4 @@ export async function getSession() {
     console.error(`Failed to restore session for DID ${did}:`, error);
     return null;
   }
-}
+});

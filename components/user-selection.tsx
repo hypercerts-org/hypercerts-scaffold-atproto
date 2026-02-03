@@ -1,7 +1,7 @@
 "use client";
 
 import useDebounce from "@/lib/use-debounce";
-import { ProfileView } from "@atproto/api/dist/client/types/app/bsky/actor/defs";
+import type { ProfileView } from "@atproto/api/dist/client/types/app/bsky/actor/defs";
 import { useState } from "react";
 import {
   Command,
@@ -19,11 +19,13 @@ export interface UserSelectionProps {
   onUserSelect: (profile: ProfileView) => void;
 }
 
+const EMPTY_PROFILES: ProfileView[] = [];
+
 export default function UserSelection({ onUserSelect }: UserSelectionProps) {
   const [search, setSearch] = useState("");
   const debouncedSearch = useDebounce(search, 300);
 
-  const { data: userSuggestions = [], isLoading } = useUserSearchQuery(debouncedSearch);
+  const { data: userSuggestions = EMPTY_PROFILES, isLoading } = useUserSearchQuery(debouncedSearch);
 
   const handleSelect = (profile: ProfileView) => {
     onUserSelect(profile);

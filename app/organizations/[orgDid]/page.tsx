@@ -44,7 +44,10 @@ export default async function OrganizationPage({
   });
   if (!sdsRepo) return <div>Please log in to view organizations.</div>;
 
-  const org = await sdsRepo.scopedRepo.organizations.get(decodedOrgDid);
+  const [org, collabResult] = await Promise.all([
+    sdsRepo.scopedRepo.organizations.get(decodedOrgDid),
+    sdsRepo.scopedRepo.collaborators.list({ limit: 50 }).catch(() => null),
+  ]);
   if (!org) return <div>Organization not found</div>;
 
   let collaborators: (RepositoryAccessGrant & {
@@ -52,9 +55,8 @@ export default async function OrganizationPage({
   })[] = [];
 
   try {
-    const result = await sdsRepo.scopedRepo.collaborators.list({
-      limit: 50,
-    });
+    if (!collabResult) throw new Error("Failed to fetch collaborators");
+    const result = collabResult;
 
     const active = result.collaborators.filter((c) => !c.revokedAt);
 

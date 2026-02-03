@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import { ProfileView } from "@atproto/api/dist/client/types/app/bsky/actor/defs";
+import type { ProfileView } from "@atproto/api/dist/client/types/app/bsky/actor/defs";
 import Image from "next/image";
 
 export default function UserAvatar({

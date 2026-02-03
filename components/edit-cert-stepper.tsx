@@ -1,12 +1,14 @@
+const STEPS = [
+  { id: 1, label: "Hypercert Details" },
+  { id: 2, label: "Contributions" },
+  { id: 3, label: "Attachment" },
+  { id: 4, label: "Location" },
+  { id: 5, label: "Measurement" },
+  { id: 6, label: "Evaluation" },
+] as const;
+
 export function StepperHeader({ step }: { step: number }) {
-  const steps = [
-    { id: 1, label: "Hypercert Details" },
-    { id: 2, label: "Contributions" },
-    { id: 3, label: "Attachment" },
-    { id: 4, label: "Location" },
-    { id: 5, label: "Measurement" },
-    { id: 6, label: "Evaluation" },
-  ];
+  const steps = STEPS;
   return (
     <div className="flex items-center justify-center gap-6 my-6">
       {steps.map((s, idx) => (

@@ -1,5 +1,6 @@
 // lib/repo-context.ts
 import "server-only";
+import { cache } from "react";
 import { cookies } from "next/headers";
 import sdk from "@/lib/hypercerts-sdk";
 import type { Repository } from "@hypercerts-org/sdk-core";
@@ -45,7 +46,7 @@ export interface RepoContext {
  * Scaffold helper: resolves user/active/target DID, picks server routing, restores
  * the user's session, and returns both the server-routed repository and a target-scoped repo.
  */
-export async function getRepoContext(
+export const getRepoContext = cache(async function getRepoContext(
   options: RepoContextOptions = {}
 ): Promise<RepoContext | null> {
   const cookieStore = await cookies();
@@ -74,4 +75,4 @@ export async function getRepoContext(
     );
     return null;
   }
-}
+});

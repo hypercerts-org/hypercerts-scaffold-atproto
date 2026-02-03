@@ -11,11 +11,11 @@ export async function resolveBlobToUrl(
   if (!blob) return undefined;
   if (typeof blob === "string") return blob;
 
-  const session = await getSession();
-  if (!session) return undefined;
-
-  const viewCtx = await getRepoContext({ targetDid: ownerDid });
-  if (!viewCtx) return undefined;
+  const [session, viewCtx] = await Promise.all([
+    getSession(),
+    getRepoContext({ targetDid: ownerDid }),
+  ]);
+  if (!session || !viewCtx) return undefined;
 
   const sessionIssuer = session.serverMetadata.issuer;
 
@@ -47,11 +47,14 @@ export async function resolveRecordBlobs(
     return await resolveBlobToUrl(value, ownerDid);
   }
 
-  // Recursively process properties
+  // Recursively process properties in parallel
+  const entries = Object.entries(value);
+  const resolved = await Promise.all(
+    entries.map(([, val]) => resolveRecordBlobs(val, ownerDid))
+  );
   const result: any = {};
-  for (const [key, val] of Object.entries(value)) {
-    // Skip internal fields if any
-    result[key] = await resolveRecordBlobs(val, ownerDid);
-  }
+  entries.forEach(([key], i) => {
+    result[key] = resolved[i];
+  });
   return result;
 }

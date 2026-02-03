@@ -5,10 +5,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
+import { queryKeys } from "@/lib/api/query-keys";
 import { addMeasurement, MeasurementLocationParam } from "@/lib/create-actions";
-import { ProfileView } from "@atproto/api/dist/client/types/app/bsky/actor/defs";
-import { CreateHypercertResult } from "@hypercerts-org/sdk-core";
-import { useMutation } from "@tanstack/react-query";
+import type { ProfileView } from "@atproto/api/dist/client/types/app/bsky/actor/defs";
+import type { CreateHypercertResult } from "@hypercerts-org/sdk-core";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Calendar, MapPin, Plus, PlusCircle, Trash, Wand2 } from "lucide-react";
 import { FormEventHandler, useState } from "react";
 import { toast } from "sonner";
@@ -82,6 +83,7 @@ export default function MeasurementForm({
   onNext,
   onBack,
 }: MeasurementFormProps) {
+  const queryClient = useQueryClient();
   const [measurers, setMeasurers] = useState<ProfileView[]>([]);
   const [manualDids, setManualDids] = useState<string[]>([]);
   const [metric, setMetric] = useState("");
@@ -114,6 +116,11 @@ export default function MeasurementForm({
     mutationFn: addMeasurement,
     onSuccess: () => {
       toast.success("Measurement added!");
+      if (hypercertInfo.hypercertUri) {
+        queryClient.invalidateQueries({
+          queryKey: queryKeys.hypercerts.measurements(hypercertInfo.hypercertUri),
+        });
+      }
       onNext();
     },
     onError: (err) => {
@@ -199,48 +206,51 @@ export default function MeasurementForm({
   };
 
   const removeMeasurer = (user: ProfileView) => {
-    setMeasurers(measurers.filter((m) => m.did !== user.did));
+    setMeasurers((prev) => prev.filter((m) => m.did !== user.did));
   };
 
   const addManualDid = () => {
-    setManualDids([...manualDids, ""]);
+    setManualDids((prev) => [...prev, ""]);
   };
 
   const removeManualDid = (index: number) => {
-    setManualDids(manualDids.filter((_, i) => i !== index));
+    setManualDids((prev) => prev.filter((_, i) => i !== index));
   };
 
   const updateManualDid = (index: number, value: string) => {
-    const newDids = [...manualDids];
-    newDids[index] = value;
-    setManualDids(newDids);
+    setManualDids((prev) => {
+      const newDids = [...prev];
+      newDids[index] = value;
+      return newDids;
+    });
   };
 
   const handleUriChange = (
     index: number,
     value: string,
-    uris: string[],
+    _uris: string[],
     setter: React.Dispatch<React.SetStateAction<string[]>>
   ) => {
-    const newUris = [...uris];
-    newUris[index] = value;
-    setter(newUris);
+    setter((prev) => {
+      const newUris = [...prev];
+      newUris[index] = value;
+      return newUris;
+    });
   };
 
   const addUriInput = (
-    uris: string[],
+    _uris: string[],
     setter: React.Dispatch<React.SetStateAction<string[]>>
   ) => {
-    setter([...uris, ""]);
+    setter((prev) => [...prev, ""]);
   };
 
   const removeUriInput = (
     index: number,
-    uris: string[],
+    _uris: string[],
     setter: React.Dispatch<React.SetStateAction<string[]>>
   ) => {
-    const newUris = uris.filter((_, i) => i !== index);
-    setter(newUris);
+    setter((prev) => prev.filter((_, i) => i !== index));
   };
 
   // Build location params for submission
@@ -283,19 +293,19 @@ export default function MeasurementForm({
 
   // Location entry helpers
   const addLocationEntry = () => {
-    setLocationEntries([...locationEntries, createEmptyLocationEntry()]);
+    setLocationEntries((prev) => [...prev, createEmptyLocationEntry()]);
   };
 
   const removeLocationEntry = (id: string) => {
-    setLocationEntries(locationEntries.filter((entry) => entry.id !== id));
+    setLocationEntries((prev) => prev.filter((entry) => entry.id !== id));
   };
 
   const updateLocationEntry = (
     id: string,
     updates: Partial<LocationEntry>
   ) => {
-    setLocationEntries(
-      locationEntries.map((entry) =>
+    setLocationEntries((prev) =>
+      prev.map((entry) =>
         entry.id === id ? { ...entry, ...updates } : entry
       )
     );
