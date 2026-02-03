@@ -1,18 +1,12 @@
 "use client";
 
 import * as React from "react";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import type { RepositoryAccessGrant } from "@hypercerts-org/sdk-core";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { Users } from "lucide-react";
 
 import { removeCollaborator as removeCollaboratorAction } from "@/lib/create-actions";
 import { toast } from "sonner";
@@ -59,21 +53,37 @@ export default function CollaboratorsList({
   });
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Collaborators</CardTitle>
-        <CardDescription>
-          People who currently have access to this organization.
-        </CardDescription>
-      </CardHeader>
+    <div className="glass-panel rounded-2xl overflow-hidden">
+      {/* Header */}
+      <div className="px-6 pt-6 pb-4 border-b border-border/50">
+        <div className="flex items-center gap-3">
+          <div className="size-9 rounded-lg bg-create-accent/10 flex items-center justify-center">
+            <Users className="size-4 text-create-accent" />
+          </div>
+          <div>
+            <h3 className="text-lg font-[family-name:var(--font-syne)] font-bold tracking-tight text-foreground">
+              Collaborators
+            </h3>
+            <p className="text-xs font-[family-name:var(--font-outfit)] text-muted-foreground">
+              People who currently have access to this organization
+            </p>
+          </div>
+        </div>
+      </div>
 
-      <CardContent className="space-y-4">
+      {/* Content */}
+      <div className="px-6 py-5">
         {activeCollaborators.length === 0 ? (
-          <div className="text-sm text-muted-foreground">
-            No collaborators found.
+          <div className="text-center py-8 space-y-2">
+            <div className="size-12 rounded-full bg-muted/50 flex items-center justify-center mx-auto">
+              <Users className="size-5 text-muted-foreground" />
+            </div>
+            <p className="text-sm font-[family-name:var(--font-outfit)] text-muted-foreground">
+              No collaborators found.
+            </p>
           </div>
         ) : (
-          <div className="space-y-3">
+          <div className="space-y-3 stagger-children">
             {activeCollaborators.map((c) => {
               const enabledPerms = Object.entries(c.permissions ?? {})
                 .filter(([, v]) => Boolean(v))
@@ -82,7 +92,7 @@ export default function CollaboratorsList({
               const profile = c.userProfile ?? null;
               const displayName =
                 profile?.displayName?.trim() || profile?.handle || c.userDid;
-              const handle = profile?.handle ? `@${profile.handle}` : "—";
+              const handle = profile?.handle ? `@${profile.handle}` : null;
 
               const isThisRowPending =
                 removeMutation.isPending &&
@@ -98,50 +108,59 @@ export default function CollaboratorsList({
               return (
                 <div
                   key={c.userDid}
-                  className="flex flex-col gap-3 rounded-lg border p-4 sm:flex-row sm:items-center sm:justify-between"
+                  className="flex flex-col gap-3 rounded-xl border border-border/40 bg-muted/10 p-4 sm:flex-row sm:items-center sm:justify-between hover:border-create-accent/30 transition-colors"
                 >
                   <div className="flex items-start gap-3">
-                    <Avatar className="h-10 w-10">
+                    <Avatar className="size-10 border border-border/50">
                       {profile?.avatar ? (
                         <AvatarImage src={profile.avatar} alt={displayName} />
                       ) : null}
-                      <AvatarFallback>
+                      <AvatarFallback className="bg-create-accent/10 text-create-accent font-[family-name:var(--font-syne)] text-xs font-bold">
                         {initials(profile?.displayName || profile?.handle)}
                       </AvatarFallback>
                     </Avatar>
 
-                    <div className="space-y-1">
-                      <div className="font-medium">{displayName}</div>
+                    <div className="space-y-1.5 min-w-0">
+                      <div className="font-[family-name:var(--font-syne)] font-semibold text-sm text-foreground">
+                        {displayName}
+                      </div>
 
-                      <div className="text-sm text-muted-foreground">
-                        <span className="font-mono">{handle}</span>
-                        <span className="mx-2">•</span>
-                        <span className="font-mono break-all">{c.userDid}</span>
+                      <div className="flex items-center gap-2 text-xs font-[family-name:var(--font-outfit)] text-muted-foreground">
+                        {handle && (
+                          <>
+                            <span className="font-medium">{handle}</span>
+                            <span className="text-border">|</span>
+                          </>
+                        )}
+                        <span className="font-mono break-all">
+                          {c.userDid}
+                        </span>
                       </div>
 
                       {profile?.description ? (
-                        <div className="text-sm text-muted-foreground line-clamp-2">
+                        <p className="text-xs font-[family-name:var(--font-outfit)] text-muted-foreground line-clamp-1 leading-relaxed">
                           {profile.description}
-                        </div>
+                        </p>
                       ) : null}
 
-                      <div className="flex flex-wrap gap-2 pt-1">
-                        <Badge variant="secondary" className="capitalize">
+                      <div className="flex flex-wrap gap-1.5 pt-0.5">
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-[family-name:var(--font-outfit)] font-medium bg-create-accent/10 text-create-accent border border-create-accent/20 capitalize">
                           {c.role}
-                        </Badge>
+                        </span>
                         {enabledPerms.map((p) => (
                           <Badge
                             key={p}
                             variant="outline"
-                            className="capitalize"
+                            className="capitalize text-[10px] font-[family-name:var(--font-outfit)]"
                           >
                             {p}
                           </Badge>
                         ))}
                       </div>
 
-                      {removeMutation.isError && isThisRowPending === false ? (
-                        <div className="text-sm text-destructive">
+                      {removeMutation.isError &&
+                      isThisRowPending === false ? (
+                        <div className="text-xs font-[family-name:var(--font-outfit)] text-destructive">
                           {(removeMutation.error as Error)?.message ??
                             "Failed to revoke access."}
                         </div>
@@ -156,6 +175,7 @@ commented out for now revoke has some issues
                       variant="destructive"
                       size="sm"
                       disabled={removeMutation.isPending}
+                      className="font-[family-name:var(--font-outfit)] text-xs"
                     >
                       {isThisRowPending ? "Revoking..." : "Revoke access"}
                     </Button>
@@ -165,7 +185,7 @@ commented out for now revoke has some issues
             })}
           </div>
         )}
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }

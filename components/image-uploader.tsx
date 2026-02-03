@@ -25,18 +25,27 @@ export default function ImageUploader({
     if (file) onFileSelect(file);
   };
 
-  // Style presets
-  const containerStyles =
-    aspect === "banner" ? "w-full h-40" : "w-24 h-24 rounded-full";
+  const isBanner = aspect === "banner";
+
+  const containerStyles = isBanner
+    ? "w-full h-40 rounded-none"
+    : "w-24 h-24 rounded-full";
 
   return (
     <div className={cn("space-y-2", className)}>
-      {label && <p className="text-sm font-medium">{label}</p>}
+      {label && (
+        <p className="text-xs uppercase tracking-wider font-[family-name:var(--font-outfit)] font-medium text-muted-foreground">
+          {label}
+        </p>
+      )}
 
       <div
         className={cn(
-          "relative bg-muted flex items-center justify-center rounded-md",
+          "relative flex items-center justify-center overflow-hidden",
           containerStyles,
+          isBanner
+            ? "bg-gradient-to-br from-create-accent/20 via-create-accent/10 to-muted"
+            : "bg-gradient-to-br from-create-accent/15 to-muted rounded-full"
         )}
       >
         {/* If image exists, show it */}
@@ -47,8 +56,8 @@ export default function ImageUploader({
               alt="Uploaded image"
               fill
               className={cn(
-                "object-cover rounded-md",
-                aspect !== "banner" && "rounded-full",
+                "object-cover",
+                isBanner ? "rounded-none" : "rounded-full"
               )}
             />
 
@@ -56,16 +65,26 @@ export default function ImageUploader({
             <button
               type="button"
               onClick={() => inputRef.current?.click()}
-              className="absolute bottom-1 right-1 z-10 bg-black/50 backdrop-blur-sm p-2 rounded-full hover:bg-black/60 transition"
+              className={cn(
+                "absolute z-10 bg-black/40 backdrop-blur-sm p-2 rounded-full hover:bg-black/60 transition-all duration-200 hover:scale-110",
+                isBanner ? "bottom-2 right-2" : "bottom-0 right-0"
+              )}
             >
               <Camera className="w-4 h-4 text-white" />
             </button>
           </>
         ) : (
           // If no image, show upload UI
-          <label className="flex flex-col items-center justify-center w-full h-full cursor-pointer border border-dashed border-muted-foreground/30 rounded-md hover:bg-muted/50 transition">
-            <Camera className="w-6 h-6 text-muted-foreground mb-1" />
-            <span className="text-xs text-muted-foreground">Upload</span>
+          <label
+            className={cn(
+              "flex flex-col items-center justify-center w-full h-full cursor-pointer border-2 border-dashed border-create-accent/20 hover:border-create-accent/40 hover:bg-create-accent/5 transition-all duration-200",
+              isBanner ? "rounded-none" : "rounded-full"
+            )}
+          >
+            <Camera className="w-5 h-5 text-create-accent/50 mb-1" />
+            <span className="text-[10px] font-[family-name:var(--font-outfit)] font-medium text-muted-foreground">
+              Upload
+            </span>
 
             <input
               ref={inputRef}
