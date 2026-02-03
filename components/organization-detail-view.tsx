@@ -1,17 +1,11 @@
 "use client";
 
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import type { OrganizationInfo } from "@hypercerts-org/sdk-core";
 import { toast } from "sonner";
+import { Building2, Calendar, Copy, Shield } from "lucide-react";
 
 interface OrganizationDetailsViewProps {
   organization: OrganizationInfo;
@@ -34,97 +28,130 @@ export default function OrganizationDetailsView({
     .filter(([, v]) => Boolean(v))
     .map(([k]) => k);
 
-  const copy = async (text: string) => {
+  const copy = async (text: string, label: string) => {
     try {
       await navigator.clipboard.writeText(text);
-      toast.success("Succesfully copied to clipboard");
+      toast.success(`${label} copied to clipboard`);
     } catch {
-      toast.error("Oops couldnt copy it down");
+      toast.error("Couldn't copy to clipboard");
     }
   };
 
   return (
-    <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-            <div className="space-y-1">
-              <CardTitle className="text-2xl">{organization.name}</CardTitle>
-              <CardDescription>
-                {organization.description?.trim() || "No description provided."}
-              </CardDescription>
+    <div className="glass-panel rounded-2xl overflow-hidden">
+      {/* Accent strip */}
+      <div className="h-1.5 bg-gradient-to-r from-create-accent/60 via-create-accent/30 to-transparent" />
 
-              <div className="mt-2 flex flex-wrap items-center gap-2">
-                <Badge>@{organization.handle}</Badge>
-                <Badge variant="secondary" className="capitalize">
-                  Access: {organization.accessType}
+      {/* Header */}
+      <div className="px-6 pt-6 pb-5">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+          <div className="flex items-start gap-4">
+            <div className="size-12 rounded-xl bg-create-accent/10 flex items-center justify-center shrink-0">
+              <Building2 className="size-6 text-create-accent" />
+            </div>
+            <div className="space-y-2">
+              <h2 className="text-2xl lg:text-3xl font-[family-name:var(--font-syne)] font-bold tracking-tight text-foreground">
+                {organization.name}
+              </h2>
+              <p className="text-sm font-[family-name:var(--font-outfit)] text-muted-foreground max-w-lg leading-relaxed">
+                {organization.description?.trim() ||
+                  "No description provided."}
+              </p>
+
+              <div className="flex flex-wrap items-center gap-2 pt-1">
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-[family-name:var(--font-outfit)] font-medium bg-create-accent/10 text-create-accent border border-create-accent/20">
+                  @{organization.handle}
+                </span>
+                <Badge
+                  variant="secondary"
+                  className="capitalize font-[family-name:var(--font-outfit)] text-xs"
+                >
+                  {organization.accessType} access
                 </Badge>
                 {typeof organization.collaboratorCount === "number" ? (
-                  <Badge variant="outline">
-                    {organization.collaboratorCount} collaborators
+                  <Badge
+                    variant="outline"
+                    className="font-[family-name:var(--font-outfit)] text-xs"
+                  >
+                    {organization.collaboratorCount} collaborator
+                    {organization.collaboratorCount !== 1 ? "s" : ""}
                   </Badge>
                 ) : null}
               </div>
             </div>
-
-            <div className="flex flex-wrap gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => copy(organization.did)}
-              >
-                Copy DID
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => copy(organization.handle)}
-              >
-                Copy handle
-              </Button>
-            </div>
           </div>
-        </CardHeader>
 
-        <CardContent className="space-y-4">
-          <Separator />
-
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <div className="space-y-1">
-              <div className="text-sm text-muted-foreground">
-                Organization DID
-              </div>
-              <div className="font-mono text-sm break-all">
-                {organization.did}
-              </div>
-            </div>
-
-            <div className="space-y-1">
-              <div className="text-sm text-muted-foreground">Created</div>
-              <div className="text-sm">
-                <FormatIso iso={organization.createdAt} />
-              </div>
-            </div>
-
-            <div className="space-y-2 sm:col-span-2">
-              <div className="text-sm text-muted-foreground">
-                Your permissions
-              </div>
-              {enabledPerms.length === 0 ? (
-                <Badge variant="outline">No permissions</Badge>
-              ) : (
-                <div className="flex flex-wrap gap-2">
-                  {enabledPerms.map((p) => (
-                    <Badge key={p} variant="secondary" className="capitalize">
-                      {p}
-                    </Badge>
-                  ))}
-                </div>
-              )}
-            </div>
+          <div className="flex flex-wrap gap-2 shrink-0">
+            <Button
+              variant="outline"
+              size="sm"
+              className="font-[family-name:var(--font-outfit)] text-xs gap-1.5"
+              onClick={() => copy(organization.did, "DID")}
+            >
+              <Copy className="size-3" />
+              Copy DID
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              className="font-[family-name:var(--font-outfit)] text-xs gap-1.5"
+              onClick={() => copy(organization.handle, "Handle")}
+            >
+              <Copy className="size-3" />
+              Copy Handle
+            </Button>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
+
+      <Separator className="opacity-50" />
+
+      {/* Details grid */}
+      <div className="px-6 py-5">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div className="space-y-1.5">
+            <dt className="text-xs uppercase tracking-wider font-[family-name:var(--font-outfit)] text-muted-foreground">
+              Organization DID
+            </dt>
+            <dd className="font-mono text-xs break-all text-foreground leading-relaxed">
+              {organization.did}
+            </dd>
+          </div>
+
+          <div className="space-y-1.5">
+            <dt className="flex items-center gap-1.5 text-xs uppercase tracking-wider font-[family-name:var(--font-outfit)] text-muted-foreground">
+              <Calendar className="size-3" />
+              Created
+            </dt>
+            <dd className="text-sm font-[family-name:var(--font-outfit)]">
+              <FormatIso iso={organization.createdAt} />
+            </dd>
+          </div>
+
+          <div className="space-y-2 sm:col-span-2">
+            <dt className="flex items-center gap-1.5 text-xs uppercase tracking-wider font-[family-name:var(--font-outfit)] text-muted-foreground">
+              <Shield className="size-3" />
+              Your Permissions
+            </dt>
+            {enabledPerms.length === 0 ? (
+              <dd className="text-sm font-[family-name:var(--font-outfit)] text-muted-foreground">
+                No permissions assigned
+              </dd>
+            ) : (
+              <dd className="flex flex-wrap gap-2">
+                {enabledPerms.map((p) => (
+                  <span
+                    key={p}
+                    className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-[family-name:var(--font-outfit)] font-medium bg-create-accent/10 text-create-accent border border-create-accent/20 capitalize"
+                  >
+                    {p}
+                  </span>
+                ))}
+              </dd>
+            )}
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

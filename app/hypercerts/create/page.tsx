@@ -33,59 +33,87 @@ export default function Home() {
   const previousStepper = () => {
     setStep((step) => step - 1);
   };
+
   return (
-    <div className="max-w-4xl mx-auto py-8 px-4">
-      <ActiveProfileInfoBox />
-      <StepperHeader step={step} />
-      {step === 1 && (
-        <HypercertsCreateForm
-          setHypercertInfo={setHypercertInfo}
-          hypercertInfo={hypercertInfo}
-          nextStepper={nextStepper}
-        />
-      )}
-      {step === 2 && hypercertInfo && (
-        <HypercertContributionForm
-          hypercertInfo={hypercertInfo}
-          onNext={() => setStep((step) => step + 1)}
-          onBack={previousStepper}
-        />
-      )}
-      {step === 3 && hypercertInfo && (
-        <HypercertEvidenceForm
-          hypercertInfo={hypercertInfo}
-          onNext={nextStepper}
-          onBack={previousStepper}
-        />
-      )}
-      {step === 4 && hypercertInfo && (
-        <HypercertLocationForm
-          onNext={nextStepper}
-          onBack={previousStepper}
-          hypercertInfo={hypercertInfo}
-        />
-      )}
-      {step === 5 && hypercertInfo && (
-        <MeasurementForm
-          hypercertInfo={hypercertInfo}
-          onNext={nextStepper}
-          onBack={previousStepper}
-        />
-      )}
-      {step === 6 && hypercertInfo && (
-        <EvaluationForm
-          hypercertInfo={hypercertInfo}
-          onNext={nextStepper}
-          onBack={previousStepper}
-        />
-      )}
-      {step === 7 && (
-        <HypercertCompletionStep
-          onCreateAnother={() => setStep(1)}
-          onBack={previousStepper}
-          hypercertInfo={hypercertInfo}
-        />
-      )}
+    <div className="relative min-h-screen noise-bg">
+      <div className="relative z-10 max-w-7xl mx-auto px-4 py-8 lg:py-12">
+        {/* Page header */}
+        <div className="mb-8 lg:mb-10 animate-fade-in">
+          <h1 className="text-3xl lg:text-4xl font-[family-name:var(--font-syne)] font-bold tracking-tight text-foreground">
+            Create Hypercert
+          </h1>
+          <p className="mt-2 text-sm font-[family-name:var(--font-outfit)] text-muted-foreground max-w-xl">
+            Define your impact claim with verifiable details, evidence, and measurements.
+          </p>
+        </div>
+
+        {/* Two-column layout: sidebar + main */}
+        <div className="grid grid-cols-1 lg:grid-cols-[260px_1fr] gap-8 lg:gap-12">
+          {/* Sidebar */}
+          <aside className="lg:sticky lg:top-8 lg:self-start space-y-6">
+            <ActiveProfileInfoBox />
+            <StepperHeader step={step} />
+          </aside>
+
+          {/* Main content area */}
+          <main className="min-w-0">
+            <div
+              key={step}
+              className="animate-fade-in-up"
+            >
+              {step === 1 && (
+                <HypercertsCreateForm
+                  setHypercertInfo={setHypercertInfo}
+                  hypercertInfo={hypercertInfo}
+                  nextStepper={nextStepper}
+                />
+              )}
+              {step === 2 && hypercertInfo && (
+                <HypercertContributionForm
+                  hypercertInfo={hypercertInfo}
+                  onNext={() => setStep((step) => step + 1)}
+                  onBack={previousStepper}
+                />
+              )}
+              {step === 3 && hypercertInfo && (
+                <HypercertEvidenceForm
+                  hypercertInfo={hypercertInfo}
+                  onNext={nextStepper}
+                  onBack={previousStepper}
+                />
+              )}
+              {step === 4 && hypercertInfo && (
+                <HypercertLocationForm
+                  onNext={nextStepper}
+                  onBack={previousStepper}
+                  hypercertInfo={hypercertInfo}
+                />
+              )}
+              {step === 5 && hypercertInfo && (
+                <MeasurementForm
+                  hypercertInfo={hypercertInfo}
+                  onNext={nextStepper}
+                  onBack={previousStepper}
+                />
+              )}
+              {step === 6 && hypercertInfo && (
+                <EvaluationForm
+                  hypercertInfo={hypercertInfo}
+                  onNext={nextStepper}
+                  onBack={previousStepper}
+                />
+              )}
+              {step === 7 && (
+                <HypercertCompletionStep
+                  onCreateAnother={() => setStep(1)}
+                  onBack={previousStepper}
+                  hypercertInfo={hypercertInfo}
+                />
+              )}
+            </div>
+          </main>
+        </div>
+      </div>
     </div>
   );
 }

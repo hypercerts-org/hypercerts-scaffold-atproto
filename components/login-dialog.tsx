@@ -45,33 +45,52 @@ export default function LoginDialog() {
 
   return (
     <form onSubmit={handleSubmit} className="grid w-full max-w-sm gap-6 py-10">
-      <InputGroup>
-        <InputGroupAddon>
-          <AtSignIcon />
-        </InputGroupAddon>
-        <InputGroupInput
-          onChange={(e) => setHandle(e.target.value)}
-          placeholder="Enter your handle"
-        />
-      </InputGroup>
-      {hostname && (
-        <p className="text-sm text-muted-foreground">
-          Handle: {handle}.{hostname}
+      <div className="space-y-2 animate-fade-in-up">
+        <h2 className="text-2xl font-[family-name:var(--font-syne)] font-bold text-foreground">
+          Sign In
+        </h2>
+        <p className="text-sm font-[family-name:var(--font-outfit)] text-muted-foreground">
+          Enter your handle to continue
         </p>
-      )}
+      </div>
 
-      <Button type="submit" disabled={loginMutation.isPending}>
-        {loginMutation.isPending && <Spinner />}
-        Login
-      </Button>
-      <Button
-        disabled={loginMutation.isPending}
-        onClick={redirectToAccountCreation}
-        variant={"link"}
-        type="button"
-      >
-        Create an account
-      </Button>
+      <div className="animate-fade-in-up [animation-delay:100ms] space-y-3">
+        <InputGroup className="glass-panel border-border/50 focus-within:border-create-accent transition-colors">
+          <InputGroupAddon className="text-create-accent">
+            <AtSignIcon />
+          </InputGroupAddon>
+          <InputGroupInput
+            onChange={(e) => setHandle(e.target.value)}
+            placeholder="Enter your handle"
+            className="font-[family-name:var(--font-outfit)] bg-transparent"
+          />
+        </InputGroup>
+        {hostname && (
+          <p className="text-sm font-[family-name:var(--font-outfit)] text-muted-foreground px-1">
+            Full handle: <span className="text-create-accent font-medium">{handle || "..."}.{hostname}</span>
+          </p>
+        )}
+      </div>
+
+      <div className="animate-fade-in-up [animation-delay:200ms] space-y-3">
+        <Button 
+          type="submit" 
+          disabled={loginMutation.isPending}
+          className="w-full bg-create-accent hover:bg-create-accent/90 text-white font-[family-name:var(--font-outfit)] font-medium transition-all"
+        >
+          {loginMutation.isPending && <Spinner />}
+          Sign In
+        </Button>
+        <Button
+          disabled={loginMutation.isPending}
+          onClick={redirectToAccountCreation}
+          variant={"ghost"}
+          type="button"
+          className="w-full font-[family-name:var(--font-outfit)] text-muted-foreground hover:text-create-accent hover:bg-muted/50 transition-colors"
+        >
+          Create an account
+        </Button>
+      </div>
     </form>
   );
 }

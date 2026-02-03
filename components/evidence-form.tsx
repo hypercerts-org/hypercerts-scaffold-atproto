@@ -19,7 +19,7 @@ import { Button } from "./ui/button";
 import { BaseHypercertFormProps } from "@/lib/types";
 import { useAddAttachmentMutation } from "@/queries/hypercerts";
 import { AttachmentLocationParam } from "@/lib/api/types";
-import { MapPin } from "lucide-react";
+import { MapPin, Wand2, FileText } from "lucide-react";
 
 type ContentMode = "link" | "file";
 
@@ -80,15 +80,12 @@ export default function HypercertEvidenceForm({
   };
 
   const handleLocationModeChange = (mode: "string" | "create") => {
-    // Clear data when switching modes
     if (mode === "string") {
-      // Clear create mode data
       setLocationName("");
       setLocationDescription("");
       setLocationUrl("");
       setLocationFile(null);
     } else {
-      // Clear string mode data
       setLocationString("");
     }
     setLocationMode(mode);
@@ -101,7 +98,6 @@ export default function HypercertEvidenceForm({
       return locationString.trim() || undefined;
     }
     
-    // Create mode
     const effectiveLocationType = locationType === "other" 
       ? locationTypeCustom.trim() || "coordinate-decimal"
       : locationType;
@@ -166,12 +162,10 @@ export default function HypercertEvidenceForm({
       "This document provides an independent verification of the hypercert claim. It includes:\n\n- A breakdown of the methodology used\n- Supporting quantitative metrics\n- Third-party validation steps\n- References to supporting documentation and outcomes\n\nUse this evidence to substantiate the core claim and demonstrate credibility."
     );
 
-    // Evidence: enforce link mode
     setEvidenceMode("link");
     setEvidenceUrl("https://example.com/audit-report.pdf");
     setEvidenceFile(null);
 
-    // Location: add example location
     setLocationMode("create");
     setLocationName("Project Site");
     setLocationDescription("Primary verification location");
@@ -214,22 +208,30 @@ export default function HypercertEvidenceForm({
 
   return (
     <FormInfo
-      title="Add Hypercert Attachment"
-      description="Attach a link or file that backs up this hypercert claim"
+      stepLabel="Step 3 of 6"
+      title="Add Evidence"
+      description="Attach a link or file that backs up this hypercert claim."
     >
       <form onSubmit={handleSubmit} className="space-y-6">
-        <div className="flex">
+        {/* Autofill */}
+        <div className="flex justify-end">
           <Button
             type="button"
             variant="outline"
             size="sm"
             onClick={handleAutofill}
+            className="gap-2 text-xs font-[family-name:var(--font-outfit)]"
           >
-            Autofill example
+            <Wand2 className="h-3.5 w-3.5" />
+            Autofill Demo
           </Button>
         </div>
+
+        {/* Title */}
         <div className="space-y-2">
-          <Label htmlFor="title">Title *</Label>
+          <Label htmlFor="title" className="text-sm font-[family-name:var(--font-outfit)] font-medium">
+            Title *
+          </Label>
           <Input
             id="title"
             placeholder="e.g., Audit report, Research paper, Demo video"
@@ -237,16 +239,25 @@ export default function HypercertEvidenceForm({
             onChange={(e) => setTitle(e.target.value)}
             maxLength={256}
             required
+            className="font-[family-name:var(--font-outfit)]"
           />
         </div>
 
+        {/* Attachment Type */}
         <div className="space-y-2">
-          <Label htmlFor="contentType">Attachment Type *</Label>
+          <div className="flex items-center gap-2">
+            <div className="h-6 w-6 rounded-lg bg-create-accent/10 flex items-center justify-center">
+              <FileText className="h-3.5 w-3.5 text-create-accent" />
+            </div>
+            <Label htmlFor="contentType" className="text-sm font-[family-name:var(--font-outfit)] font-medium">
+              Attachment Type *
+            </Label>
+          </div>
           <Select
             value={contentType}
             onValueChange={(val) => setContentType(val)}
           >
-            <SelectTrigger id="contentType">
+            <SelectTrigger id="contentType" className="font-[family-name:var(--font-outfit)]">
               <SelectValue placeholder="Choose the type of attachment..." />
             </SelectTrigger>
             <SelectContent>
@@ -257,13 +268,16 @@ export default function HypercertEvidenceForm({
               <SelectItem value="methodology">Methodology</SelectItem>
             </SelectContent>
           </Select>
-          <p className="text-xs text-muted-foreground">
+          <p className="text-[11px] font-[family-name:var(--font-outfit)] text-muted-foreground">
             Specify the type of attachment you are providing.
           </p>
         </div>
 
+        {/* Short Description */}
         <div className="space-y-2">
-          <Label htmlFor="shortDescription">Short Description *</Label>
+          <Label htmlFor="shortDescription" className="text-sm font-[family-name:var(--font-outfit)] font-medium">
+            Short Description *
+          </Label>
           <Textarea
             id="shortDescription"
             placeholder="Summarize what this evidence demonstrates..."
@@ -272,14 +286,18 @@ export default function HypercertEvidenceForm({
             maxLength={3000}
             rows={3}
             required
+            className="font-[family-name:var(--font-outfit)]"
           />
-          <p className="text-xs text-muted-foreground">
+          <p className="text-[11px] font-[family-name:var(--font-outfit)] text-muted-foreground">
             {shortDescription.length} / 3000 characters
           </p>
         </div>
 
+        {/* Detailed Description */}
         <div className="space-y-2">
-          <Label htmlFor="description">Detailed Description (Optional)</Label>
+          <Label htmlFor="description" className="text-sm font-[family-name:var(--font-outfit)] font-medium">
+            Detailed Description (Optional)
+          </Label>
           <Textarea
             id="description"
             placeholder="Provide more context on the evidence and how it supports the claim..."
@@ -287,12 +305,14 @@ export default function HypercertEvidenceForm({
             onChange={(e) => setDescription(e.target.value)}
             maxLength={30000}
             rows={5}
+            className="font-[family-name:var(--font-outfit)]"
           />
-          <p className="text-xs text-muted-foreground">
+          <p className="text-[11px] font-[family-name:var(--font-outfit)] text-muted-foreground">
             {description.length} / 30000 characters
           </p>
         </div>
 
+        {/* Evidence Content */}
         <LinkFileSelector
           fileUploadDisabled={false}
           label="Evidence Content *"
@@ -307,24 +327,28 @@ export default function HypercertEvidenceForm({
         />
 
         {/* Location Section */}
-        <div className="space-y-6 pt-6 border-t">
+        <div className="space-y-5 pt-6 border-t border-border/50">
           <div className="flex items-center gap-2">
-            <MapPin className="h-5 w-5" />
-            <h3 className="text-lg font-semibold">Location (Optional)</h3>
+            <div className="h-6 w-6 rounded-lg bg-create-accent/10 flex items-center justify-center">
+              <MapPin className="h-3.5 w-3.5 text-create-accent" />
+            </div>
+            <h3 className="text-sm font-[family-name:var(--font-syne)] font-semibold uppercase tracking-wider text-muted-foreground">
+              Location
+            </h3>
+            <span className="text-[11px] font-[family-name:var(--font-outfit)] text-muted-foreground/60">
+              Optional
+            </span>
           </div>
-          <p className="text-sm text-muted-foreground">
-            Add geographic location information for this attachment
-          </p>
 
           {/* Mode selector */}
           <div className="space-y-2">
-            <Label>Location Mode</Label>
             <div className="flex gap-2">
               <Button
                 type="button"
                 variant={locationMode === "string" ? "default" : "outline"}
                 size="sm"
                 onClick={() => handleLocationModeChange("string")}
+                className="font-[family-name:var(--font-outfit)]"
               >
                 Reference (AT-URI)
               </Button>
@@ -333,6 +357,7 @@ export default function HypercertEvidenceForm({
                 variant={locationMode === "create" ? "default" : "outline"}
                 size="sm"
                 onClick={() => handleLocationModeChange("create")}
+                className="font-[family-name:var(--font-outfit)]"
               >
                 Create New Location
               </Button>
@@ -349,6 +374,7 @@ export default function HypercertEvidenceForm({
                     setLocationUrl("");
                     setLocationFile(null);
                   }}
+                  className="font-[family-name:var(--font-outfit)] text-muted-foreground"
                 >
                   Clear
                 </Button>
@@ -358,16 +384,19 @@ export default function HypercertEvidenceForm({
 
           {/* String mode */}
           {locationMode === "string" && (
-            <div className="space-y-2">
-              <Label htmlFor="locationString">Location Reference</Label>
+            <div className="space-y-2 animate-fade-in-up">
+              <Label htmlFor="locationString" className="text-sm font-[family-name:var(--font-outfit)] font-medium">
+                Location Reference
+              </Label>
               <Input
                 id="locationString"
                 type="text"
                 placeholder="at://did:plc:xxx/app.certified.location/xxx"
                 value={locationString}
                 onChange={(e) => setLocationString(e.target.value)}
+                className="font-[family-name:var(--font-outfit)]"
               />
-              <p className="text-xs text-muted-foreground">
+              <p className="text-[11px] font-[family-name:var(--font-outfit)] text-muted-foreground">
                 Enter an AT-URI to an existing location record
               </p>
             </div>
@@ -375,37 +404,44 @@ export default function HypercertEvidenceForm({
 
           {/* Create mode */}
           {locationMode === "create" && (
-            <div className="space-y-4">
+            <div className="space-y-4 animate-fade-in-up rounded-xl border border-border/60 bg-muted/20 p-5">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="lpVersion">Location Protocol Version</Label>
+                  <Label htmlFor="lpVersion" className="text-sm font-[family-name:var(--font-outfit)] font-medium">
+                    Location Protocol Version
+                  </Label>
                   <Input
                     id="lpVersion"
                     value={lpVersion}
                     onChange={(e) => setLpVersion(e.target.value)}
+                    className="font-[family-name:var(--font-outfit)]"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="srs">Spatial Reference System (SRS)</Label>
+                  <Label htmlFor="srs" className="text-sm font-[family-name:var(--font-outfit)] font-medium">
+                    Spatial Reference System (SRS)
+                  </Label>
                   <Input
                     id="srs"
                     value={srs}
                     onChange={(e) => setSrs(e.target.value)}
+                    className="font-[family-name:var(--font-outfit)]"
                   />
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-[11px] font-[family-name:var(--font-outfit)] text-muted-foreground">
                     e.g., http://www.opengis.net/def/crs/OGC/1.3/CRS84
                   </p>
                 </div>
               </div>
 
               <div className="space-y-2">
-                <Label>Location Type</Label>
+                <Label className="text-sm font-[family-name:var(--font-outfit)] font-medium">Location Type</Label>
                 <div className="flex flex-wrap gap-2">
                   <Button
                     type="button"
                     variant={locationType === "coordinate-decimal" ? "default" : "outline"}
                     size="sm"
                     onClick={() => setLocationType("coordinate-decimal")}
+                    className="font-[family-name:var(--font-outfit)]"
                   >
                     coordinate-decimal
                   </Button>
@@ -414,6 +450,7 @@ export default function HypercertEvidenceForm({
                     variant={locationType === "geojson-point" ? "default" : "outline"}
                     size="sm"
                     onClick={() => setLocationType("geojson-point")}
+                    className="font-[family-name:var(--font-outfit)]"
                   >
                     geojson-point
                   </Button>
@@ -422,6 +459,7 @@ export default function HypercertEvidenceForm({
                     variant={locationType === "other" ? "default" : "outline"}
                     size="sm"
                     onClick={() => setLocationType("other")}
+                    className="font-[family-name:var(--font-outfit)]"
                   >
                     Other
                   </Button>
@@ -431,30 +469,36 @@ export default function HypercertEvidenceForm({
                     placeholder="Custom locationType identifier"
                     value={locationTypeCustom}
                     onChange={(e) => setLocationTypeCustom(e.target.value)}
-                    className="mt-2"
+                    className="mt-2 font-[family-name:var(--font-outfit)]"
                   />
                 )}
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="locationName">Location Name (Optional)</Label>
+                <Label htmlFor="locationName" className="text-sm font-[family-name:var(--font-outfit)] font-medium">
+                  Location Name (Optional)
+                </Label>
                 <Input
                   id="locationName"
                   placeholder="e.g., Project Site, Field Location"
                   value={locationName}
                   onChange={(e) => setLocationName(e.target.value)}
                   maxLength={256}
+                  className="font-[family-name:var(--font-outfit)]"
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="locationDescription">Location Description (Optional)</Label>
+                <Label htmlFor="locationDescription" className="text-sm font-[family-name:var(--font-outfit)] font-medium">
+                  Location Description (Optional)
+                </Label>
                 <Textarea
                   id="locationDescription"
                   placeholder="Describe the location context..."
                   value={locationDescription}
                   onChange={(e) => setLocationDescription(e.target.value)}
                   rows={2}
+                  className="font-[family-name:var(--font-outfit)]"
                 />
               </div>
 

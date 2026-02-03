@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Loader from "@/components/loader";
 import {
   Card,
@@ -14,6 +15,18 @@ import Image from "next/image";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { listOrgs } from "@/lib/create-actions";
+import { Award, Calendar, Plus, FileText } from "lucide-react";
+
+export const metadata: Metadata = {
+  title: "Hypercerts",
+  description:
+    "Browse and manage your hypercert impact claims. View personal and organization hypercerts.",
+  openGraph: {
+    title: "Hypercerts",
+    description:
+      "Browse and manage your hypercert impact claims.",
+  },
+};
 
 const shortDid = (did: string) =>
   did.length > 28 ? `${did.slice(0, 18)}…${did.slice(-6)}` : did;
@@ -55,83 +68,172 @@ export default async function MyHypercertsPage({
         shortDid(selectedDid);
 
   return (
-    <main className="max-w-4xl mx-auto py-10 gap-4 flex flex-col">
-      <div className="text-center space-y-2">
-        <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight text-balance">
-          Hypercerts
-        </h1>
-        <p className="text-sm text-muted-foreground">
-          Viewing hypercerts for{" "}
-          <span className="font-medium text-foreground">{selectedLabel}</span>
-        </p>
-      </div>
+    <main className="relative min-h-screen noise-bg">
+      <div className="gradient-mesh absolute inset-0 -z-10" />
+      
+      <div className="max-w-5xl mx-auto py-12 px-4 space-y-8">
+        {/* Header */}
+        <div className="text-center space-y-3 animate-fade-in-up">
+          <div className="flex items-center justify-center gap-3">
+            <div className="size-10 rounded-full bg-create-accent/10 flex items-center justify-center">
+              <Award className="size-5 text-create-accent" />
+            </div>
+            <h1 className="text-4xl md:text-5xl font-[family-name:var(--font-syne)] font-bold tracking-tight">
+              Hypercerts
+            </h1>
+          </div>
+          <p className="text-sm font-[family-name:var(--font-outfit)] text-muted-foreground">
+            Viewing hypercerts for{" "}
+            <span className="font-medium text-create-accent">{selectedLabel}</span>
+          </p>
+        </div>
 
-      <div className="flex flex-wrap gap-2 justify-center">
-        <Button
-          asChild
-          size="sm"
-          variant={selectedDid === ctx.userDid ? "default" : "outline"}
-          className="rounded-full"
-        >
-          <Link href={chipHref(ctx.userDid)}>Personal</Link>
-        </Button>
+        {/* DID Filter Chips */}
+        <div className="animate-fade-in-up [animation-delay:100ms]">
+          <div className="glass-panel rounded-2xl p-3 flex flex-wrap gap-2 justify-center max-w-2xl mx-auto">
+            <Button
+              asChild
+              size="sm"
+              variant="ghost"
+              className={`rounded-full font-[family-name:var(--font-outfit)] transition-all ${
+                selectedDid === ctx.userDid
+                  ? "bg-create-accent text-create-accent-foreground hover:bg-create-accent/90"
+                  : "hover:bg-muted/50 hover:border-create-accent/40"
+              }`}
+            >
+              <Link href={chipHref(ctx.userDid)}>Personal</Link>
+            </Button>
 
-        {organizations.map((org) => (
-          <Button
-            key={org.did}
-            asChild
-            size="sm"
-            variant={selectedDid === org.did ? "default" : "outline"}
-            className="rounded-full"
-          >
-            <Link href={chipHref(org.did)}>{org.name}</Link>
-          </Button>
-        ))}
-      </div>
+            {organizations.map((org) => (
+              <Button
+                key={org.did}
+                asChild
+                size="sm"
+                variant="ghost"
+                className={`rounded-full font-[family-name:var(--font-outfit)] transition-all ${
+                  selectedDid === org.did
+                    ? "bg-create-accent text-create-accent-foreground hover:bg-create-accent/90"
+                    : "hover:bg-muted/50 hover:border-create-accent/40"
+                }`}
+              >
+                <Link href={chipHref(org.did)}>{org.name}</Link>
+              </Button>
+            ))}
+          </div>
+        </div>
 
-      {!records ? (
-        <Loader />
-      ) : (
-        <div className="max-w-md m-auto w-full">
-          {records.length === 0 ? (
-            <p>No hypercerts found.</p>
-          ) : (
-            <div className="flex flex-col gap-4">
+        {/* Content */}
+        {!records ? (
+          <div className="animate-fade-in-up [animation-delay:200ms]">
+            <div className="glass-panel rounded-2xl p-12 max-w-md mx-auto">
+              <Loader />
+            </div>
+          </div>
+        ) : records.length === 0 ? (
+          <div className="animate-fade-in-up [animation-delay:200ms]">
+            <div className="glass-panel rounded-2xl p-12 max-w-md mx-auto text-center space-y-4">
+              <div className="size-16 rounded-full bg-create-accent/10 flex items-center justify-center mx-auto">
+                <FileText className="size-8 text-create-accent" />
+              </div>
+              <h2 className="text-xl font-[family-name:var(--font-syne)] font-semibold">
+                No hypercerts found
+              </h2>
+              <p className="text-sm font-[family-name:var(--font-outfit)] text-muted-foreground">
+                Get started by creating your first hypercert to track and verify your impact.
+              </p>
+              <Button
+                asChild
+                className="bg-create-accent hover:bg-create-accent/90 text-white font-[family-name:var(--font-outfit)] mt-2"
+              >
+                <Link href="/hypercerts/create">
+                  <Plus className="size-4 mr-2" />
+                  Create Hypercert
+                </Link>
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <div className="animate-fade-in-up [animation-delay:200ms]">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 stagger-children">
               {records.map(({ record: cert, uri }) => {
-                  // fix for now for interop demo
                 const imageUrl =
                   viewCtx.targetDid && cert.image
                     ? getBlobURL((cert.image as any).image, viewCtx.targetDid, sessionIssuer)
                     : null;
 
+                const workScope = Array.isArray(cert.workScope) ? cert.workScope : [];
+                const createdDate = cert.createdAt
+                  ? new Date(cert.createdAt).toLocaleDateString()
+                  : null;
+
                 return (
                   <Link
                     key={uri}
                     href={`/hypercerts/${encodeURIComponent(uri)}`}
+                    className="group"
                   >
-                    <Card>
-                      <CardHeader>
-                        <CardTitle>{cert.title}</CardTitle>
-                        <CardDescription>
-                          {cert?.shortDescription}
-                        </CardDescription>
-                      </CardHeader>
-
-                      <CardContent>
-                        {!!imageUrl && (
-                          <div className="relative aspect-square max-w-md">
-                            <Image fill alt="cover image" src={imageUrl} />
+                    <Card className="glass-panel rounded-xl overflow-hidden border border-border/50 hover:border-create-accent/50 hover:shadow-lg transition-all duration-300 h-full flex flex-col">
+                      {/* Image or Placeholder */}
+                      <div className="relative aspect-[4/3] overflow-hidden bg-gradient-to-br from-create-accent/20 via-create-accent/10 to-transparent">
+                        {imageUrl ? (
+                          <Image
+                            fill
+                            alt={cert.title || "Hypercert cover"}
+                            src={imageUrl}
+                            className="object-cover group-hover:scale-105 transition-transform duration-300"
+                          />
+                        ) : (
+                          <div className="absolute inset-0 flex items-center justify-center">
+                            <Award className="size-16 text-create-accent/30" />
                           </div>
                         )}
-                      </CardContent>
+                      </div>
+
+                      {/* Content */}
+                      <CardHeader className="flex-1">
+                        <CardTitle className="font-[family-name:var(--font-syne)] text-lg line-clamp-1 group-hover:text-create-accent transition-colors">
+                          {cert.title || "Untitled"}
+                        </CardTitle>
+                        <CardDescription className="font-[family-name:var(--font-outfit)] text-sm line-clamp-2">
+                          {cert.shortDescription || "No description provided"}
+                        </CardDescription>
+
+                        {/* Metadata */}
+                        <div className="flex flex-col gap-2 pt-3">
+                          {createdDate && (
+                            <div className="flex items-center gap-1.5 text-xs text-muted-foreground font-[family-name:var(--font-outfit)]">
+                              <Calendar className="size-3" />
+                              <span>{createdDate}</span>
+                            </div>
+                          )}
+
+                          {workScope.length > 0 && (
+                            <div className="flex flex-wrap gap-1.5">
+                              {workScope.slice(0, 3).map((scope: string) => (
+                                <span
+                                  key={scope}
+                                  className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-[family-name:var(--font-outfit)] bg-create-accent/10 text-create-accent border border-create-accent/20"
+                                >
+                                  {scope}
+                                </span>
+                              ))}
+                              {workScope.length > 3 && (
+                                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-[family-name:var(--font-outfit)] text-muted-foreground">
+                                  +{workScope.length - 3}
+                                </span>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      </CardHeader>
                     </Card>
                   </Link>
                 );
               })}
             </div>
-          )}
-        </div>
-      )}
+          </div>
+        )}
+      </div>
     </main>
   );
 }
