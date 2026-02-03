@@ -7,11 +7,11 @@ export function URILink({ uri, label }: { uri?: string; label: string }) {
     <Link
       target="_blank"
       rel="noreferrer noopener"
-      className="flex gap-2 items-center hover:text-blue-400 hover:underline"
+      className="inline-flex gap-1.5 items-center hover:text-create-accent hover:underline transition-colors group"
       href={uri}
     >
-      {label || "—"}
-      <LinkIcon size={18} />
+      <span className="break-all">{label || "—"}</span>
+      <LinkIcon className="size-4 shrink-0 group-hover:translate-x-0.5 transition-transform" />
     </Link>
   );
 }

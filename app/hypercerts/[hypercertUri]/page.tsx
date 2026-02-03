@@ -3,6 +3,9 @@ import HypercertDetailsView from "@/components/hypercert-detail-view";
 import { getSession } from "@/lib/atproto-session";
 import { getRepoContext } from "@/lib/repo-context";
 import { getBlobURL } from "@/lib/utils";
+import { ArrowLeft } from "lucide-react";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
 
 function extractDidFromAtUri(atUri: string): string | null {
   // Expected: at://<did>/<collection>/<rkey>
@@ -86,12 +89,31 @@ export default async function HypercertViewPage({
   }
 
   return (
-    <div className="max-w-4xl mx-auto py-8 px-4 space-y-6">
-      <HypercertDetailsView
-        hypercertUri={decodedUri}
-        record={certWithoutImage}
-        imageUri={imageUri}
-      />
-    </div>
+    <main className="relative min-h-screen noise-bg">
+      <div className="gradient-mesh absolute inset-0 -z-10" />
+      
+      <div className="relative z-10 max-w-4xl mx-auto py-8 px-4 space-y-6">
+        {/* Back navigation */}
+        <div className="animate-fade-in-up">
+          <Button
+            asChild
+            variant="ghost"
+            size="sm"
+            className="font-[family-name:var(--font-outfit)] text-muted-foreground hover:text-create-accent transition-colors"
+          >
+            <Link href="/hypercerts">
+              <ArrowLeft className="size-4 mr-2" />
+              Back to Hypercerts
+            </Link>
+          </Button>
+        </div>
+
+        <HypercertDetailsView
+          hypercertUri={decodedUri}
+          record={certWithoutImage}
+          imageUri={imageUri}
+        />
+      </div>
+    </main>
   );
 }
