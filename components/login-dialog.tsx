@@ -27,13 +27,7 @@ export default function LoginDialog() {
 
   const handleSubmit: FormEventHandler<HTMLFormElement> = async (e) => {
     e.preventDefault();
-    let finalHandle = handle;
-    if (hostname && !handle.includes(hostname)) {
-      const cleanHandle = handle.endsWith(".") ? handle.slice(0, -1) : handle;
-      finalHandle = `${cleanHandle}.${hostname}`;
-    }
-
-    loginMutation.mutate(finalHandle);
+    loginMutation.mutate(handle);
   };
 
   const redirectToAccountCreation = () => {
@@ -61,15 +55,15 @@ export default function LoginDialog() {
           </InputGroupAddon>
           <InputGroupInput
             onChange={(e) => setHandle(e.target.value)}
-            placeholder="Enter your handle"
+            placeholder="kzoeps.gainforest.org"
             className="font-[family-name:var(--font-outfit)] bg-transparent"
           />
         </InputGroup>
-        {hostname && (
+        {/* {hostname && (
           <p className="text-sm font-[family-name:var(--font-outfit)] text-muted-foreground px-1">
             Full handle: <span className="text-create-accent font-medium">{handle || "..."}.{hostname}</span>
           </p>
-        )}
+        )} */}
       </div>
 
       <div className="animate-fade-in-up [animation-delay:200ms] space-y-3">

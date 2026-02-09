@@ -29,8 +29,6 @@ export default async function Home() {
     getAuthenticatedRepo("pds"),
     getSession(),
   ]);
-
-  console.log("session token info", await session?.getTokenInfo())
   
   const profile = personalRepo ? await personalRepo.profile.get() : null;
   const isSignedIn = !!session;

@@ -28,7 +28,7 @@ export const getAuthenticatedRepo = cache(async function getAuthenticatedRepo(
   try {
     const session = await sdk.restoreSession(userDid);
     if (!session) return null;
-    return sdk.repository(session, { server: determinedServer });
+    return await sdk.repository(session, { server: determinedServer });
   } catch (error) {
     console.error(`Failed to restore session for DID ${userDid}:`, error);
     return null;

@@ -64,7 +64,7 @@ export const getRepoContext = cache(async function getRepoContext(
     const session = await sdk.restoreSession(userDid);
     if (!session) return null;
 
-    const repository = sdk.repository(session, { server });
+    const repository = await sdk.repository(session, { server });
     const scopedRepo = repository.repo(targetDid);
 
     return { userDid, activeDid, targetDid, server, repository, scopedRepo };

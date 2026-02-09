@@ -4,10 +4,10 @@ import { RedisSessionStore, RedisStateStore } from "./redis-state-store";
 if (
   !process.env.ATPROTO_JWK_PRIVATE ||
   !process.env.NEXT_PUBLIC_APP_URL ||
-  !process.env.NEXT_PUBLIC_PDS_URL ||
+  !process.env.NEXT_PUBLIC_REDIRECT_BASE_URL ||
   !process.env.NEXT_PUBLIC_SDS_URL
 ) {
-  throw new Error("Some environment vars missing");
+  throw new Error("Required environment variables missing: ATPROTO_JWK_PRIVATE, NEXT_PUBLIC_APP_URL, NEXT_PUBLIC_REDIRECT_BASE_URL, NEXT_PUBLIC_SDS_URL");
 }
 
 export const sessionStore = new RedisSessionStore();
@@ -30,18 +30,24 @@ export const OAUTH_SCOPE = [ATPROTO_SCOPE, TRANSITION_SCOPES.GENERIC].join(" ")
 
 const sdk = createATProtoSDK({
   oauth: {
-    clientId: `${process.env.NEXT_PUBLIC_APP_URL}/client-metadata.json`,
-    redirectUri: `${process.env.NEXT_PUBLIC_APP_URL}/api/auth/callback`,
+    // For loopback: clientId is http://localhost (no port, no /client-metadata.json)
+    // For production: clientId should be the public URL + /client-metadata.json
+    clientId: process.env.NEXT_PUBLIC_APP_URL.startsWith('http://localhost')
+      ? process.env.NEXT_PUBLIC_APP_URL
+      : `${process.env.NEXT_PUBLIC_APP_URL}/client-metadata.json`,
+    // Redirect URI uses the IP-based URL (127.0.0.1 for loopback per RFC 8252)
+    redirectUri: `${process.env.NEXT_PUBLIC_REDIRECT_BASE_URL}/api/auth/callback`,
     scope: OAUTH_SCOPE,
-    jwksUri: `${process.env.NEXT_PUBLIC_APP_URL}/jwks.json`,
+    // jwksUri uses the IP-based URL for loopback
+    jwksUri: `${process.env.NEXT_PUBLIC_REDIRECT_BASE_URL}/jwks.json`,
     jwkPrivate: process.env.ATPROTO_JWK_PRIVATE,
   },
   storage: {
     sessionStore,
     stateStore,
   },
+  handleResolver: process.env.NEXT_PUBLIC_PDS_URL,
   servers: {
-    pds: process.env.NEXT_PUBLIC_PDS_URL,
     sds: process.env.NEXT_PUBLIC_SDS_URL,
   },
   logger: console,

@@ -455,7 +455,7 @@ packages:
       '@atproto/xrpc': '*'
 
   '@hypercerts-org/sdk-core@file:vendor/hypercerts-org-sdk-core-0.10.0-beta.8.tgz':
-    resolution: {integrity: sha512-N22klhqmk7BQdXorKBN8VaXpgrrYDU5aO/T/rfuEKhBSH/RQ1eqTzqxRXntzZ1x2JAEArF8YwV0iuWGaKoGHGw==, tarball: file:vendor/hypercerts-org-sdk-core-0.10.0-beta.8.tgz}
+    resolution: {integrity: sha512-X7vL9ez3/G1IY/NrN31DqpoGfGCxqvqoF1uANh5n5GuIzcVMHduGtRSjmllCwLid28HSNFxWxrVM1l5G1LQIKg==, tarball: file:vendor/hypercerts-org-sdk-core-0.10.0-beta.8.tgz}
     version: 0.10.0-beta.8
 
   '@img/colour@1.0.0':
