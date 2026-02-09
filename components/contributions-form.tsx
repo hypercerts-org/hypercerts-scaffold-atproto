@@ -69,13 +69,21 @@ export default function HypercertContributionForm({
     ];
 
     if (!mappedContributors.length) return;
+    
+    // Validate hypercertUri exists
+    if (!hypercertInfo?.hypercertUri) {
+      throw new Error("Hypercert URI is required to create a contribution");
+    }
+
     const contributionRecord = {
-      hypercertUri: hypercertInfo?.hypercertUri,
-      role,
+      hypercertUri: hypercertInfo.hypercertUri,
       contributors: mappedContributors,
-      description: description || undefined,
-      startDate: workTimeframeFrom?.toISOString(),
-      endDate: workTimeframeTo?.toISOString(),
+      contributionDetails: {
+        role,
+        contributionDescription: description || undefined,
+        startDate: workTimeframeFrom?.toISOString(),
+        endDate: workTimeframeTo?.toISOString(),
+      },
     };
 
     const res = await addContribution(contributionRecord);
@@ -86,6 +94,7 @@ export default function HypercertContributionForm({
   const handleSubmit: FormEventHandler<HTMLFormElement> = async (e) => {
     e.preventDefault();
     if (!hypercertInfo?.hypercertUri) {
+      toast.error("Hypercert information is missing");
       return;
     }
     setSaving(true);
@@ -96,7 +105,7 @@ export default function HypercertContributionForm({
       onNext?.();
     } catch (error) {
       console.error("Error saving contribution:", error);
-      toast.error("Failed to update contribution");
+      toast.error("Failed to create contribution");
     } finally {
       setSaving(false);
     }

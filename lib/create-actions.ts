@@ -61,10 +61,14 @@ export const logout = async () => {
 };
 
 export const addContribution = async (params: {
-  hypercertUri?: string;
+  hypercertUri: string;
   contributors: string[];
-  role: string;
-  description?: string;
+  contributionDetails: {
+    role: string;
+    contributionDescription?: string;
+    startDate?: string;
+    endDate?: string;
+  };
 }) => {
   const ctx = await getRepoContext();
 
