@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
-import HypercertEvidenceView, { Evidence } from "./hypercert-evidence-view";
+import HypercertEvidenceView from "./hypercert-evidence-view";
 import { Skeleton } from "./ui/skeleton";
 import { Separator } from "./ui/separator";
 import {
@@ -9,6 +9,9 @@ import {
   useEvidenceRecordsQuery,
 } from "@/queries/hypercerts";
 import { FileCheck } from "lucide-react";
+import { OrgHypercertsClaimAttachment } from "@hypercerts-org/sdk-core";
+
+type Attachment = OrgHypercertsClaimAttachment.Main;
 
 const EvidenceSkeleton = () => (
   <div className="glass-panel p-6 border border-border/50 rounded-xl space-y-4">
@@ -37,11 +40,11 @@ export default function HypercertEvidenceSection({
   const { isLoadingDetails, isErrorDetails, evidences } = useMemo(() => {
     let loading = false;
     let error = false;
-    const items: Evidence[] = [];
-    for (const q of evidenceQueries) {
-      if (q.isLoading) loading = true;
-      if (q.isError) error = true;
-      if (q.isSuccess && q.data) items.push(q.data.value as Evidence);
+    const items: Attachment[] = [];
+    for (const query of evidenceQueries) {
+      if (query.isLoading) loading = true;
+      if (query.isError) error = true;
+      if (query.isSuccess && query.data) items.push(query.data.value as Attachment);
     }
     return { isLoadingDetails: loading, isErrorDetails: error, evidences: items };
   }, [evidenceQueries]);

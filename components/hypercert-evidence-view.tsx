@@ -11,34 +11,35 @@ import {
 import { URILink } from "./uri-link";
 import { Badge } from "./ui/badge";
 import { Link as LinkIcon } from "lucide-react";
+import { OrgHypercertsClaimAttachment, OrgHypercertsDefs } from "@hypercerts-org/sdk-core";
 
-export interface Evidence {
-  title: string;
-  shortDescription: string;
-  description?: string;
-  contentType?: "evidence" | "report" | "audit" | "testimonial" | "methodology";
-  content: {
-    $type: string;
-    uri?: string;
-    blob?: string;
-  };
-  createdAt: string;
-}
+type Attachment = OrgHypercertsClaimAttachment.Main;
 
 export default function HypercertEvidenceView({
   evidence,
 }: {
-  evidence?: Evidence;
+  evidence?: Attachment;
 }) {
   if (!evidence) {
     return null;
   }
 
-  const evidenceUrl = evidence.content.uri || evidence.content.blob || "";
-
-  const getContentTypeColor = (type?: Evidence["contentType"]) => {
+  const getContentTypeColor = (type?: string) => {
     // All content types use the same color
     return "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-100";
+  };
+
+  // Helper to extract URL from content item
+  const getContentUrl = (contentItem: Attachment["content"][number]): string => {
+    // Check if it's a Uri type
+    if ("uri" in contentItem && contentItem.uri) {
+      return contentItem.uri;
+    }
+    // Check if it's a SmallBlob type (BlobRef will be stringified)
+    if ("blob" in contentItem && contentItem.blob) {
+      return String(contentItem.blob);
+    }
+    return "";
   };
 
   return (
@@ -75,30 +76,42 @@ export default function HypercertEvidenceView({
           )}
         </div>
 
-        <div className="flex items-start gap-3 pt-2 border-t border-border/50">
-          <LinkIcon className="size-4 text-create-accent shrink-0 mt-0.5" />
-          <div className="space-y-1 flex-1 min-w-0">
-            <dt className="text-xs font-[family-name:var(--font-outfit)] text-muted-foreground uppercase tracking-wider">
-              Evidence Source
-            </dt>
-            <dd className="text-sm font-[family-name:var(--font-outfit)] break-all">
-              {evidenceUrl ? (
-                <URILink
-                  label={evidenceUrl}
-                  uri={
-                    evidenceUrl.startsWith("at://")
-                      ? getPDSlsURI(evidenceUrl)
-                      : evidenceUrl
-                  }
-                />
-              ) : (
-                <span className="text-muted-foreground italic">
-                  No source link available
-                </span>
-              )}
-            </dd>
+        {evidence.content && evidence.content.length > 0 && (
+          <div className="space-y-3 pt-2 border-t border-border/50">
+            {evidence.content.map((contentItem, index) => {
+              const contentUrl = getContentUrl(contentItem);
+              return (
+                <div key={index} className="flex items-start gap-3">
+                  <LinkIcon className="size-4 text-create-accent shrink-0 mt-0.5" />
+                  <div className="space-y-1 flex-1 min-w-0">
+                    <dt className="text-xs font-[family-name:var(--font-outfit)] text-muted-foreground uppercase tracking-wider">
+                      {evidence.content.length > 1 
+                        ? `Evidence Source ${index + 1}`
+                        : "Evidence Source"
+                      }
+                    </dt>
+                    <dd className="text-sm font-[family-name:var(--font-outfit)] break-all">
+                      {contentUrl ? (
+                        <URILink
+                          label={contentUrl}
+                          uri={
+                            contentUrl.startsWith("at://")
+                              ? getPDSlsURI(contentUrl)
+                              : contentUrl
+                          }
+                        />
+                      ) : (
+                        <span className="text-muted-foreground italic">
+                          No source link available
+                        </span>
+                      )}
+                    </dd>
+                  </div>
+                </div>
+              );
+            })}
           </div>
-        </div>
+        )}
       </CardContent>
     </Card>
   );
