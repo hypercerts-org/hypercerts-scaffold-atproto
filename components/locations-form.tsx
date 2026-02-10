@@ -11,7 +11,7 @@ import FormFooter from "./form-footer";
 import FormInfo from "./form-info";
 import LinkFileSelector from "./link-file-selector";
 import { useAddLocationMutation } from "@/queries/hypercerts";
-import { MapPin, Globe } from "lucide-react";
+import { MapPin, Globe, Wand2 } from "lucide-react";
 
 type LocationContentMode = "link" | "file";
 
@@ -53,6 +53,18 @@ export default function HypercertLocationForm({
   const handleFileChange: React.ChangeEventHandler<HTMLInputElement> = (e) => {
     const file = e.target.files?.[0];
     setLocationFile(file ?? null);
+  };
+
+  const handleAutofill = () => {
+    setLpVersion("1.0.0");
+    setSrs("http://www.opengis.net/def/crs/OGC/1.3/CRS84");
+    setLocationTypePreset("geojson-point");
+    setName("Reforestation Site Alpha");
+    setDescription("Primary project location in the northern highlands region, covering approximately 25 hectares of reforestation area.");
+    setContentMode("link");
+    setLocationUrl("https://example.com/location-data.geojson");
+    setLocationFile(null);
+    toast.success("Autofilled location form with sample data.");
   };
 
   const handleSubmit: FormEventHandler<HTMLFormElement> = async (e) => {
@@ -103,6 +115,20 @@ export default function HypercertLocationForm({
       description="Define the spatial context for this hypercert claim using a URI or uploaded location file."
     >
       <form onSubmit={handleSubmit} className="space-y-6">
+        {/* Autofill */}
+        <div className="flex justify-end">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={handleAutofill}
+            className="gap-2 text-xs font-[family-name:var(--font-outfit)]"
+          >
+            <Wand2 className="h-3.5 w-3.5" />
+            Autofill Demo
+          </Button>
+        </div>
+
         {/* Protocol & SRS */}
         <div className="space-y-4">
           <div className="flex items-center gap-2 mb-1">

@@ -5,7 +5,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { addContribution } from "@/lib/create-actions";
 import { BaseHypercertFormProps } from "@/lib/types";
 import type { ProfileView } from "@atproto/api/dist/client/types/app/bsky/actor/defs";
-import { Trash, PlusCircle, Users } from "lucide-react";
+import { Trash, PlusCircle, Users, Wand2 } from "lucide-react";
 import { FormEventHandler, useState } from "react";
 import { toast } from "sonner";
 import { DatePicker } from "./date-range-picker";
@@ -114,6 +114,23 @@ export default function HypercertContributionForm({
   const hasContributors =
     contributors.length > 0 || manualContributors.some((c) => c.trim() !== "");
 
+  const handleAutofill = () => {
+    setRole("Lead Developer");
+    setManualContributors([
+      "did:plc:z72i7hdynmk6r22z27h6tvur",
+      "did:plc:ragtjsm2j2vknwkz3zp4oxrd",
+    ]);
+    setDescription(
+      "Led the technical development and implementation of the community platform, including backend infrastructure, API design, and database architecture. Coordinated with stakeholders to ensure project milestones were met on time."
+    );
+    const startDate = new Date();
+    startDate.setMonth(startDate.getMonth() - 6);
+    const endDate = new Date();
+    setWorkTimeframeFrom(startDate);
+    setWorkTimeframeTo(endDate);
+    toast.success("Autofilled contribution form with sample data.");
+  };
+
   return (
     <FormInfo
       stepLabel="Step 2 of 6"
@@ -121,6 +138,20 @@ export default function HypercertContributionForm({
       description="Link roles, contributors, and timeframes to your hypercert."
     >
       <form onSubmit={handleSubmit} className="space-y-6">
+        {/* Autofill */}
+        <div className="flex justify-end">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={handleAutofill}
+            className="gap-2 text-xs font-[family-name:var(--font-outfit)]"
+          >
+            <Wand2 className="h-3.5 w-3.5" />
+            Autofill Demo
+          </Button>
+        </div>
+
         {/* Role */}
         <div className="space-y-2">
           <Label htmlFor="role" className="text-sm font-[family-name:var(--font-outfit)] font-medium">

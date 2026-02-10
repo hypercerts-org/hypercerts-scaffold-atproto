@@ -16,7 +16,7 @@ export interface Evidence {
   title: string;
   shortDescription: string;
   description?: string;
-  relationType: "supports" | "clarifies" | "challenges";
+  contentType?: "evidence" | "report" | "audit" | "testimonial" | "methodology";
   content: {
     $type: string;
     uri?: string;
@@ -36,17 +36,9 @@ export default function HypercertEvidenceView({
 
   const evidenceUrl = evidence.content.uri || evidence.content.blob || "";
 
-  const getRelationColor = (relation: Evidence["relationType"]) => {
-    switch (relation) {
-      case "supports":
-        return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100";
-      case "challenges":
-        return "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-100";
-      case "clarifies":
-        return "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-100";
-      default:
-        return "";
-    }
+  const getContentTypeColor = (type?: Evidence["contentType"]) => {
+    // All content types use the same color
+    return "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-100";
   };
 
   return (
@@ -63,9 +55,11 @@ export default function HypercertEvidenceView({
               </time>
             </CardDescription>
           </div>
-          <Badge className={`${getRelationColor(evidence.relationType)} font-[family-name:var(--font-outfit)] shrink-0`}>
-            {evidence.relationType.charAt(0).toUpperCase() +
-              evidence.relationType.slice(1)}
+          <Badge className={`${getContentTypeColor(evidence.contentType)} font-[family-name:var(--font-outfit)] shrink-0`}>
+            {evidence.contentType
+              ? evidence.contentType.charAt(0).toUpperCase() +
+                evidence.contentType.slice(1)
+              : "Evidence"}
           </Badge>
         </div>
       </CardHeader>
