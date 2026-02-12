@@ -13,8 +13,6 @@ export async function POST(req: Request) {
 
     const displayName = formData.get("displayName")?.toString() || "";
     const description = formData.get("description")?.toString() || "";
-    const pronouns = formData.get("pronouns")?.toString() || "";
-    const website = formData.get("website")?.toString() || "";
 
     const avatar = formData.get("avatar") as File | null;
     const banner = formData.get("banner") as File | null;
@@ -31,17 +29,11 @@ export async function POST(req: Request) {
         { status: 400 }
       );
     }
-    if (pronouns && pronouns.length > 20) {
-      return NextResponse.json(
-        { error: "Pronouns must be 20 characters or less" },
-        { status: 400 }
-      );
-    }
 
     // Check if profile exists by fetching it first
     let existingProfile;
     try {
-      existingProfile = await repo.profile.getCertifiedProfile();
+      existingProfile = await repo.profile.getBskyProfile();
     } catch (error) {
       // Profile doesn't exist yet
       existingProfile = null;
@@ -53,34 +45,26 @@ export async function POST(req: Request) {
       const createParams: {
         displayName?: string;
         description?: string;
-        pronouns?: string;
-        website?: string;
         avatar?: File;
         banner?: File;
       } = {};
 
       if (displayName) createParams.displayName = displayName;
       if (description) createParams.description = description;
-      if (pronouns) createParams.pronouns = pronouns;
-      if (website) createParams.website = website;
       if (avatar) createParams.avatar = avatar;
       if (banner) createParams.banner = banner;
 
-      await repo.profile.createCertifiedProfile(createParams);
+      await repo.profile.createBskyProfile(createParams);
     } else {
       // For update: use null to remove fields, undefined to preserve
       const updateParams: {
         displayName?: string | null;
         description?: string | null;
-        pronouns?: string | null;
-        website?: string | null;
         avatar?: File | null;
         banner?: File | null;
       } = {
         displayName: displayName || null,
         description: description || null,
-        pronouns: pronouns || null,
-        website: website || null,
       };
 
       // Only include avatar/banner if user uploaded new files
@@ -92,13 +76,13 @@ export async function POST(req: Request) {
         updateParams.banner = banner;
       }
 
-      await repo.profile.updateCertifiedProfile(updateParams);
+      await repo.profile.updateBskyProfile(updateParams);
     }
-    revalidatePath("/profile");
+    revalidatePath("/bsky-profile");
 
-    const updated = await repo.profile.getCertifiedProfile();
+    const updated = await repo.profile.getBskyProfile();
 
-    // Avatar and banner are already converted to blob URLs by getCertifiedProfile()
+    // Avatar and banner are already converted to blob URLs by getBskyProfile()
     const avatarUrl = updated.avatar || "";
     const bannerUrl = updated.banner || "";
 
@@ -107,16 +91,14 @@ export async function POST(req: Request) {
       profile: {
         displayName: updated.displayName || "",
         description: updated.description || "",
-        pronouns: updated.pronouns || "",
-        website: updated.website || "",
         avatar: avatarUrl,
         banner: bannerUrl,
       },
     });
   } catch (error) {
-    console.error("Profile update error:", error);
+    console.error("Bsky profile update error:", error);
     return NextResponse.json(
-      { error: "Failed to update profile" },
+      { error: "Failed to update Bsky profile" },
       { status: 500 }
     );
   }

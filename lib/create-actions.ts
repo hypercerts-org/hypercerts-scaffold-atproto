@@ -19,7 +19,7 @@ export const getActiveProfileInfo = async () => {
   if (!ctx) return null;
 
   if (ctx.server === "pds") {
-    const profile = await ctx.scopedRepo.profile.get();
+    const profile = await ctx.scopedRepo.profile.getCertifiedProfile().catch(() => null);
     if (!profile) return null;
     return {
       name: profile.displayName || profile.handle,

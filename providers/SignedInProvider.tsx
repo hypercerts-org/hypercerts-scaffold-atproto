@@ -29,7 +29,7 @@ export async function SignedInProvider({
     ]);
 
     const [profile, org] = await Promise.all([
-      repo ? repo.profile.get() : Promise.resolve(null),
+      repo ? repo.profile.getCertifiedProfile().catch(() => null) : Promise.resolve(null),
       orgRepo && activeDid && activeDid !== session.did
         ? orgRepo.organizations.get(activeDid)
         : Promise.resolve(null),

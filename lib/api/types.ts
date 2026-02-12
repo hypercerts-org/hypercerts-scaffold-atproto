@@ -102,6 +102,24 @@ export interface UpdateProfileResponse {
   };
 }
 
+// Bsky Profile types
+export interface UpdateBskyProfileRequest {
+  displayName?: string | null;
+  description?: string | null;
+  avatar?: File | null;
+  banner?: File | null;
+}
+
+export interface UpdateBskyProfileResponse {
+  ok: boolean;
+  profile: {
+    displayName?: string;
+    description?: string;
+    avatar?: string;
+    banner?: string;
+  };
+}
+
 // External API types - Constellation
 export interface BacklinksResponse {
   records: {

@@ -18,10 +18,10 @@ export const metadata: Metadata = {
 export default async function ProfilePage() {
   const repo = await getAuthenticatedRepo("pds");
   if (!repo) redirect("/");
-  const profile = await repo.profile.get();
+  const profile = await repo.profile.getCertifiedProfile();
 
-  const avatarUrl = profile.avatar || "";
-  const bannerUrl = profile.banner || "";
+  const avatarUrl = profile?.avatar || "";
+  const bannerUrl = profile?.banner || "";
 
   return (
     <div className="relative min-h-screen noise-bg">
@@ -45,10 +45,10 @@ export default async function ProfilePage() {
         <main className="max-w-2xl animate-fade-in-up">
           <ProfileForm
             initialProfile={{
-              displayName: profile.displayName || "",
-              description: profile.description || "",
-              pronouns: profile.pronouns || "",
-              website: profile.website || "",
+              displayName: profile?.displayName || "",
+              description: profile?.description || "",
+              pronouns: profile?.pronouns || "",
+              website: profile?.website || "",
               avatarUrl,
               bannerUrl,
             }}

@@ -30,7 +30,7 @@ export default async function Home() {
     getSession(),
   ]);
   
-  const profile = personalRepo ? await personalRepo.profile.get() : null;
+  const profile = personalRepo ? await personalRepo.profile.getCertifiedProfile().catch(() => null) : null;
   const isSignedIn = !!session;
 
   return (
