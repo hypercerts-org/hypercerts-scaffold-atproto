@@ -205,12 +205,12 @@ This is completely transparent to users - just access the app however you prefer
 This scaffold uses OAuth 2.0 with DPoP (Demonstrating Proof of Possession) for authentication, implemented via the Hypercerts SDK.
 
 **Flow:**
-1. User enters their handle
+1. User enters their handle (e.g., `user.example.com`)
 2. Application redirects to the ATProto authorization server
 3. User approves the application
-4. Callback receives the session and stores it in Redis
-// Note this will be updated since it is unsafe to restore session using the user-did
-5. A `user-did` cookie tracks the authenticated user
+4. OAuth callback receives the authorization code
+5. SDK exchanges code for session credentials (stored in Redis)
+6. A `user-did` cookie tracks the authenticated user for subsequent requests
 
 ### Server-Side Authentication
 
@@ -220,17 +220,39 @@ Use `getRepoContext()` to get an authenticated repository in server components o
 import { getRepoContext } from "@/lib/repo-context";
 
 export async function GET() {
+  // Get authenticated repository context
   const ctx = await getRepoContext();
   
   if (!ctx) {
     return Response.json({ error: "Not authenticated" }, { status: 401 });
   }
   
+  // Available context properties:
   // ctx.userDid - the authenticated user's DID
-  // ctx.activeDid - currently active profile (user or org)
-  // ctx.scopedRepo - repository scoped to target DID
+  // ctx.activeDid - currently active profile DID
+  // ctx.targetDid - the DID this operation targets
+  // ctx.repository - repository routed to PDS
+  // ctx.scopedRepo - repository scoped to targetDid
   
-  const profile = await ctx.scopedRepo.profile.get();
+  // Use scopedRepo for most operations
+  const profile = await ctx.scopedRepo.profile.getCertifiedProfile();
+  return Response.json(profile);
+}
+```
+
+**Simpler alternative** using `getAuthenticatedRepo()`:
+
+```typescript
+import { getAuthenticatedRepo } from "@/lib/atproto-session";
+
+export async function GET() {
+  const repo = await getAuthenticatedRepo();
+  
+  if (!repo) {
+    return Response.json({ error: "Not authenticated" }, { status: 401 });
+  }
+  
+  const profile = await repo.profile.getCertifiedProfile();
   return Response.json(profile);
 }
 ```
@@ -249,12 +271,20 @@ export async function GET() {
     return Response.json({ error: "Not authenticated" }, { status: 401 });
   }
   
-  // ctx.userDid - the authenticated user's DID
-  // ctx.activeDid - currently active profile
-  // ctx.scopedRepo - repository scoped to target DID
+  // Access user profile
+  const profile = await ctx.scopedRepo.profile.getCertifiedProfile();
   
-  const profile = await ctx.scopedRepo.profile.get();
-  return Response.json(profile);
+  // Create a hypercert
+  await ctx.scopedRepo.hypercert.create({
+    title: "My Hypercert",
+    description: "A certificate of impact",
+    // ... other fields
+  });
+  
+  // List hypercerts
+  const hypercerts = await ctx.scopedRepo.hypercert.list();
+  
+  return Response.json({ profile, hypercerts });
 }
 ```
 
