@@ -139,38 +139,6 @@ export default function MeasurementForm({
       "https://example.com/data.csv",
       "at://did:plc:z72i7hdynmk6r22z27h6tvur/org.hypercerts.claim.evidence/3jzfcijpqzk2a",
     ]);
-    setUseLocations(true);
-    setLocationEntries([
-      {
-        id: crypto.randomUUID(),
-        mode: "string",
-        stringValue:
-          "at://did:plc:666wpj2xloq7d6n5xjizhmbb/app.certified.location/3mepwcsf62k2w",
-        lpVersion: "1.0.0",
-        srs: "http://www.opengis.net/def/crs/OGC/1.3/CRS84",
-        locationType: "coordinate-decimal",
-        locationTypeCustom: "",
-        name: "",
-        description: "",
-        contentMode: "link",
-        locationUrl: "",
-        locationFile: null,
-      },
-      {
-        id: crypto.randomUUID(),
-        mode: "create",
-        stringValue: "",
-        lpVersion: "1.0.0",
-        srs: "http://www.opengis.net/def/crs/OGC/1.3/CRS84",
-        locationType: "geojson-point",
-        locationTypeCustom: "",
-        name: "Reforestation Site Alpha",
-        description: "Primary reforestation area in the northern region",
-        contentMode: "link",
-        locationUrl: "https://example.com/location.geojson",
-        locationFile: null,
-      },
-    ]);
     setUseComment(true);
     setComment("Verified via drone imagery and ground survey");
     toast.success("Form autofilled with dummy data");
