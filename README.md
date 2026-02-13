@@ -1,13 +1,13 @@
 # Hypercerts Scaffold
 
-A Next.js scaffold for building applications on ATProto using the Hypercerts SDK. This project demonstrates authentication, organization management, and hypercert creation on the ATProto network.
+A Next.js scaffold for building applications on ATProto using the Hypercerts SDK. This project demonstrates authentication, profile management, and hypercert creation on the ATProto network.
 
 ## Prerequisites
 
 - Node.js 20+
 - Redis instance (for session & state storage), e.g.
   `docker run -d -p 6379:6379 redis:alpine`
-- A PDS/SDS account for testing
+- A PDS account for testing
 
 ## Quick Start
 
@@ -42,7 +42,6 @@ Open [http://127.0.0.1:3000](http://127.0.0.1:3000) to see the application.
 | `REDIS_PORT` | Redis server port |
 | `REDIS_PASSWORD` | Redis password |
 | `NEXT_PUBLIC_PDS_URL` | Personal Data Server URL |
-| `NEXT_PUBLIC_SDS_URL` | Shared Data Server URL |
 
 ### Local Development
 
@@ -60,7 +59,6 @@ For development and testing, use these servers:
 
 ```env
 NEXT_PUBLIC_PDS_URL=https://pds-eu-west4.test.certified.app
-NEXT_PUBLIC_SDS_URL=https://sds-eu-west4.test.certified.app
 ```
 
 ### Testing with ngrok
@@ -191,22 +189,22 @@ export async function GET() {
 }
 ```
 
-## Working with Organizations
+## Working with Repository Context
 
-Organizations are shared repositories on the SDS that allow multiple users to collaborate under a single identity.
+The repository context provides access to the authenticated user's repository and profile data.
 
 ```typescript
 import { getRepoContext } from "@/lib/repo-context";
 
 export async function GET() {
-  const ctx = await getRepoContext({ targetDid: "the_organization_did"});
+  const ctx = await getRepoContext();
   
   if (!ctx) {
     return Response.json({ error: "Not authenticated" }, { status: 401 });
   }
   
   // ctx.userDid - the authenticated user's DID
-  // ctx.activeDid - currently active profile (user or org)
+  // ctx.activeDid - currently active profile
   // ctx.scopedRepo - repository scoped to target DID
   
   const profile = await ctx.scopedRepo.profile.get();
@@ -223,7 +221,6 @@ export async function GET() {
 │   │   ├── certs/          # Hypercert operations
 │   │   └── profile/        # Profile management
 │   ├── hypercerts/         # Hypercert pages
-│   ├── organizations/      # Organization pages
 │   └── profile/            # Profile page
 ├── components/             # React components
 ├── lib/
@@ -251,4 +248,3 @@ export async function GET() {
 - [Hypercerts Documentation](https://hypercerts.org/docs)
 - [Next.js Documentation](https://nextjs.org/docs)
 - [Hypercerts SDK](https://github.com/hypercerts-org/hypercerts-sdk)
-- [SDS](https://github.com/hypercerts-org/atproto/tree/sds)
