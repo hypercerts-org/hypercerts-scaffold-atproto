@@ -7,6 +7,7 @@ import { resolveSessionPds } from "@/lib/server-utils";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { OrgHypercertsDefs } from "@hypercerts-org/sdk-core";
 
 function extractDidFromAtUri(atUri: string): string | null {
   // Expected: at://<did>/<collection>/<rkey>
@@ -81,13 +82,19 @@ export default async function HypercertViewPage({
   if (image && session) {
     const pdsUrl = await resolveSessionPds(session);
 
-    imageUri = getBlobURL(image, ownerDid, pdsUrl);
+    // TODO: check for uri and image types. for now we will assume its a small iamge
+    imageUri = getBlobURL(
+      (image as OrgHypercertsDefs.SmallImage).image,
+      ownerDid,
+      pdsUrl,
+    );
+    console.log(imageUri);
   }
 
   return (
     <main className="relative min-h-screen noise-bg">
       <div className="gradient-mesh absolute inset-0 -z-10" />
-      
+
       <div className="relative z-10 max-w-4xl mx-auto py-8 px-4 space-y-6">
         {/* Back navigation */}
         <div className="animate-fade-in-up">

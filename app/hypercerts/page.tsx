@@ -16,6 +16,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Award, Calendar, Plus, FileText } from "lucide-react";
+import { OrgHypercertsDefs } from "@hypercerts-org/sdk-core";
 
 export const metadata: Metadata = {
   title: "Hypercerts",
@@ -92,7 +93,7 @@ export default async function MyHypercertsPage() {
               {records.map(({ record: cert, uri }) => {
                 const imageUrl =
                   ctx.activeDid && cert.image
-                    ? getBlobURL((cert.image as any).image, ctx.activeDid, pdsUrl)
+                    ? getBlobURL((cert.image as OrgHypercertsDefs.SmallImage).image, ctx.activeDid, pdsUrl)
                     : null;
 
                 const workScope = Array.isArray(cert.workScope) ? cert.workScope : [];
