@@ -11,16 +11,16 @@ import { Button } from "@/components/ui/button";
 import { getRepoContext } from "@/lib/repo-context";
 import { getSession } from "@/lib/atproto-session";
 import { getBlobURL } from "@/lib/utils";
+import { resolveSessionPds } from "@/lib/server-utils";
 import Image from "next/image";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { listOrgs } from "@/lib/create-actions";
 import { Award, Calendar, Plus, FileText } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "Hypercerts",
   description:
-    "Browse and manage your hypercert impact claims. View personal and organization hypercerts.",
+    "Browse and manage your hypercert impact claims.",
   openGraph: {
     title: "Hypercerts",
     description:
@@ -28,44 +28,16 @@ export const metadata: Metadata = {
   },
 };
 
-const shortDid = (did: string) =>
-  did.length > 28 ? `${did.slice(0, 18)}…${did.slice(-6)}` : did;
-
-export default async function MyHypercertsPage({
-  searchParams,
-}: {
-  searchParams?: Promise<{ profileDid: string }>;
-}) {
-  const [ctx, session, params] = await Promise.all([
+export default async function MyHypercertsPage() {
+  const [ctx, session] = await Promise.all([
     getRepoContext(),
     getSession(),
-    searchParams,
   ]);
 
   if (!ctx || !session) redirect("/");
 
-  const profileDidParam = params?.profileDid;
-  const selectedDid =
-    typeof profileDidParam === "string" && profileDidParam.length > 0
-      ? profileDidParam
-      : ctx.activeDid;
-
-  const [{ organizations }, viewCtx] = await Promise.all([
-    listOrgs(),
-    getRepoContext({ targetDid: selectedDid }),
-  ]);
-  if (!viewCtx) redirect("/");
-
-  const chipHref = (did: string) => `?profileDid=${encodeURIComponent(did)}`;
-
-  const { records } = await viewCtx.scopedRepo.hypercerts.list({ limit: 100 });
-  const sessionIssuer = session.serverMetadata.issuer;
-
-  const selectedLabel =
-    selectedDid === ctx.userDid
-      ? "Personal"
-      : organizations.find((org) => org.did === selectedDid)?.name ??
-        shortDid(selectedDid);
+  const { records } = await ctx.scopedRepo.hypercerts.list({ limit: 100 });
+  const pdsUrl = await resolveSessionPds(session);
 
   return (
     <main className="relative min-h-screen noise-bg">
@@ -82,55 +54,17 @@ export default async function MyHypercertsPage({
               Hypercerts
             </h1>
           </div>
-          <p className="text-sm font-[family-name:var(--font-outfit)] text-muted-foreground">
-            Viewing hypercerts for{" "}
-            <span className="font-medium text-create-accent">{selectedLabel}</span>
-          </p>
-        </div>
-
-        {/* DID Filter Chips */}
-        <div className="animate-fade-in-up [animation-delay:100ms]">
-          <div className="glass-panel rounded-2xl p-3 flex flex-wrap gap-2 justify-center max-w-2xl mx-auto">
-            <Button
-              asChild
-              size="sm"
-              variant="ghost"
-              className={`rounded-full font-[family-name:var(--font-outfit)] transition-all ${
-                selectedDid === ctx.userDid
-                  ? "bg-create-accent text-create-accent-foreground hover:bg-create-accent/90"
-                  : "hover:bg-muted/50 hover:border-create-accent/40"
-              }`}
-            >
-              <Link href={chipHref(ctx.userDid)}>Personal</Link>
-            </Button>
-
-            {organizations.map((org) => (
-              <Button
-                key={org.did}
-                asChild
-                size="sm"
-                variant="ghost"
-                className={`rounded-full font-[family-name:var(--font-outfit)] transition-all ${
-                  selectedDid === org.did
-                    ? "bg-create-accent text-create-accent-foreground hover:bg-create-accent/90"
-                    : "hover:bg-muted/50 hover:border-create-accent/40"
-                }`}
-              >
-                <Link href={chipHref(org.did)}>{org.name}</Link>
-              </Button>
-            ))}
-          </div>
         </div>
 
         {/* Content */}
         {!records ? (
-          <div className="animate-fade-in-up [animation-delay:200ms]">
+          <div className="animate-fade-in-up [animation-delay:100ms]">
             <div className="glass-panel rounded-2xl p-12 max-w-md mx-auto">
               <Loader />
             </div>
           </div>
         ) : records.length === 0 ? (
-          <div className="animate-fade-in-up [animation-delay:200ms]">
+          <div className="animate-fade-in-up [animation-delay:100ms]">
             <div className="glass-panel rounded-2xl p-12 max-w-md mx-auto text-center space-y-4">
               <div className="size-16 rounded-full bg-create-accent/10 flex items-center justify-center mx-auto">
                 <FileText className="size-8 text-create-accent" />
@@ -153,12 +87,12 @@ export default async function MyHypercertsPage({
             </div>
           </div>
         ) : (
-          <div className="animate-fade-in-up [animation-delay:200ms]">
+          <div className="animate-fade-in-up [animation-delay:100ms]">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 stagger-children">
               {records.map(({ record: cert, uri }) => {
                 const imageUrl =
-                  viewCtx.targetDid && cert.image
-                    ? getBlobURL((cert.image as any).image, viewCtx.targetDid, sessionIssuer)
+                  ctx.activeDid && cert.image
+                    ? getBlobURL((cert.image as any).image, ctx.activeDid, pdsUrl)
                     : null;
 
                 const workScope = Array.isArray(cert.workScope) ? cert.workScope : [];

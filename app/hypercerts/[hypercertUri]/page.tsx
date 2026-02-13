@@ -3,6 +3,7 @@ import HypercertDetailsView from "@/components/hypercert-detail-view";
 import { getSession } from "@/lib/atproto-session";
 import { getRepoContext } from "@/lib/repo-context";
 import { getBlobURL } from "@/lib/utils";
+import { resolveSessionPds } from "@/lib/server-utils";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -78,9 +79,9 @@ export default async function HypercertViewPage({
   const { image, ...certWithoutImage } = cert.record;
 
   if (image && session) {
-    const sessionIssuer = session.serverMetadata.issuer;
+    const pdsUrl = await resolveSessionPds(session);
 
-    imageUri = getBlobURL(image, ownerDid, sessionIssuer);
+    imageUri = getBlobURL(image, ownerDid, pdsUrl);
   }
 
   return (

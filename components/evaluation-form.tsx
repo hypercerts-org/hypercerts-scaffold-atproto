@@ -94,7 +94,7 @@ export default function EvaluationForm({
     ]);
     setUseLocation(true);
     setLocationUri(
-      "at://did:plc:z72i7hdynmk6r22z27h6tvur/app.certified.location/3jzfcijpqzk2c"
+      "at://did:plc:666wpj2xloq7d6n5xjizhmbb/app.certified.location/3mepwcsf62k2w"
     );
     toast.success("Form autofilled with dummy data");
   };

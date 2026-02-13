@@ -2,6 +2,7 @@ import "server-only";
 import { getSession } from "./atproto-session";
 import { getRepoContext } from "./repo-context";
 import { getBlobURL } from "./utils";
+import { resolveSessionPds } from "./server-utils";
 import { BlobRef } from "@atproto/lexicon";
 
 export async function resolveBlobToUrl(
@@ -17,9 +18,9 @@ export async function resolveBlobToUrl(
   ]);
   if (!session || !viewCtx) return undefined;
 
-  const sessionIssuer = session.serverMetadata.issuer;
+  const pdsUrl = await resolveSessionPds(session);
 
-  return getBlobURL(blob, ownerDid, sessionIssuer);
+  return getBlobURL(blob, ownerDid, pdsUrl);
 }
 
 /**

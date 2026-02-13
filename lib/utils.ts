@@ -4,6 +4,8 @@ import { twMerge } from "tailwind-merge";
 import * as Hypercert from "@/lexicons/types/org/hypercerts/claim/activity";
 import * as Contribution from "@/lexicons/types/org/hypercerts/claim/contribution";
 import * as Evaluation from "@/lexicons/types/org/hypercerts/claim/evaluation";
+import sdk from "@/lib/hypercerts-sdk";
+import type { OAuthSession } from "@atproto/oauth-client-node";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -29,9 +31,16 @@ export function getBlobURL(
     const cid = blobRef.ref ?? undefined;
     if (!did || !cid) return undefined;
 
-    const url = `${
-      pdsUrl || process.env.NEXT_PUBLIC_PDS_URL
-    }/xrpc/com.atproto.sync.getBlob?did=${encodeURIComponent(
+    const resolvedPdsUrl = pdsUrl || process.env.NEXT_PUBLIC_PDS_URL;
+    
+    // Check if we're using Bluesky CDN (fallback case)
+    if (resolvedPdsUrl === "https://cdn.bsky.app") {
+      // Use CDN format: https://cdn.bsky.app/img/feed_thumbnail/plain/{DID}/{CID}@jpeg
+      return `https://cdn.bsky.app/img/feed_thumbnail/plain/${did}/${cid.toString()}@jpeg`;
+    }
+    
+    // Use standard PDS format
+    const url = `${resolvedPdsUrl}/xrpc/com.atproto.sync.getBlob?did=${encodeURIComponent(
       did
     )}&cid=${encodeURIComponent(cid.toString())}`;
     return url;

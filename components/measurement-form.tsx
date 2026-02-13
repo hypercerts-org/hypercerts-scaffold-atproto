@@ -145,7 +145,7 @@ export default function MeasurementForm({
         id: crypto.randomUUID(),
         mode: "string",
         stringValue:
-          "at://did:plc:z72i7hdynmk6r22z27h6tvur/app.certified.location/3jzfcijpqzk2c",
+          "at://did:plc:666wpj2xloq7d6n5xjizhmbb/app.certified.location/3mepwcsf62k2w",
         lpVersion: "1.0.0",
         srs: "http://www.opengis.net/def/crs/OGC/1.3/CRS84",
         locationType: "coordinate-decimal",
