@@ -195,11 +195,6 @@ export default async function Home() {
                   View My Hypercerts
                 </Link>
               </Button>
-              <Button asChild variant="outline" className="font-[family-name:var(--font-outfit)] font-medium">
-                <Link href="/organizations">
-                  Organizations
-                </Link>
-              </Button>
             </div>
           </div>
         </section>
