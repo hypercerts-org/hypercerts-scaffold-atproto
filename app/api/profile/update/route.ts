@@ -99,16 +99,16 @@ export async function POST(req: Request) {
     const updated = await repo.profile.getCertifiedProfile();
 
     // Avatar and banner are already converted to blob URLs by getCertifiedProfile()
-    const avatarUrl = updated.avatar || "";
-    const bannerUrl = updated.banner || "";
+    const avatarUrl = updated?.avatar || "";
+    const bannerUrl = updated?.banner || "";
 
     return NextResponse.json({
       ok: true,
       profile: {
-        displayName: updated.displayName || "",
-        description: updated.description || "",
-        pronouns: updated.pronouns || "",
-        website: updated.website || "",
+        displayName: updated?.displayName || "",
+        description: updated?.description || "",
+        pronouns: updated?.pronouns || "",
+        website: updated?.website || "",
         avatar: avatarUrl,
         banner: bannerUrl,
       },

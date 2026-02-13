@@ -60,6 +60,7 @@ export const logout = async () => {
   sdk.revokeSession(session.sub);
 };
 
+// TODO addContribution in SDK needs to be updated so for now contributions will directly be added through hypercert create
 export const addContribution = async (params: {
   hypercertUri: string;
   contributors: string[];
@@ -70,13 +71,14 @@ export const addContribution = async (params: {
     endDate?: string;
   };
 }) => {
-  const ctx = await getRepoContext();
+  return true
+  // const ctx = await getRepoContext();
 
-  if (!ctx) {
-    throw new Error("Unable to get authenticated repository");
-  }
+  // if (!ctx) {
+  //   throw new Error("Unable to get authenticated repository");
+  // }
 
-  return ctx.scopedRepo.hypercerts.addContribution(params);
+  // return ctx.scopedRepo.hypercerts.addContribution(params);
 };
 
 export const addEvaluation = async (params: {

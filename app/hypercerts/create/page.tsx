@@ -21,10 +21,10 @@ const HypercertsCreateForm = dynamic(
   () => import("@/components/hypercerts-create-form"),
   { loading: () => <HypercertsCreateFormSkeleton /> }
 );
-const HypercertContributionForm = dynamic(
-  () => import("@/components/contributions-form"),
-  { loading: () => <ContributionFormSkeleton /> }
-);
+// const HypercertContributionForm = dynamic(
+//   () => import("@/components/contributions-form"),
+//   { loading: () => <ContributionFormSkeleton /> }
+// );
 const HypercertEvidenceForm = dynamic(
   () => import("@/components/evidence-form"),
   { loading: () => <EvidenceFormSkeleton /> }
@@ -87,42 +87,43 @@ export default function Home() {
                 nextStepper={nextStepper}
               />
             )}
-            {step === 2 && hypercertInfo && (
+            {/* TODO commented out for now while SDK addContribution stabilized */}
+            {/* {step === 2 && hypercertInfo && (
               <HypercertContributionForm
                 hypercertInfo={hypercertInfo}
                 onNext={() => setStep((step) => step + 1)}
                 onBack={previousStepper}
               />
-            )}
-            {step === 3 && hypercertInfo && (
+            )} */}
+            {step === 2 && hypercertInfo && (
               <HypercertEvidenceForm
                 hypercertInfo={hypercertInfo}
                 onNext={nextStepper}
                 onBack={previousStepper}
               />
             )}
-            {step === 4 && hypercertInfo && (
+            {step === 3 && hypercertInfo && (
               <HypercertLocationForm
                 onNext={nextStepper}
                 onBack={previousStepper}
                 hypercertInfo={hypercertInfo}
               />
             )}
-            {step === 5 && hypercertInfo && (
+            {step === 4 && hypercertInfo && (
               <MeasurementForm
                 hypercertInfo={hypercertInfo}
                 onNext={nextStepper}
                 onBack={previousStepper}
               />
             )}
-            {step === 6 && hypercertInfo && (
+            {step === 5 && hypercertInfo && (
               <EvaluationForm
                 hypercertInfo={hypercertInfo}
                 onNext={nextStepper}
                 onBack={previousStepper}
               />
             )}
-            {step === 7 && (
+            {step === 6 && (
               <HypercertCompletionStep
                 onCreateAnother={() => setStep(1)}
                 onBack={previousStepper}
