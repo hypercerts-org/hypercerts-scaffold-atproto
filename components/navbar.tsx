@@ -11,11 +11,10 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { AtSignIcon, LogOut, User, GlobeIcon, Sparkles } from "lucide-react";
+import { AtSignIcon, LogOut, User, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { FormEventHandler, useState } from "react";
-import ProfileSwitchDialog from "./profile-switch-dialog";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -102,16 +101,6 @@ export default function Navbar({
                   Hypercerts
                 </Link>
                 <Link
-                  href="/organizations"
-                  className={`px-3 py-1.5 text-sm font-[family-name:var(--font-outfit)] font-medium rounded-lg transition-colors ${
-                    pathname?.startsWith("/organizations")
-                      ? "bg-create-accent/10 text-create-accent hover:bg-create-accent/20"
-                      : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
-                  }`}
-                >
-                  Organizations
-                </Link>
-                <Link
                   href="/hypercerts/create"
                   className={`px-3 py-1.5 text-sm font-[family-name:var(--font-outfit)] font-medium rounded-lg transition-colors ${
                     pathname === "/hypercerts/create"
@@ -176,23 +165,6 @@ export default function Navbar({
                       Profile
                     </Link>
                   </DropdownMenuItem>
-
-                  <DropdownMenuSeparator />
-
-                  {userDid && userHandle && (
-                    <ProfileSwitchDialog
-                      personalHandle={userHandle}
-                      currentActiveDid={activeDid || userDid}
-                      userDid={userDid}
-                    >
-                      <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="font-[family-name:var(--font-outfit)]">
-                        <button className="flex items-center gap-2 w-full text-left">
-                          <GlobeIcon className="h-4 w-4" />
-                          Switch Profile
-                        </button>
-                      </DropdownMenuItem>
-                    </ProfileSwitchDialog>
-                  )}
 
                   <DropdownMenuSeparator />
 
