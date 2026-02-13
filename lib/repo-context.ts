@@ -15,10 +15,8 @@ export interface RepoContextOptions {
   targetDid?: string;
 
   /**
-   * Escape hatch when you *know* the server must be PDS or SDS.
-   * If omitted, we use the scaffold rule:
-   *   targetDid === userDid -> PDS
-   *   else -> SDS
+   * Server override (always PDS now).
+   * Kept for backwards compatibility.
    */
   serverOverride?: RepoServer;
 }
@@ -57,8 +55,7 @@ export const getRepoContext = cache(async function getRepoContext(
   const activeDid = cookieStore.get("active-did")?.value || userDid;
   const targetDid = options.targetDid || activeDid;
 
-  const server: RepoServer =
-    options.serverOverride ?? (targetDid === userDid ? "pds" : "sds");
+  const server: RepoServer = options.serverOverride ?? "pds";
 
   try {
     const session = await sdk.restoreSession(userDid);
