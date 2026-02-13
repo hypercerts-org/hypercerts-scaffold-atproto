@@ -80,12 +80,7 @@ export default async function HypercertViewPage({
   if (image && session) {
     const sessionIssuer = session.serverMetadata.issuer;
 
-    const blobBase =
-      ownerDid === viewCtx.userDid
-        ? sessionIssuer
-        : process.env.NEXT_PUBLIC_SDS_URL || sessionIssuer;
-
-    imageUri = getBlobURL(image, ownerDid, blobBase);
+    imageUri = getBlobURL(image, ownerDid, sessionIssuer);
   }
 
   return (

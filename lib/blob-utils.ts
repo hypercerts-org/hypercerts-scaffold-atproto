@@ -19,12 +19,7 @@ export async function resolveBlobToUrl(
 
   const sessionIssuer = session.serverMetadata.issuer;
 
-  const blobBase =
-    ownerDid === viewCtx.userDid
-      ? sessionIssuer
-      : process.env.NEXT_PUBLIC_SDS_URL || sessionIssuer;
-
-  return getBlobURL(blob, ownerDid, blobBase);
+  return getBlobURL(blob, ownerDid, sessionIssuer);
 }
 
 /**
