@@ -29,6 +29,12 @@ cp .env.example .env.local
 # Make sure Redis is running (if using Docker)
 docker ps  # should show a Redis container running
 
+# Generate and display the key
+pnpm run generate-jwk
+
+# Or append directly to .env.local
+pnpm run --silent generate-jwk >> .env.local
+
 # Run the development server
 pnpm run dev
 ```
@@ -159,20 +165,6 @@ This application automatically redirects requests from `localhost` to `127.0.0.1
 - **Prevents DNS rebinding attacks**: Using an IP address ensures the redirect stays on the local machine
 - **Consistent OAuth behavior**: ATProto PDSs expect IP-based loopback addresses
 - **Browser security**: Some browsers handle `localhost` and `127.0.0.1` differently for security features
-
-### How It Works
-
-The application includes a Next.js proxy (`proxy.ts`) that:
-1. Detects requests to `localhost:*` (any port)
-2. Automatically redirects to `127.0.0.1:*` (preserving port, path, and query params)
-3. Uses HTTP 307 (Temporary Redirect) to preserve the request method
-
-**Examples:**
-- `http://localhost:3000` → `http://127.0.0.1:3000`
-- `http://localhost:3000/login` → `http://127.0.0.1:3000/login`
-- `http://localhost:3000/api/auth/callback?code=123` → `http://127.0.0.1:3000/api/auth/callback?code=123`
-
-This is completely transparent to users - just access the app however you prefer, and the redirect will handle the rest!
 
 ### Troubleshooting OAuth Issues
 
