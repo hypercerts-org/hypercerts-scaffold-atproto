@@ -5,7 +5,7 @@ import { cookies } from "next/headers";
 import sdk from "@/lib/hypercerts-sdk";
 import type { Repository } from "@hypercerts-org/sdk-core";
 
-export type RepoServer = "pds" | "sds";
+export type RepoServer = "pds";
 
 export interface RepoContextOptions {
   /**
