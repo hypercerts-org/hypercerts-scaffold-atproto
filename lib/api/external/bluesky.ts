@@ -38,30 +38,3 @@ export async function searchActors(
   return response.actors || [];
 }
 
-/**
- * Check if a handle is available on a given SDS server
- */
-export async function checkHandleAvailability(
-  handlePrefix: string,
-  sdsUrl: string
-): Promise<boolean> {
-  const url = new URL(
-    "/xrpc/com.atproto.identity.resolveHandle",
-    `https://${sdsUrl}`
-  );
-  url.searchParams.set("handle", `${handlePrefix}.${sdsUrl}`);
-
-  try {
-    await externalApiClient(url.toString());
-    // 200 OK means handle is taken
-    return false;
-  } catch (error) {
-    if (error instanceof APIError) {
-      // 400 with HandleNotFound or InvalidRequest means handle is available
-      if (error.status === 400) {
-        return true;
-      }
-    }
-    throw error;
-  }
-}
