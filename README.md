@@ -28,7 +28,9 @@ pnpm run dev
 
 Open [http://127.0.0.1:3000](http://127.0.0.1:3000) to see the application.
 
-> **Note**: If you access `http://localhost:3000`, you'll be automatically redirected to `http://127.0.0.1:3000`. This ensures RFC 8252 compliance for OAuth loopback clients, which requires using IP addresses instead of hostnames for security. See the [Localhost Redirect](#localhost-redirect) section for details.
+> **⚠️ OAuth Requirement**: You **must** use `http://127.0.0.1:3000` for local development (not `localhost`).  
+> The app automatically redirects `localhost` to `127.0.0.1` for RFC 8252 OAuth compliance.  
+> See [Localhost Redirect](#localhost-redirect) for details.
 
 ## ⚠️ Important: SDK Version & Breaking Changes
 
@@ -139,6 +141,8 @@ The **PDS (Personal Data Server)** stores all user data - your profile and your 
 
 ## Localhost Redirect
 
+**TL;DR**: Use `http://127.0.0.1:3000` for local development. The app automatically redirects `localhost` → `127.0.0.1`, but your `.env.local` **must** use `127.0.0.1` for OAuth to work.
+
 This application automatically redirects requests from `localhost` to `127.0.0.1` to ensure RFC 8252 compliance for OAuth loopback clients.
 
 ### Why?
@@ -162,6 +166,30 @@ The application includes a Next.js proxy (`proxy.ts`) that:
 - `http://localhost:3000/api/auth/callback?code=123` → `http://127.0.0.1:3000/api/auth/callback?code=123`
 
 This is completely transparent to users - just access the app however you prefer, and the redirect will handle the rest!
+
+### Troubleshooting OAuth Issues
+
+**Problem:** "OAuth callback failed" or "Invalid redirect_uri"
+
+**Solution:** 
+- Check that `NEXT_PUBLIC_BASE_URL` in `.env.local` uses `127.0.0.1` (not `localhost`)
+- Restart the dev server after changing `.env.local`
+- Clear browser cookies and try again
+
+**Problem:** Redirect loop after login
+
+**Solution:**
+- Clear browser cookies
+- Restart the dev server
+- Try in incognito/private browsing mode
+- Check that Redis is running (`docker ps`)
+
+**Problem:** Works on `127.0.0.1` but not with ngrok
+
+**Solution:**
+- Update `NEXT_PUBLIC_BASE_URL` to your ngrok URL (e.g., `https://abc123.ngrok.io`)
+- Restart the dev server after changing the URL
+- Note: ngrok URLs change on each restart unless you have a paid plan with reserved domains
 
 ## Authentication
 
