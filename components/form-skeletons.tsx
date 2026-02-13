@@ -146,11 +146,11 @@ export function ContributionFormSkeleton() {
   );
 }
 
-// Step 3: Evidence Form Skeleton
+// Step 2: Evidence Form Skeleton
 export function EvidenceFormSkeleton() {
   return (
     <div className="glass-panel rounded-2xl overflow-hidden animate-fade-in-up">
-      <FormInfoHeaderSkeleton stepLabel="Step 3 of 6" />
+      <FormInfoHeaderSkeleton stepLabel="Step 2 of 5" />
       
       <div className="px-6 py-6">
         <div className="space-y-6">
@@ -198,11 +198,11 @@ export function EvidenceFormSkeleton() {
   );
 }
 
-// Step 4: Location Form Skeleton
+// Step 3: Location Form Skeleton
 export function LocationFormSkeleton() {
   return (
     <div className="glass-panel rounded-2xl overflow-hidden animate-fade-in-up">
-      <FormInfoHeaderSkeleton stepLabel="Step 4 of 6" />
+      <FormInfoHeaderSkeleton stepLabel="Step 3 of 5" />
       
       <div className="px-6 py-6">
         <div className="space-y-6">
@@ -245,11 +245,11 @@ export function LocationFormSkeleton() {
   );
 }
 
-// Step 5: Measurement Form Skeleton
+// Step 4: Measurement Form Skeleton
 export function MeasurementFormSkeleton() {
   return (
     <div className="glass-panel rounded-2xl overflow-hidden animate-fade-in-up">
-      <FormInfoHeaderSkeleton stepLabel="Step 5 of 6" />
+      <FormInfoHeaderSkeleton stepLabel="Step 4 of 5" />
       
       <div className="px-6 py-6">
         <div className="space-y-8">
@@ -295,11 +295,11 @@ export function MeasurementFormSkeleton() {
   );
 }
 
-// Step 6: Evaluation Form Skeleton
+// Step 5: Evaluation Form Skeleton
 export function EvaluationFormSkeleton() {
   return (
     <div className="glass-panel rounded-2xl overflow-hidden animate-fade-in-up">
-      <FormInfoHeaderSkeleton stepLabel="Step 6 of 6" />
+      <FormInfoHeaderSkeleton stepLabel="Step 5 of 5" />
       
       <div className="px-6 py-6">
         <div className="space-y-8">

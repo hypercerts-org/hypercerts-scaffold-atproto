@@ -12,11 +12,10 @@ import {
 
 const STEPS = [
   { id: 1, label: "Details", icon: FileText },
-  { id: 2, label: "Contributors", icon: Users },
-  { id: 3, label: "Evidence", icon: Paperclip },
-  { id: 4, label: "Location", icon: MapPin },
-  { id: 5, label: "Measurement", icon: BarChart3 },
-  { id: 6, label: "Evaluation", icon: ClipboardCheck },
+  { id: 2, label: "Evidence", icon: Paperclip },
+  { id: 3, label: "Location", icon: MapPin },
+  { id: 4, label: "Measurement", icon: BarChart3 },
+  { id: 5, label: "Evaluation", icon: ClipboardCheck },
 ] as const;
 
 export function StepperHeader({ step }: { step: number }) {

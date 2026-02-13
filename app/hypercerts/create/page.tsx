@@ -7,7 +7,6 @@ import dynamic from "next/dynamic";
 import { useState } from "react";
 import {
   HypercertsCreateFormSkeleton,
-  ContributionFormSkeleton,
   EvidenceFormSkeleton,
   LocationFormSkeleton,
   MeasurementFormSkeleton,
