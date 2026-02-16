@@ -340,6 +340,10 @@ pnpm run start
 
 ### Testing OAuth Branding Locally
 
+**Important: PDS Trusted Client Requirement**
+
+The PDS (`pds-eu-west4.test.certified.app`) only applies branding CSS for client URLs registered in its `PDS_OAUTH_TRUSTED_CLIENTS` environment variable. Random ngrok URLs or unregistered Vercel preview URLs will NOT show branding on the PDS OAuth pages, even though the metadata is served correctly by your app. To see branding rendered by the PDS, your client URL must be added to the trusted list (see "Getting your domain trusted by the PDS" below).
+
 **Why branding doesn't appear in local development:**
 
 ATProto OAuth has a limitation with loopback mode (localhost/127.0.0.1). When using a loopback `client_id`, the PDS auto-generates minimal client metadata and only supports the `scope` and `redirect_uri` parameters. Custom branding fields (logo, colors, CSS) are ignored. This is part of the ATProto specification — loopback clients cannot provide custom metadata for security reasons.
@@ -374,13 +378,25 @@ To test OAuth branding locally, you need a public HTTPS URL. The easiest way is 
 
 6. **Access the app via the ngrok URL** (not 127.0.0.1)
 
-The app now runs in production mode and serves full client metadata with branding at `/client-metadata.json`. When users authenticate, the PDS will fetch this metadata and display your custom branding (logo, colors, CSS) on the OAuth consent screen.
+The app now runs in production mode and serves full client metadata with branding at `/client-metadata.json`. You can verify the metadata is correct by visiting `https://abc123.ngrok-free.app/client-metadata.json` and checking the `branding` field.
+
+**Important:** The PDS will NOT render the branding on its OAuth pages unless the ngrok URL is added to `PDS_OAUTH_TRUSTED_CLIENTS`. Ngrok is useful for testing that the metadata endpoint serves branding CSS correctly, but for the branding to actually appear on the PDS OAuth consent screen, you need to get your domain trusted (see below). If you have a stable ngrok domain (paid plan), you can request it be added to the trusted list.
 
 **Note:** If you encounter CORS or origin validation errors, you may need to configure `allowedDevOrigins` in `next.config.ts` to include your ngrok domain.
 
+#### Getting your domain trusted by the PDS
+
+To get a domain added to the PDS trusted clients list:
+
+1. **Contact @aspiers on GitHub** with your request
+2. **Provide the full client_id URL** (e.g., `https://your-app.vercel.app/client-metadata.json`)
+3. **Production/stable URLs are preferred** over ephemeral ngrok URLs
+
+Once your domain is added to the trusted list, the PDS will apply your branding CSS to the OAuth consent pages.
+
 **Vercel deployments:**
 
-OAuth branding works automatically on Vercel preview and production deployments — no ngrok needed. The production `NEXT_PUBLIC_BASE_URL` is already a public HTTPS URL, so the PDS can fetch full metadata.
+OAuth branding metadata is served automatically on Vercel preview and production deployments — no ngrok needed. The production `NEXT_PUBLIC_BASE_URL` is already a public HTTPS URL, so the PDS can fetch full metadata. However, note that Vercel preview and production URLs also need to be in the PDS trusted clients list for branding to appear on the PDS OAuth pages.
 
 ### Build Errors After SDK Update
 
