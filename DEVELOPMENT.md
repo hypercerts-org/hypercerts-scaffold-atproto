@@ -338,6 +338,50 @@ pnpm run start
 - Try in incognito/private browsing mode
 - Check Redis is running and accessible
 
+### Testing OAuth Branding Locally
+
+**Why branding doesn't appear in local development:**
+
+ATProto OAuth has a limitation with loopback mode (localhost/127.0.0.1). When using a loopback `client_id`, the PDS auto-generates minimal client metadata and only supports the `scope` and `redirect_uri` parameters. Custom branding fields (logo, colors, CSS) are ignored. This is part of the ATProto specification — loopback clients cannot provide custom metadata for security reasons.
+
+**The ngrok workaround:**
+
+To test OAuth branding locally, you need a public HTTPS URL. The easiest way is to use ngrok to create a tunnel to your local dev server:
+
+1. **Install ngrok:**
+   ```bash
+   npm install -g ngrok
+   ```
+   Or download from https://ngrok.com
+
+2. **Start the ngrok tunnel:**
+   ```bash
+   ngrok http 3000
+   ```
+
+3. **Copy the HTTPS URL** from the ngrok output (e.g., `https://abc123.ngrok-free.app`)
+
+4. **Update your environment:**
+   Edit `.env.local` and set:
+   ```bash
+   NEXT_PUBLIC_BASE_URL=https://abc123.ngrok-free.app
+   ```
+
+5. **Restart the dev server:**
+   ```bash
+   pnpm run dev
+   ```
+
+6. **Access the app via the ngrok URL** (not 127.0.0.1)
+
+The app now runs in production mode and serves full client metadata with branding at `/client-metadata.json`. When users authenticate, the PDS will fetch this metadata and display your custom branding (logo, colors, CSS) on the OAuth consent screen.
+
+**Note:** If you encounter CORS or origin validation errors, you may need to configure `allowedDevOrigins` in `next.config.ts` to include your ngrok domain.
+
+**Vercel deployments:**
+
+OAuth branding works automatically on Vercel preview and production deployments — no ngrok needed. The production `NEXT_PUBLIC_BASE_URL` is already a public HTTPS URL, so the PDS can fetch full metadata.
+
 ### Build Errors After SDK Update
 
 **Symptom:** TypeScript errors, import errors, type mismatches
