@@ -33,9 +33,9 @@ const REPO_COLLECTIONS = [
 ];
 
 const HYPERCERT_REPO_SCOPE = `repo?${REPO_COLLECTIONS.map((c) => "collection=" + c).join("&")}&action=create&action=update&action=delete`;
+const BLOB_SCOPE = "blob:*/*";
 const RPC_SCOPE =
   "rpc:app.bsky.actor.getProfile?aud=did:web:api.bsky.app%23bsky_appview";
-const BLOB_SCOPE = "blob:*/*";
 
 const GRANULAR_SCOPE = [
   ATPROTO_SCOPE,
