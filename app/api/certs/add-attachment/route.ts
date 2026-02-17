@@ -4,6 +4,7 @@ import { NextRequest, NextResponse } from "next/server";
 export async function POST(req: NextRequest) {
   try {
     const data = await req.formData();
+    const ctxPromise = getRepoContext();
 
     const title = (data.get("title") as string | null)?.trim() ?? "";
     const shortDescription =
@@ -60,7 +61,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const ctx = await getRepoContext(); // defaults targetDid=activeDid
+    const ctx = await ctxPromise; // defaults targetDid=activeDid
     if (!ctx) {
       return NextResponse.json(
         { error: "Could not authenticate repo" },
