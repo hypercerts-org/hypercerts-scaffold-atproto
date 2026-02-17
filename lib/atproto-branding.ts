@@ -78,15 +78,6 @@ export function generateBrandingCss(baseUrl: string): string {
   --branding-color-primary: 15 37 68;
   --branding-color-primary-contrast: 255 255 255;
   --branding-color-primary-hue: 216;
-  --branding-color-error: 229 72 77;
-  --branding-color-error-contrast: 255 255 255;
-  --branding-color-error-hue: 358;
-  --branding-color-warning: 245 159 0;
-  --branding-color-warning-contrast: 43 45 49;
-  --branding-color-warning-hue: 38;
-  --branding-color-success: 43 138 62;
-  --branding-color-success-contrast: 255 255 255;
-  --branding-color-success-hue: 134;
 }
 
 /* ===== LOGO REPLACEMENT ===== */
@@ -136,31 +127,11 @@ img[alt="Hypercerts Logo"] {
   margin-top: 8px !important;
 }
 
-/* Mobile: add spacing below header */
-@media (max-width: 767px) {
-  .grid h1.text-primary {
-    margin-top: 24px !important;
-    padding-top: 16px !important;
-  }
-}
-
-/* Desktop: larger H1 with spacing */
+/* Desktop: larger H1 image */
 @media (min-width: 768px) {
-  .grid h1.text-primary {
-    margin-top: 16px !important;
-  }
-
   .grid h1.text-primary::after {
     width: 334px !important;
     height: 117px !important;
-    margin-top: 16px !important;
-  }
-}
-
-@media (min-width: 1024px) {
-  .grid h1.text-primary::after {
-    width: 400px !important;
-    height: 140px !important;
   }
 }
 
@@ -168,7 +139,8 @@ img[alt="Hypercerts Logo"] {
 /* This page has H1 "Authenticate" with buttons below, no logo element */
 
 /* Add Hypercerts wordmark above the Authenticate H1 using ::before */
-main.flex.flex-col.items-center > h1.text-primary::before {
+/* Exclude error pages (which also use main.flex.flex-col.items-center) */
+main.flex.flex-col.items-center:not(:has([role="alert"])) > h1.text-primary::before {
   content: "" !important;
   display: block !important;
   width: 200px !important;
@@ -182,28 +154,16 @@ main.flex.flex-col.items-center > h1.text-primary::before {
 
 /* Mobile: smaller logo */
 @media (max-width: 767px) {
-  main.flex.flex-col.items-center > h1.text-primary::before {
+  main.flex.flex-col.items-center:not(:has([role="alert"])) > h1.text-primary::before {
     width: 150px !important;
     height: 30px !important;
     margin-bottom: 16px !important;
   }
 }
 
-/* Style the "Authenticate" H1 text — no color override in light mode, PDS handles it */
-main.flex.flex-col.items-center > h1.text-primary {
-  font-size: 1.5rem !important;
-  line-height: 2rem !important;
-}
-
-@media (min-width: 768px) {
-  main.flex.flex-col.items-center > h1.text-primary {
-    font-size: 2.25rem !important;
-    line-height: 2.5rem !important;
-  }
-}
-
-/* Replace "Sign in with Hypercerts" button text with Certified branding on Authenticate page */
-/* This is the second button (the bg-gray-100 button after the primary button) */
+/* ===== BUTTON TEXT/ICON REPLACEMENT ===== */
+/* Button text/icon replacement — both sign-in page submit and Authenticate page button */
+button[type="submit"].bg-primary,
 main.flex.flex-col.items-center > button:nth-of-type(2) {
   font-size: 0 !important;
   line-height: 0 !important;
@@ -213,6 +173,7 @@ main.flex.flex-col.items-center > button:nth-of-type(2) {
   gap: 8px !important;
 }
 
+button[type="submit"].bg-primary::before,
 main.flex.flex-col.items-center > button:nth-of-type(2)::before {
   content: "" !important;
   display: inline-block !important;
@@ -225,95 +186,11 @@ main.flex.flex-col.items-center > button:nth-of-type(2)::before {
   flex-shrink: 0 !important;
 }
 
+button[type="submit"].bg-primary::after,
 main.flex.flex-col.items-center > button:nth-of-type(2)::after {
   content: "Sign in with Certified" !important;
   font-size: 1rem !important;
   line-height: 1.5rem !important;
-}
-
-/* ===== SUBMIT BUTTON TEXT/ICON REPLACEMENT ===== */
-/* Since bg-primary now resolves to navy via CSS variable, only replace text/icon */
-button[type="submit"].bg-primary {
-  font-size: 0 !important;
-  line-height: 0 !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  gap: 8px !important;
-}
-
-button[type="submit"].bg-primary::before {
-  content: "" !important;
-  display: inline-block !important;
-  width: 20px !important;
-  height: 22px !important;
-  background-image: url('${sanitizedLogoUrl}') !important;
-  background-size: contain !important;
-  background-repeat: no-repeat !important;
-  background-position: center !important;
-  flex-shrink: 0 !important;
-}
-
-button[type="submit"].bg-primary::after {
-  content: "Sign in with Certified" !important;
-  font-size: 1rem !important;
-  line-height: 1.5rem !important;
-}
-
-/* ===== ERROR/SESSION EXPIRY PAGE ===== */
-/* Style the H1 "Error" on error pages - identified by having [role="alert"] */
-main:has([role="alert"]) > h1.text-primary {
-  font-size: 1.5rem !important;
-  line-height: 2rem !important;
-  color: #e5484d !important;
-  font-weight: 700 !important;
-}
-
-/* Error page should NOT show logo */
-main:has([role="alert"]) > h1.text-primary::before {
-  display: none !important;
-}
-
-@media (min-width: 768px) {
-  main:has([role="alert"]) > h1.text-primary {
-    font-size: 2.25rem !important;
-    line-height: 2.5rem !important;
-  }
-}
-
-/* ===== MOBILE SPECIFIC FIXES ===== */
-@media (max-width: 767px) {
-  /* Grid content container - logo and title - layout fixes */
-  .grid.grow.content-center {
-    justify-items: start !important;
-    gap: 8px !important;
-  }
-
-  /* Space between logo and title on mobile */
-  .grid.grow.content-center > img {
-    margin-bottom: 8px !important;
-  }
-
-  /* H1 mobile spacing */
-  .grid.grow.content-center > h1 {
-    margin-top: 4px !important;
-    margin-bottom: 15px !important;
-  }
-
-  /* Language selector - position top right on mobile */
-  select[aria-label="Interface language selector"] {
-    position: absolute !important;
-    top: 16px !important;
-    right: 16px !important;
-    margin: 0 !important;
-  }
-
-  /* Make the header container relative for absolute positioning */
-  .px-6.pt-4.w-full,
-  .flex.flex-col.items-center > div:first-child,
-  .w-full.flex.flex-row.items-center {
-    position: relative !important;
-  }
 }
 
 /* ===== DESKTOP ALIGNMENT ===== */
@@ -329,6 +206,11 @@ main:has([role="alert"]) > h1.text-primary::before {
   }
 }
 
+/* Left-alignment consistency on all viewports */
+.grid.grow.content-center {
+  justify-items: start !important;
+}
+
 /* ===== DARK MODE ===== */
 @media (prefers-color-scheme: dark) {
   /* Logo: invert to white so it's visible on dark panel */
@@ -337,7 +219,7 @@ main:has([role="alert"]) > h1.text-primary::before {
   }
 
   /* Authenticate page logo */
-  main.flex.flex-col.items-center > h1.text-primary::before {
+  main.flex.flex-col.items-center:not(:has([role="alert"])) > h1.text-primary::before {
     filter: invert(1) !important;
   }
 
@@ -382,22 +264,6 @@ main:has([role="alert"]) > h1.text-primary::before {
   button.bg-primary:hover,
   [role="button"].bg-primary:hover {
     background-color: #2563EB !important;
-  }
-}
-
-/* Dark mode + mobile: dark navy background and light text for heading area */
-@media (prefers-color-scheme: dark) and (max-width: 767px) {
-  .grid.grow.content-center {
-    background-color: #0F2544 !important;
-    padding: 24px !important;
-    border-radius: 12px !important;
-  }
-
-  .grid.grow.content-center .text-slate-600,
-  .grid.grow.content-center .text-slate-700,
-  .grid.grow.content-center .text-slate-400,
-  .grid.grow.content-center p {
-    color: rgba(255, 255, 255, 0.7) !important;
   }
 }`;
 }
