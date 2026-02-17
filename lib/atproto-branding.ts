@@ -59,6 +59,10 @@ export function generateBrandingCss(baseUrl: string): string {
   // Sanitize the logo URL to prevent CSS injection
   const sanitizedLogoUrl = sanitizeUrlForCss(logoUrl);
 
+  // Construct horizontal logo URL (full wordmark, 1929x340px, ~5.67:1 aspect ratio)
+  const horizontalLogoUrl = `${baseUrl}/hypercerts_logo_horizontal.svg`;
+  const sanitizedHorizontalLogoUrl = sanitizeUrlForCss(horizontalLogoUrl);
+
   // Construct signin SVG URL from base URL
   const signinUrl = `${baseUrl}/certified-signin.svg`;
   const sanitizedSigninUrl = sanitizeUrlForCss(signinUrl);
@@ -300,6 +304,14 @@ body.dark {
 .md\\:bg-slate-100 .text-primary,
 .md\\:bg-slate-100 h1.text-primary {
   color: #ffffff !important;
+}
+
+/* Subtitle text in dark left panel (e.g. 'Enter your password') */
+.md\\:bg-slate-100 .text-slate-600,
+.md\\:bg-slate-100 .text-slate-700,
+.md\\:bg-slate-100 .text-slate-400,
+.md\\:bg-slate-100 p {
+  color: rgba(255, 255, 255, 0.7) !important;
 }
 
 /* ===== ACCOUNT SELECTION & FORM ITEMS ===== */
@@ -756,6 +768,14 @@ select {
   .grid.grow.content-center > h1 {
     margin-top: 4px !important;
     margin-bottom: 15px !important;
+  }
+
+  /* Subtitle text in dark heading area on mobile */
+  .grid.grow.content-center .text-slate-600,
+  .grid.grow.content-center .text-slate-700,
+  .grid.grow.content-center .text-slate-400,
+  .grid.grow.content-center p {
+    color: rgba(255, 255, 255, 0.7) !important;
   }
 
   /* Language selector - position top right on mobile */
