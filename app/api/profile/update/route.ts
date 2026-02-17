@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getAuthenticatedRepo } from "@/lib/atproto-session";
 import { revalidatePath } from "next/cache";
+import { convertBlobUrlToCdn } from "@/lib/utils";
 
 export async function POST(req: Request) {
   try {
@@ -98,9 +99,9 @@ export async function POST(req: Request) {
 
     const updated = await repo.profile.getCertifiedProfile();
 
-    // Avatar and banner are already converted to blob URLs by getCertifiedProfile()
-    const avatarUrl = updated?.avatar || "";
-    const bannerUrl = updated?.banner || "";
+    // Convert blob URLs to CDN URLs so Next.js remotePatterns allow them
+    const avatarUrl = convertBlobUrlToCdn(updated?.avatar) || "";
+    const bannerUrl = convertBlobUrlToCdn(updated?.banner) || "";
 
     return NextResponse.json({
       ok: true,
