@@ -2,7 +2,6 @@
 
 import {
   FileText,
-  Users,
   Paperclip,
   MapPin,
   BarChart3,
@@ -29,7 +28,6 @@ export function StepperHeader({ step }: { step: number }) {
         {STEPS.map((s, idx) => {
           const isCompleted = step > s.id;
           const isActive = step === s.id;
-          const isUpcoming = step < s.id;
           const Icon = s.icon;
 
           return (

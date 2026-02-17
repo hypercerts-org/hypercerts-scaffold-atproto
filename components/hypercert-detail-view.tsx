@@ -1,6 +1,5 @@
 "use client";
 
-import { Separator } from "@/components/ui/separator";
 import { URILink } from "./uri-link";
 import { getPDSlsURI } from "@/lib/utils";
 
@@ -8,7 +7,7 @@ import HypercertMeasurementsSection from "./hypercert-measurements-section";
 import type { HypercertClaim } from "@hypercerts-org/sdk-core";
 import HypercertEvaluationsSection from "./hypercert-evaluations-section";
 import HypercertEvidenceSection from "./hypercert-evidence-section";
-import { Calendar, Clock, Link as LinkIcon, Award } from "lucide-react";
+import { Calendar, Clock, Link as LinkIcon } from "lucide-react";
 import Image from "next/image";
 
 export default function HypercertDetailsView({

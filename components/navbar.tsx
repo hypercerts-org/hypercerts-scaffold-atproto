@@ -41,8 +41,6 @@ export default function Navbar({
   isSignedIn,
   avatarUrl,
   handle: userHandle,
-  userDid,
-  activeDid,
   activeProfileName,
   activeProfileHandle,
 }: NavbarProps) {

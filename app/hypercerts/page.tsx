@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import Loader from "@/components/loader";
 import {
   Card,
-  CardContent,
   CardDescription,
   CardHeader,
   CardTitle,

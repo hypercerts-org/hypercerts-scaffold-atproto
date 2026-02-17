@@ -11,10 +11,7 @@ import {
 import { URILink } from "./uri-link";
 import { Badge } from "./ui/badge";
 import { Link as LinkIcon } from "lucide-react";
-import {
-  OrgHypercertsClaimAttachment,
-  OrgHypercertsDefs,
-} from "@hypercerts-org/sdk-core";
+import { OrgHypercertsClaimAttachment } from "@hypercerts-org/sdk-core";
 
 type Attachment = OrgHypercertsClaimAttachment.Main;
 
@@ -27,7 +24,7 @@ export default function HypercertEvidenceView({
     return null;
   }
 
-  const getContentTypeColor = (type?: string) => {
+  const getContentTypeColor = () => {
     // All content types use the same color
     return "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-100";
   };
@@ -62,7 +59,7 @@ export default function HypercertEvidenceView({
             </CardDescription>
           </div>
           <Badge
-            className={`${getContentTypeColor(evidence.contentType)} font-[family-name:var(--font-outfit)] shrink-0`}
+            className={`${getContentTypeColor()} font-[family-name:var(--font-outfit)] shrink-0`}
           >
             {evidence.contentType
               ? evidence.contentType.charAt(0).toUpperCase() +

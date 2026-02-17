@@ -2,7 +2,7 @@
  * Bluesky API functions
  */
 
-import { externalApiClient, APIError } from "../client";
+import { externalApiClient } from "../client";
 import type { BlueskyProfile, BlueskySearchActorsResponse } from "../types";
 
 const BLUESKY_PUBLIC_API = "https://public.api.bsky.app";

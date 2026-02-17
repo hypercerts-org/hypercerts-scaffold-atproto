@@ -3,9 +3,7 @@ import { getRepoContext } from "@/lib/repo-context";
 import { resolveRecordBlobs } from "./blob-utils";
 
 import { RepositoryRole } from "@hypercerts-org/sdk-core";
-import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
-import { after } from "next/server";
 import { getSession } from "./atproto-session";
 import sdk from "./hypercerts-sdk";
 
@@ -54,7 +52,8 @@ export const logout = async () => {
 };
 
 // TODO addContribution in SDK needs to be updated so for now contributions will directly be added through hypercert create
-export const addContribution = async (params: {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export const addContribution = async (_params: {
   hypercertUri: string;
   contributors: string[];
   contributionDetails: {

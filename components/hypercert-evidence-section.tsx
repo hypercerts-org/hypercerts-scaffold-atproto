@@ -3,7 +3,6 @@
 import { useMemo } from "react";
 import HypercertEvidenceView from "./hypercert-evidence-view";
 import { Skeleton } from "./ui/skeleton";
-import { Separator } from "./ui/separator";
 import {
   useEvidenceLinksQuery,
   useEvidenceRecordsQuery,
