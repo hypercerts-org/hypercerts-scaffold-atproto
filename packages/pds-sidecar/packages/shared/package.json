@@ -1,0 +1,31 @@
+{
+  "name": "@certified/shared",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsc --build",
+    "dev": "tsc --build --watch",
+    "test": "vitest run",
+    "lint": "tsc --noEmit"
+  },
+  "dependencies": {
+    "better-sqlite3": "^9.4.3",
+    "pino": "^8.19.0",
+    "pino-pretty": "^11.0.0"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.8",
+    "@types/node": "^20.0.0",
+    "typescript": "^5.4.0",
+    "vitest": "^1.4.0"
+  }
+}
