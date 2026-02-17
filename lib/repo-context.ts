@@ -44,7 +44,10 @@ export const getRepoContext = cache(async function getRepoContext(
   const cookieStore = await cookies();
 
   const userDid = cookieStore.get("user-did")?.value;
-  if (!userDid) return null;
+  if (!userDid) {
+    console.warn("[getRepoContext] No user-did cookie found; user is not logged in or session has expired.");
+    return null;
+  }
 
   const activeDid = cookieStore.get("active-did")?.value || userDid;
   const targetDid = options.targetDid || activeDid;

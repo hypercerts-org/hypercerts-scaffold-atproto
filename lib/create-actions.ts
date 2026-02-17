@@ -29,7 +29,7 @@ export const getActiveProfileInfo = async () => {
 export const switchActiveProfile = async (did: string) => {
   const session = await getSession();
   if (!session) {
-    throw new Error("Authentication required to switch profiles");
+    throw new Error("Cannot switch profiles: no active session found. Please log in first.");
   }
 
   const cookieStore = await cookies();
@@ -81,7 +81,7 @@ export const addEvaluation = async (params: {
 }) => {
   const ctx = await getRepoContext();
   if (!ctx) {
-    throw new Error("Unable to get repository context");
+    throw new Error("addEvaluation failed: could not establish repository context. The user session may have expired or the target DID is unreachable.");
   }
 
   const { hypercertUri, ...evaluationData } = params;
@@ -120,7 +120,7 @@ export const addMeasurement = async (params: {
 }) => {
   const ctx = await getRepoContext();
   if (!ctx) {
-    throw new Error("Unable to get repository context");
+    throw new Error("addMeasurement failed: could not establish repository context. The user session may have expired or the target DID is unreachable.");
   }
 
   return ctx.scopedRepo.hypercerts.addMeasurement({
@@ -139,7 +139,7 @@ export const getMeasurementRecord = async (params: {
   const { did, collection, rkey } = params;
   const ctx = await getRepoContext({ targetDid: did });
   if (!ctx) {
-    throw new Error("Unable to get repository context");
+    throw new Error("getMeasurementRecord failed: could not establish repository context. The user session may have expired or the target DID is unreachable.");
   }
 
   const data = await ctx.scopedRepo.records.get({ collection, rkey });
@@ -157,7 +157,7 @@ export const getEvaluationRecord = async (params: {
   const { did, collection, rkey } = params;
   const ctx = await getRepoContext({ targetDid: did });
   if (!ctx) {
-    throw new Error("Unable to get repository context");
+    throw new Error("getEvaluationRecord failed: could not establish repository context. The user session may have expired or the target DID is unreachable.");
   }
 
   const data = await ctx.scopedRepo.records.get({ collection, rkey });
@@ -175,7 +175,7 @@ export const getEvidenceRecord = async (params: {
   const { did, collection, rkey } = params;
   const ctx = await getRepoContext({ targetDid: did });
   if (!ctx) {
-    throw new Error("Unable to get repository context");
+    throw new Error("getEvidenceRecord failed: could not establish repository context. The user session may have expired or the target DID is unreachable.");
   }
 
   const data = await ctx.scopedRepo.records.get({ collection, rkey });
