@@ -43,7 +43,7 @@ export async function POST(req: Request) {
     let existingProfile;
     try {
       existingProfile = await repo.profile.getCertifiedProfile();
-    } catch (error) {
+    } catch {
       // Profile doesn't exist yet
       existingProfile = null;
     }

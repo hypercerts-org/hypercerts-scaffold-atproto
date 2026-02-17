@@ -1,4 +1,5 @@
 "use client";
+import Image from "next/image";
 import HypercertRightsFields, {
   RightsState,
 } from "@/components/hypercerts-rights-fields";
@@ -150,8 +151,6 @@ export default function HypercertsBaseForm({
     contributors.length > 0 || manualContributors.some((c) => c.trim() !== "");
 
   const getRecord = (): CreateHypercertParams | undefined => {
-    const cleanedWorkScope = workScope.map((w) => w.trim()).filter(Boolean);
-
     if (
       !rights.name.trim() ||
       !rights.type.trim() ||
@@ -349,10 +348,11 @@ export default function HypercertsBaseForm({
         >
           {imagePreview ? (
             <>
-              <img
+              <Image
                 src={imagePreview}
                 alt="Preview"
-                className="absolute inset-0 w-full h-full object-cover opacity-60 group-hover:opacity-40 transition-opacity"
+                fill
+                className="object-cover opacity-60 group-hover:opacity-40 transition-opacity"
               />
               <div className="relative z-10 flex flex-col items-center gap-1">
                 <Upload className="h-5 w-5 text-foreground/70" />

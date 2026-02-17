@@ -15,16 +15,6 @@ export default function LoginDialog() {
   const [handle, setHandle] = useState("");
   const loginMutation = useLoginMutation();
 
-  const pdsUrl = process.env.NEXT_PUBLIC_PDS_URL;
-  let hostname = "";
-  if (pdsUrl) {
-    try {
-      hostname = new URL(pdsUrl).hostname;
-    } catch (e) {
-      console.error("Invalid PDS URL:", pdsUrl, e);
-    }
-  }
-
   const handleSubmit: FormEventHandler<HTMLFormElement> = async (e) => {
     e.preventDefault();
     loginMutation.mutate(handle);

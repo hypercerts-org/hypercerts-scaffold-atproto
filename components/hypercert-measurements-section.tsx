@@ -5,7 +5,6 @@ import HypercertMeasurementView, {
   Measurement,
 } from "./hypercert-measurement-view";
 import { Skeleton } from "./ui/skeleton";
-import { Separator } from "./ui/separator";
 import {
   useMeasurementLinksQuery,
   useMeasurementRecordsQuery,

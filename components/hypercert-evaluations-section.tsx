@@ -5,7 +5,6 @@ import HypercertEvaluationView, {
   Evaluation,
 } from "./hypercert-evaluation-view";
 import { Skeleton } from "./ui/skeleton";
-import { Separator } from "./ui/separator";
 import {
   useEvaluationLinksQuery,
   useEvaluationRecordsQuery,
