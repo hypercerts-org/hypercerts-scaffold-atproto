@@ -117,7 +117,7 @@ export async function POST(req: Request) {
   } catch (error) {
     console.error("Profile update error:", error);
     return NextResponse.json(
-      { error: "Failed to update profile" },
+      { error: `Profile update failed: ${(error as Error).message}` },
       { status: 500 }
     );
   }

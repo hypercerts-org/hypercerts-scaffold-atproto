@@ -21,9 +21,7 @@ export async function POST(req: NextRequest) {
     if (!locationType || !lpVersion || !srs) {
       return NextResponse.json(
         {
-          error: `Missing${locationType ? " locationType" : ""}. ${
-            lpVersion ? "lpVersion" : ""
-          }. ${srs ? "srs" : ""}. `,
+          error: `Missing${!locationType ? " locationType" : ""}${!lpVersion ? " lpVersion" : ""}${!srs ? " srs" : ""}`,
         },
         { status: 400 }
       );
