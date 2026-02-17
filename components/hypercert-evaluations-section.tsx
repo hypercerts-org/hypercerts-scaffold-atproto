@@ -86,7 +86,7 @@ export default function HypercertEvaluationsSection({
         </div>
       ) : null}
 
-      {!isLoading && !isError && (
+      {!isLoading && !isError ? (
         <>
           {evaluations && evaluations.length > 0 ? (
             <div className="space-y-4 stagger-children">
@@ -103,7 +103,7 @@ export default function HypercertEvaluationsSection({
             </div>
           )}
         </>
-      )}
+      ) : null}
     </div>
   );
 }
