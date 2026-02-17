@@ -2,10 +2,15 @@
 // Intercepts GET /.well-known/oauth-authorization-server and rewrites
 // `authorization_endpoint` to point to the sidecar auth service.
 //
-// This middleware must be mounted BEFORE the PDS middleware in the Express
-// stack so it can intercept and modify the response.
+// The @atproto/oauth-provider serves this endpoint using staticJsonMiddleware
+// which pre-serializes the JSON to a buffer and sends it via res.end() directly
+// (NOT via res.json() or res.send()). So we intercept res.end() to modify
+// the raw JSON body before it's sent.
+//
+// IMPORTANT: This middleware must be injected BEFORE the PDS route handlers
+// in the Express stack. See index.ts for how this is done.
 
-import type { RequestHandler, Response } from 'express';
+import type { RequestHandler } from 'express';
 
 /**
  * Creates an Express middleware that intercepts the OAuth authorization server
@@ -15,28 +20,47 @@ import type { RequestHandler, Response } from 'express';
  *   (e.g. `https://auth.pds.certs.network`)
  */
 export function createMetadataOverride(authServiceUrl: string): RequestHandler {
+  const authorizationEndpoint = `${authServiceUrl}/oauth/authorize`;
+
   return function metadataOverride(req, res, next) {
     // Only intercept the OAuth AS metadata endpoint
     if (req.path !== '/.well-known/oauth-authorization-server') {
       return next();
     }
 
-    // Override res.json to capture and modify the response body before sending
-    const originalJson = res.json.bind(res) as Response['json'];
+    // The PDS uses staticJsonMiddleware which calls res.end() with a Buffer.
+    // We intercept res.end() to modify the JSON body before it's sent.
+    // The original response does NOT include a content-length header, so we
+    // don't need to update it — Node.js computes it from the buffer size.
+    const origEnd = res.end;
 
-    res.json = function (body: unknown) {
-      // Restore original json to avoid infinite recursion
-      res.json = originalJson;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (res as any).end = function (...args: unknown[]) {
+      const chunk = args[0];
 
-      if (body && typeof body === 'object' && !Array.isArray(body)) {
-        const metadata = body as Record<string, unknown>;
-        // Replace authorization_endpoint with the sidecar's authorize endpoint.
-        // All other OAuth endpoints (PAR, token, JWKS) remain on the PDS.
-        metadata['authorization_endpoint'] = `${authServiceUrl}/oauth/authorize`;
+      try {
+        // chunk may be a Buffer or string containing JSON
+        let jsonStr: string | null = null;
+        if (Buffer.isBuffer(chunk)) {
+          jsonStr = chunk.toString('utf8');
+        } else if (typeof chunk === 'string') {
+          jsonStr = chunk;
+        }
+
+        if (jsonStr) {
+          const metadata = JSON.parse(jsonStr) as Record<string, unknown>;
+          metadata['authorization_endpoint'] = authorizationEndpoint;
+          const modified = Buffer.from(JSON.stringify(metadata), 'utf8');
+          // Replace the chunk with the modified buffer
+          args[0] = modified;
+        }
+      } catch {
+        // If parsing fails, pass through unmodified
       }
 
-      return originalJson(body);
-    } as Response['json'];
+      // Call original end with (possibly modified) args, preserving `this` context
+      return origEnd.apply(this, args as Parameters<typeof origEnd>);
+    };
 
     next();
   };

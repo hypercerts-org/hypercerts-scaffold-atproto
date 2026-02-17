@@ -44,11 +44,25 @@ export async function startPDS(): Promise<void> {
   // --- Create PDS instance ---
   const pds = await PDS.create(cfg, secrets);
 
-  // --- Mount metadata override BEFORE PDS middleware ---
-  // This intercepts /.well-known/oauth-authorization-server and rewrites
-  // `authorization_endpoint` to point to the sidecar auth service.
-  // Must be mounted before the PDS's own middleware stack.
+  // --- Mount metadata override at the FRONT of the middleware stack ---
+  // The PDS registers all its routes during PDS.create(). If we call
+  // pds.app.use() after that, our middleware runs AFTER the route handlers
+  // (which have already sent the response). To intercept the response, we
+  // must inject our middleware BEFORE the existing routes.
+  //
+  // Strategy: add our middleware, then move it to position 2 in the stack
+  // (after 'query' and 'expressInit' which set up req/res, but before routes).
   pds.app.use(createMetadataOverride(authServiceUrl));
+
+  // Move the last-added layer (our middleware) to position 2 in the stack,
+  // after the Express init layers ('query' and 'expressInit') but before routes.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const stack = (pds.app as any)._router?.stack;
+  if (Array.isArray(stack) && stack.length > 2) {
+    const ourLayer = stack.pop();
+    // Insert after index 1 (after 'query' at 0 and 'expressInit' at 1)
+    stack.splice(2, 0, ourLayer);
+  }
 
   // --- Set up sidecar database and helpers ---
   const sidecarDb = createDatabase(sidecarDbPath);
