@@ -30,6 +30,20 @@ export async function GET() {
     );
   }
 
+  if (
+    !privateKey.keys ||
+    !Array.isArray(privateKey.keys) ||
+    privateKey.keys.length === 0
+  ) {
+    return NextResponse.json(
+      {
+        error:
+          "ATPROTO_JWK_PRIVATE must contain a JWKS with a non-empty 'keys' array.",
+      },
+      { status: 500 },
+    );
+  }
+
   // Transform private keys to public keys for OAuth verification:
   // - Remove private component ("d")
   // - Remove any "use" or "key_ops" from private key
