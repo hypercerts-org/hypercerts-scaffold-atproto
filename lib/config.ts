@@ -9,14 +9,41 @@
  * @see https://datatracker.ietf.org/doc/html/rfc8252 (OAuth for Native Apps)
  */
 
-import { ATPROTO_SCOPE, TRANSITION_SCOPES } from "@hypercerts-org/sdk-core";
+import {
+  ATPROTO_SCOPE,
+  TRANSITION_SCOPES,
+  HYPERCERT_COLLECTIONS,
+} from "@hypercerts-org/sdk-core";
 
-/**
- * OAuth scope configuration
- * Currently using transition:generic, will migrate to granular scopes
- * also during local development transition:generic is a requirement
- */
-export const OAUTH_SCOPE = [ATPROTO_SCOPE, TRANSITION_SCOPES.GENERIC].join(" ");
+// Granular repo scope — all collections the app needs write access to
+const REPO_COLLECTIONS = [
+  HYPERCERT_COLLECTIONS.CLAIM,
+  HYPERCERT_COLLECTIONS.RIGHTS,
+  HYPERCERT_COLLECTIONS.LOCATION,
+  HYPERCERT_COLLECTIONS.CONTRIBUTION_DETAILS,
+  HYPERCERT_COLLECTIONS.CONTRIBUTOR_INFORMATION,
+  HYPERCERT_COLLECTIONS.MEASUREMENT,
+  HYPERCERT_COLLECTIONS.EVALUATION,
+  HYPERCERT_COLLECTIONS.ATTACHMENT,
+  HYPERCERT_COLLECTIONS.COLLECTION,
+  HYPERCERT_COLLECTIONS.FUNDING_RECEIPT,
+  HYPERCERT_COLLECTIONS.WORK_SCOPE_TAG,
+  HYPERCERT_COLLECTIONS.BSKY_PROFILE,
+  HYPERCERT_COLLECTIONS.CERTIFIED_PROFILE,
+];
+
+const HYPERCERT_REPO_SCOPE = `repo?${REPO_COLLECTIONS.map((c) => "collection=" + c).join("&")}&action=create&action=update&action=delete`;
+const RPC_SCOPE =
+  "rpc:app.bsky.actor.getProfile?aud=did:web:api.bsky.app%23bsky_appview";
+const BLOB_SCOPE = "blob?accept=video/*&accept=image/*";
+
+const GRANULAR_SCOPE = [
+  ATPROTO_SCOPE,
+  HYPERCERT_REPO_SCOPE,
+  RPC_SCOPE,
+  BLOB_SCOPE,
+].join(" ");
+const LOOPBACK_SCOPE = [ATPROTO_SCOPE, TRANSITION_SCOPES.GENERIC].join(" ");
 
 /**
  * Validates a URL format
@@ -44,6 +71,18 @@ function isLoopback(url: string): boolean {
   } catch {
     return false;
   }
+}
+
+/**
+ * Returns the appropriate OAuth scope based on the environment.
+ * - Loopback (local dev): uses "atproto transition:generic" (ATProto requirement for loopback clients)
+ * - Production: uses granular scopes (repo, rpc, blob) for precise permission requests
+ */
+function getOAuthScope(url: string): string {
+  if (isLoopback(url)) {
+    return LOOPBACK_SCOPE;
+  }
+  return GRANULAR_SCOPE;
 }
 
 /**
@@ -158,6 +197,13 @@ try {
   console.error("\n❌ Configuration Error:\n");
   throw error;
 }
+
+/**
+ * OAuth scope configuration — environment-aware:
+ * - Loopback (local dev): "atproto transition:generic" (ATProto requirement for loopback clients)
+ * - Production: granular scopes (repo, rpc, blob) for precise permission requests
+ */
+export const OAUTH_SCOPE = getOAuthScope(baseUrl);
 
 const redirectBaseUrl = getRedirectBaseUrl(baseUrl);
 const redirectUri = `${redirectBaseUrl}/api/auth/callback`;
