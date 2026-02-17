@@ -43,9 +43,13 @@ export async function POST(req: Request) {
     let existingProfile;
     try {
       existingProfile = await repo.profile.getCertifiedProfile();
-    } catch {
-      // Profile doesn't exist yet
-      existingProfile = null;
+    } catch (err: unknown) {
+      const isNotFound = err instanceof Error && /not found/i.test(err.message);
+      if (isNotFound) {
+        existingProfile = null;
+      } else {
+        throw err;
+      }
     }
 
     // If no displayName, assume no profile record exists yet
