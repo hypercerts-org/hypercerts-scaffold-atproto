@@ -56,7 +56,7 @@ export default function HypercertMeasurementView({
           </div>
 
           {/* Methodology */}
-          {measurement.measurementMethodURI && (
+          {measurement.measurementMethodURI ? (
             <div className="flex items-start gap-3">
               <FileText className="size-4 text-create-accent shrink-0 mt-0.5" />
               <div className="space-y-1 flex-1 min-w-0">
@@ -71,7 +71,7 @@ export default function HypercertMeasurementView({
                 </dd>
               </div>
             </div>
-          )}
+          ) : null}
 
           {/* Measurers */}
           <div className="flex items-start gap-3">
@@ -101,7 +101,7 @@ export default function HypercertMeasurementView({
           </div>
 
           {/* Evidence */}
-          {measurement.evidenceURI && measurement.evidenceURI.length > 0 && (
+          {measurement.evidenceURI && measurement.evidenceURI.length > 0 ? (
             <div className="pt-4 border-t border-border/50">
               <dt className="text-xs font-[family-name:var(--font-outfit)] text-muted-foreground uppercase tracking-wider mb-2">
                 Evidence
@@ -120,7 +120,7 @@ export default function HypercertMeasurementView({
                 ))}
               </dd>
             </div>
-          )}
+          ) : null}
         </dl>
       </CardContent>
     </Card>

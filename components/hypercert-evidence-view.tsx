@@ -73,14 +73,14 @@ export default function HypercertEvidenceView({
           <p className="text-sm font-[family-name:var(--font-outfit)] font-medium">
             {evidence.shortDescription}
           </p>
-          {evidence.description && (
+          {evidence.description ? (
             <p className="text-sm font-[family-name:var(--font-outfit)] text-muted-foreground whitespace-pre-wrap leading-relaxed">
               {evidence.description}
             </p>
-          )}
+          ) : null}
         </div>
 
-        {evidence.content && evidence.content.length > 0 && (
+        {evidence.content && evidence.content.length > 0 ? (
           <div className="space-y-3 pt-2 border-t border-border/50">
             {evidence.content.map((contentItem, index) => {
               const contentUrl = getContentUrl(contentItem);
@@ -114,7 +114,7 @@ export default function HypercertEvidenceView({
               );
             })}
           </div>
-        )}
+        ) : null}
       </CardContent>
     </Card>
   );

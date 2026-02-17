@@ -131,7 +131,7 @@ export default function HypercertDetailsView({
           </div>
 
           {/* Work Scope Tags */}
-          {workScope.length > 0 && (
+          {workScope.length > 0 ? (
             <div className="pt-4 border-t border-border/50">
               <dt className="text-xs font-[family-name:var(--font-outfit)] text-muted-foreground uppercase tracking-wider mb-2">
                 Work Scope
@@ -147,7 +147,7 @@ export default function HypercertDetailsView({
                 ))}
               </dd>
             </div>
-          )}
+          ) : null}
         </div>
       </div>
 
