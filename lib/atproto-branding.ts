@@ -63,9 +63,13 @@ export function generateBrandingCss(baseUrl: string): string {
   const horizontalLogoUrl = `${baseUrl}/hypercerts_logo_horizontal.svg`;
   const sanitizedHorizontalLogoUrl = sanitizeUrlForCss(horizontalLogoUrl);
 
-  // Construct signin SVG URL from base URL
+  // Construct signin SVG URL from base URL (dark variant: white text, for dark backgrounds)
   const signinUrl = `${baseUrl}/certified-signin.svg`;
   const sanitizedSigninUrl = sanitizeUrlForCss(signinUrl);
+
+  // Construct signin light SVG URL (light variant: dark navy text, for light backgrounds)
+  const signinLightUrl = `${baseUrl}/certified-signin-light.svg`;
+  const sanitizedSigninLightUrl = sanitizeUrlForCss(signinLightUrl);
 
   return `/* Hypercerts Scaffold Custom Branding */
 
@@ -97,7 +101,6 @@ img[alt*="Logo"] {
   background-size: contain !important;
   background-repeat: no-repeat !important;
   background-position: left center !important;
-  filter: invert(1) !important;
 }
 
 /* Mobile: left aligned with better spacing */
@@ -109,6 +112,17 @@ img[alt*="Logo"] {
     background-position: left center !important;
     margin-top: 8px !important;
     margin-bottom: 8px !important;
+  }
+}
+
+/* Dark mode: invert logo to white so it's visible on dark panel */
+@media (prefers-color-scheme: dark) {
+  img[alt="Hypercerts Logo"],
+  img[alt*="Logo"] {
+    filter: invert(1) !important;
+  }
+  main.flex.flex-col.items-center > h1.text-primary::before {
+    filter: invert(1) !important;
   }
 }
 
@@ -129,7 +143,7 @@ div.w-8:has(img[alt="Ma Earth"]) {
 }
 
 /* ===== H1 TEXT REPLACEMENT ===== */
-/* Replace "Sign in with Hypercerts" with certified-signin.svg image - only on sign-in page */
+/* Replace "Sign in with Hypercerts" with certified-signin SVG image - only on sign-in page */
 /* The sign-in H1 is in a grid layout, error page H1 is in a flex main */
 .grid h1.text-primary {
   font-size: 0 !important;
@@ -138,18 +152,26 @@ div.w-8:has(img[alt="Ma Earth"]) {
   margin-top: 12px !important;
 }
 
+/* Light mode: use dark-text variant of certified-signin SVG */
 .grid h1.text-primary::after {
   content: "" !important;
   display: block !important;
   width: 280px !important;
   height: 98px !important;
   max-width: 100% !important;
-  background-image: url('${sanitizedSigninUrl}') !important;
+  background-image: url('${sanitizedSigninLightUrl}') !important;
   background-size: contain !important;
   background-repeat: no-repeat !important;
   background-position: left center !important;
   margin-top: 8px !important;
   color: #ffffff !important;
+}
+
+/* Dark mode: use white-text variant of certified-signin SVG */
+@media (prefers-color-scheme: dark) {
+  .grid h1.text-primary::after {
+    background-image: url('${sanitizedSigninUrl}') !important;
+  }
 }
 
 /* Mobile: add spacing below header */
@@ -180,26 +202,27 @@ div.w-8:has(img[alt="Ma Earth"]) {
   }
 }
 
-/* ===== LEFT PANEL - DARK NAVY BACKGROUND ===== */
-/* The PDS hardcodes md:bg-slate-100 for the left panel; override to dark navy */
-.md\\:bg-slate-100,
-.dark .md\\:bg-slate-100,
-.md\\:dark\\:bg-slate-800 {
-  background-color: #0F2544 !important;
-}
+/* ===== LEFT PANEL - DARK NAVY BACKGROUND (dark mode only) ===== */
+/* In light mode, the PDS native slate-100 (#f1f5f9) takes over */
+@media (prefers-color-scheme: dark) {
+  .md\\:bg-slate-100,
+  .md\\:dark\\:bg-slate-800 {
+    background-color: #0F2544 !important;
+  }
 
-/* Light text for dark left panel */
-.md\\:bg-slate-100 .text-primary,
-.md\\:bg-slate-100 h1.text-primary {
-  color: #ffffff !important;
-}
+  /* Light text for dark left panel */
+  .md\\:bg-slate-100 .text-primary,
+  .md\\:bg-slate-100 h1.text-primary {
+    color: #ffffff !important;
+  }
 
-/* Subtitle text in dark left panel (e.g. 'Enter your password') */
-.md\\:bg-slate-100 .text-slate-600,
-.md\\:bg-slate-100 .text-slate-700,
-.md\\:bg-slate-100 .text-slate-400,
-.md\\:bg-slate-100 p {
-  color: rgba(255, 255, 255, 0.7) !important;
+  /* Subtitle text in dark left panel (e.g. 'Enter your password') */
+  .md\\:bg-slate-100 .text-slate-600,
+  .md\\:bg-slate-100 .text-slate-700,
+  .md\\:bg-slate-100 .text-slate-400,
+  .md\\:bg-slate-100 p {
+    color: rgba(255, 255, 255, 0.7) !important;
+  }
 }
 
 /* ===== AUTHENTICATE PAGE (New Session Landing) ===== */
@@ -220,7 +243,6 @@ main.flex.flex-col.items-center > h1.text-primary::before {
   background-size: contain !important;
   background-repeat: no-repeat !important;
   background-position: center !important;
-  filter: invert(1) !important;
 }
 
 /* Mobile: smaller logo */
@@ -232,11 +254,17 @@ main.flex.flex-col.items-center > h1.text-primary::before {
   }
 }
 
-/* Style the "Authenticate" H1 text */
+/* Style the "Authenticate" H1 text — no color override in light mode, PDS handles it */
 main.flex.flex-col.items-center > h1.text-primary {
-  color: #ffffff !important;
   font-size: 1.5rem !important;
   line-height: 2rem !important;
+}
+
+/* Dark mode: white text for Authenticate H1 */
+@media (prefers-color-scheme: dark) {
+  main.flex.flex-col.items-center > h1.text-primary {
+    color: #ffffff !important;
+  }
 }
 
 @media (min-width: 768px) {
@@ -304,6 +332,21 @@ button[type="submit"].bg-primary::after {
   line-height: 1.5rem !important;
 }
 
+/* ===== DARK MODE BUTTON VISIBILITY ===== */
+/* In dark mode, bg-primary (#0F2544) blends into the dark panel — use bright blue instead */
+@media (prefers-color-scheme: dark) {
+  button[type="submit"].bg-primary,
+  button.bg-primary,
+  [role="button"].bg-primary {
+    background-color: #3B82F6 !important;
+  }
+  button[type="submit"].bg-primary:hover,
+  button.bg-primary:hover,
+  [role="button"].bg-primary:hover {
+    background-color: #2563EB !important;
+  }
+}
+
 /* ===== ERROR/SESSION EXPIRY PAGE ===== */
 /* Style the H1 "Error" on error pages - identified by having [role="alert"] */
 main:has([role="alert"]) > h1.text-primary {
@@ -327,13 +370,10 @@ main:has([role="alert"]) > h1.text-primary::before {
 
 /* ===== MOBILE SPECIFIC FIXES ===== */
 @media (max-width: 767px) {
-  /* Grid content container - logo and title - dark navy background on mobile */
+  /* Grid content container - logo and title - layout fixes */
   .grid.grow.content-center {
     justify-items: start !important;
     gap: 8px !important;
-    background-color: #0F2544 !important;
-    padding: 24px !important;
-    border-radius: 12px !important;
   }
 
   /* Space between logo and title on mobile */
@@ -345,14 +385,6 @@ main:has([role="alert"]) > h1.text-primary::before {
   .grid.grow.content-center > h1 {
     margin-top: 4px !important;
     margin-bottom: 15px !important;
-  }
-
-  /* Subtitle text in dark heading area on mobile */
-  .grid.grow.content-center .text-slate-600,
-  .grid.grow.content-center .text-slate-700,
-  .grid.grow.content-center .text-slate-400,
-  .grid.grow.content-center p {
-    color: rgba(255, 255, 255, 0.7) !important;
   }
 
   /* Language selector - position top right on mobile */
@@ -368,6 +400,22 @@ main:has([role="alert"]) > h1.text-primary::before {
   .flex.flex-col.items-center > div:first-child,
   .w-full.flex.flex-row.items-center {
     position: relative !important;
+  }
+}
+
+/* Dark mode mobile: dark navy background and light text for heading area */
+@media (prefers-color-scheme: dark) and (max-width: 767px) {
+  .grid.grow.content-center {
+    background-color: #0F2544 !important;
+    padding: 24px !important;
+    border-radius: 12px !important;
+  }
+
+  .grid.grow.content-center .text-slate-600,
+  .grid.grow.content-center .text-slate-700,
+  .grid.grow.content-center .text-slate-400,
+  .grid.grow.content-center p {
+    color: rgba(255, 255, 255, 0.7) !important;
   }
 }
 
