@@ -14,6 +14,7 @@ import {
   TRANSITION_SCOPES,
   HYPERCERT_COLLECTIONS,
 } from "@hypercerts-org/sdk-core";
+import { generateBrandingCss } from "./atproto-branding";
 
 // Granular repo scope — collections with full CRUD access
 const REPO_COLLECTIONS = [
@@ -252,6 +253,53 @@ export const config = {
   // Private keys (server-only, not exposed to client)
   jwkPrivate: process.env.ATPROTO_JWK_PRIVATE!,
 } as const;
+
+/**
+ * Build OAuth client metadata object
+ *
+ * Returns the full OAuth client metadata according to RFC 7591.
+ * In production mode, includes custom branding CSS for PDS OAuth pages.
+ * In loopback mode, returns minimal metadata without branding.
+ *
+ * @returns OAuth client metadata object
+ * @see https://datatracker.ietf.org/doc/html/rfc7591
+ */
+export function buildClientMetadata(): Record<string, unknown> {
+  if (config.isLoopback) {
+    // Loopback mode: no branding, application_type is "native"
+    return {
+      client_id: config.clientId,
+      client_name: "Hypercerts Scaffold",
+      client_uri: config.baseUrl,
+      redirect_uris: [config.redirectUri],
+      scope: OAUTH_SCOPE,
+      logo_uri: `${config.baseUrl}/certified-logo.svg`,
+      grant_types: ["authorization_code", "refresh_token"],
+      response_types: ["code"],
+      token_endpoint_auth_method: "none",
+      application_type: "native",
+      dpop_bound_access_tokens: true,
+    };
+  }
+
+  // Production mode: include branding, application_type is "web"
+  return {
+    client_id: config.clientId,
+    client_name: "Hypercerts Scaffold",
+    client_uri: config.baseUrl,
+    redirect_uris: [config.redirectUri],
+    scope: OAUTH_SCOPE,
+      logo_uri: `${config.baseUrl}/certified-logo.svg`,
+      grant_types: ["authorization_code", "refresh_token"],
+      response_types: ["code"],
+      token_endpoint_auth_method: "none",
+      application_type: "web",
+    dpop_bound_access_tokens: true,
+    branding: {
+      css: generateBrandingCss(config.baseUrl),
+    },
+  };
+}
 
 // Validate required environment variables
 const requiredEnvVars = [
