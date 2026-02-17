@@ -16,3 +16,5 @@ export type {
   NextFunction,
   RequestHandler,
 } from './rate-limiter.js';
+export { CallbackSigner } from './callback-signer.js';
+export type { CallbackParams } from './callback-signer.js';
