@@ -97,7 +97,7 @@ img[alt*="Logo"] {
   background-image: url('${sanitizedHorizontalLogoUrl}') !important;
   background-size: contain !important;
   background-repeat: no-repeat !important;
-  background-position: right center !important;
+  background-position: left center !important;
   filter: invert(1) !important;
 }
 
@@ -148,7 +148,7 @@ div.w-8:has(img[alt="Ma Earth"]) {
   background-image: url('${sanitizedSigninUrl}') !important;
   background-size: contain !important;
   background-repeat: no-repeat !important;
-  background-position: right center !important;
+  background-position: left center !important;
   margin-top: 8px !important;
   color: #ffffff !important;
 }
@@ -798,14 +798,14 @@ select {
 
 /* ===== DESKTOP ALIGNMENT ===== */
 @media (min-width: 768px) {
-  /* Right align content in left panel on desktop */
+  /* Left align content in left panel on desktop */
   .grid.grow.content-center {
-    justify-items: end !important;
+    justify-items: start !important;
   }
 
-  /* Right align text */
+  /* Left align text */
   .md\\:text-right {
-    text-align: right !important;
+    text-align: left !important;
   }
 }`;
 }
