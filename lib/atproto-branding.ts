@@ -145,6 +145,7 @@ div.w-8:has(img[alt="Ma Earth"]) {
   background-repeat: no-repeat !important;
   background-position: right center !important;
   margin-top: 8px !important;
+  color: #ffffff !important;
 }
 
 /* Mobile: add spacing below header */
@@ -206,7 +207,7 @@ main.flex.flex-col.items-center > h1.text-primary::before {
 
 /* Style the "Authenticate" H1 text */
 main.flex.flex-col.items-center > h1.text-primary {
-  color: #2b2d31 !important;
+  color: #ffffff !important;
   font-size: 1.5rem !important;
   line-height: 2rem !important;
 }
@@ -288,11 +289,17 @@ body.dark {
   background-color: #fafafa !important;
 }
 
-/* Left panel styling */
+/* Left panel styling - dark navy background */
 .md\\:bg-slate-100,
 .dark .md\\:bg-slate-100,
 .md\\:dark\\:bg-slate-800 {
-  background-color: #f0f0f3 !important;
+  background-color: #0F2544 !important;
+}
+
+/* Light text for dark left panel */
+.md\\:bg-slate-100 .text-primary,
+.md\\:bg-slate-100 h1.text-primary {
+  color: #ffffff !important;
 }
 
 /* ===== ACCOUNT SELECTION & FORM ITEMS ===== */
@@ -731,10 +738,13 @@ select {
     background-color: #f8f8fa !important;
   }
 
-  /* Grid content container - logo and title */
+  /* Grid content container - logo and title - dark navy background on mobile */
   .grid.grow.content-center {
     justify-items: start !important;
     gap: 8px !important;
+    background-color: #0F2544 !important;
+    padding: 24px !important;
+    border-radius: 12px !important;
   }
 
   /* Space between logo and title on mobile */
