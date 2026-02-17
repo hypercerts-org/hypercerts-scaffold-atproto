@@ -59,6 +59,10 @@ export function generateBrandingCss(baseUrl: string): string {
   // Sanitize the logo URL to prevent CSS injection
   const sanitizedLogoUrl = sanitizeUrlForCss(logoUrl);
 
+  // Construct signin SVG URL from base URL
+  const signinUrl = `${baseUrl}/certified-signin.svg`;
+  const sanitizedSigninUrl = sanitizeUrlForCss(signinUrl);
+
   return `/* Hypercerts Scaffold Custom Branding - Light Theme */
 
 /* ===== FORCE LIGHT COLOR SCHEME ===== */
@@ -121,7 +125,7 @@ div.w-8:has(img[alt="Ma Earth"]) {
 }
 
 /* ===== H1 TEXT REPLACEMENT ===== */
-/* Replace "Sign in with Hypercerts" with "Sign in with Certified" - only on sign-in page */
+/* Replace "Sign in with Hypercerts" with certified-signin.svg image - only on sign-in page */
 /* The sign-in H1 is in a grid layout, error page H1 is in a flex main */
 .grid h1.text-primary {
   font-size: 0 !important;
@@ -131,12 +135,15 @@ div.w-8:has(img[alt="Ma Earth"]) {
 }
 
 .grid h1.text-primary::after {
-  content: "Sign in with Certified" !important;
-  font-size: 1.25rem !important;
-  line-height: 1.75rem !important;
-  color: #2b2d31 !important;
+  content: "" !important;
   display: block !important;
-  font-weight: 600 !important;
+  width: 280px !important;
+  height: 98px !important;
+  max-width: 100% !important;
+  background-image: url('${sanitizedSigninUrl}') !important;
+  background-size: contain !important;
+  background-repeat: no-repeat !important;
+  background-position: right center !important;
   margin-top: 8px !important;
 }
 
@@ -155,17 +162,16 @@ div.w-8:has(img[alt="Ma Earth"]) {
   }
 
   .grid h1.text-primary::after {
-    font-size: 1.5rem !important;
-    line-height: 2rem !important;
-    text-align: right !important;
+    width: 334px !important;
+    height: 117px !important;
     margin-top: 16px !important;
   }
 }
 
 @media (min-width: 1024px) {
   .grid h1.text-primary::after {
-    font-size: 3rem !important;
-    line-height: 1 !important;
+    width: 400px !important;
+    height: 140px !important;
   }
 }
 
@@ -180,7 +186,7 @@ main.flex.flex-col.items-center > h1.text-primary {
 main.flex.flex-col.items-center > h1.text-primary::before {
   content: "" !important;
   display: block !important;
-  width: 54px !important;
+  width: 180px !important;
   height: 54px !important;
   margin: 0 auto 24px auto !important;
   background-image: url('${sanitizedLogoUrl}') !important;
@@ -192,7 +198,7 @@ main.flex.flex-col.items-center > h1.text-primary::before {
 /* Mobile: smaller logo */
 @media (max-width: 767px) {
   main.flex.flex-col.items-center > h1.text-primary::before {
-    width: 42px !important;
+    width: 140px !important;
     height: 42px !important;
     margin-bottom: 16px !important;
   }
@@ -217,6 +223,22 @@ main.flex.flex-col.items-center > h1.text-primary {
 main.flex.flex-col.items-center > button:nth-of-type(2) {
   font-size: 0 !important;
   line-height: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+}
+
+main.flex.flex-col.items-center > button:nth-of-type(2)::before {
+  content: "" !important;
+  display: inline-block !important;
+  width: 20px !important;
+  height: 22px !important;
+  background-image: url('${sanitizedLogoUrl}') !important;
+  background-size: contain !important;
+  background-repeat: no-repeat !important;
+  background-position: center !important;
+  flex-shrink: 0 !important;
 }
 
 main.flex.flex-col.items-center > button:nth-of-type(2)::after {
@@ -593,10 +615,26 @@ button[type="submit"]:hover {
   background-color: #3e4147 !important;
 }
 
-/* Replace "Sign in with Hypercerts" button text with "Sign in with Certified" */
+/* Replace "Sign in with Hypercerts" button text with C logo icon + "Sign in with Certified" */
 button[type="submit"].bg-primary {
   font-size: 0 !important;
   line-height: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+}
+
+button[type="submit"].bg-primary::before {
+  content: "" !important;
+  display: inline-block !important;
+  width: 20px !important;
+  height: 22px !important;
+  background-image: url('${sanitizedLogoUrl}') !important;
+  background-size: contain !important;
+  background-repeat: no-repeat !important;
+  background-position: center !important;
+  flex-shrink: 0 !important;
 }
 
 button[type="submit"].bg-primary::after {
