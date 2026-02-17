@@ -30,7 +30,8 @@ const mailer = new Mailer({
   host: SMTP_HOST,
   port: SMTP_PORT,
   secure: SMTP_SECURE,
-  auth: { user: SMTP_USER, pass: SMTP_PASS },
+  // Only pass auth when credentials are provided — MailHog doesn't need auth
+  ...(SMTP_USER || SMTP_PASS ? { auth: { user: SMTP_USER, pass: SMTP_PASS } } : {}),
   from: SMTP_FROM,
 });
 const callbackSigner = new CallbackSigner(CALLBACK_SECRET);

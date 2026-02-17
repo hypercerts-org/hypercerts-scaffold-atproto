@@ -5,7 +5,7 @@ export interface MailerConfig {
   host: string;
   port: number;
   secure: boolean;
-  auth: { user: string; pass: string };
+  auth?: { user: string; pass: string };
   from: string;
 }
 
@@ -15,11 +15,17 @@ export class Mailer {
 
   constructor(config: MailerConfig) {
     this.from = config.from;
+
+    // Only pass auth to nodemailer when credentials are actually provided.
+    // MailHog and other dev SMTP servers don't need auth — passing an empty
+    // auth object causes nodemailer to attempt PLAIN authentication and fail.
+    const hasAuth = config.auth && (config.auth.user || config.auth.pass);
+
     this.transporter = nodemailer.createTransport({
       host: config.host,
       port: config.port,
       secure: config.secure,
-      auth: config.auth,
+      ...(hasAuth ? { auth: config.auth } : {}),
     });
   }
 
