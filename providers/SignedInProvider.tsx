@@ -11,7 +11,11 @@ export async function SignedInProvider({
 }: {
   children?: React.ReactNode;
 }) {
-  const [session, cookieStore] = await Promise.all([getSession(), cookies()]);
+  const [session, cookieStore, repo] = await Promise.all([
+    getSession(),
+    cookies(),
+    getAuthenticatedRepo(),
+  ]);
   const activeDid = cookieStore.get("active-did")?.value || session?.did;
 
   let avatarUrl: string | undefined = undefined;
@@ -19,12 +23,8 @@ export async function SignedInProvider({
   const activeProfileName: string | undefined = undefined;
   const activeProfileHandle: string | undefined = undefined;
 
-  if (session) {
-    const repo = await getAuthenticatedRepo();
-
-    const profile = repo
-      ? await repo.profile.getCertifiedProfile().catch(() => null)
-      : null;
+  if (session && repo) {
+    const profile = await repo.profile.getCertifiedProfile().catch(() => null);
 
     avatarUrl = convertBlobUrlToCdn(profile?.avatar) || "";
     handle = profile?.handle || "";
