@@ -338,6 +338,27 @@ pnpm run start
 - Try in incognito/private browsing mode
 - Check Redis is running and accessible
 
+### OAuth Branding
+
+OAuth branding (custom logo, colors, CSS on the PDS sign-in pages) only works when **both** conditions are met:
+
+1. **The PDS is a certified PDS** — branding is a feature of certified PDS instances (e.g. `pds-eu-west4.test.certified.app`). Standard/uncertified PDS instances do not support custom OAuth branding.
+2. **Your app's client URL has been added to the PDS's trusted OAuth clients list** — the PDS only applies branding CSS for client URLs registered in its `PDS_OAUTH_TRUSTED_CLIENTS` environment variable. Even if your app serves correct branding metadata at `/client-metadata.json`, the PDS will ignore it unless your URL is explicitly trusted.
+
+Additionally, branding cannot work in local development (loopback mode). When using a loopback `client_id` (localhost/127.0.0.1), the PDS auto-generates minimal client metadata and ignores custom branding fields. This is part of the ATProto specification.
+
+#### Getting your domain trusted by the PDS
+
+To get a domain added to the PDS trusted clients list:
+
+1. **Contact @aspiers on GitHub** with your request
+2. **Provide the full client_id URL** (e.g., `https://your-app.vercel.app/client-metadata.json`)
+3. **Production/stable URLs are preferred** over ephemeral URLs
+
+Once your domain is added to the trusted list, the PDS will apply your branding CSS to the OAuth consent pages.
+
+**Vercel deployments:** Your Vercel production URL must also be added to the PDS trusted clients list for branding to appear. The app serves branding metadata automatically — the only requirement is that the URL is trusted by the PDS.
+
 ### Build Errors After SDK Update
 
 **Symptom:** TypeScript errors, import errors, type mismatches
@@ -348,15 +369,6 @@ pnpm run start
 - Check for deprecated APIs
 - Update import statements if SDK reorganized exports
 - Check SDK version compatibility with Next.js/React versions
-
-### ngrok Issues
-
-**Symptom:** Works locally but not with ngrok
-
-**Solutions:**
-- Update `NEXT_PUBLIC_BASE_URL` to your ngrok URL (e.g., `https://abc123.ngrok.io`)
-- Restart dev server after changing URL
-- Note: ngrok URLs change on each restart unless you have a paid plan
 
 ---
 
