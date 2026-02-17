@@ -110,7 +110,7 @@ export default function HypercertLocationForm({
 
   return (
     <FormInfo
-      stepLabel="Step 4 of 6"
+      stepLabel="Step 3 of 5"
       title="Add Location"
       description="Define the spatial context for this hypercert claim using a URI or uploaded location file."
     >

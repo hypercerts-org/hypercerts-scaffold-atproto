@@ -288,7 +288,7 @@ export default function MeasurementForm({
 
   return (
     <FormInfo
-      stepLabel="Step 5 of 6"
+      stepLabel="Step 4 of 5"
       title="Add Measurement"
       description="Record measurement data related to your hypercert."
     >

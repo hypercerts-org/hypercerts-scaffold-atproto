@@ -185,7 +185,7 @@ export default function EvaluationForm({
 
   return (
     <FormInfo
-      stepLabel="Step 6 of 6"
+      stepLabel="Step 5 of 5"
       title="Add Evaluation"
       description="Provide an evaluation of the hypercert's impact."
     >

@@ -208,7 +208,7 @@ export default function HypercertEvidenceForm({
 
   return (
     <FormInfo
-      stepLabel="Step 3 of 6"
+      stepLabel="Step 2 of 5"
       title="Add Evidence"
       description="Attach a link or file that backs up this hypercert claim."
     >

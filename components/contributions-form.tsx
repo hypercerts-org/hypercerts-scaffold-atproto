@@ -133,7 +133,7 @@ export default function HypercertContributionForm({
 
   return (
     <FormInfo
-      stepLabel="Step 2 of 6"
+      stepLabel="Step 2 of 6" // TODO: update stepLabel when contributions step is re-enabled
       title="Add Contributions"
       description="Link roles, contributors, and timeframes to your hypercert."
     >
