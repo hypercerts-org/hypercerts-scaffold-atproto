@@ -8,12 +8,21 @@ export async function GET(req: NextRequest) {
 
   const error = searchParams.get("error");
   if (error) {
-    const description =
-      searchParams.get("error_description") || "Authorization was cancelled";
-    console.warn("OAuth authorization error:", error, description);
+    const rawDescription = searchParams.get("error_description");
+    console.warn("OAuth authorization error:", error, rawDescription);
+    const trimmed = rawDescription?.trim() ?? "";
+    const sanitizedDescription =
+      trimmed.length === 0
+        ? "Authorization was cancelled"
+        : trimmed.length > 200
+          ? trimmed.slice(0, 200) + "..."
+          : trimmed;
     const redirectUrl = new URL("/", config.baseUrl);
     redirectUrl.searchParams.set("auth_error", error);
-    redirectUrl.searchParams.set("auth_error_description", description);
+    redirectUrl.searchParams.set(
+      "auth_error_description",
+      sanitizedDescription,
+    );
     return NextResponse.redirect(redirectUrl);
   }
 
