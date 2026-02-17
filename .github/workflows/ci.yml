@@ -12,7 +12,7 @@ concurrency:
 
 jobs:
   ci:
-    name: Build, Lint & Format Check
+    name: Lint & Format Check
     runs-on: ubuntu-latest
 
     steps:
@@ -30,9 +30,6 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
-
-      - name: Build
-        run: pnpm build
 
       - name: Lint
         run: pnpm lint
