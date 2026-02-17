@@ -1,7 +1,7 @@
 import LoginDialog from "@/components/login-dialog";
 import Navbar from "@/components/navbar";
 import { getSession, getAuthenticatedRepo } from "@/lib/atproto-session";
-import { getBlobURL } from "@/lib/utils";
+import { getBlobURL, convertBlobUrlToCdn } from "@/lib/utils";
 import { cookies } from "next/headers";
 
 export async function SignedInProvider({
@@ -27,7 +27,7 @@ export async function SignedInProvider({
       ? await repo.profile.getCertifiedProfile().catch(() => null)
       : null;
 
-    avatarUrl = profile?.avatar;
+    avatarUrl = convertBlobUrlToCdn(profile?.avatar) || "";
     handle = profile?.handle || "";
   }
 

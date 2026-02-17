@@ -39,71 +39,77 @@ export default function ImageUploader({
         </p>
       )}
 
-      <div
-        className={cn(
-          "relative flex items-center justify-center overflow-hidden",
-          containerStyles,
-          isBanner
-            ? "bg-gradient-to-br from-create-accent/20 via-create-accent/10 to-muted"
-            : "bg-gradient-to-br from-create-accent/15 to-muted rounded-full"
-        )}
-      >
-        {/* If image exists, show it */}
-        {imageUrl ? (
-          <>
-            <Image
-              src={imageUrl}
-              alt="Uploaded image"
-              fill
-              className={cn(
-                "object-cover",
-                isBanner ? "rounded-none" : "rounded-full"
-              )}
-            />
+      <div className={cn(!isBanner && "relative inline-block")}>
+        <div
+          className={cn(
+            "relative flex items-center justify-center overflow-hidden",
+            containerStyles,
+            isBanner
+              ? "bg-gradient-to-br from-create-accent/20 via-create-accent/10 to-muted"
+              : "bg-gradient-to-br from-create-accent/15 to-muted rounded-full"
+          )}
+        >
+          {/* Single hidden input — always rendered so inputRef is always valid */}
+          <input
+            ref={inputRef}
+            type="file"
+            accept="image/png, image/jpeg, image/jpg"
+            className="hidden"
+            onChange={handleFileChange}
+          />
 
-            {/* Camera icon overlay */}
-            <button
-              type="button"
+          {/* If image exists, show it */}
+          {imageUrl ? (
+            <>
+              <Image
+                src={imageUrl}
+                alt="Uploaded image"
+                fill
+                className={cn(
+                  "object-cover",
+                  isBanner ? "rounded-none" : "rounded-full"
+                )}
+              />
+
+              {/* Camera icon overlay — banner only (avatar button is outside overflow-hidden) */}
+              {isBanner && (
+                <button
+                  type="button"
+                  onClick={() => inputRef.current?.click()}
+                  className="absolute z-10 bg-black/40 backdrop-blur-sm p-2 rounded-full hover:bg-black/60 transition-all duration-200 hover:scale-110 bottom-2 right-2"
+                >
+                  <Camera className="w-4 h-4 text-white" />
+                </button>
+              )}
+            </>
+          ) : (
+            // If no image, show upload UI (label click triggers the shared input above)
+            <label
               onClick={() => inputRef.current?.click()}
               className={cn(
-                "absolute z-10 bg-black/40 backdrop-blur-sm p-2 rounded-full hover:bg-black/60 transition-all duration-200 hover:scale-110",
-                isBanner ? "bottom-2 right-2" : "bottom-0 right-0"
+                "flex flex-col items-center justify-center w-full h-full cursor-pointer border-2 border-dashed border-create-accent/20 hover:border-create-accent/40 hover:bg-create-accent/5 transition-all duration-200",
+                isBanner ? "rounded-none" : "rounded-full"
               )}
             >
-              <Camera className="w-4 h-4 text-white" />
-            </button>
-          </>
-        ) : (
-          // If no image, show upload UI
-          <label
-            className={cn(
-              "flex flex-col items-center justify-center w-full h-full cursor-pointer border-2 border-dashed border-create-accent/20 hover:border-create-accent/40 hover:bg-create-accent/5 transition-all duration-200",
-              isBanner ? "rounded-none" : "rounded-full"
-            )}
+              <Camera className="w-5 h-5 text-create-accent/50 mb-1" />
+              <span className="text-[10px] font-[family-name:var(--font-outfit)] font-medium text-muted-foreground">
+                Upload
+              </span>
+            </label>
+          )}
+
+        </div>
+
+        {/* Avatar camera button — outside overflow-hidden so it is not clipped by the circle */}
+        {!isBanner && imageUrl && (
+          <button
+            type="button"
+            onClick={() => inputRef.current?.click()}
+            className="absolute z-10 bg-black/40 backdrop-blur-sm p-2 rounded-full hover:bg-black/60 transition-all duration-200 hover:scale-110 bottom-0 right-0"
           >
-            <Camera className="w-5 h-5 text-create-accent/50 mb-1" />
-            <span className="text-[10px] font-[family-name:var(--font-outfit)] font-medium text-muted-foreground">
-              Upload
-            </span>
-
-            <input
-              ref={inputRef}
-              type="file"
-              accept="image/png, image/jpeg, image/jpg"
-              className="hidden"
-              onChange={handleFileChange}
-            />
-          </label>
+            <Camera className="w-4 h-4 text-white" />
+          </button>
         )}
-
-        {/* Hidden input for replacing image */}
-        <input
-          ref={inputRef}
-          type="file"
-          accept="image/png, image/jpeg, image/jpg"
-          className="hidden"
-          onChange={handleFileChange}
-        />
       </div>
     </div>
   );

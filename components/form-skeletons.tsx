@@ -116,7 +116,7 @@ export function HypercertsCreateFormSkeleton() {
 export function ContributionFormSkeleton() {
   return (
     <div className="glass-panel rounded-2xl overflow-hidden animate-fade-in-up">
-      <FormInfoHeaderSkeleton stepLabel="Step 2 of 6" />
+      <FormInfoHeaderSkeleton stepLabel="Step 2 of 6" /> {/* TODO: update stepLabel when contributions step is re-enabled */}
       
       <div className="px-6 py-6">
         <div className="space-y-6">

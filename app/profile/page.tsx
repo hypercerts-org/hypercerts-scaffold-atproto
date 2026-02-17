@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { getAuthenticatedRepo, getSession } from "@/lib/atproto-session";
 import ProfileForm from "@/components/profile-form";
-import { getBlobURL } from "@/lib/utils";
+import { getBlobURL, convertBlobUrlToCdn } from "@/lib/utils";
 import { UserCircle } from "lucide-react";
 
 export const metadata: Metadata = {
@@ -20,8 +20,8 @@ export default async function ProfilePage() {
   if (!repo) redirect("/");
   const profile = await repo.profile.getCertifiedProfile();
 
-  const avatarUrl = profile?.avatar || "";
-  const bannerUrl = profile?.banner || "";
+  const avatarUrl = convertBlobUrlToCdn(profile?.avatar);
+  const bannerUrl = convertBlobUrlToCdn(profile?.banner);
 
   return (
     <div className="relative min-h-screen noise-bg">

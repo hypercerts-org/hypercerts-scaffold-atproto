@@ -55,7 +55,7 @@ export default function LoginDialog() {
           </InputGroupAddon>
           <InputGroupInput
             onChange={(e) => setHandle(e.target.value)}
-            placeholder="kzoeps.gainforest.org"
+            placeholder="kzoeps.bsky.social"
             className="font-[family-name:var(--font-outfit)] bg-transparent"
           />
         </InputGroup>

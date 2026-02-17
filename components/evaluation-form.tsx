@@ -92,10 +92,6 @@ export default function EvaluationForm({
       "at://did:plc:z72i7hdynmk6r22z27h6tvur/org.hypercerts.claim.measurement/3jzfcijpqzk2a",
       "at://did:plc:z72i7hdynmk6r22z27h6tvur/org.hypercerts.claim.measurement/3jzfcijpqzk2b",
     ]);
-    setUseLocation(true);
-    setLocationUri(
-      "at://did:plc:666wpj2xloq7d6n5xjizhmbb/app.certified.location/3mepwcsf62k2w"
-    );
     toast.success("Form autofilled with dummy data");
   };
 
@@ -189,7 +185,7 @@ export default function EvaluationForm({
 
   return (
     <FormInfo
-      stepLabel="Step 6 of 6"
+      stepLabel="Step 5 of 5"
       title="Add Evaluation"
       description="Provide an evaluation of the hypercert's impact."
     >
