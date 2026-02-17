@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
+import LoginDialog from "@/components/login-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -30,6 +31,14 @@ export default async function Home() {
     getSession(),
   ]);
   
+  if (!session) {
+    return (
+      <div className="flex grow flex-col items-center justify-center">
+        <LoginDialog />
+      </div>
+    );
+  }
+
   const profile = personalRepo ? await personalRepo.profile.getCertifiedProfile().catch(() => null) : null;
   const isSignedIn = !!session;
 

@@ -1,4 +1,3 @@
-import LoginDialog from "@/components/login-dialog";
 import Navbar from "@/components/navbar";
 import { getSession, getAuthenticatedRepo } from "@/lib/atproto-session";
 import { getBlobURL } from "@/lib/utils";
@@ -42,13 +41,7 @@ export async function SignedInProvider({
         activeProfileName={activeProfileName}
         activeProfileHandle={activeProfileHandle}
       />
-      {session ? (
-        <>{children}</>
-      ) : (
-        <div className="flex grow flex-col items-center justify-center">
-          <LoginDialog />
-        </div>
-      )}
+      {children}
     </>
   );
 }
