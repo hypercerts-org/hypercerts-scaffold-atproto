@@ -16,7 +16,7 @@ import {
 } from "@hypercerts-org/sdk-core";
 import { generateBrandingCss } from "./atproto-branding";
 
-// Granular repo scope — all collections the app needs write access to
+// Granular repo scope — collections with full CRUD access
 const REPO_COLLECTIONS = [
   HYPERCERT_COLLECTIONS.CLAIM,
   HYPERCERT_COLLECTIONS.RIGHTS,
@@ -29,11 +29,14 @@ const REPO_COLLECTIONS = [
   HYPERCERT_COLLECTIONS.COLLECTION,
   HYPERCERT_COLLECTIONS.FUNDING_RECEIPT,
   HYPERCERT_COLLECTIONS.WORK_SCOPE_TAG,
-  HYPERCERT_COLLECTIONS.BSKY_PROFILE,
   HYPERCERT_COLLECTIONS.CERTIFIED_PROFILE,
 ];
 
 const HYPERCERT_REPO_SCOPE = `repo?${REPO_COLLECTIONS.map((c) => "collection=" + c).join("&")}&action=create&action=update&action=delete`;
+
+// Bsky profile scope — only create and update (no delete)
+const BSKY_PROFILE_SCOPE = `repo?collection=${HYPERCERT_COLLECTIONS.BSKY_PROFILE}&action=create&action=update`;
+
 const BLOB_SCOPE = "blob:*/*";
 const RPC_SCOPE =
   "rpc:app.bsky.actor.getProfile?aud=did:web:api.bsky.app%23bsky_appview";
@@ -41,6 +44,7 @@ const RPC_SCOPE =
 const GRANULAR_SCOPE = [
   ATPROTO_SCOPE,
   HYPERCERT_REPO_SCOPE,
+  BSKY_PROFILE_SCOPE,
   RPC_SCOPE,
   BLOB_SCOPE,
 ].join(" ");
