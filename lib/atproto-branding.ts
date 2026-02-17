@@ -67,14 +67,13 @@ export function generateBrandingCss(baseUrl: string): string {
   const signinUrl = `${baseUrl}/certified-signin.svg`;
   const sanitizedSigninUrl = sanitizeUrlForCss(signinUrl);
 
-  return `/* Hypercerts Scaffold Custom Branding - Light Theme */
+  return `/* Hypercerts Scaffold Custom Branding */
 
-/* ===== FORCE LIGHT COLOR SCHEME ===== */
+/* ===== BRANDING CSS VARIABLES ===== */
 :root {
-  color-scheme: light only !important;
-  --branding-color-primary: 43 45 49;
-  --branding-color-primary-contrast: 248 248 250;
-  --branding-color-primary-hue: 220;
+  --branding-color-primary: 15 37 68;
+  --branding-color-primary-contrast: 255 255 255;
+  --branding-color-primary-hue: 216;
   --branding-color-error: 229 72 77;
   --branding-color-error-contrast: 255 255 255;
   --branding-color-error-hue: 358;
@@ -87,7 +86,7 @@ export function generateBrandingCss(baseUrl: string): string {
 }
 
 /* ===== LOGO REPLACEMENT ===== */
-/* Replace Hypercerts logo with horizontal Hypercerts wordmark - Desktop: right aligned */
+/* Replace Hypercerts logo with horizontal Hypercerts wordmark - Desktop: left aligned */
 img[alt="Hypercerts Logo"],
 img[alt*="Logo"] {
   width: 200px !important;
@@ -181,6 +180,28 @@ div.w-8:has(img[alt="Ma Earth"]) {
   }
 }
 
+/* ===== LEFT PANEL - DARK NAVY BACKGROUND ===== */
+/* The PDS hardcodes md:bg-slate-100 for the left panel; override to dark navy */
+.md\\:bg-slate-100,
+.dark .md\\:bg-slate-100,
+.md\\:dark\\:bg-slate-800 {
+  background-color: #0F2544 !important;
+}
+
+/* Light text for dark left panel */
+.md\\:bg-slate-100 .text-primary,
+.md\\:bg-slate-100 h1.text-primary {
+  color: #ffffff !important;
+}
+
+/* Subtitle text in dark left panel (e.g. 'Enter your password') */
+.md\\:bg-slate-100 .text-slate-600,
+.md\\:bg-slate-100 .text-slate-700,
+.md\\:bg-slate-100 .text-slate-400,
+.md\\:bg-slate-100 p {
+  color: rgba(255, 255, 255, 0.7) !important;
+}
+
 /* ===== AUTHENTICATE PAGE (New Session Landing) ===== */
 /* This page has H1 "Authenticate" with buttons below, no logo element */
 
@@ -254,389 +275,8 @@ main.flex.flex-col.items-center > button:nth-of-type(2)::after {
   line-height: 1.5rem !important;
 }
 
-/* ===== ERROR/SESSION EXPIRY PAGE ===== */
-/* Style the H1 "Error" on error pages - identified by having [role="alert"] */
-main:has([role="alert"]) > h1.text-primary {
-  font-size: 1.5rem !important;
-  line-height: 2rem !important;
-  color: #e5484d !important;
-  font-weight: 700 !important;
-}
-
-/* Error page should NOT show logo */
-main:has([role="alert"]) > h1.text-primary::before {
-  display: none !important;
-}
-
-@media (min-width: 768px) {
-  main:has([role="alert"]) > h1.text-primary {
-    font-size: 2.25rem !important;
-    line-height: 2.5rem !important;
-  }
-}
-
-/* ===== MAIN BACKGROUNDS - LIGHT THEME ===== */
-body {
-  background-color: #fafafa !important;
-  color-scheme: light !important;
-}
-
-/* Override dark mode - force light */
-body,
-.dark body,
-body.dark {
-  background-color: #fafafa !important;
-}
-
-/* Main content area */
-.bg-white,
-.dark .bg-white,
-.dark\\:bg-slate-900 {
-  background-color: #fafafa !important;
-}
-
-/* Left panel styling - dark navy background */
-.md\\:bg-slate-100,
-.dark .md\\:bg-slate-100,
-.md\\:dark\\:bg-slate-800 {
-  background-color: #0F2544 !important;
-}
-
-/* Light text for dark left panel */
-.md\\:bg-slate-100 .text-primary,
-.md\\:bg-slate-100 h1.text-primary {
-  color: #ffffff !important;
-}
-
-/* Subtitle text in dark left panel (e.g. 'Enter your password') */
-.md\\:bg-slate-100 .text-slate-600,
-.md\\:bg-slate-100 .text-slate-700,
-.md\\:bg-slate-100 .text-slate-400,
-.md\\:bg-slate-100 p {
-  color: rgba(255, 255, 255, 0.7) !important;
-}
-
-/* ===== ACCOUNT SELECTION & FORM ITEMS ===== */
-.bg-gray-100,
-.dark\\:bg-gray-800,
-.dark .dark\\:bg-gray-800 {
-  background-color: #f8f8fa !important;
-}
-
-/* Hover states */
-.hover\\:bg-gray-200:hover,
-.dark\\:hover\\:bg-gray-700:hover,
-.dark .dark\\:hover\\:bg-gray-700:hover {
-  background-color: #f0f0f3 !important;
-}
-
-/* ===== TEXT COLORS - LIGHT THEME ===== */
-.text-slate-900,
-.dark\\:text-slate-100,
-.dark .dark\\:text-slate-100 {
-  color: #1a1b1e !important;
-}
-
-/* Secondary/muted text */
-.text-slate-600,
-.text-slate-700,
-.text-slate-400,
-.dark\\:text-slate-400,
-.dark\\:text-slate-300,
-.dark .dark\\:text-slate-400,
-.dark .dark\\:text-slate-300 {
-  color: #4a4b53 !important;
-}
-
-/* Neutral text colors */
-.text-neutral-500,
-.text-neutral-400,
-.dark\\:text-neutral-400,
-.dark .dark\\:text-neutral-400 {
-  color: #5c5d66 !important;
-}
-
-/* ===== ACCENT/PRIMARY COLORS ===== */
-.text-primary {
-  color: #757780 !important;
-}
-
-/* Primary background (buttons) */
-.bg-primary {
-  background-color: #2b2d31 !important;
-}
-
-/* Primary border */
-.border-primary {
-  border-color: #2b2d31 !important;
-}
-
-/* Focus ring */
-.focus\\:ring-primary:focus,
-.has-focus\\:ring-primary:has(:focus) {
-  --tw-ring-color: #4e5058 !important;
-}
-
-/* ===== FORM INPUTS ===== */
-input,
-textarea,
-select {
-  background-color: #f8f8fa !important;
-  border: 1px solid #e4e4e8 !important;
-  border-width: 1px !important;
-  border-style: solid !important;
-  color: #1a1b1e !important;
-}
-
-input::placeholder,
-textarea::placeholder {
-  color: #9a9ba3 !important;
-}
-
-input:focus,
-textarea:focus,
-select:focus {
-  border-color: #757780 !important;
-  outline: 2px solid #4e5058 !important;
-  outline-offset: 2px !important;
-}
-
-/* ===== USERNAME PREVIEW & PASSWORD STRENGTH BOXES ===== */
-/* These use bg-gray-200/bg-gray-300 in light mode, dark:bg-slate-* in dark mode */
-
-/* Container backgrounds - the row below inputs (username preview, password strength) */
-/* Using a slightly more saturated neutral to distinguish from input background */
-.bg-gray-200,
-.bg-slate-700,
-.dark\\:bg-slate-700 {
-  background-color: #eaeaed !important;
-}
-
-/* Inner elements - placeholder spans, meter bars */
-.bg-gray-300,
-.bg-slate-600,
-.bg-slate-500,
-.dark\\:bg-slate-600,
-.dark\\:bg-slate-500 {
-  background-color: #e4e4e8 !important;
-}
-
-/* Text in these areas - muted */
-.text-gray-700,
-.text-gray-500,
-.text-gray-400,
-.text-gray-300,
-.dark\\:text-gray-300,
-.dark\\:text-gray-400,
-.dark\\:text-gray-500 {
-  color: #4a4b53 !important;
-}
-
-/* Strong/bold username text - should be black */
-.text-gray-800,
-.text-gray-900,
-.dark\\:text-gray-200,
-.dark\\:text-gray-100,
-strong.text-gray-800,
-strong.dark\\:text-gray-200 {
-  color: #1a1b1e !important;
-}
-
-/* Also override any remaining slate backgrounds */
-.bg-slate-800,
-.dark\\:bg-slate-800 {
-  background-color: #f0f0f3 !important;
-}
-
-/* Text that should be dark on light backgrounds */
-.text-slate-200,
-.text-slate-300,
-.text-slate-100,
-.dark\\:text-slate-200,
-.dark\\:text-slate-300,
-.dark\\:text-slate-100,
-.text-white {
-  color: #4a4b53 !important;
-}
-
-/* Input container with rounded corners */
-.rounded-br-none,
-.rounded-bl-none,
-.rounded-br-2,
-.rounded-bl-2 {
-  background-color: #f0f0f3 !important;
-}
-
-/* The container around inputs (identifier, password fields) */
-/* These containers have focus:ring-primary or has-focus:ring-primary classes */
-.rounded-lg.has-focus\\:ring-primary,
-.rounded-lg.focus\\:ring-primary,
-.rounded-lg[class*="has-focus:ring"],
-.rounded-lg[class*="focus:ring"] {
-  background-color: #f8f8fa !important;
-  border: 1px solid #e4e4e8 !important;
-}
-
-/* Focus state for input containers - accent border */
-.rounded-lg.has-focus\\:ring-primary:has(:focus),
-.rounded-lg.focus\\:ring-primary:focus-within,
-.rounded-lg[class*="has-focus:ring"]:has(:focus),
-.rounded-lg[class*="focus:ring"]:focus-within {
-  border-color: #757780 !important;
-}
-
-/* Also target bg-gray-100 containers that wrap inputs */
-.bg-gray-100.rounded-lg:has(input),
-.dark\\:bg-gray-800.rounded-lg:has(input) {
-  background-color: #f8f8fa !important;
-  border: 1px solid #e4e4e8 !important;
-}
-
-.bg-gray-100.rounded-lg:has(input:focus),
-.dark\\:bg-gray-800.rounded-lg:has(input:focus) {
-  border-color: #757780 !important;
-}
-
-/* Input inside containers - keep transparent (container has the border) */
-.rounded-br-none input,
-.rounded-bl-none input,
-.border-primary input,
-input.bg-transparent,
-.bg-gray-100.rounded-lg input,
-.dark\\:bg-gray-800.rounded-lg input,
-.rounded-lg.has-focus\\:ring-primary input,
-.rounded-lg.focus\\:ring-primary input,
-.rounded-lg[class*="has-focus:ring"] input,
-.rounded-lg[class*="focus:ring"] input {
-  border: none !important;
-  background-color: transparent !important;
-  outline: none !important;
-}
-
-/* Ensure focus state doesn't add outline to inner inputs */
-.bg-gray-100.rounded-lg input:focus,
-.dark\\:bg-gray-800.rounded-lg input:focus,
-.rounded-lg.has-focus\\:ring-primary input:focus,
-.rounded-lg.focus\\:ring-primary input:focus {
-  border: none !important;
-  outline: none !important;
-}
-
-/* ===== CHECKBOXES ===== */
-input[type="checkbox"] {
-  accent-color: #2b2d31 !important;
-  border: 1px solid #e4e4e8 !important;
-  background-color: #f8f8fa !important;
-}
-
-input[type="checkbox"]:checked {
-  background-color: #2b2d31 !important;
-}
-
-/* ===== INFO/WARNING/ERROR BOXES ===== */
-.bg-contrast-25,
-.bg-contrast-50,
-[class*="bg-contrast"],
-.dark\\:bg-contrast-50,
-.dark .dark\\:bg-contrast-50 {
-  background-color: #f0f0f3 !important;
-}
-
-/* Footer styling */
-footer.bg-contrast-25,
-footer.bg-contrast-50,
-footer[class*="bg-contrast"] {
-  background-color: #f0f0f3 !important;
-  border-top: 1px solid #e4e4e8 !important;
-}
-
-.text-contrast-500,
-[class*="text-contrast"] {
-  color: #4a4b53 !important;
-}
-
-/* Warning styling - warm amber */
-.bg-warning {
-  background-color: #f59f00 !important;
-}
-
-.text-warning {
-  color: #c77700 !important;
-}
-
-/* Warning contrast text (for text on warning background) */
-.text-warning-contrast {
-  color: #7d4e00 !important;
-}
-
-/* Warning alert box - ensure good contrast and styling */
-[role="alert"].bg-warning {
-  background-color: #fff4e6 !important;
-  border: 1px solid #f59f00 !important;
-}
-
-[role="alert"].bg-warning .text-inherit,
-[role="alert"].bg-warning h3 {
-  color: #7d4e00 !important;
-}
-
-[role="alert"].bg-warning svg {
-  color: #c77700 !important;
-}
-
-/* Error styling - red (for password meter "weak") */
-.bg-error {
-  background-color: #f8a5a8 !important;
-}
-
-.text-error {
-  color: #e5484d !important;
-}
-
-/* Success styling - green */
-.bg-success {
-  background-color: #8fd19e !important;
-}
-
-.text-success {
-  color: #2b8a3e !important;
-}
-
-/* Password strength meter specific - ensure bars are visible */
-[role="meter"] .bg-error {
-  background-color: #f8a5a8 !important;
-}
-
-[role="meter"] .bg-warning {
-  background-color: #f59f00 !important;
-}
-
-[role="meter"] .bg-success {
-  background-color: #8fd19e !important;
-}
-
-/* Inactive meter bars */
-[role="meter"] .bg-gray-300,
-[role="meter"] .dark\\:bg-slate-500 {
-  background-color: #d4d4d8 !important;
-}
-
-/* ===== BUTTONS ===== */
-/* Primary buttons (dark) */
-button.bg-primary,
-[role="button"].bg-primary,
-button[type="submit"] {
-  background-color: #2b2d31 !important;
-  color: #f8f8fa !important;
-}
-
-button.bg-primary:hover,
-[role="button"].bg-primary:hover,
-button[type="submit"]:hover {
-  background-color: #3e4147 !important;
-}
-
-/* Replace "Sign in with Hypercerts" button text with C logo icon + "Sign in with Certified" */
+/* ===== SUBMIT BUTTON TEXT/ICON REPLACEMENT ===== */
+/* Since bg-primary now resolves to navy via CSS variable, only replace text/icon */
 button[type="submit"].bg-primary {
   font-size: 0 !important;
   line-height: 0 !important;
@@ -664,94 +304,29 @@ button[type="submit"].bg-primary::after {
   line-height: 1.5rem !important;
 }
 
-/* Secondary buttons (light neutral) */
-button.bg-gray-100,
-button.bg-gray-200,
-[role="button"].bg-gray-100,
-[role="button"].bg-gray-200,
-button.bg-transparent,
-[role="button"].bg-transparent,
-.dark .dark\\:bg-gray-800 button,
-.dark .dark\\:bg-gray-800 [role="button"] {
-  background-color: #f0f0f3 !important;
-  color: #4a4b53 !important;
-  border: 1px solid #e4e4e8 !important;
+/* ===== ERROR/SESSION EXPIRY PAGE ===== */
+/* Style the H1 "Error" on error pages - identified by having [role="alert"] */
+main:has([role="alert"]) > h1.text-primary {
+  font-size: 1.5rem !important;
+  line-height: 2rem !important;
+  color: #e5484d !important;
+  font-weight: 700 !important;
 }
 
-button.bg-gray-100:hover,
-button.bg-gray-200:hover,
-[role="button"].bg-gray-100:hover,
-[role="button"].bg-gray-200:hover,
-button.bg-transparent:hover,
-[role="button"].bg-transparent:hover {
-  background-color: #eaeaed !important;
+/* Error page should NOT show logo */
+main:has([role="alert"]) > h1.text-primary::before {
+  display: none !important;
 }
 
-/* Text-only buttons (like "Sign up", "Forgot?") */
-button.text-primary,
-[role="button"].text-primary {
-  color: #757780 !important;
-  background-color: transparent !important;
-  border: none !important;
-}
-
-button.text-primary:hover,
-[role="button"].text-primary:hover {
-  color: #5c5d66 !important;
-  text-decoration: underline !important;
-}
-
-/* ===== LINKS ===== */
-a {
-  color: #757780 !important;
-}
-
-a:hover {
-  color: #5c5d66 !important;
-}
-
-/* ===== FORM TEXT ELEMENTS ===== */
-ul li,
-ol li,
-p {
-  color: #4a4b53 !important;
-}
-
-.text-sm.font-medium {
-  color: #4a4b53 !important;
-}
-
-/* Username preview box */
-.rounded-lg.border {
-  background-color: #f8f8fa !important;
-  border-color: #e4e4e8 !important;
-}
-
-/* Info icon boxes */
-.rounded-lg.bg-contrast-25,
-.rounded-lg[class*="bg-contrast"] {
-  background-color: #f0f0f3 !important;
-}
-
-/* ===== DROPDOWN/SELECT STYLING ===== */
-select {
-  background-color: #f0f0f3 !important;
-  color: #4a4b53 !important;
-}
-
-/* ===== ERROR PAGE ===== */
-.text-4xl,
-.text-5xl {
-  color: #2b2d31 !important;
+@media (min-width: 768px) {
+  main:has([role="alert"]) > h1.text-primary {
+    font-size: 2.25rem !important;
+    line-height: 2.5rem !important;
+  }
 }
 
 /* ===== MOBILE SPECIFIC FIXES ===== */
 @media (max-width: 767px) {
-  /* Mobile main content */
-  main {
-    background-color: #f8f8fa !important;
-  }
-
   /* Grid content container - logo and title - dark navy background on mobile */
   .grid.grow.content-center {
     justify-items: start !important;
