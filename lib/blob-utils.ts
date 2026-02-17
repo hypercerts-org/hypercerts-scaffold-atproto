@@ -28,9 +28,9 @@ export async function resolveBlobToUrl(
  * This ensures the object returned to the client is "plain" and contains string URLs instead of CID/BlobRef objects.
  */
 export async function resolveRecordBlobs(
-  value: any,
+  value: unknown,
   ownerDid: string,
-): Promise<any> {
+): Promise<unknown> {
   if (!value || typeof value !== "object") return value;
 
   // Handle arrays
@@ -38,17 +38,19 @@ export async function resolveRecordBlobs(
     return Promise.all(value.map((v) => resolveRecordBlobs(v, ownerDid)));
   }
 
+  const obj = value as Record<string, unknown>;
+
   // Check if this object is a BlobRef (has $type: 'blob' or 'ref' property from atproto returns)
-  if (value.$type === "blob" || (value.ref && value.mimeType)) {
-    return await resolveBlobToUrl(value, ownerDid);
+  if (obj.$type === "blob" || (obj.ref && obj.mimeType)) {
+    return await resolveBlobToUrl(obj as BlobRef | { $type: string }, ownerDid);
   }
 
   // Recursively process properties in parallel
-  const entries = Object.entries(value);
+  const entries = Object.entries(obj);
   const resolved = await Promise.all(
     entries.map(([, val]) => resolveRecordBlobs(val, ownerDid)),
   );
-  const result: any = {};
+  const result: Record<string, unknown> = {};
   entries.forEach(([key], i) => {
     result[key] = resolved[i];
   });

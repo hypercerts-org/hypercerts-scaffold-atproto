@@ -156,7 +156,10 @@ export default function HypercertEvidenceForm({
       return false;
     }
 
-    if (contentType && !CONTENT_TYPES.includes(contentType as any)) {
+    if (
+      contentType &&
+      !(CONTENT_TYPES as readonly string[]).includes(contentType)
+    ) {
       toast.error("Invalid content type.");
       return false;
     }

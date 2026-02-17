@@ -69,7 +69,17 @@ export async function POST(req: NextRequest) {
     }
 
     // Parse location if provided
-    let location: any = undefined;
+    let location:
+      | string
+      | {
+          lpVersion: string;
+          srs: string;
+          locationType: string;
+          location: string | File;
+          name?: string;
+          description?: string;
+        }
+      | undefined = undefined;
     const locationMode = (data.get("locationMode") as string | null)?.trim();
 
     if (locationMode === "string") {
@@ -119,7 +129,7 @@ export async function POST(req: NextRequest) {
       title,
       shortDescription,
       description,
-      contentType: contentType as any,
+      contentType,
       ...(location && { location }),
     });
 
