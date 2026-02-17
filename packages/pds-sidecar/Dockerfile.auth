@@ -1,0 +1,50 @@
+# Stage 1: Build
+FROM node:20-alpine AS builder
+
+WORKDIR /build
+
+# Copy workspace root manifests
+COPY package.json package-lock.json tsconfig.json ./
+
+# Copy sub-package manifests (needed for workspace resolution)
+COPY packages/shared/package.json ./packages/shared/
+COPY packages/auth-service/package.json ./packages/auth-service/
+
+# Install all workspace dependencies
+RUN npm ci --workspace=packages/shared --workspace=packages/auth-service
+
+# Copy source files
+COPY packages/shared/src ./packages/shared/src
+COPY packages/shared/tsconfig.json ./packages/shared/
+COPY packages/auth-service/src ./packages/auth-service/src
+COPY packages/auth-service/tsconfig.json ./packages/auth-service/
+
+# Build shared first, then auth-service
+RUN npm run build --workspace=packages/shared && \
+    npm run build --workspace=packages/auth-service
+
+# Stage 2: Runtime
+FROM node:20-alpine AS runtime
+
+WORKDIR /app
+
+# Install curl for health checks
+RUN apk add --no-cache curl
+
+# Copy workspace root manifests
+COPY package.json package-lock.json tsconfig.json ./
+
+# Copy sub-package manifests
+COPY packages/shared/package.json ./packages/shared/
+COPY packages/auth-service/package.json ./packages/auth-service/
+
+# Install production dependencies only
+RUN npm ci --workspace=packages/shared --workspace=packages/auth-service --omit=dev
+
+# Copy built artifacts from builder
+COPY --from=builder /build/packages/shared/dist ./packages/shared/dist
+COPY --from=builder /build/packages/auth-service/dist ./packages/auth-service/dist
+
+EXPOSE 3001
+
+CMD ["node", "packages/auth-service/dist/index.js"]

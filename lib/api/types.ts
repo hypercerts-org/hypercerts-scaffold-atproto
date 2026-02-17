@@ -13,6 +13,14 @@ export interface LoginResponse {
   authUrl: string;
 }
 
+export interface EmailLoginRequest {
+  email: string;
+}
+
+export interface EmailLoginResponse {
+  authUrl: string;
+}
+
 // Hypercert types
 export interface CreateHypercertRequest {
   title: string;

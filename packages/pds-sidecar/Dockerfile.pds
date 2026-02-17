@@ -1,0 +1,50 @@
+# Stage 1: Build
+FROM node:20-alpine AS builder
+
+WORKDIR /build
+
+# Copy workspace root manifests
+COPY package.json package-lock.json tsconfig.json ./
+
+# Copy sub-package manifests (needed for workspace resolution)
+COPY packages/shared/package.json ./packages/shared/
+COPY packages/pds-core/package.json ./packages/pds-core/
+
+# Install all workspace dependencies
+RUN npm ci --workspace=packages/shared --workspace=packages/pds-core
+
+# Copy source files
+COPY packages/shared/src ./packages/shared/src
+COPY packages/shared/tsconfig.json ./packages/shared/
+COPY packages/pds-core/src ./packages/pds-core/src
+COPY packages/pds-core/tsconfig.json ./packages/pds-core/
+
+# Build shared first, then pds-core
+RUN npm run build --workspace=packages/shared && \
+    npm run build --workspace=packages/pds-core
+
+# Stage 2: Runtime
+FROM node:20-alpine AS runtime
+
+WORKDIR /app
+
+# Install curl for health checks
+RUN apk add --no-cache curl
+
+# Copy workspace root manifests
+COPY package.json package-lock.json tsconfig.json ./
+
+# Copy sub-package manifests
+COPY packages/shared/package.json ./packages/shared/
+COPY packages/pds-core/package.json ./packages/pds-core/
+
+# Install production dependencies only
+RUN npm ci --workspace=packages/shared --workspace=packages/pds-core --omit=dev
+
+# Copy built artifacts from builder
+COPY --from=builder /build/packages/shared/dist ./packages/shared/dist
+COPY --from=builder /build/packages/pds-core/dist ./packages/pds-core/dist
+
+EXPOSE 3000
+
+CMD ["node", "packages/pds-core/dist/index.js"]
