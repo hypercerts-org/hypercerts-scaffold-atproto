@@ -15,7 +15,8 @@ export function useLogoutMutation() {
     },
     onError: (error) => {
       console.error("Logout error:", error);
-      toast.error("Logout failed");
+      const message = error instanceof Error ? error.message : "Unknown error";
+      toast.error(`Logout failed: ${message}`);
     },
   });
 }

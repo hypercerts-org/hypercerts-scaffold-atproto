@@ -61,7 +61,8 @@ export default function EvaluationForm({
     },
     onError: (error) => {
       console.error("Failed to add evaluation:", error);
-      toast.error("Failed to add evaluation");
+      const message = error instanceof Error ? error.message : "Unknown error";
+      toast.error(`Failed to add evaluation: ${message}`);
     },
   });
 
