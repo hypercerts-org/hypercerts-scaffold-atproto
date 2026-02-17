@@ -87,25 +87,26 @@ export function generateBrandingCss(baseUrl: string): string {
 }
 
 /* ===== LOGO REPLACEMENT ===== */
-/* Replace Hypercerts logo with Scaffold logo - Desktop: right aligned */
+/* Replace Hypercerts logo with horizontal Hypercerts wordmark - Desktop: right aligned */
 img[alt="Hypercerts Logo"],
 img[alt*="Logo"] {
-  width: 54px !important;
-  height: 54px !important;
+  width: 200px !important;
+  height: 40px !important;
   object-fit: contain !important;
   object-position: -9999px -9999px !important;
-  background-image: url('${sanitizedLogoUrl}') !important;
+  background-image: url('${sanitizedHorizontalLogoUrl}') !important;
   background-size: contain !important;
   background-repeat: no-repeat !important;
   background-position: right center !important;
+  filter: invert(1) !important;
 }
 
 /* Mobile: left aligned with better spacing */
 @media (max-width: 767px) {
   img[alt="Hypercerts Logo"],
   img[alt*="Logo"] {
-    width: 40px !important;
-    height: 40px !important;
+    width: 150px !important;
+    height: 30px !important;
     background-position: left center !important;
     margin-top: 8px !important;
     margin-bottom: 8px !important;
@@ -191,20 +192,21 @@ main.flex.flex-col.items-center > h1.text-primary {
 main.flex.flex-col.items-center > h1.text-primary::before {
   content: "" !important;
   display: block !important;
-  width: 180px !important;
-  height: 54px !important;
+  width: 200px !important;
+  height: 40px !important;
   margin: 0 auto 24px auto !important;
-  background-image: url('${sanitizedLogoUrl}') !important;
+  background-image: url('${sanitizedHorizontalLogoUrl}') !important;
   background-size: contain !important;
   background-repeat: no-repeat !important;
   background-position: center !important;
+  filter: invert(1) !important;
 }
 
 /* Mobile: smaller logo */
 @media (max-width: 767px) {
   main.flex.flex-col.items-center > h1.text-primary::before {
-    width: 140px !important;
-    height: 42px !important;
+    width: 150px !important;
+    height: 30px !important;
     margin-bottom: 16px !important;
   }
 }
