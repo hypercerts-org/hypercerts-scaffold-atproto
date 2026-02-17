@@ -27,6 +27,7 @@ export const getActiveProfileInfo = async () => {
   };
 };
 export const switchActiveProfile = async (did: string) => {
+  const cookiePromise = cookies();
   const session = await getSession();
   if (!session) {
     throw new Error(
@@ -34,7 +35,7 @@ export const switchActiveProfile = async (did: string) => {
     );
   }
 
-  const cookieStore = await cookies();
+  const cookieStore = await cookiePromise;
   cookieStore.set("active-did", did, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",

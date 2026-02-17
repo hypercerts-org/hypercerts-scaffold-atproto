@@ -18,8 +18,10 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    const session = await sdk.callback(searchParams);
-    const cookieStore = await cookies();
+    const [session, cookieStore] = await Promise.all([
+      sdk.callback(searchParams),
+      cookies(),
+    ]);
     cookieStore.set("user-did", session.did, {
       httpOnly: true,
       secure: config.isProduction,
