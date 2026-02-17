@@ -3,6 +3,7 @@ import Navbar from "@/components/navbar";
 import { getSession, getAuthenticatedRepo } from "@/lib/atproto-session";
 import { getBlobURL, convertBlobUrlToCdn } from "@/lib/utils";
 import { cookies } from "next/headers";
+import { Suspense } from "react";
 import { AuthErrorToast } from "./AuthErrorToast";
 
 export async function SignedInProvider({
@@ -34,7 +35,9 @@ export async function SignedInProvider({
 
   return (
     <>
-      <AuthErrorToast />
+      <Suspense fallback={null}>
+        <AuthErrorToast />
+      </Suspense>
       <Navbar
         isSignedIn={!!session}
         avatarUrl={avatarUrl}
