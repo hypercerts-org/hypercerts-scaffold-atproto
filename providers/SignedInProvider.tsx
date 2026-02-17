@@ -16,8 +16,8 @@ export async function SignedInProvider({
 
   let avatarUrl: string | undefined = undefined;
   let handle: string | undefined = undefined;
-  let activeProfileName: string | undefined = undefined;
-  let activeProfileHandle: string | undefined = undefined;
+  const activeProfileName: string | undefined = undefined;
+  const activeProfileHandle: string | undefined = undefined;
 
   if (session) {
     const repo = await getAuthenticatedRepo();
