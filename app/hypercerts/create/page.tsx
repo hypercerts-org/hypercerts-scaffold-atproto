@@ -78,13 +78,13 @@ export default function Home() {
 
           {/* Main content area - only forms change with skeletons during loading */}
           <main className="min-w-0">
-            {step === 1 && (
+            {step === 1 ? (
               <HypercertsCreateForm
                 setHypercertInfo={setHypercertInfo}
                 hypercertInfo={hypercertInfo}
                 nextStepper={nextStepper}
               />
-            )}
+            ) : null}
             {/* TODO commented out for now while SDK addContribution stabilized */}
             {/* {step === 2 && hypercertInfo && (
               <HypercertContributionForm
@@ -93,41 +93,41 @@ export default function Home() {
                 onBack={previousStepper}
               />
             )} */}
-            {step === 2 && hypercertInfo && (
+            {step === 2 && hypercertInfo ? (
               <HypercertEvidenceForm
                 hypercertInfo={hypercertInfo}
                 onNext={nextStepper}
                 onBack={previousStepper}
               />
-            )}
-            {step === 3 && hypercertInfo && (
+            ) : null}
+            {step === 3 && hypercertInfo ? (
               <HypercertLocationForm
                 onNext={nextStepper}
                 onBack={previousStepper}
                 hypercertInfo={hypercertInfo}
               />
-            )}
-            {step === 4 && hypercertInfo && (
+            ) : null}
+            {step === 4 && hypercertInfo ? (
               <MeasurementForm
                 hypercertInfo={hypercertInfo}
                 onNext={nextStepper}
                 onBack={previousStepper}
               />
-            )}
-            {step === 5 && hypercertInfo && (
+            ) : null}
+            {step === 5 && hypercertInfo ? (
               <EvaluationForm
                 hypercertInfo={hypercertInfo}
                 onNext={nextStepper}
                 onBack={previousStepper}
               />
-            )}
-            {step === 6 && (
+            ) : null}
+            {step === 6 ? (
               <HypercertCompletionStep
                 onCreateAnother={() => setStep(1)}
                 onBack={previousStepper}
                 hypercertInfo={hypercertInfo}
               />
-            )}
+            ) : null}
           </main>
         </div>
       </div>

@@ -166,7 +166,7 @@ export default async function Home() {
       </section>
 
       {/* Session Info (if signed in) */}
-      {isSignedIn && session && (
+      {isSignedIn && session ? (
         <section className="relative z-10 max-w-6xl mx-auto px-6 pb-16 lg:pb-24">
           <div className="glass-panel rounded-2xl p-8 space-y-6 animate-fade-in-up">
             <div className="flex items-start justify-between">
@@ -194,22 +194,22 @@ export default async function Home() {
                   {session.did}
                 </dd>
               </div>
-              {profile?.displayName && (
+              {profile?.displayName ? (
                 <div className="space-y-1">
                   <dt className="text-xs uppercase tracking-wider text-muted-foreground">
                     Display Name
                   </dt>
                   <dd className="font-medium">{profile.displayName}</dd>
                 </div>
-              )}
-              {profile?.handle && (
+              ) : null}
+              {profile?.handle ? (
                 <div className="space-y-1">
                   <dt className="text-xs uppercase tracking-wider text-muted-foreground">
                     Handle
                   </dt>
                   <dd className="font-medium">@{profile.handle}</dd>
                 </div>
-              )}
+              ) : null}
             </dl>
 
             <div className="flex flex-wrap gap-3 pt-2">
@@ -232,7 +232,7 @@ export default async function Home() {
             </div>
           </div>
         </section>
-      )}
+      ) : null}
 
       {/* Footer CTA */}
       <section className="relative z-10 max-w-6xl mx-auto px-6 pb-24">

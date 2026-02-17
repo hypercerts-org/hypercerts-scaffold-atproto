@@ -31,8 +31,10 @@ export default async function MyHypercertsPage() {
 
   if (!ctx || !session) redirect("/");
 
-  const { records } = await ctx.scopedRepo.hypercerts.list({ limit: 100 });
-  const pdsUrl = await resolveSessionPds(session);
+  const [{ records }, pdsUrl] = await Promise.all([
+    ctx.scopedRepo.hypercerts.list({ limit: 100 }),
+    resolveSessionPds(session),
+  ]);
 
   return (
     <main className="relative min-h-screen noise-bg">
@@ -136,14 +138,14 @@ export default async function MyHypercertsPage() {
 
                         {/* Metadata */}
                         <div className="flex flex-col gap-2 pt-3">
-                          {createdDate && (
+                          {createdDate ? (
                             <div className="flex items-center gap-1.5 text-xs text-muted-foreground font-[family-name:var(--font-outfit)]">
                               <Calendar className="size-3" />
                               <span>{createdDate}</span>
                             </div>
-                          )}
+                          ) : null}
 
-                          {workScope.length > 0 && (
+                          {workScope.length > 0 ? (
                             <div className="flex flex-wrap gap-1.5">
                               {workScope.slice(0, 3).map((scope: string) => (
                                 <span
@@ -153,13 +155,13 @@ export default async function MyHypercertsPage() {
                                   {scope}
                                 </span>
                               ))}
-                              {workScope.length > 3 && (
+                              {workScope.length > 3 ? (
                                 <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-[family-name:var(--font-outfit)] text-muted-foreground">
                                   +{workScope.length - 3}
                                 </span>
-                              )}
+                              ) : null}
                             </div>
-                          )}
+                          ) : null}
                         </div>
                       </CardHeader>
                     </Card>
