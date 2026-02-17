@@ -119,7 +119,7 @@ export async function POST(req: NextRequest) {
   } catch (e) {
     console.error("Error in add-attachment API:", e);
     return NextResponse.json(
-      { error: "Internal server error", details: (e as Error).message },
+      { error: `Failed to add attachment: ${(e as Error).message}` },
       { status: 500 }
     );
   }
