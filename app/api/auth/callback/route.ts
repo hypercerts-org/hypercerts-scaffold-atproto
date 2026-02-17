@@ -8,7 +8,8 @@ export async function GET(req: NextRequest) {
 
   const error = searchParams.get("error");
   if (error) {
-    const description = searchParams.get("error_description") || "Authorization was cancelled";
+    const description =
+      searchParams.get("error_description") || "Authorization was cancelled";
     console.warn("OAuth authorization error:", error, description);
     const redirectUrl = new URL("/", config.baseUrl);
     redirectUrl.searchParams.set("auth_error", error);
@@ -37,7 +38,10 @@ export async function GET(req: NextRequest) {
     console.error("Authentication failed:", e);
     const redirectUrl = new URL("/", config.baseUrl);
     redirectUrl.searchParams.set("auth_error", "callback_failed");
-    redirectUrl.searchParams.set("auth_error_description", "Authentication failed. Please try again.");
+    redirectUrl.searchParams.set(
+      "auth_error_description",
+      "Authentication failed. Please try again.",
+    );
     return NextResponse.redirect(redirectUrl);
   }
 }

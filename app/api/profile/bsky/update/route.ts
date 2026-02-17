@@ -21,13 +21,13 @@ export async function POST(req: Request) {
     if (avatar && avatar.size > 1_000_000) {
       return NextResponse.json(
         { error: "Avatar must be less than 1MB" },
-        { status: 400 }
+        { status: 400 },
       );
     }
     if (banner && banner.size > 1_000_000) {
       return NextResponse.json(
         { error: "Banner must be less than 1MB" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -100,7 +100,7 @@ export async function POST(req: Request) {
     console.error("Bsky profile update error:", error);
     return NextResponse.json(
       { error: `Profile update failed: ${(error as Error).message}` },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

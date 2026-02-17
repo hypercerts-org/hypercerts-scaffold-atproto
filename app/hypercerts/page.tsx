@@ -20,20 +20,15 @@ import { OrgHypercertsDefs } from "@hypercerts-org/sdk-core";
 
 export const metadata: Metadata = {
   title: "Hypercerts",
-  description:
-    "Browse and manage your hypercert impact claims.",
+  description: "Browse and manage your hypercert impact claims.",
   openGraph: {
     title: "Hypercerts",
-    description:
-      "Browse and manage your hypercert impact claims.",
+    description: "Browse and manage your hypercert impact claims.",
   },
 };
 
 export default async function MyHypercertsPage() {
-  const [ctx, session] = await Promise.all([
-    getRepoContext(),
-    getSession(),
-  ]);
+  const [ctx, session] = await Promise.all([getRepoContext(), getSession()]);
 
   if (!ctx || !session) redirect("/");
 
@@ -43,7 +38,7 @@ export default async function MyHypercertsPage() {
   return (
     <main className="relative min-h-screen noise-bg">
       <div className="gradient-mesh absolute inset-0 -z-10" />
-      
+
       <div className="max-w-5xl mx-auto py-12 px-4 space-y-8">
         {/* Header */}
         <div className="text-center space-y-3 animate-fade-in-up">
@@ -74,7 +69,8 @@ export default async function MyHypercertsPage() {
                 No hypercerts found
               </h2>
               <p className="text-sm font-[family-name:var(--font-outfit)] text-muted-foreground">
-                Get started by creating your first hypercert to track and verify your impact.
+                Get started by creating your first hypercert to track and verify
+                your impact.
               </p>
               <Button
                 asChild
@@ -93,10 +89,16 @@ export default async function MyHypercertsPage() {
               {records.map(({ record: cert, uri }) => {
                 const imageUrl =
                   ctx.activeDid && cert.image
-                    ? getBlobURL((cert.image as OrgHypercertsDefs.SmallImage).image, ctx.activeDid, pdsUrl)
+                    ? getBlobURL(
+                        (cert.image as OrgHypercertsDefs.SmallImage).image,
+                        ctx.activeDid,
+                        pdsUrl,
+                      )
                     : null;
 
-                const workScope = Array.isArray(cert.workScope) ? cert.workScope : [];
+                const workScope = Array.isArray(cert.workScope)
+                  ? cert.workScope
+                  : [];
                 const createdDate = cert.createdAt
                   ? new Date(cert.createdAt).toLocaleDateString()
                   : null;

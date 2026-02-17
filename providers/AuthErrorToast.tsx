@@ -18,7 +18,10 @@ export function AuthErrorToast() {
     if (authError === "access_denied") {
       toast.error("Login cancelled. You can try again when you're ready.");
     } else {
-      toast.error(description || `Authentication failed (${authError}). Please try again.`);
+      toast.error(
+        description ||
+          `Authentication failed (${authError}). Please try again.`,
+      );
     }
 
     router.replace(pathname);

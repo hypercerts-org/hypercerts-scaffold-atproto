@@ -9,14 +9,14 @@ import { NextResponse } from "next/server";
  *
  * Only the public key components are exposed - the private key is
  * kept secret in the ATPROTO_JWK_PRIVATE environment variable.
- * 
+ *
  */
 export async function GET() {
   const rawJwk = process.env.ATPROTO_JWK_PRIVATE;
   if (!rawJwk) {
     return NextResponse.json(
       { error: "ATPROTO_JWK_PRIVATE environment variable is not configured." },
-      { status: 500 }
+      { status: 500 },
     );
   }
 
@@ -26,7 +26,7 @@ export async function GET() {
   } catch {
     return NextResponse.json(
       { error: "ATPROTO_JWK_PRIVATE contains invalid JSON." },
-      { status: 500 }
+      { status: 500 },
     );
   }
 
@@ -35,15 +35,20 @@ export async function GET() {
   // - Remove any "use" or "key_ops" from private key
   // - Add key_ops: ["verify"] for OAuth server validation
   const keys = (privateKey.keys ?? []).map(
-    ({ d, use, key_ops, ...jwk }: { 
-      d?: string; 
+    ({
+      d,
+      use,
+      key_ops,
+      ...jwk
+    }: {
+      d?: string;
       use?: string;
       key_ops?: string[];
       [key: string]: unknown;
     }) => ({
       ...jwk,
       key_ops: ["verify"], // OAuth servers expect this for signature verification
-    })
+    }),
   );
 
   return NextResponse.json(
@@ -53,6 +58,6 @@ export async function GET() {
         "Content-Type": "application/json",
         "Cache-Control": "public, max-age=3600",
       },
-    }
+    },
   );
 }

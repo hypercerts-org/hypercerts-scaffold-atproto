@@ -17,7 +17,7 @@ export async function updateProfile(params: {
   banner?: File | null;
 }): Promise<UpdateProfileResponse> {
   const formData = new FormData();
-  
+
   if (params.displayName !== undefined) {
     formData.set("displayName", params.displayName || "");
   }
@@ -39,6 +39,6 @@ export async function updateProfile(params: {
 
   return apiClientFormData<UpdateProfileResponse>(
     "/api/profile/update",
-    formData
+    formData,
   );
 }

@@ -18,7 +18,7 @@ import {
 // This prevents the page from going blank while loading and keeps the sidebar visible
 const HypercertsCreateForm = dynamic(
   () => import("@/components/hypercerts-create-form"),
-  { loading: () => <HypercertsCreateFormSkeleton /> }
+  { loading: () => <HypercertsCreateFormSkeleton /> },
 );
 // const HypercertContributionForm = dynamic(
 //   () => import("@/components/contributions-form"),
@@ -26,23 +26,21 @@ const HypercertsCreateForm = dynamic(
 // );
 const HypercertEvidenceForm = dynamic(
   () => import("@/components/evidence-form"),
-  { loading: () => <EvidenceFormSkeleton /> }
+  { loading: () => <EvidenceFormSkeleton /> },
 );
 const HypercertLocationForm = dynamic(
   () => import("@/components/locations-form"),
-  { loading: () => <LocationFormSkeleton /> }
+  { loading: () => <LocationFormSkeleton /> },
 );
-const MeasurementForm = dynamic(
-  () => import("@/components/measurement-form"),
-  { loading: () => <MeasurementFormSkeleton /> }
-);
-const EvaluationForm = dynamic(
-  () => import("@/components/evaluation-form"),
-  { loading: () => <EvaluationFormSkeleton /> }
-);
+const MeasurementForm = dynamic(() => import("@/components/measurement-form"), {
+  loading: () => <MeasurementFormSkeleton />,
+});
+const EvaluationForm = dynamic(() => import("@/components/evaluation-form"), {
+  loading: () => <EvaluationFormSkeleton />,
+});
 const HypercertCompletionStep = dynamic(
   () => import("@/components/hypercert-completion-step"),
-  { loading: () => <CompletionStepSkeleton /> }
+  { loading: () => <CompletionStepSkeleton /> },
 );
 
 export default function Home() {
@@ -65,7 +63,8 @@ export default function Home() {
             Create Hypercert
           </h1>
           <p className="mt-2 text-sm font-[family-name:var(--font-outfit)] text-muted-foreground max-w-xl">
-            Define your impact claim with verifiable details, evidence, and measurements.
+            Define your impact claim with verifiable details, evidence, and
+            measurements.
           </p>
         </div>
 

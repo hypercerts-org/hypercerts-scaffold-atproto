@@ -51,7 +51,11 @@ export default function HypercertMeasurementsSection({
       if (q.isError) error = true;
       if (q.isSuccess && q.data) items.push(q.data.value as Measurement);
     }
-    return { isLoadingDetails: loading, isErrorDetails: error, measurements: items };
+    return {
+      isLoadingDetails: loading,
+      isErrorDetails: error,
+      measurements: items,
+    };
   }, [measurementQueries]);
 
   const isLoading = isLoadingLinks || isLoadingDetails;
@@ -70,7 +74,8 @@ export default function HypercertMeasurementsSection({
           </h3>
           {measurements && measurements.length > 0 && (
             <p className="text-xs font-[family-name:var(--font-outfit)] text-muted-foreground">
-              {measurements.length} {measurements.length === 1 ? "measurement" : "measurements"}
+              {measurements.length}{" "}
+              {measurements.length === 1 ? "measurement" : "measurements"}
             </p>
           )}
         </div>
@@ -83,7 +88,7 @@ export default function HypercertMeasurementsSection({
           <MeasurementSkeleton />
         </div>
       )}
-      
+
       {isError && (
         <div className="glass-panel rounded-xl p-6 border border-red-500/20 bg-red-500/5">
           <p className="text-sm font-[family-name:var(--font-outfit)] text-red-500">
@@ -91,7 +96,7 @@ export default function HypercertMeasurementsSection({
           </p>
         </div>
       )}
-      
+
       {!isLoading && !isError && (
         <>
           {measurements && measurements.length > 0 ? (

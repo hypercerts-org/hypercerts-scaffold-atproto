@@ -23,7 +23,7 @@ interface UseAddAttachmentMutationOptions {
 }
 
 export function useAddAttachmentMutation(
-  options?: UseAddAttachmentMutationOptions
+  options?: UseAddAttachmentMutationOptions,
 ) {
   const queryClient = useQueryClient();
 

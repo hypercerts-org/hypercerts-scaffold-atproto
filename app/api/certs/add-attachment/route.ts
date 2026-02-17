@@ -22,7 +22,7 @@ export async function POST(req: NextRequest) {
     if (!hypercertUri) {
       return NextResponse.json(
         { error: "Missing hypercertUri." },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -39,7 +39,7 @@ export async function POST(req: NextRequest) {
       if (!evidenceUrl) {
         return NextResponse.json(
           { error: "Missing evidenceUrl for link mode." },
-          { status: 400 }
+          { status: 400 },
         );
       }
       content = evidenceUrl;
@@ -49,14 +49,14 @@ export async function POST(req: NextRequest) {
       if (!file || file.size === 0) {
         return NextResponse.json(
           { error: "Missing evidenceFile for file mode." },
-          { status: 400 }
+          { status: 400 },
         );
       }
       content = file;
     } else {
       return NextResponse.json(
         { error: `Invalid evidenceMode: ${evidenceMode}` },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -64,7 +64,7 @@ export async function POST(req: NextRequest) {
     if (!ctx) {
       return NextResponse.json(
         { error: "Could not authenticate repo" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -73,7 +73,9 @@ export async function POST(req: NextRequest) {
     const locationMode = (data.get("locationMode") as string | null)?.trim();
 
     if (locationMode === "string") {
-      const locationString = (data.get("locationString") as string | null)?.trim();
+      const locationString = (
+        data.get("locationString") as string | null
+      )?.trim();
       if (locationString) {
         location = locationString;
       }
@@ -81,25 +83,31 @@ export async function POST(req: NextRequest) {
       const lpVersion = (data.get("lpVersion") as string | null)?.trim();
       const srs = (data.get("srs") as string | null)?.trim();
       const locationType = (data.get("locationType") as string | null)?.trim();
-      const locationContentMode = (data.get("locationContentMode") as string | null)?.trim();
-      
+      const locationContentMode = (
+        data.get("locationContentMode") as string | null
+      )?.trim();
+
       if (lpVersion && srs && locationType) {
         let locationData: string | File | undefined;
-        
+
         if (locationContentMode === "link") {
           locationData = (data.get("locationUrl") as string | null)?.trim();
         } else if (locationContentMode === "file") {
-          locationData = data.get("locationFile") as File | null ?? undefined;
+          locationData = (data.get("locationFile") as File | null) ?? undefined;
         }
-        
+
         if (locationData) {
           location = {
             lpVersion,
             srs,
             locationType,
             location: locationData,
-            ...(data.get("locationName") && { name: (data.get("locationName") as string).trim() }),
-            ...(data.get("locationDescription") && { description: (data.get("locationDescription") as string).trim() }),
+            ...(data.get("locationName") && {
+              name: (data.get("locationName") as string).trim(),
+            }),
+            ...(data.get("locationDescription") && {
+              description: (data.get("locationDescription") as string).trim(),
+            }),
           };
         }
       }
@@ -120,7 +128,7 @@ export async function POST(req: NextRequest) {
     console.error("Error in add-attachment API:", e);
     return NextResponse.json(
       { error: `Failed to add attachment: ${(e as Error).message}` },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

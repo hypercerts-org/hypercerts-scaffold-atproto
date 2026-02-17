@@ -44,9 +44,14 @@ export default function HypercertEvidenceSection({
     for (const query of evidenceQueries) {
       if (query.isLoading) loading = true;
       if (query.isError) error = true;
-      if (query.isSuccess && query.data) items.push(query.data.value as Attachment);
+      if (query.isSuccess && query.data)
+        items.push(query.data.value as Attachment);
     }
-    return { isLoadingDetails: loading, isErrorDetails: error, evidences: items };
+    return {
+      isLoadingDetails: loading,
+      isErrorDetails: error,
+      evidences: items,
+    };
   }, [evidenceQueries]);
 
   const isLoading = isLoadingLinks || isLoadingDetails;
@@ -65,7 +70,8 @@ export default function HypercertEvidenceSection({
           </h3>
           {evidences && evidences.length > 0 && (
             <p className="text-xs font-[family-name:var(--font-outfit)] text-muted-foreground">
-              {evidences.length} {evidences.length === 1 ? "piece" : "pieces"} of evidence
+              {evidences.length} {evidences.length === 1 ? "piece" : "pieces"}{" "}
+              of evidence
             </p>
           )}
         </div>
@@ -78,7 +84,7 @@ export default function HypercertEvidenceSection({
           <EvidenceSkeleton />
         </div>
       )}
-      
+
       {isError && (
         <div className="glass-panel rounded-xl p-6 border border-red-500/20 bg-red-500/5">
           <p className="text-sm font-[family-name:var(--font-outfit)] text-red-500">
@@ -86,7 +92,7 @@ export default function HypercertEvidenceSection({
           </p>
         </div>
       )}
-      
+
       {!isLoading && !isError && (
         <>
           {evidences && evidences.length > 0 ? (

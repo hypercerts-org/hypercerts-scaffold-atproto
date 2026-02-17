@@ -46,7 +46,10 @@ export default function HypercertMeasurementView({
               <dt className="text-xs font-[family-name:var(--font-outfit)] text-muted-foreground uppercase tracking-wider">
                 Measured On
               </dt>
-              <dd className="text-sm font-[family-name:var(--font-outfit)]" suppressHydrationWarning>
+              <dd
+                className="text-sm font-[family-name:var(--font-outfit)]"
+                suppressHydrationWarning
+              >
                 {new Date(measurement.createdAt).toLocaleString()}
               </dd>
             </div>
@@ -79,9 +82,13 @@ export default function HypercertMeasurementView({
               </dt>
               <dd className="space-y-1">
                 {measurement.measurers.map((measurer, index) => {
-                  const did = typeof measurer === "object" ? measurer.did : measurer;
+                  const did =
+                    typeof measurer === "object" ? measurer.did : measurer;
                   return (
-                    <div key={index} className="text-sm font-[family-name:var(--font-outfit)] break-all">
+                    <div
+                      key={index}
+                      className="text-sm font-[family-name:var(--font-outfit)] break-all"
+                    >
                       <URILink
                         uri={`https://bsky.app/profile/${did}`}
                         label={did}
@@ -101,8 +108,14 @@ export default function HypercertMeasurementView({
               </dt>
               <dd className="space-y-1">
                 {measurement.evidenceURI.map((uri, index) => (
-                  <div key={index} className="text-sm font-[family-name:var(--font-outfit)] break-all">
-                    <URILink label={uri} uri={uri?.includes("https") ? uri : getPDSlsURI(uri)} />
+                  <div
+                    key={index}
+                    className="text-sm font-[family-name:var(--font-outfit)] break-all"
+                  >
+                    <URILink
+                      label={uri}
+                      uri={uri?.includes("https") ? uri : getPDSlsURI(uri)}
+                    />
                   </div>
                 ))}
               </dd>

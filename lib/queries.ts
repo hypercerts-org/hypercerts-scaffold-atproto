@@ -10,7 +10,7 @@ import { parseAtUri } from "@/lib/utils";
 export const getRecordWithURI = async <T>(
   uri: string,
   atProtoAgent: Agent,
-  fallbackCollection: string
+  fallbackCollection: string,
 ): Promise<T | null> => {
   if (!atProtoAgent || !uri) return null;
 
@@ -20,7 +20,7 @@ export const getRecordWithURI = async <T>(
     parsed.rkey,
     parsed.did,
     atProtoAgent,
-    parsed.collection || fallbackCollection
+    parsed.collection || fallbackCollection,
   );
 };
 
@@ -28,7 +28,7 @@ export const getRecord = async <T>(
   rkey: string,
   did: string,
   atProtoAgent: Agent,
-  collection: string
+  collection: string,
 ): Promise<T | null> => {
   const response = await atProtoAgent.com.atproto.repo.getRecord({
     repo: did,
@@ -57,7 +57,7 @@ export const uploadFile = async (atProtoAgent: Agent, file?: File) => {
 
 export const createHypercert = async (
   atProtoAgent: Agent,
-  record: HypercertClaim.Record
+  record: HypercertClaim.Record,
 ) => {
   const data = await atProtoAgent.com.atproto.repo.createRecord({
     repo: atProtoAgent.assertDid,
@@ -70,7 +70,7 @@ export const createHypercert = async (
 export const updateHypercert = async (
   rkey: string,
   atProtoAgent: Agent,
-  record: HypercertClaim.Record
+  record: HypercertClaim.Record,
 ) => {
   const data = await atProtoAgent.com.atproto.repo.putRecord({
     rkey,
@@ -83,7 +83,7 @@ export const updateHypercert = async (
 
 export const createContribution = async (
   atProtoAgent: Agent,
-  record: HypercertContribution.Record
+  record: HypercertContribution.Record,
 ) => {
   const response = await atProtoAgent?.com.atproto.repo.createRecord({
     record,
@@ -95,7 +95,7 @@ export const createContribution = async (
 
 export const createEvaluation = async (
   atProtoAgent: Agent,
-  record: HypercertEvaluation.Record
+  record: HypercertEvaluation.Record,
 ) => {
   const response = await atProtoAgent?.com.atproto.repo.createRecord({
     record,
@@ -107,7 +107,7 @@ export const createEvaluation = async (
 
 export const createEvidence = async (
   atProtoAgent: Agent,
-  record: HypercertEvidence.Record
+  record: HypercertEvidence.Record,
 ) => {
   const response = await atProtoAgent.com.atproto.repo.createRecord({
     record,
@@ -119,7 +119,7 @@ export const createEvidence = async (
 
 export const createLocation = async (
   atProtoAgent: Agent,
-  record: HypercertLocation.Record
+  record: HypercertLocation.Record,
 ) => {
   const response = await atProtoAgent.com.atproto.repo.createRecord({
     record,

@@ -1,5 +1,5 @@
 import { getAuthenticatedRepo } from "@/lib/atproto-session";
-import { LocationParams } from "@hypercerts-org/sdk-core"
+import { LocationParams } from "@hypercerts-org/sdk-core";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
@@ -23,14 +23,14 @@ export async function POST(req: NextRequest) {
         {
           error: `Missing${!locationType ? " locationType" : ""}${!lpVersion ? " lpVersion" : ""}${!srs ? " srs" : ""}`,
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     if (!hypercertUri) {
       return NextResponse.json(
         { error: "Missing hypercertUri." },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -41,7 +41,7 @@ export async function POST(req: NextRequest) {
       if (!locationUrl) {
         return NextResponse.json(
           { error: "Missing locationUrl for link mode." },
-          { status: 400 }
+          { status: 400 },
         );
       }
 
@@ -59,7 +59,7 @@ export async function POST(req: NextRequest) {
       if (!file || file.size === 0) {
         return NextResponse.json(
           { error: "Missing locationFile for file mode." },
-          { status: 400 }
+          { status: 400 },
         );
       }
 
@@ -72,7 +72,7 @@ export async function POST(req: NextRequest) {
     } else {
       return NextResponse.json(
         { error: `Invalid contentMode: ${contentMode}` },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -80,13 +80,13 @@ export async function POST(req: NextRequest) {
     if (!personalRepository) {
       return NextResponse.json(
         { error: "Could not authenticate repo" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
     const result = await personalRepository.hypercerts.attachLocation(
       hypercertUri,
-      locationPayload
+      locationPayload,
     );
 
     return NextResponse.json(result);
@@ -94,7 +94,7 @@ export async function POST(req: NextRequest) {
     console.error("Error in add-location API:", e);
     return NextResponse.json(
       { error: "Internal server error", details: (e as Error).message },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

@@ -20,12 +20,14 @@ export async function POST(req: NextRequest) {
     if (!title || !shortDescription || !startDate || !endDate) {
       return NextResponse.json(
         { error: "Missing required fields" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     const rights = rightsRaw ? JSON.parse(rightsRaw) : undefined;
-    const contributions = contributionsRaw ? JSON.parse(contributionsRaw) : undefined;
+    const contributions = contributionsRaw
+      ? JSON.parse(contributionsRaw)
+      : undefined;
 
     const hypercertParams: CreateHypercertParams = {
       title,
@@ -43,7 +45,7 @@ export async function POST(req: NextRequest) {
     if (!ctx) {
       return NextResponse.json(
         { error: "Could not authenticate repo" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -56,7 +58,7 @@ export async function POST(req: NextRequest) {
     }
     return NextResponse.json(
       { error: `Failed to create hypercert: ${(e as Error).message}` },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

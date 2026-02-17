@@ -57,34 +57,34 @@
   --card-foreground: oklch(0.16 0.005 260);
   --popover: oklch(0.995 0.001 260);
   --popover-foreground: oklch(0.16 0.005 260);
-  --primary: oklch(0.20 0.005 260);
+  --primary: oklch(0.2 0.005 260);
   --primary-foreground: oklch(0.98 0.005 260);
   --secondary: oklch(0.96 0.005 260);
-  --secondary-foreground: oklch(0.20 0.005 260);
+  --secondary-foreground: oklch(0.2 0.005 260);
   --muted: oklch(0.96 0.005 260);
-  --muted-foreground: oklch(0.50 0.01 260);
+  --muted-foreground: oklch(0.5 0.01 260);
   --accent: oklch(0.94 0.005 260);
-  --accent-foreground: oklch(0.20 0.005 260);
+  --accent-foreground: oklch(0.2 0.005 260);
   --destructive: oklch(0.577 0.245 27.325);
   --border: oklch(0.91 0.005 260);
   --input: oklch(0.91 0.005 260);
   --ring: oklch(0.35 0.01 260);
   --chart-1: oklch(0.35 0.02 260);
-  --chart-2: oklch(0.50 0.015 250);
+  --chart-2: oklch(0.5 0.015 250);
   --chart-3: oklch(0.398 0.02 240);
   --chart-4: oklch(0.828 0.06 80);
   --chart-5: oklch(0.769 0.06 60);
   --sidebar: oklch(0.975 0.003 260);
   --sidebar-foreground: oklch(0.16 0.005 260);
-  --sidebar-primary: oklch(0.20 0.005 260);
+  --sidebar-primary: oklch(0.2 0.005 260);
   --sidebar-primary-foreground: oklch(0.98 0.005 260);
   --sidebar-accent: oklch(0.94 0.005 260);
-  --sidebar-accent-foreground: oklch(0.20 0.005 260);
+  --sidebar-accent-foreground: oklch(0.2 0.005 260);
   --sidebar-border: oklch(0.91 0.005 260);
   --sidebar-ring: oklch(0.35 0.01 260);
 
   /* Create flow accent — Hypercert dark charcoal #1c1e21 */
-  --create-accent: oklch(0.20 0.005 260);
+  --create-accent: oklch(0.2 0.005 260);
   --create-accent-foreground: oklch(0.98 0.005 260);
   --create-surface: oklch(0.96 0.005 260);
   --create-muted: oklch(0.92 0.005 260);
@@ -153,8 +153,12 @@
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes slideInLeft {
@@ -169,11 +173,12 @@
 }
 
 @keyframes pulseGlow {
-  0%, 100% {
-    box-shadow: 0 0 0 0 oklch(0.20 0.005 260 / 0.3);
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 oklch(0.2 0.005 260 / 0.3);
   }
   50% {
-    box-shadow: 0 0 0 6px oklch(0.20 0.005 260 / 0);
+    box-shadow: 0 0 0 6px oklch(0.2 0.005 260 / 0);
   }
 }
 
@@ -198,9 +203,15 @@
 }
 
 @keyframes gradientShift {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
 }
 
 .animate-fade-in-up {
@@ -233,16 +244,36 @@
 .stagger-children > * {
   animation: fadeInUp 0.4s ease-out both;
 }
-.stagger-children > *:nth-child(1) { animation-delay: 0ms; }
-.stagger-children > *:nth-child(2) { animation-delay: 60ms; }
-.stagger-children > *:nth-child(3) { animation-delay: 120ms; }
-.stagger-children > *:nth-child(4) { animation-delay: 180ms; }
-.stagger-children > *:nth-child(5) { animation-delay: 240ms; }
-.stagger-children > *:nth-child(6) { animation-delay: 300ms; }
-.stagger-children > *:nth-child(7) { animation-delay: 360ms; }
-.stagger-children > *:nth-child(8) { animation-delay: 420ms; }
-.stagger-children > *:nth-child(9) { animation-delay: 480ms; }
-.stagger-children > *:nth-child(10) { animation-delay: 540ms; }
+.stagger-children > *:nth-child(1) {
+  animation-delay: 0ms;
+}
+.stagger-children > *:nth-child(2) {
+  animation-delay: 60ms;
+}
+.stagger-children > *:nth-child(3) {
+  animation-delay: 120ms;
+}
+.stagger-children > *:nth-child(4) {
+  animation-delay: 180ms;
+}
+.stagger-children > *:nth-child(5) {
+  animation-delay: 240ms;
+}
+.stagger-children > *:nth-child(6) {
+  animation-delay: 300ms;
+}
+.stagger-children > *:nth-child(7) {
+  animation-delay: 360ms;
+}
+.stagger-children > *:nth-child(8) {
+  animation-delay: 420ms;
+}
+.stagger-children > *:nth-child(9) {
+  animation-delay: 480ms;
+}
+.stagger-children > *:nth-child(10) {
+  animation-delay: 540ms;
+}
 
 /* ─── Glass Panel ─── */
 
@@ -279,22 +310,50 @@
 
 .gradient-mesh {
   background:
-    radial-gradient(ellipse at 20% 50%, oklch(0.40 0.01 260 / 0.08), transparent 50%),
-    radial-gradient(ellipse at 80% 20%, oklch(0.50 0.01 250 / 0.06), transparent 50%),
-    radial-gradient(ellipse at 50% 80%, oklch(0.55 0.008 240 / 0.05), transparent 50%);
+    radial-gradient(
+      ellipse at 20% 50%,
+      oklch(0.4 0.01 260 / 0.08),
+      transparent 50%
+    ),
+    radial-gradient(
+      ellipse at 80% 20%,
+      oklch(0.5 0.01 250 / 0.06),
+      transparent 50%
+    ),
+    radial-gradient(
+      ellipse at 50% 80%,
+      oklch(0.55 0.008 240 / 0.05),
+      transparent 50%
+    );
 }
 
 .dark .gradient-mesh {
   background:
-    radial-gradient(ellipse at 20% 50%, oklch(0.30 0.01 260 / 0.12), transparent 50%),
-    radial-gradient(ellipse at 80% 20%, oklch(0.35 0.008 250 / 0.10), transparent 50%),
-    radial-gradient(ellipse at 50% 80%, oklch(0.40 0.006 240 / 0.08), transparent 50%);
+    radial-gradient(
+      ellipse at 20% 50%,
+      oklch(0.3 0.01 260 / 0.12),
+      transparent 50%
+    ),
+    radial-gradient(
+      ellipse at 80% 20%,
+      oklch(0.35 0.008 250 / 0.1),
+      transparent 50%
+    ),
+    radial-gradient(
+      ellipse at 50% 80%,
+      oklch(0.4 0.006 240 / 0.08),
+      transparent 50%
+    );
 }
 
 /* ─── Stepper connector line ─── */
 
 .stepper-line {
-  background: linear-gradient(to bottom, var(--create-accent), oklch(0.40 0.01 260 / 0.3));
+  background: linear-gradient(
+    to bottom,
+    var(--create-accent),
+    oklch(0.4 0.01 260 / 0.3)
+  );
 }
 
 .stepper-line-inactive {

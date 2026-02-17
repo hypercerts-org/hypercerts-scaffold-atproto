@@ -25,7 +25,7 @@ export default function HypercertLocationForm({
 }) {
   const [lpVersion, setLpVersion] = useState("1.0.0");
   const [srs, setSrs] = useState(
-    "http://www.opengis.net/def/crs/OGC/1.3/CRS84"
+    "http://www.opengis.net/def/crs/OGC/1.3/CRS84",
   );
   const [locationTypePreset, setLocationTypePreset] = useState<
     "coordinate-decimal" | "geojson-point" | "other"
@@ -60,7 +60,9 @@ export default function HypercertLocationForm({
     setSrs("http://www.opengis.net/def/crs/OGC/1.3/CRS84");
     setLocationTypePreset("geojson-point");
     setName("Reforestation Site Alpha");
-    setDescription("Primary project location in the northern highlands region, covering approximately 25 hectares of reforestation area.");
+    setDescription(
+      "Primary project location in the northern highlands region, covering approximately 25 hectares of reforestation area.",
+    );
     setContentMode("link");
     setLocationUrl("https://example.com/location-data.geojson");
     setLocationFile(null);
@@ -103,7 +105,8 @@ export default function HypercertLocationForm({
       description: description.trim() || undefined,
       contentMode,
       locationUrl: contentMode === "link" ? locationUrl.trim() : undefined,
-      locationFile: contentMode === "file" ? locationFile ?? undefined : undefined,
+      locationFile:
+        contentMode === "file" ? (locationFile ?? undefined) : undefined,
       hypercertUri: hypercertInfo.hypercertUri,
     });
   };
@@ -142,7 +145,10 @@ export default function HypercertLocationForm({
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="lpVersion" className="text-sm font-[family-name:var(--font-outfit)] font-medium">
+              <Label
+                htmlFor="lpVersion"
+                className="text-sm font-[family-name:var(--font-outfit)] font-medium"
+              >
                 Location Protocol Version *
               </Label>
               <Input
@@ -155,7 +161,10 @@ export default function HypercertLocationForm({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="srs" className="text-sm font-[family-name:var(--font-outfit)] font-medium">
+              <Label
+                htmlFor="srs"
+                className="text-sm font-[family-name:var(--font-outfit)] font-medium"
+              >
                 Spatial Reference System (SRS) URI *
               </Label>
               <Input
@@ -233,7 +242,10 @@ export default function HypercertLocationForm({
         {/* Name & Description */}
         <div className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="name" className="text-sm font-[family-name:var(--font-outfit)] font-medium">
+            <Label
+              htmlFor="name"
+              className="text-sm font-[family-name:var(--font-outfit)] font-medium"
+            >
               Location Name (Optional)
             </Label>
             <Input
@@ -246,7 +258,10 @@ export default function HypercertLocationForm({
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="description" className="text-sm font-[family-name:var(--font-outfit)] font-medium">
+            <Label
+              htmlFor="description"
+              className="text-sm font-[family-name:var(--font-outfit)] font-medium"
+            >
               Location Description (Optional)
             </Label>
             <Textarea

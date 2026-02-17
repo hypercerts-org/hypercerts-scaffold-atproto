@@ -33,7 +33,7 @@ export default function HypercertContributionForm({
 
   const addContributor = (user: ProfileView) => {
     const isAdded = contributors.find(
-      (contributor) => contributor.did === user.did
+      (contributor) => contributor.did === user.did,
     );
     if (!isAdded) {
       setContributors((prev) => [...prev, user]);
@@ -42,7 +42,7 @@ export default function HypercertContributionForm({
 
   const removeContributor = (user: ProfileView) => {
     setContributors((prev) =>
-      prev.filter((contributor) => contributor.did !== user.did)
+      prev.filter((contributor) => contributor.did !== user.did),
     );
   };
 
@@ -69,7 +69,7 @@ export default function HypercertContributionForm({
     ];
 
     if (!mappedContributors.length) return;
-    
+
     // Validate hypercertUri exists
     if (!hypercertInfo?.hypercertUri) {
       throw new Error("Hypercert URI is required to create a contribution");
@@ -122,7 +122,7 @@ export default function HypercertContributionForm({
       "did:plc:ragtjsm2j2vknwkz3zp4oxrd",
     ]);
     setDescription(
-      "Led the technical development and implementation of the community platform, including backend infrastructure, API design, and database architecture. Coordinated with stakeholders to ensure project milestones were met on time."
+      "Led the technical development and implementation of the community platform, including backend infrastructure, API design, and database architecture. Coordinated with stakeholders to ensure project milestones were met on time.",
     );
     const startDate = new Date();
     startDate.setMonth(startDate.getMonth() - 6);
@@ -155,7 +155,10 @@ export default function HypercertContributionForm({
 
         {/* Role */}
         <div className="space-y-2">
-          <Label htmlFor="role" className="text-sm font-[family-name:var(--font-outfit)] font-medium">
+          <Label
+            htmlFor="role"
+            className="text-sm font-[family-name:var(--font-outfit)] font-medium"
+          >
             Role / Title *
           </Label>
           <Input
@@ -248,7 +251,10 @@ export default function HypercertContributionForm({
 
         {/* Description */}
         <div className="space-y-2">
-          <Label htmlFor="description" className="text-sm font-[family-name:var(--font-outfit)] font-medium">
+          <Label
+            htmlFor="description"
+            className="text-sm font-[family-name:var(--font-outfit)] font-medium"
+          >
             Description (Optional)
           </Label>
           <Textarea

@@ -21,7 +21,7 @@ export default function HypercertDetailsView({
   imageUri?: string;
 }) {
   const workScope = Array.isArray(record.workScope) ? record.workScope : [];
-  
+
   return (
     <div className="space-y-6">
       {/* Hero Section */}
@@ -106,7 +106,10 @@ export default function HypercertDetailsView({
                   Hypercert URI
                 </dt>
                 <dd className="text-sm font-[family-name:var(--font-outfit)] break-all">
-                  <URILink uri={getPDSlsURI(hypercertUri)} label={hypercertUri} />
+                  <URILink
+                    uri={getPDSlsURI(hypercertUri)}
+                    label={hypercertUri}
+                  />
                 </dd>
               </div>
             </div>

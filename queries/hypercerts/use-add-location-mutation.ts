@@ -22,7 +22,7 @@ interface UseAddLocationMutationOptions {
 }
 
 export function useAddLocationMutation(
-  options?: UseAddLocationMutationOptions
+  options?: UseAddLocationMutationOptions,
 ) {
   return useMutation({
     mutationFn: (params: AddLocationParams) => addLocation(params),

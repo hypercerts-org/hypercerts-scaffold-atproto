@@ -22,7 +22,7 @@ export async function getProfile(actor: string): Promise<BlueskyProfile> {
  */
 export async function searchActors(
   query: string,
-  limit = 10
+  limit = 10,
 ): Promise<BlueskyProfile[]> {
   if (!query.trim()) {
     return [];
@@ -33,8 +33,7 @@ export async function searchActors(
   url.searchParams.set("limit", String(limit));
 
   const response = await externalApiClient<BlueskySearchActorsResponse>(
-    url.toString()
+    url.toString(),
   );
   return response.actors || [];
 }
-

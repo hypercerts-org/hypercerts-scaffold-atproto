@@ -42,7 +42,11 @@ export default function HypercertEvaluationsSection({
       if (q.isError) error = true;
       if (q.isSuccess && q.data) items.push(q.data.value as Evaluation);
     }
-    return { isLoadingDetails: loading, isErrorDetails: error, evaluations: items };
+    return {
+      isLoadingDetails: loading,
+      isErrorDetails: error,
+      evaluations: items,
+    };
   }, [evaluationQueries]);
 
   const isLoading = isLoadingLinks || isLoadingDetails;
@@ -61,7 +65,8 @@ export default function HypercertEvaluationsSection({
           </h3>
           {evaluations && evaluations.length > 0 && (
             <p className="text-xs font-[family-name:var(--font-outfit)] text-muted-foreground">
-              {evaluations.length} {evaluations.length === 1 ? "evaluation" : "evaluations"}
+              {evaluations.length}{" "}
+              {evaluations.length === 1 ? "evaluation" : "evaluations"}
             </p>
           )}
         </div>
@@ -73,7 +78,7 @@ export default function HypercertEvaluationsSection({
           <EvaluationSkeleton />
         </div>
       )}
-      
+
       {isError && (
         <div className="glass-panel rounded-xl p-6 border border-red-500/20 bg-red-500/5">
           <p className="text-sm font-[family-name:var(--font-outfit)] text-red-500">
@@ -81,16 +86,13 @@ export default function HypercertEvaluationsSection({
           </p>
         </div>
       )}
-      
+
       {!isLoading && !isError && (
         <>
           {evaluations && evaluations.length > 0 ? (
             <div className="space-y-4 stagger-children">
               {evaluations.map((evaluation, index) => (
-                <HypercertEvaluationView
-                  key={index}
-                  evaluation={evaluation}
-                />
+                <HypercertEvaluationView key={index} evaluation={evaluation} />
               ))}
             </div>
           ) : (

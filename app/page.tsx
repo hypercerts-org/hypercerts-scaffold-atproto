@@ -29,8 +29,10 @@ export default async function Home() {
     getAuthenticatedRepo(),
     getSession(),
   ]);
-  
-  const profile = personalRepo ? await personalRepo.profile.getCertifiedProfile().catch(() => null) : null;
+
+  const profile = personalRepo
+    ? await personalRepo.profile.getCertifiedProfile().catch(() => null)
+    : null;
   const isSignedIn = !!session;
 
   return (
@@ -46,27 +48,37 @@ export default async function Home() {
                 Verifiable Impact Claims
               </span>
             </div>
-            
+
             <h1 className="text-4xl lg:text-6xl font-[family-name:var(--font-syne)] font-bold tracking-tight text-foreground max-w-4xl mx-auto leading-tight">
               Create Impact Claims
               <br />
               <span className="text-create-accent">That Matter</span>
             </h1>
-            
+
             <p className="text-lg lg:text-xl font-[family-name:var(--font-outfit)] text-muted-foreground max-w-2xl mx-auto">
-              Build verifiable hypercerts on AT Protocol. Track contributions, measurements, and evaluations with transparency and trust.
+              Build verifiable hypercerts on AT Protocol. Track contributions,
+              measurements, and evaluations with transparency and trust.
             </p>
 
             <div className="flex flex-wrap items-center justify-center gap-4 pt-4">
               {isSignedIn ? (
                 <>
-                  <Button asChild size="lg" className="bg-create-accent hover:bg-create-accent/90 text-create-accent-foreground font-[family-name:var(--font-outfit)] font-semibold shadow-md">
+                  <Button
+                    asChild
+                    size="lg"
+                    className="bg-create-accent hover:bg-create-accent/90 text-create-accent-foreground font-[family-name:var(--font-outfit)] font-semibold shadow-md"
+                  >
                     <Link href="/hypercerts/create" className="gap-2">
                       <Sparkles className="h-5 w-5" />
                       Create Hypercert
                     </Link>
                   </Button>
-                  <Button asChild variant="outline" size="lg" className="font-[family-name:var(--font-outfit)] font-medium">
+                  <Button
+                    asChild
+                    variant="outline"
+                    size="lg"
+                    className="font-[family-name:var(--font-outfit)] font-medium"
+                  >
                     <Link href="/hypercerts" className="gap-2">
                       View My Hypercerts
                       <ArrowRight className="h-4 w-4" />
@@ -78,7 +90,11 @@ export default async function Home() {
                   <p className="text-sm font-[family-name:var(--font-outfit)] text-muted-foreground text-center mb-4">
                     Sign in to get started creating hypercerts
                   </p>
-                  <Button asChild size="lg" className="w-full bg-create-accent hover:bg-create-accent/90 text-create-accent-foreground font-[family-name:var(--font-outfit)] font-semibold">
+                  <Button
+                    asChild
+                    size="lg"
+                    className="w-full bg-create-accent hover:bg-create-accent/90 text-create-accent-foreground font-[family-name:var(--font-outfit)] font-semibold"
+                  >
                     <Link href="#" className="gap-2">
                       Sign In to Continue
                       <ArrowRight className="h-4 w-4" />
@@ -93,7 +109,10 @@ export default async function Home() {
 
       {/* Features Grid */}
       <section className="relative z-10 max-w-6xl mx-auto px-6 py-16 lg:py-24">
-        <div className="text-center mb-12 animate-fade-in-up" style={{ animationDelay: "100ms" }}>
+        <div
+          className="text-center mb-12 animate-fade-in-up"
+          style={{ animationDelay: "100ms" }}
+        >
           <h2 className="text-2xl lg:text-3xl font-[family-name:var(--font-syne)] font-bold tracking-tight mb-3">
             Why Hypercerts?
           </h2>
@@ -112,7 +131,8 @@ export default async function Home() {
               Decentralized Identity
             </h3>
             <p className="text-sm font-[family-name:var(--font-outfit)] text-muted-foreground">
-              Built on AT Protocol. Your claims live on your Personal Data Server, fully under your control.
+              Built on AT Protocol. Your claims live on your Personal Data
+              Server, fully under your control.
             </p>
           </div>
 
@@ -125,7 +145,8 @@ export default async function Home() {
               Rich Metadata
             </h3>
             <p className="text-sm font-[family-name:var(--font-outfit)] text-muted-foreground">
-              Add contributions, evidence, measurements, evaluations, and locations to your claims.
+              Add contributions, evidence, measurements, evaluations, and
+              locations to your claims.
             </p>
           </div>
 
@@ -138,7 +159,8 @@ export default async function Home() {
               Production Ready
             </h3>
             <p className="text-sm font-[family-name:var(--font-outfit)] text-muted-foreground">
-              TypeScript SDK, validated lexicons, and real-time sync with your AT Protocol repo.
+              TypeScript SDK, validated lexicons, and real-time sync with your
+              AT Protocol repo.
             </p>
           </div>
         </div>
@@ -166,34 +188,47 @@ export default async function Home() {
 
             <dl className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm font-[family-name:var(--font-outfit)]">
               <div className="space-y-1">
-                <dt className="text-xs uppercase tracking-wider text-muted-foreground">DID</dt>
-                <dd className="font-mono text-xs break-all text-foreground">{session.did}</dd>
+                <dt className="text-xs uppercase tracking-wider text-muted-foreground">
+                  DID
+                </dt>
+                <dd className="font-mono text-xs break-all text-foreground">
+                  {session.did}
+                </dd>
               </div>
               {profile?.displayName && (
                 <div className="space-y-1">
-                  <dt className="text-xs uppercase tracking-wider text-muted-foreground">Display Name</dt>
+                  <dt className="text-xs uppercase tracking-wider text-muted-foreground">
+                    Display Name
+                  </dt>
                   <dd className="font-medium">{profile.displayName}</dd>
                 </div>
               )}
               {profile?.handle && (
                 <div className="space-y-1">
-                  <dt className="text-xs uppercase tracking-wider text-muted-foreground">Handle</dt>
+                  <dt className="text-xs uppercase tracking-wider text-muted-foreground">
+                    Handle
+                  </dt>
                   <dd className="font-medium">@{profile.handle}</dd>
                 </div>
               )}
             </dl>
 
             <div className="flex flex-wrap gap-3 pt-2">
-              <Button asChild className="bg-create-accent hover:bg-create-accent/90 text-create-accent-foreground font-[family-name:var(--font-outfit)] font-medium">
+              <Button
+                asChild
+                className="bg-create-accent hover:bg-create-accent/90 text-create-accent-foreground font-[family-name:var(--font-outfit)] font-medium"
+              >
                 <Link href="/hypercerts/create" className="gap-2">
                   <Sparkles className="h-4 w-4" />
                   Create Hypercert
                 </Link>
               </Button>
-              <Button asChild variant="outline" className="font-[family-name:var(--font-outfit)] font-medium">
-                <Link href="/hypercerts">
-                  View My Hypercerts
-                </Link>
+              <Button
+                asChild
+                variant="outline"
+                className="font-[family-name:var(--font-outfit)] font-medium"
+              >
+                <Link href="/hypercerts">View My Hypercerts</Link>
               </Button>
             </div>
           </div>
@@ -209,25 +244,37 @@ export default async function Home() {
                 Ready to create your first hypercert?
               </h2>
               <p className="text-base font-[family-name:var(--font-outfit)] text-muted-foreground mb-8 max-w-xl mx-auto">
-                Join the movement for verifiable impact claims built on decentralized infrastructure
+                Join the movement for verifiable impact claims built on
+                decentralized infrastructure
               </p>
               <div className="flex flex-wrap items-center justify-center gap-4">
                 {isSignedIn ? (
                   <>
-                    <Button asChild size="lg" className="bg-create-accent hover:bg-create-accent/90 text-create-accent-foreground font-[family-name:var(--font-outfit)] font-semibold shadow-md">
+                    <Button
+                      asChild
+                      size="lg"
+                      className="bg-create-accent hover:bg-create-accent/90 text-create-accent-foreground font-[family-name:var(--font-outfit)] font-semibold shadow-md"
+                    >
                       <Link href="/hypercerts/create" className="gap-2">
                         <Sparkles className="h-5 w-5" />
                         Create Hypercert
                       </Link>
                     </Button>
-                    <Button asChild variant="outline" size="lg" className="font-[family-name:var(--font-outfit)] font-medium">
-                      <Link href="/hypercerts">
-                        View Hypercerts
-                      </Link>
+                    <Button
+                      asChild
+                      variant="outline"
+                      size="lg"
+                      className="font-[family-name:var(--font-outfit)] font-medium"
+                    >
+                      <Link href="/hypercerts">View Hypercerts</Link>
                     </Button>
                   </>
                 ) : (
-                  <Button asChild size="lg" className="bg-create-accent hover:bg-create-accent/90 text-create-accent-foreground font-[family-name:var(--font-outfit)] font-semibold shadow-md">
+                  <Button
+                    asChild
+                    size="lg"
+                    className="bg-create-accent hover:bg-create-accent/90 text-create-accent-foreground font-[family-name:var(--font-outfit)] font-semibold shadow-md"
+                  >
                     <Link href="#" className="gap-2">
                       Sign In to Get Started
                       <ArrowRight className="h-5 w-5" />

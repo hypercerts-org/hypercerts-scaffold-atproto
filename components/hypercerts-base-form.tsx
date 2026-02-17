@@ -89,8 +89,11 @@ export default function HypercertsBaseForm({
   const [contributors, setContributors] = useState<ProfileView[]>([]);
   const [manualContributors, setManualContributors] = useState<string[]>([""]);
   const [contributionDescription, setContributionDescription] = useState("");
-  const [contributionStartDate, setContributionStartDate] = useState<Date | null>(null);
-  const [contributionEndDate, setContributionEndDate] = useState<Date | null>(null);
+  const [contributionStartDate, setContributionStartDate] =
+    useState<Date | null>(null);
+  const [contributionEndDate, setContributionEndDate] = useState<Date | null>(
+    null,
+  );
 
   // Image preview
   const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -114,7 +117,7 @@ export default function HypercertsBaseForm({
   // Contributor helper functions
   const addContributor = (user: ProfileView) => {
     const isAdded = contributors.find(
-      (contributor) => contributor.did === user.did
+      (contributor) => contributor.did === user.did,
     );
     if (!isAdded) {
       setContributors((prev) => [...prev, user]);
@@ -123,7 +126,7 @@ export default function HypercertsBaseForm({
 
   const removeContributor = (user: ProfileView) => {
     setContributors((prev) =>
-      prev.filter((contributor) => contributor.did !== user.did)
+      prev.filter((contributor) => contributor.did !== user.did),
     );
   };
 
@@ -277,7 +280,10 @@ export default function HypercertsBaseForm({
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <Label htmlFor="title" className="text-sm font-[family-name:var(--font-outfit)] font-medium">
+          <Label
+            htmlFor="title"
+            className="text-sm font-[family-name:var(--font-outfit)] font-medium"
+          >
             Hypercert Name *
           </Label>
           <Input
@@ -291,7 +297,10 @@ export default function HypercertsBaseForm({
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <Label htmlFor="description" className="text-sm font-[family-name:var(--font-outfit)] font-medium">
+          <Label
+            htmlFor="description"
+            className="text-sm font-[family-name:var(--font-outfit)] font-medium"
+          >
             Short Description *
           </Label>
           <Textarea
@@ -486,7 +495,10 @@ export default function HypercertsBaseForm({
         {showContributions && (
           <div className="rounded-xl border border-border/60 bg-muted/20 p-5 space-y-5 animate-fade-in-up">
             <div className="space-y-2">
-              <Label htmlFor="contribution-role" className="text-sm font-[family-name:var(--font-outfit)] font-medium">
+              <Label
+                htmlFor="contribution-role"
+                className="text-sm font-[family-name:var(--font-outfit)] font-medium"
+              >
                 Role / Title
               </Label>
               <Input
@@ -500,7 +512,9 @@ export default function HypercertsBaseForm({
             </div>
 
             <div className="space-y-2">
-              <Label className="text-sm font-[family-name:var(--font-outfit)] font-medium">Contributors</Label>
+              <Label className="text-sm font-[family-name:var(--font-outfit)] font-medium">
+                Contributors
+              </Label>
               <Tabs defaultValue="search" className="w-full">
                 <TabsList className="grid w-full grid-cols-2">
                   <TabsTrigger value="search">Search Users</TabsTrigger>
@@ -567,7 +581,10 @@ export default function HypercertsBaseForm({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="contribution-description" className="text-sm font-[family-name:var(--font-outfit)] font-medium">
+              <Label
+                htmlFor="contribution-description"
+                className="text-sm font-[family-name:var(--font-outfit)] font-medium"
+              >
                 Contribution Description (Optional)
               </Label>
               <Textarea
@@ -623,7 +640,9 @@ export default function HypercertsBaseForm({
               className="font-[family-name:var(--font-outfit)]"
             >
               {isSaving && <Spinner className="mr-2" />}
-              {isSaving && buttonClicked === "create" ? "Creating..." : "Create"}
+              {isSaving && buttonClicked === "create"
+                ? "Creating..."
+                : "Create"}
             </Button>
 
             <Button
@@ -634,7 +653,9 @@ export default function HypercertsBaseForm({
               className="bg-create-accent hover:bg-create-accent/90 text-create-accent-foreground font-[family-name:var(--font-outfit)] font-medium min-w-[120px]"
             >
               {isSaving && <Spinner className="mr-2" />}
-              {isSaving && buttonClicked === "saveNext" ? "Creating..." : "Next"}
+              {isSaving && buttonClicked === "saveNext"
+                ? "Creating..."
+                : "Next"}
             </Button>
           </div>
         </div>

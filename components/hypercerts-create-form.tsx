@@ -25,7 +25,7 @@ export default function HypercertsCreateForm({
 
   const handleCreate = async (
     certInfo: CreateHypercertParams,
-    advance?: boolean
+    advance?: boolean,
   ) => {
     createMutation.mutate(certInfo, {
       onSuccess: () => {

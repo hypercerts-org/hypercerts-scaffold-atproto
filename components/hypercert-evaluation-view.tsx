@@ -79,9 +79,13 @@ export default function HypercertEvaluationView({
               </dt>
               <dd className="space-y-1">
                 {evaluation.evaluators.map((evaluator, index) => {
-                  const did = typeof evaluator === "object" ? evaluator.did : evaluator;
+                  const did =
+                    typeof evaluator === "object" ? evaluator.did : evaluator;
                   return (
-                    <div key={index} className="text-sm font-[family-name:var(--font-outfit)] break-all">
+                    <div
+                      key={index}
+                      className="text-sm font-[family-name:var(--font-outfit)] break-all"
+                    >
                       <URILink
                         uri={`https://bsky.app/profile/${did}`}
                         label={did}
@@ -103,7 +107,10 @@ export default function HypercertEvaluationView({
                 </dt>
                 <dd className="space-y-1">
                   {evaluation.content.map((uri, index) => (
-                    <div key={index} className="text-sm font-[family-name:var(--font-outfit)] break-all">
+                    <div
+                      key={index}
+                      className="text-sm font-[family-name:var(--font-outfit)] break-all"
+                    >
                       <URILink
                         label={uri}
                         uri={uri.includes("https") ? uri : getPDSlsURI(uri)}
@@ -125,7 +132,10 @@ export default function HypercertEvaluationView({
                 </dt>
                 <dd className="space-y-1">
                   {evaluation.measurements.map((uri, index) => (
-                    <div key={index} className="text-sm font-[family-name:var(--font-outfit)] break-all">
+                    <div
+                      key={index}
+                      className="text-sm font-[family-name:var(--font-outfit)] break-all"
+                    >
                       <URILink
                         label={uri}
                         uri={uri.includes("https") ? uri : getPDSlsURI(uri)}

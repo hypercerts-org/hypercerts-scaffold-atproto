@@ -13,11 +13,11 @@ const CONSTELLATION_BASE_URL = "https://constellation.microcosm.blue";
 export async function getBacklinks(
   subject: string,
   source: string,
-  limit = 50
+  limit = 50,
 ): Promise<BacklinksResponse["records"]> {
   const url = new URL(
     "/xrpc/blue.microcosm.links.getBacklinks",
-    CONSTELLATION_BASE_URL
+    CONSTELLATION_BASE_URL,
   );
   url.searchParams.set("subject", subject);
   url.searchParams.set("source", source);
@@ -31,11 +31,11 @@ export async function getBacklinks(
  * Fetch evidence links for a hypercert
  */
 export async function getEvidenceLinks(
-  hypercertUri: string
+  hypercertUri: string,
 ): Promise<BacklinksResponse["records"]> {
   return getBacklinks(
     hypercertUri,
-    "org.hypercerts.claim.attachment:subjects[com.atproto.repo.strongRef].uri"
+    "org.hypercerts.claim.attachment:subjects[com.atproto.repo.strongRef].uri",
   );
 }
 
@@ -43,11 +43,11 @@ export async function getEvidenceLinks(
  * Fetch evaluation links for a hypercert
  */
 export async function getEvaluationLinks(
-  hypercertUri: string
+  hypercertUri: string,
 ): Promise<BacklinksResponse["records"]> {
   return getBacklinks(
     hypercertUri,
-    "org.hypercerts.claim.evaluation:subject.uri"
+    "org.hypercerts.claim.evaluation:subject.uri",
   );
 }
 
@@ -55,10 +55,10 @@ export async function getEvaluationLinks(
  * Fetch measurement links for a hypercert
  */
 export async function getMeasurementLinks(
-  hypercertUri: string
+  hypercertUri: string,
 ): Promise<BacklinksResponse["records"]> {
   return getBacklinks(
     hypercertUri,
-    "org.hypercerts.claim.measurement:subject.uri"
+    "org.hypercerts.claim.measurement:subject.uri",
   );
 }

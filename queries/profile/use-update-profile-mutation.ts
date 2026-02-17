@@ -19,7 +19,7 @@ interface UseUpdateProfileMutationOptions {
 }
 
 export function useUpdateProfileMutation(
-  options?: UseUpdateProfileMutationOptions
+  options?: UseUpdateProfileMutationOptions,
 ) {
   const queryClient = useQueryClient();
 

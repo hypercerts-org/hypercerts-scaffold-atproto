@@ -1,11 +1,11 @@
 /**
  * Application Configuration
- * 
+ *
  * Centralized configuration with auto-detection for different environments:
  * - Local development: Uses 127.0.0.1 (RFC 8252 compliant)
  * - Vercel production/preview: Auto-detects from VERCEL_URL
  * - Custom deployments: Uses NEXT_PUBLIC_BASE_URL
- * 
+ *
  * @see https://datatracker.ietf.org/doc/html/rfc8252 (OAuth for Native Apps)
  */
 
@@ -71,7 +71,7 @@ function validateBaseUrl(url: string): void {
   if (!isValidUrl(url)) {
     throw new Error(
       `Invalid NEXT_PUBLIC_BASE_URL: "${url}" is not a valid URL.\n` +
-      `Expected format: http://127.0.0.1:3000 (local) or https://yourdomain.com (production)`
+        `Expected format: http://127.0.0.1:3000 (local) or https://yourdomain.com (production)`,
     );
   }
 
@@ -81,8 +81,8 @@ function validateBaseUrl(url: string): void {
     if (parsed.protocol !== "http:") {
       throw new Error(
         `Invalid NEXT_PUBLIC_BASE_URL: Loopback addresses must use HTTP, not HTTPS.\n` +
-        `Current: ${url}\n` +
-        `Expected: http://127.0.0.1:${parsed.port || 3000}`
+          `Current: ${url}\n` +
+          `Expected: http://127.0.0.1:${parsed.port || 3000}`,
       );
     }
 
@@ -91,8 +91,8 @@ function validateBaseUrl(url: string): void {
     if (parsed.hostname === "localhost") {
       throw new Error(
         `Invalid NEXT_PUBLIC_BASE_URL: Loopback must use IP address, not hostname.\n` +
-        `Current: ${url}\n` +
-        `Expected: http://127.0.0.1:${parsed.port || 3000}\n`
+          `Current: ${url}\n` +
+          `Expected: http://127.0.0.1:${parsed.port || 3000}\n`,
       );
     }
 
@@ -100,8 +100,8 @@ function validateBaseUrl(url: string): void {
     if (!parsed.port) {
       throw new Error(
         `Invalid NEXT_PUBLIC_BASE_URL: Loopback addresses must include a port.\n` +
-        `Current: ${url}\n` +
-        `Expected: http://127.0.0.1:3000`
+          `Current: ${url}\n` +
+          `Expected: http://127.0.0.1:3000`,
       );
     }
   } else {
@@ -110,8 +110,8 @@ function validateBaseUrl(url: string): void {
     if (parsed.protocol !== "https:") {
       throw new Error(
         `Invalid NEXT_PUBLIC_BASE_URL: Production URLs must use HTTPS.\n` +
-        `Current: ${url}\n` +
-        `Expected: https://${parsed.hostname}`
+          `Current: ${url}\n` +
+          `Expected: https://${parsed.hostname}`,
       );
     }
   }
@@ -136,7 +136,7 @@ function getRedirectBaseUrl(baseUrl: string): string {
 function buildClientId(
   baseUrl: string,
   scope: string,
-  redirectUri: string
+  redirectUri: string,
 ): string {
   if (isLoopback(baseUrl)) {
     // ATProto loopback client_id uses "http://localhost" (not IP)
@@ -177,28 +177,28 @@ export const config = {
   // Core URLs
   baseUrl,
   redirectBaseUrl,
-  
+
   // Environment flags
   isLoopback: isLoopbackMode,
   isDevelopment,
   isProduction,
-  
+
   // OAuth configuration
   clientId,
   redirectUri,
   jwksUri,
   scope: OAUTH_SCOPE,
-  
+
   // Network endpoints
   pdsUrl: process.env.NEXT_PUBLIC_PDS_URL!,
-  
+
   // Redis configuration
   redis: {
     host: process.env.REDIS_HOST!,
     port: process.env.REDIS_PORT!,
     password: process.env.REDIS_PASSWORD!,
   },
-  
+
   // Private keys (server-only, not exposed to client)
   jwkPrivate: process.env.ATPROTO_JWK_PRIVATE!,
 } as const;
@@ -216,7 +216,7 @@ for (const envVar of requiredEnvVars) {
   if (!process.env[envVar]) {
     throw new Error(
       `Missing required environment variable: ${envVar}\n` +
-      `Please check your .env.local file.`
+        `Please check your .env.local file.`,
     );
   }
 }

@@ -40,11 +40,13 @@ This allows us to **dogfood** the latest SDK changes before they're officially r
 A packed package is a `.tgz` file created by `npm pack` or `pnpm pack`. It's essentially a tarball of the package that would normally be published to npm.
 
 ### Normal npm install:
+
 ```json
 "@hypercerts-org/sdk-core": "^0.10.0"  // from npm registry
 ```
 
 ### Packed version (what we use):
+
 ```json
 "@hypercerts-org/sdk-core": "file:vendor/hypercerts-org-sdk-core-0.10.0-beta.8.tgz"  // from local file
 ```
@@ -177,21 +179,25 @@ git push
 ### Troubleshooting
 
 **Build errors after SDK update:**
+
 - Check that the SDK version is compatible with the scaffold's TypeScript version
 - Check for breaking changes in SDK type definitions
 - Update type imports if SDK has reorganized exports
 
 **Runtime errors:**
+
 - Check SDK release notes or commit messages for breaking API changes
 - Check if authentication flow has changed
 - Check if data structures have changed
 
 **Type errors:**
+
 - SDK may have changed type definitions
 - Update your code to match new types
 - Check if SDK has deprecated/removed types you were using
 
 **Import errors:**
+
 - SDK may have reorganized exports
 - Check SDK source for new import paths
 - Update import statements accordingly
@@ -254,7 +260,8 @@ REDIS_PASSWORD=your_password
 NEXT_PUBLIC_PDS_URL=https://pds-eu-west4.test.certified.app
 ```
 
-**Important:** 
+**Important:**
+
 - `NEXT_PUBLIC_BASE_URL` **must** use `127.0.0.1` (not `localhost`) for OAuth to work
 - Never commit `.env.local` to git - it contains secrets!
 
@@ -286,21 +293,25 @@ pnpm run lint
 ### Common Development Tasks
 
 **Check types:**
+
 ```bash
 npx tsc --noEmit
 ```
 
 **Run linter:**
+
 ```bash
 pnpm run lint
 ```
 
 **Build for production:**
+
 ```bash
 pnpm run build
 ```
 
 **Start production server:**
+
 ```bash
 pnpm run start
 ```
@@ -314,6 +325,7 @@ pnpm run start
 **Symptom:** Error connecting to Redis, session storage fails
 
 **Solutions:**
+
 - Check Redis is running: `docker ps` (should see hypercerts-redis)
 - Start Redis if stopped: `docker start hypercerts-redis`
 - Check `REDIS_HOST`, `REDIS_PORT`, `REDIS_PASSWORD` in `.env.local`
@@ -324,6 +336,7 @@ pnpm run start
 **Symptom:** "Invalid redirect_uri" or OAuth callback fails
 
 **Solutions:**
+
 - **Must use `127.0.0.1`, not `localhost`** - OAuth requires IP addresses for loopback
 - Check `NEXT_PUBLIC_BASE_URL` in `.env.local` matches how you're accessing the app
 - Restart dev server after changing `.env.local`
@@ -333,6 +346,7 @@ pnpm run start
 **Symptom:** Redirect loop after login
 
 **Solutions:**
+
 - Clear browser cookies
 - Restart dev server
 - Try in incognito/private browsing mode
@@ -343,6 +357,7 @@ pnpm run start
 **Symptom:** TypeScript errors, import errors, type mismatches
 
 **Solutions:**
+
 - Check for breaking changes in SDK
 - Update type definitions in scaffold code
 - Check for deprecated APIs
@@ -354,6 +369,7 @@ pnpm run start
 **Symptom:** Works locally but not with ngrok
 
 **Solutions:**
+
 - Update `NEXT_PUBLIC_BASE_URL` to your ngrok URL (e.g., `https://abc123.ngrok.io`)
 - Restart dev server after changing URL
 - Note: ngrok URLs change on each restart unless you have a paid plan
@@ -467,13 +483,13 @@ hypercerts-scaffold/
 
 ### Key Files
 
-| File | Purpose |
-|------|---------|
-| `lib/hypercerts-sdk.ts` | Initializes the Hypercerts SDK with OAuth config |
-| `lib/repo-context.ts` | Helper to get authenticated repository context |
-| `lib/create-actions.ts` | Server actions for common operations |
-| `providers/OAuthProvider.tsx` | Client-side OAuth state management |
-| `app/api/auth/*` | OAuth flow endpoints (login, callback, logout) |
+| File                          | Purpose                                          |
+| ----------------------------- | ------------------------------------------------ |
+| `lib/hypercerts-sdk.ts`       | Initializes the Hypercerts SDK with OAuth config |
+| `lib/repo-context.ts`         | Helper to get authenticated repository context   |
+| `lib/create-actions.ts`       | Server actions for common operations             |
+| `providers/OAuthProvider.tsx` | Client-side OAuth state management               |
+| `app/api/auth/*`              | OAuth flow endpoints (login, callback, logout)   |
 
 ---
 

@@ -7,7 +7,7 @@ import { BlobRef } from "@atproto/lexicon";
 
 export async function resolveBlobToUrl(
   blob: BlobRef | string | { $type: string } | undefined,
-  ownerDid: string
+  ownerDid: string,
 ): Promise<string | undefined> {
   if (!blob) return undefined;
   if (typeof blob === "string") return blob;
@@ -29,7 +29,7 @@ export async function resolveBlobToUrl(
  */
 export async function resolveRecordBlobs(
   value: any,
-  ownerDid: string
+  ownerDid: string,
 ): Promise<any> {
   if (!value || typeof value !== "object") return value;
 
@@ -46,7 +46,7 @@ export async function resolveRecordBlobs(
   // Recursively process properties in parallel
   const entries = Object.entries(value);
   const resolved = await Promise.all(
-    entries.map(([, val]) => resolveRecordBlobs(val, ownerDid))
+    entries.map(([, val]) => resolveRecordBlobs(val, ownerDid)),
   );
   const result: any = {};
   entries.forEach(([key], i) => {

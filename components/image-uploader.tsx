@@ -46,7 +46,7 @@ export default function ImageUploader({
             containerStyles,
             isBanner
               ? "bg-gradient-to-br from-create-accent/20 via-create-accent/10 to-muted"
-              : "bg-gradient-to-br from-create-accent/15 to-muted rounded-full"
+              : "bg-gradient-to-br from-create-accent/15 to-muted rounded-full",
           )}
         >
           {/* Single hidden input — always rendered so inputRef is always valid */}
@@ -67,7 +67,7 @@ export default function ImageUploader({
                 fill
                 className={cn(
                   "object-cover",
-                  isBanner ? "rounded-none" : "rounded-full"
+                  isBanner ? "rounded-none" : "rounded-full",
                 )}
               />
 
@@ -88,7 +88,7 @@ export default function ImageUploader({
               onClick={() => inputRef.current?.click()}
               className={cn(
                 "flex flex-col items-center justify-center w-full h-full cursor-pointer border-2 border-dashed border-create-accent/20 hover:border-create-accent/40 hover:bg-create-accent/5 transition-all duration-200",
-                isBanner ? "rounded-none" : "rounded-full"
+                isBanner ? "rounded-none" : "rounded-full",
               )}
             >
               <Camera className="w-5 h-5 text-create-accent/50 mb-1" />
@@ -97,7 +97,6 @@ export default function ImageUploader({
               </span>
             </label>
           )}
-
         </div>
 
         {/* Avatar camera button — outside overflow-hidden so it is not clipped by the circle */}

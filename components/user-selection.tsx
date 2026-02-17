@@ -25,7 +25,8 @@ export default function UserSelection({ onUserSelect }: UserSelectionProps) {
   const [search, setSearch] = useState("");
   const debouncedSearch = useDebounce(search, 300);
 
-  const { data: userSuggestions = EMPTY_PROFILES, isLoading } = useUserSearchQuery(debouncedSearch);
+  const { data: userSuggestions = EMPTY_PROFILES, isLoading } =
+    useUserSearchQuery(debouncedSearch);
 
   const handleSelect = (profile: ProfileView) => {
     onUserSelect(profile);
@@ -47,7 +48,10 @@ export default function UserSelection({ onUserSelect }: UserSelectionProps) {
         {!isLoading && !!userSuggestions.length && (
           <CommandGroup heading="Suggestions">
             {userSuggestions.map((user) => (
-              <CommandItem onSelect={() => handleSelect(user as ProfileView)} key={user.did}>
+              <CommandItem
+                onSelect={() => handleSelect(user as ProfileView)}
+                key={user.did}
+              >
                 <UserAvatar user={user as ProfileView} />
               </CommandItem>
             ))}

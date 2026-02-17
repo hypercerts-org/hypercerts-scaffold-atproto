@@ -67,8 +67,8 @@ export default function LoginDialog() {
       </div>
 
       <div className="animate-fade-in-up [animation-delay:200ms] space-y-3">
-        <Button 
-          type="submit" 
+        <Button
+          type="submit"
           disabled={loginMutation.isPending}
           className="w-full bg-create-accent hover:bg-create-accent/90 text-white font-[family-name:var(--font-outfit)] font-medium transition-all"
         >

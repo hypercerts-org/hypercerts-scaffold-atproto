@@ -11,7 +11,7 @@ export async function POST(request: Request) {
     console.error("Failed to initiate login process", e);
     return Response.json(
       { error: "Failed to initiate login process" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
