@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
 import { Textarea } from "@/components/ui/textarea";
-import * as Hypercert from "@/lexicons/types/org/hypercerts/claim/activity";
+import type { Record as HypercertRecord } from "@/lexicons/types/org/hypercerts/claim/activity";
 import type { CreateHypercertParams } from "@hypercerts-org/sdk-core";
 import { Label } from "@radix-ui/react-label";
 import {
@@ -35,7 +35,7 @@ export interface HypercertsBaseFormProps {
   saveDisabled: boolean;
   onSave?: (record: CreateHypercertParams, advance?: boolean) => void;
   updateActions?: boolean;
-  certInfo?: Hypercert.Record;
+  certInfo?: HypercertRecord;
   hypercertUri?: string;
   nextStepper: () => void;
 }
@@ -166,10 +166,11 @@ export default function HypercertsBaseForm({
     // Build contributions array if contributors exist
     let contributions: CreateHypercertParams["contributions"] = undefined;
     if (hasContributors && contributionRole.trim()) {
-      const mappedContributors = [
-        ...contributors.map(({ did }) => did),
-        ...manualContributors.filter((uri) => uri.trim() !== ""),
-      ];
+      const mappedContributors: string[] = [];
+      for (const c of contributors) mappedContributors.push(c.did);
+      for (const uri of manualContributors) {
+        if (uri.trim() !== "") mappedContributors.push(uri);
+      }
 
       contributions = [
         {
@@ -407,7 +408,7 @@ export default function HypercertsBaseForm({
                 required={index === 0}
                 className="w-40 font-[family-name:var(--font-outfit)] text-sm h-9"
               />
-              {workScope.length > 1 && index !== 0 && (
+              {workScope.length > 1 && index !== 0 ? (
                 <Button
                   type="button"
                   variant="ghost"
@@ -418,8 +419,8 @@ export default function HypercertsBaseForm({
                 >
                   <XIcon className="h-3.5 w-3.5" />
                 </Button>
-              )}
-              {!!workScope[index] && index === workScope.length - 1 && (
+              ) : null}
+              {!!workScope[index] && index === workScope.length - 1 ? (
                 <Button
                   type="button"
                   variant="outline"
@@ -430,7 +431,7 @@ export default function HypercertsBaseForm({
                 >
                   <PlusIcon className="h-3.5 w-3.5" />
                 </Button>
-              )}
+              ) : null}
             </div>
           ))}
         </div>
@@ -492,7 +493,7 @@ export default function HypercertsBaseForm({
           </div>
         </button>
 
-        {showContributions && (
+        {showContributions ? (
           <div className="rounded-xl border border-border/60 bg-muted/20 p-5 space-y-5 animate-fade-in-up">
             <div className="space-y-2">
               <Label
@@ -618,17 +619,17 @@ export default function HypercertsBaseForm({
               </div>
             </div>
 
-            {hasContributors && !contributionRole.trim() && (
+            {hasContributors && !contributionRole.trim() ? (
               <p className="text-sm text-amber-600 font-[family-name:var(--font-outfit)]">
                 Please enter a role for the contributors
               </p>
-            )}
+            ) : null}
           </div>
-        )}
+        ) : null}
       </div>
 
       {/* ── Actions ── */}
-      {!!updateActions && (
+      {!!updateActions ? (
         <div className="flex items-center justify-between gap-4 pt-6 mt-2 border-t border-border/50">
           <div />
           <div className="flex gap-3">
@@ -659,9 +660,9 @@ export default function HypercertsBaseForm({
             </Button>
           </div>
         </div>
-      )}
+      ) : null}
 
-      {!updateActions && (
+      {!updateActions ? (
         <Button
           disabled={saveDisabled || isSaving}
           type="submit"
@@ -670,7 +671,7 @@ export default function HypercertsBaseForm({
           {isSaving && <Spinner />}
           {isSaving ? "Creating Hypercert" : "Create Hypercert"}
         </Button>
-      )}
+      ) : null}
     </form>
   );
 }

@@ -213,40 +213,37 @@ export default function MeasurementForm({
   };
 
   const buildLocationParams = (): MeasurementLocationParam[] => {
-    return locationEntries
-      .map((entry) => {
-        if (entry.mode === "string") {
-          return entry.stringValue.trim();
-        } else {
-          const effectiveLocationType =
-            entry.locationType === "other"
-              ? entry.locationTypeCustom.trim() || "coordinate-decimal"
-              : entry.locationType;
+    const result: MeasurementLocationParam[] = [];
+    for (const entry of locationEntries) {
+      if (entry.mode === "string") {
+        const str = entry.stringValue.trim();
+        if (str !== "") result.push(str);
+      } else {
+        const effectiveLocationType =
+          entry.locationType === "other"
+            ? entry.locationTypeCustom.trim() || "coordinate-decimal"
+            : entry.locationType;
 
-          const locationData =
-            entry.contentMode === "link"
-              ? entry.locationUrl.trim()
-              : entry.locationFile;
+        const locationData =
+          entry.contentMode === "link"
+            ? entry.locationUrl.trim()
+            : entry.locationFile;
 
-          if (!locationData) return null;
+        if (!locationData) continue;
 
-          return {
-            lpVersion: entry.lpVersion,
-            srs: entry.srs,
-            locationType: effectiveLocationType,
-            location: locationData,
-            ...(entry.name.trim() && { name: entry.name.trim() }),
-            ...(entry.description.trim() && {
-              description: entry.description.trim(),
-            }),
-          };
-        }
-      })
-      .filter((loc): loc is MeasurementLocationParam => {
-        if (loc === null) return false;
-        if (typeof loc === "string") return loc !== "";
-        return true;
-      });
+        result.push({
+          lpVersion: entry.lpVersion,
+          srs: entry.srs,
+          locationType: effectiveLocationType,
+          location: locationData,
+          ...(entry.name.trim() && { name: entry.name.trim() }),
+          ...(entry.description.trim() && {
+            description: entry.description.trim(),
+          }),
+        });
+      }
+    }
+    return result;
   };
 
   const addLocationEntry = () => {
@@ -270,10 +267,11 @@ export default function MeasurementForm({
       return;
     }
 
-    const allMeasurerDids = [
-      ...measurers.map((m) => m.did),
-      ...manualDids.filter((did) => did.trim() !== ""),
-    ];
+    const allMeasurerDids: string[] = [];
+    for (const m of measurers) allMeasurerDids.push(m.did);
+    for (const did of manualDids) {
+      if (did.trim() !== "") allMeasurerDids.push(did);
+    }
 
     const locationParams = useLocations ? buildLocationParams() : [];
 
