@@ -54,7 +54,7 @@ function sanitizeUrlForCss(url: string): string {
  */
 export function generateBrandingCss(baseUrl: string): string {
   // Construct logo URL from base URL
-  const logoUrl = `${baseUrl}/favicon.ico`;
+  const logoUrl = `${baseUrl}/certified-logo.svg`;
 
   // Sanitize the logo URL to prevent CSS injection
   const sanitizedLogoUrl = sanitizeUrlForCss(logoUrl);
@@ -82,7 +82,7 @@ export function generateBrandingCss(baseUrl: string): string {
 /* Replace Hypercerts logo with Scaffold logo - Desktop: right aligned */
 img[alt="Hypercerts Logo"],
 img[alt*="Logo"] {
-  width: 180px !important;
+  width: 54px !important;
   height: 54px !important;
   object-fit: contain !important;
   object-position: -9999px -9999px !important;
@@ -96,7 +96,7 @@ img[alt*="Logo"] {
 @media (max-width: 767px) {
   img[alt="Hypercerts Logo"],
   img[alt*="Logo"] {
-    width: 120px !important;
+    width: 40px !important;
     height: 40px !important;
     background-position: left center !important;
     margin-top: 8px !important;
@@ -107,7 +107,7 @@ img[alt*="Logo"] {
 /* ===== AUTHORIZE PAGE SMALL LOGO ===== */
 /* The small logo on the Authorize page has alt="Ma Earth" and is in a constrained container */
 img[alt="Ma Earth"] {
-  width: 100px !important;
+  width: 32px !important;
   height: 32px !important;
   object-fit: contain !important;
   object-position: left center !important;
@@ -116,7 +116,7 @@ img[alt="Ma Earth"] {
 /* Widen the logo container on Authorize page */
 .flex.items-center.justify-start.gap-2 > div.w-8:has(img[alt="Ma Earth"]),
 div.w-8:has(img[alt="Ma Earth"]) {
-  width: 100px !important;
+  width: 32px !important;
   flex-shrink: 0 !important;
 }
 
@@ -180,7 +180,7 @@ main.flex.flex-col.items-center > h1.text-primary {
 main.flex.flex-col.items-center > h1.text-primary::before {
   content: "" !important;
   display: block !important;
-  width: 180px !important;
+  width: 54px !important;
   height: 54px !important;
   margin: 0 auto 24px auto !important;
   background-image: url('${sanitizedLogoUrl}') !important;
@@ -192,7 +192,7 @@ main.flex.flex-col.items-center > h1.text-primary::before {
 /* Mobile: smaller logo */
 @media (max-width: 767px) {
   main.flex.flex-col.items-center > h1.text-primary::before {
-    width: 140px !important;
+    width: 42px !important;
     height: 42px !important;
     margin-bottom: 16px !important;
   }
