@@ -49,6 +49,15 @@ export default function ImageUploader({
               : "bg-gradient-to-br from-create-accent/15 to-muted rounded-full"
           )}
         >
+          {/* Single hidden input — always rendered so inputRef is always valid */}
+          <input
+            ref={inputRef}
+            type="file"
+            accept="image/png, image/jpeg, image/jpg"
+            className="hidden"
+            onChange={handleFileChange}
+          />
+
           {/* If image exists, show it */}
           {imageUrl ? (
             <>
@@ -74,8 +83,9 @@ export default function ImageUploader({
               )}
             </>
           ) : (
-            // If no image, show upload UI
+            // If no image, show upload UI (label click triggers the shared input above)
             <label
+              onClick={() => inputRef.current?.click()}
               className={cn(
                 "flex flex-col items-center justify-center w-full h-full cursor-pointer border-2 border-dashed border-create-accent/20 hover:border-create-accent/40 hover:bg-create-accent/5 transition-all duration-200",
                 isBanner ? "rounded-none" : "rounded-full"
@@ -85,25 +95,9 @@ export default function ImageUploader({
               <span className="text-[10px] font-[family-name:var(--font-outfit)] font-medium text-muted-foreground">
                 Upload
               </span>
-
-              <input
-                ref={inputRef}
-                type="file"
-                accept="image/png, image/jpeg, image/jpg"
-                className="hidden"
-                onChange={handleFileChange}
-              />
             </label>
           )}
 
-          {/* Hidden input for replacing image */}
-          <input
-            ref={inputRef}
-            type="file"
-            accept="image/png, image/jpeg, image/jpg"
-            className="hidden"
-            onChange={handleFileChange}
-          />
         </div>
 
         {/* Avatar camera button — outside overflow-hidden so it is not clipped by the circle */}
