@@ -33,11 +33,11 @@ export default function ImageUploader({
 
   return (
     <div className={cn("space-y-2", className)}>
-      {label && (
+      {label ? (
         <p className="text-xs uppercase tracking-wider font-[family-name:var(--font-outfit)] font-medium text-muted-foreground">
           {label}
         </p>
-      )}
+      ) : null}
 
       <div className={cn(!isBanner && "relative inline-block")}>
         <div
@@ -72,7 +72,7 @@ export default function ImageUploader({
               />
 
               {/* Camera icon overlay — banner only (avatar button is outside overflow-hidden) */}
-              {isBanner && (
+              {isBanner ? (
                 <button
                   type="button"
                   onClick={() => inputRef.current?.click()}
@@ -80,7 +80,7 @@ export default function ImageUploader({
                 >
                   <Camera className="w-4 h-4 text-white" />
                 </button>
-              )}
+              ) : null}
             </>
           ) : (
             // If no image, show upload UI (label click triggers the shared input above)
@@ -100,7 +100,7 @@ export default function ImageUploader({
         </div>
 
         {/* Avatar camera button — outside overflow-hidden so it is not clipped by the circle */}
-        {!isBanner && imageUrl && (
+        {!isBanner && imageUrl ? (
           <button
             type="button"
             onClick={() => inputRef.current?.click()}
@@ -108,7 +108,7 @@ export default function ImageUploader({
           >
             <Camera className="w-4 h-4 text-white" />
           </button>
-        )}
+        ) : null}
       </div>
     </div>
   );

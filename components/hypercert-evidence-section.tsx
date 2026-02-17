@@ -67,30 +67,30 @@ export default function HypercertEvidenceSection({
           <h3 className="text-xl font-[family-name:var(--font-syne)] font-semibold">
             Evidence
           </h3>
-          {evidences && evidences.length > 0 && (
+          {evidences && evidences.length > 0 ? (
             <p className="text-xs font-[family-name:var(--font-outfit)] text-muted-foreground">
               {evidences.length} {evidences.length === 1 ? "piece" : "pieces"}{" "}
               of evidence
             </p>
-          )}
+          ) : null}
         </div>
       </div>
 
       {/* Content */}
-      {isLoading && (
+      {isLoading ? (
         <div className="space-y-4">
           <EvidenceSkeleton />
           <EvidenceSkeleton />
         </div>
-      )}
+      ) : null}
 
-      {isError && (
+      {isError ? (
         <div className="glass-panel rounded-xl p-6 border border-red-500/20 bg-red-500/5">
           <p className="text-sm font-[family-name:var(--font-outfit)] text-red-500">
             Failed to load evidence.
           </p>
         </div>
-      )}
+      ) : null}
 
       {!isLoading && !isError && (
         <>

@@ -62,29 +62,29 @@ export default function HypercertEvaluationsSection({
           <h3 className="text-xl font-[family-name:var(--font-syne)] font-semibold">
             Evaluations
           </h3>
-          {evaluations && evaluations.length > 0 && (
+          {evaluations && evaluations.length > 0 ? (
             <p className="text-xs font-[family-name:var(--font-outfit)] text-muted-foreground">
               {evaluations.length}{" "}
               {evaluations.length === 1 ? "evaluation" : "evaluations"}
             </p>
-          )}
+          ) : null}
         </div>
       </div>
 
       {/* Content */}
-      {isLoading && (
+      {isLoading ? (
         <div className="space-y-4">
           <EvaluationSkeleton />
         </div>
-      )}
+      ) : null}
 
-      {isError && (
+      {isError ? (
         <div className="glass-panel rounded-xl p-6 border border-red-500/20 bg-red-500/5">
           <p className="text-sm font-[family-name:var(--font-outfit)] text-red-500">
             Failed to load evaluations.
           </p>
         </div>
-      )}
+      ) : null}
 
       {!isLoading && !isError && (
         <>

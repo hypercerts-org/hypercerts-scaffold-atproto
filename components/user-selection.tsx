@@ -41,11 +41,11 @@ export default function UserSelection({ onUserSelect }: UserSelectionProps) {
         placeholder="Search for users..."
       />
       <CommandList>
-        {isLoading && <CommandEmpty>Loading...</CommandEmpty>}
-        {!isLoading && userSuggestions.length === 0 && !!search && (
+        {isLoading ? <CommandEmpty>Loading...</CommandEmpty> : null}
+        {!isLoading && userSuggestions.length === 0 && !!search ? (
           <CommandEmpty>No results found.</CommandEmpty>
-        )}
-        {!isLoading && !!userSuggestions.length && (
+        ) : null}
+        {!isLoading && !!userSuggestions.length ? (
           <CommandGroup heading="Suggestions">
             {userSuggestions.map((user) => (
               <CommandItem
@@ -56,7 +56,7 @@ export default function UserSelection({ onUserSelect }: UserSelectionProps) {
               </CommandItem>
             ))}
           </CommandGroup>
-        )}
+        ) : null}
         <CommandSeparator />
       </CommandList>
     </Command>

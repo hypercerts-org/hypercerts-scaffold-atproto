@@ -136,14 +136,14 @@ export default function Navbar({
                     <span className="text-sm font-[family-name:var(--font-outfit)] font-semibold">
                       My Account
                     </span>
-                    {userHandle && (
+                    {userHandle ? (
                       <span className="text-xs font-[family-name:var(--font-outfit)] text-muted-foreground">
                         @{userHandle}
                       </span>
-                    )}
+                    ) : null}
                   </DropdownMenuLabel>
 
-                  {activeProfileName && (
+                  {activeProfileName ? (
                     <>
                       <DropdownMenuSeparator />
                       <DropdownMenuLabel className="flex flex-col gap-1">
@@ -153,14 +153,14 @@ export default function Navbar({
                         <span className="text-sm font-[family-name:var(--font-outfit)] font-semibold">
                           {activeProfileName}
                         </span>
-                        {activeProfileHandle && (
+                        {activeProfileHandle ? (
                           <span className="text-xs font-[family-name:var(--font-outfit)] text-muted-foreground">
                             @{activeProfileHandle}
                           </span>
-                        )}
+                        ) : null}
                       </DropdownMenuLabel>
                     </>
-                  )}
+                  ) : null}
 
                   <DropdownMenuSeparator />
 
