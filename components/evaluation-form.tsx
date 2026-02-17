@@ -170,10 +170,11 @@ export default function EvaluationForm({
       return;
     }
 
-    const allEvaluatorDids = [
-      ...evaluators.map((e) => e.did),
-      ...manualDids.filter((did) => did.trim() !== ""),
-    ];
+    const allEvaluatorDids: string[] = [];
+    for (const e of evaluators) allEvaluatorDids.push(e.did);
+    for (const did of manualDids) {
+      if (did.trim() !== "") allEvaluatorDids.push(did);
+    }
 
     const evaluationPayload = {
       hypercertUri: hypercertInfo.hypercertUri,

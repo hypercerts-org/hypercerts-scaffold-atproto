@@ -63,10 +63,11 @@ export default function HypercertContributionForm({
   };
 
   const handleContributionCreation = async () => {
-    const mappedContributors = [
-      ...contributors.map(({ did }) => did),
-      ...manualContributors.filter((uri) => uri.trim() !== ""),
-    ];
+    const mappedContributors: string[] = [];
+    for (const c of contributors) mappedContributors.push(c.did);
+    for (const uri of manualContributors) {
+      if (uri.trim() !== "") mappedContributors.push(uri);
+    }
 
     if (!mappedContributors.length) return;
 
