@@ -15,7 +15,8 @@ export function useLoginMutation() {
     },
     onError: (error) => {
       console.error("Login error:", error);
-      toast.error("An error occurred while logging in.");
+      const message = error instanceof Error ? error.message : "Unknown error";
+      toast.error(`An error occurred while logging in: ${message}`);
     },
   });
 }

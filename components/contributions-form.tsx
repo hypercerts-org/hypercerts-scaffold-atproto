@@ -105,7 +105,8 @@ export default function HypercertContributionForm({
       onNext?.();
     } catch (error) {
       console.error("Error saving contribution:", error);
-      toast.error("Failed to create contribution");
+      const message = error instanceof Error ? error.message : "Unknown error";
+      toast.error(`Failed to create contribution: ${message}`);
     } finally {
       setSaving(false);
     }

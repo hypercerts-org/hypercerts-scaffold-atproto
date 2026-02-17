@@ -116,7 +116,8 @@ export default function MeasurementForm({
     },
     onError: (err) => {
       console.error(err);
-      toast.error("Failed to add measurement.");
+      const message = err instanceof Error ? err.message : "Unknown error";
+      toast.error(`Failed to add measurement: ${message}`);
     },
   });
 

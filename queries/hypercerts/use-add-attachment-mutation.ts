@@ -39,7 +39,8 @@ export function useAddAttachmentMutation(
     },
     onError: (error) => {
       console.error("Add attachment error:", error);
-      toast.error("Failed to add attachment");
+      const message = error instanceof Error ? error.message : "Unknown error";
+      toast.error(`Failed to add attachment: ${message}`);
     },
   });
 }
