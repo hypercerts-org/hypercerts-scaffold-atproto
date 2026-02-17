@@ -37,7 +37,7 @@ export async function GET(req: NextRequest) {
     console.error("Authentication failed:", e);
     const redirectUrl = new URL("/", config.baseUrl);
     redirectUrl.searchParams.set("auth_error", "callback_failed");
-    redirectUrl.searchParams.set("auth_error_description", e instanceof Error ? e.message : "An unexpected error occurred");
+    redirectUrl.searchParams.set("auth_error_description", "Authentication failed. Please try again.");
     return NextResponse.redirect(redirectUrl);
   }
 }
