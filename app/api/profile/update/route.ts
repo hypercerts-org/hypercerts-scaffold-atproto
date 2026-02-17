@@ -5,12 +5,12 @@ import { convertBlobUrlToCdn } from "@/lib/utils";
 
 export async function POST(req: Request) {
   try {
-    const repo = await getAuthenticatedRepo();
+    const repoPromise = getAuthenticatedRepo();
+    const formData = await req.formData();
+    const repo = await repoPromise;
     if (!repo) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
-
-    const formData = await req.formData();
 
     const displayName = formData.get("displayName")?.toString() || "";
     const description = formData.get("description")?.toString() || "";
