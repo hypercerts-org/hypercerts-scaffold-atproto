@@ -3,6 +3,7 @@ import Navbar from "@/components/navbar";
 import { getSession, getAuthenticatedRepo } from "@/lib/atproto-session";
 import { getBlobURL, convertBlobUrlToCdn } from "@/lib/utils";
 import { cookies } from "next/headers";
+import { AuthErrorToast } from "./AuthErrorToast";
 
 export async function SignedInProvider({
   children,
@@ -33,6 +34,7 @@ export async function SignedInProvider({
 
   return (
     <>
+      <AuthErrorToast />
       <Navbar
         isSignedIn={!!session}
         avatarUrl={avatarUrl}
