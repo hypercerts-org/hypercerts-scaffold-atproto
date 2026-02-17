@@ -9,6 +9,7 @@ services:
       - caddy_data:/data
       - caddy_config:/config
     environment:
+      - CADDY_DNS_PROVIDER=${CADDY_DNS_PROVIDER}
       - CADDY_DNS_API_KEY=${CADDY_DNS_API_KEY}
     depends_on:
       - pds

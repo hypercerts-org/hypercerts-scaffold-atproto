@@ -22,8 +22,9 @@ export async function POST(request: Request) {
   try {
     const pdsUrl = config.pdsUrl;
     const baseAuthUrl = await sdk.authorize(pdsUrl);
-    const authUrl = `${baseAuthUrl}&login_hint=${encodeURIComponent(email)}`;
-    return NextResponse.json({ authUrl });
+    const url = new URL(baseAuthUrl);
+    url.searchParams.set('login_hint', email);
+    return NextResponse.json({ authUrl: url.toString() });
   } catch (e) {
     console.error("Failed to initiate login process", e);
     return NextResponse.json(
