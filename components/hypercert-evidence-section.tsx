@@ -92,7 +92,7 @@ export default function HypercertEvidenceSection({
         </div>
       ) : null}
 
-      {!isLoading && !isError && (
+      {!isLoading && !isError ? (
         <>
           {evidences && evidences.length > 0 ? (
             <div className="space-y-4 stagger-children">
@@ -109,7 +109,7 @@ export default function HypercertEvidenceSection({
             </div>
           )}
         </>
-      )}
+      ) : null}
     </div>
   );
 }

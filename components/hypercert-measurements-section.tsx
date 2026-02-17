@@ -96,7 +96,7 @@ export default function HypercertMeasurementsSection({
         </div>
       ) : null}
 
-      {!isLoading && !isError && (
+      {!isLoading && !isError ? (
         <>
           {measurements && measurements.length > 0 ? (
             <div className="space-y-4 stagger-children">
@@ -116,7 +116,7 @@ export default function HypercertMeasurementsSection({
             </div>
           )}
         </>
-      )}
+      ) : null}
     </div>
   );
 }
