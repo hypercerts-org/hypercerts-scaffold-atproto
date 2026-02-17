@@ -19,12 +19,14 @@
   },
   "dependencies": {
     "better-sqlite3": "^9.4.3",
+    "nodemailer": "^6.9.0",
     "pino": "^8.19.0",
     "pino-pretty": "^11.0.0"
   },
   "devDependencies": {
     "@types/better-sqlite3": "^7.6.8",
     "@types/node": "^20.0.0",
+    "@types/nodemailer": "^6.4.22",
     "typescript": "^5.4.0",
     "vitest": "^1.4.0"
   }
