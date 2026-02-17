@@ -1,0 +1,80 @@
+services:
+  caddy:
+    image: caddy:2-alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    environment:
+      - CADDY_DNS_API_KEY=${CADDY_DNS_API_KEY}
+    depends_on:
+      - pds
+      - auth
+    restart: unless-stopped
+
+  pds:
+    build:
+      context: .
+      dockerfile: Dockerfile.pds
+    expose:
+      - "3000"
+    volumes:
+      - pds_data:/data
+    environment:
+      - PDS_HOSTNAME=${PDS_HOSTNAME}
+      - PDS_DATA_DIRECTORY=/data
+      - PDS_BLOBSTORE_DISK_LOCATION=/data/blobs
+      - PDS_DID_PLC_URL=${PDS_DID_PLC_URL}
+      - PDS_ADMIN_PASSWORD=${PDS_ADMIN_PASSWORD}
+      - PDS_JWT_SECRET=${PDS_JWT_SECRET}
+      - PDS_PLC_ROTATION_KEY_K256_PRIVATE_KEY_HEX=${PDS_PLC_ROTATION_KEY_K256_PRIVATE_KEY_HEX}
+      - AUTH_SERVICE_URL=${AUTH_SERVICE_URL}
+      - CALLBACK_SECRET=${CALLBACK_SECRET}
+      - SIDECAR_DB_PATH=/data/sidecar.sqlite
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/xrpc/_health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+    restart: unless-stopped
+
+  auth:
+    build:
+      context: .
+      dockerfile: Dockerfile.auth
+    expose:
+      - "3001"
+    volumes:
+      - auth_data:/data
+    environment:
+      - AUTH_PORT=3001
+      - AUTH_DB_PATH=/data/auth.sqlite
+      - SESSION_SECRET=${SESSION_SECRET}
+      - CALLBACK_SECRET=${CALLBACK_SECRET}
+      - PDS_URL=http://pds:3000
+      - SMTP_HOST=${SMTP_HOST}
+      - SMTP_PORT=${SMTP_PORT}
+      - SMTP_SECURE=${SMTP_SECURE}
+      - SMTP_USER=${SMTP_USER}
+      - SMTP_PASS=${SMTP_PASS}
+      - SMTP_FROM=${SMTP_FROM}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+    depends_on:
+      pds:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  caddy_data:
+  caddy_config:
+  pds_data:
+  auth_data:

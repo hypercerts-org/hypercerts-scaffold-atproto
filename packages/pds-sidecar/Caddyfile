@@ -1,0 +1,15 @@
+pds.certs.network {
+    reverse_proxy pds:3000
+}
+
+auth.pds.certs.network {
+    reverse_proxy auth:3001
+}
+
+*.pds.certs.network {
+    tls {
+        dns {$CADDY_DNS_PROVIDER} {$CADDY_DNS_API_KEY}
+        on_demand
+    }
+    reverse_proxy pds:3000
+}
