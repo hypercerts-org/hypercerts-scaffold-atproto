@@ -91,8 +91,7 @@ export function generateBrandingCss(baseUrl: string): string {
 
 /* ===== LOGO REPLACEMENT ===== */
 /* Replace Hypercerts logo with horizontal Hypercerts wordmark - Desktop: left aligned */
-img[alt="Hypercerts Logo"],
-img[alt*="Logo"] {
+img[alt="Hypercerts Logo"] {
   width: 200px !important;
   height: 40px !important;
   object-fit: contain !important;
@@ -105,24 +104,11 @@ img[alt*="Logo"] {
 
 /* Mobile: left aligned with better spacing */
 @media (max-width: 767px) {
-  img[alt="Hypercerts Logo"],
-  img[alt*="Logo"] {
+  img[alt="Hypercerts Logo"] {
     width: 150px !important;
     height: 30px !important;
-    background-position: left center !important;
     margin-top: 8px !important;
     margin-bottom: 8px !important;
-  }
-}
-
-/* Dark mode: invert logo to white so it's visible on dark panel */
-@media (prefers-color-scheme: dark) {
-  img[alt="Hypercerts Logo"],
-  img[alt*="Logo"] {
-    filter: invert(1) !important;
-  }
-  main.flex.flex-col.items-center > h1.text-primary::before {
-    filter: invert(1) !important;
   }
 }
 
@@ -132,13 +118,11 @@ img[alt="Ma Earth"] {
   width: 32px !important;
   height: 32px !important;
   object-fit: contain !important;
-  object-position: left center !important;
 }
 
 /* Widen the logo container on Authorize page */
 .flex.items-center.justify-start.gap-2 > div.w-8:has(img[alt="Ma Earth"]),
 div.w-8:has(img[alt="Ma Earth"]) {
-  width: 32px !important;
   flex-shrink: 0 !important;
 }
 
@@ -164,14 +148,6 @@ div.w-8:has(img[alt="Ma Earth"]) {
   background-repeat: no-repeat !important;
   background-position: left center !important;
   margin-top: 8px !important;
-  color: #ffffff !important;
-}
-
-/* Dark mode: use white-text variant of certified-signin SVG */
-@media (prefers-color-scheme: dark) {
-  .grid h1.text-primary::after {
-    background-image: url('${sanitizedSigninUrl}') !important;
-  }
 }
 
 /* Mobile: add spacing below header */
@@ -202,37 +178,10 @@ div.w-8:has(img[alt="Ma Earth"]) {
   }
 }
 
-/* ===== LEFT PANEL - DARK NAVY BACKGROUND (dark mode only) ===== */
-/* In light mode, the PDS native slate-100 (#f1f5f9) takes over */
-@media (prefers-color-scheme: dark) {
-  .md\\:bg-slate-100,
-  .md\\:dark\\:bg-slate-800 {
-    background-color: #0F2544 !important;
-  }
-
-  /* Light text for dark left panel */
-  .md\\:bg-slate-100 .text-primary,
-  .md\\:bg-slate-100 h1.text-primary {
-    color: #ffffff !important;
-  }
-
-  /* Subtitle text in dark left panel (e.g. 'Enter your password') */
-  .md\\:bg-slate-100 .text-slate-600,
-  .md\\:bg-slate-100 .text-slate-700,
-  .md\\:bg-slate-100 .text-slate-400,
-  .md\\:bg-slate-100 p {
-    color: rgba(255, 255, 255, 0.7) !important;
-  }
-}
-
 /* ===== AUTHENTICATE PAGE (New Session Landing) ===== */
 /* This page has H1 "Authenticate" with buttons below, no logo element */
 
 /* Add Scaffold logo above the H1 using ::before */
-main.flex.flex-col.items-center > h1.text-primary {
-  position: relative !important;
-}
-
 main.flex.flex-col.items-center > h1.text-primary::before {
   content: "" !important;
   display: block !important;
@@ -258,13 +207,6 @@ main.flex.flex-col.items-center > h1.text-primary::before {
 main.flex.flex-col.items-center > h1.text-primary {
   font-size: 1.5rem !important;
   line-height: 2rem !important;
-}
-
-/* Dark mode: white text for Authenticate H1 */
-@media (prefers-color-scheme: dark) {
-  main.flex.flex-col.items-center > h1.text-primary {
-    color: #ffffff !important;
-  }
 }
 
 @media (min-width: 768px) {
@@ -332,21 +274,6 @@ button[type="submit"].bg-primary::after {
   line-height: 1.5rem !important;
 }
 
-/* ===== DARK MODE BUTTON VISIBILITY ===== */
-/* In dark mode, bg-primary (#0F2544) blends into the dark panel — use bright blue instead */
-@media (prefers-color-scheme: dark) {
-  button[type="submit"].bg-primary,
-  button.bg-primary,
-  [role="button"].bg-primary {
-    background-color: #3B82F6 !important;
-  }
-  button[type="submit"].bg-primary:hover,
-  button.bg-primary:hover,
-  [role="button"].bg-primary:hover {
-    background-color: #2563EB !important;
-  }
-}
-
 /* ===== ERROR/SESSION EXPIRY PAGE ===== */
 /* Style the H1 "Error" on error pages - identified by having [role="alert"] */
 main:has([role="alert"]) > h1.text-primary {
@@ -403,7 +330,76 @@ main:has([role="alert"]) > h1.text-primary::before {
   }
 }
 
-/* Dark mode mobile: dark navy background and light text for heading area */
+/* ===== DESKTOP ALIGNMENT ===== */
+@media (min-width: 768px) {
+  /* Left align content in left panel on desktop */
+  .grid.grow.content-center {
+    justify-items: start !important;
+  }
+
+  /* Left align text */
+  .md\\:text-right {
+    text-align: left !important;
+  }
+}
+
+/* ===== DARK MODE ===== */
+@media (prefers-color-scheme: dark) {
+  /* Logo: invert to white so it's visible on dark panel */
+  img[alt="Hypercerts Logo"] {
+    filter: invert(1) !important;
+  }
+
+  /* Authenticate page logo */
+  main.flex.flex-col.items-center > h1.text-primary::before {
+    filter: invert(1) !important;
+  }
+
+  /* Sign-in H1: use white-text variant of certified-signin SVG */
+  .grid h1.text-primary::after {
+    background-image: url('${sanitizedSigninUrl}') !important;
+  }
+
+  /* Authenticate H1: white text */
+  main.flex.flex-col.items-center > h1.text-primary {
+    color: #ffffff !important;
+  }
+
+  /* Left panel: dark navy background */
+  /* In light mode, the PDS native slate-100 (#f1f5f9) takes over */
+  .md\\:bg-slate-100,
+  .md\\:dark\\:bg-slate-800 {
+    background-color: #0F2544 !important;
+  }
+
+  /* Light text for dark left panel */
+  .md\\:bg-slate-100 .text-primary,
+  .md\\:bg-slate-100 h1.text-primary {
+    color: #ffffff !important;
+  }
+
+  /* Subtitle text in dark left panel (e.g. 'Enter your password') */
+  .md\\:bg-slate-100 .text-slate-600,
+  .md\\:bg-slate-100 .text-slate-700,
+  .md\\:bg-slate-100 .text-slate-400,
+  .md\\:bg-slate-100 p {
+    color: rgba(255, 255, 255, 0.7) !important;
+  }
+
+  /* Button visibility: bg-primary (#0F2544) blends into dark panel — use bright blue instead */
+  button[type="submit"].bg-primary,
+  button.bg-primary,
+  [role="button"].bg-primary {
+    background-color: #3B82F6 !important;
+  }
+  button[type="submit"].bg-primary:hover,
+  button.bg-primary:hover,
+  [role="button"].bg-primary:hover {
+    background-color: #2563EB !important;
+  }
+}
+
+/* Dark mode + mobile: dark navy background and light text for heading area */
 @media (prefers-color-scheme: dark) and (max-width: 767px) {
   .grid.grow.content-center {
     background-color: #0F2544 !important;
@@ -416,19 +412,6 @@ main:has([role="alert"]) > h1.text-primary::before {
   .grid.grow.content-center .text-slate-400,
   .grid.grow.content-center p {
     color: rgba(255, 255, 255, 0.7) !important;
-  }
-}
-
-/* ===== DESKTOP ALIGNMENT ===== */
-@media (min-width: 768px) {
-  /* Left align content in left panel on desktop */
-  .grid.grow.content-center {
-    justify-items: start !important;
-  }
-
-  /* Left align text */
-  .md\\:text-right {
-    text-align: left !important;
   }
 }`;
 }
