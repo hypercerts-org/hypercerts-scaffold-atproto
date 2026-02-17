@@ -14,6 +14,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Auto-generated ATProto lexicon types — not linted by design:
+    "lexicons/**",
   ]),
 ]);
 
