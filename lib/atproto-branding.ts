@@ -71,7 +71,7 @@ export function generateBrandingCss(baseUrl: string): string {
   const signinLightUrl = `${baseUrl}/certified-signin-light.svg`;
   const sanitizedSigninLightUrl = sanitizeUrlForCss(signinLightUrl);
 
-  return `/* Hypercerts Scaffold Custom Branding */
+  return `/* Certified Custom Branding for PDS OAuth Pages */
 
 /* ===== BRANDING CSS VARIABLES ===== */
 :root {
@@ -90,7 +90,7 @@ export function generateBrandingCss(baseUrl: string): string {
 }
 
 /* ===== LOGO REPLACEMENT ===== */
-/* Replace Hypercerts logo with horizontal Hypercerts wordmark - Desktop: left aligned */
+/* Replace default PDS logo with Hypercerts horizontal wordmark - Desktop: left aligned */
 img[alt="Hypercerts Logo"] {
   width: 200px !important;
   height: 40px !important;
@@ -112,22 +112,8 @@ img[alt="Hypercerts Logo"] {
   }
 }
 
-/* ===== AUTHORIZE PAGE SMALL LOGO ===== */
-/* The small logo on the Authorize page has alt="Ma Earth" and is in a constrained container */
-img[alt="Ma Earth"] {
-  width: 32px !important;
-  height: 32px !important;
-  object-fit: contain !important;
-}
-
-/* Widen the logo container on Authorize page */
-.flex.items-center.justify-start.gap-2 > div.w-8:has(img[alt="Ma Earth"]),
-div.w-8:has(img[alt="Ma Earth"]) {
-  flex-shrink: 0 !important;
-}
-
 /* ===== H1 TEXT REPLACEMENT ===== */
-/* Replace "Sign in with Hypercerts" with certified-signin SVG image - only on sign-in page */
+/* Replace "Sign in with Hypercerts" heading with Certified sign-in SVG image - only on sign-in page */
 /* The sign-in H1 is in a grid layout, error page H1 is in a flex main */
 .grid h1.text-primary {
   font-size: 0 !important;
@@ -181,7 +167,7 @@ div.w-8:has(img[alt="Ma Earth"]) {
 /* ===== AUTHENTICATE PAGE (New Session Landing) ===== */
 /* This page has H1 "Authenticate" with buttons below, no logo element */
 
-/* Add Scaffold logo above the H1 using ::before */
+/* Add Hypercerts wordmark above the Authenticate H1 using ::before */
 main.flex.flex-col.items-center > h1.text-primary::before {
   content: "" !important;
   display: block !important;
@@ -216,7 +202,7 @@ main.flex.flex-col.items-center > h1.text-primary {
   }
 }
 
-/* Replace "Sign in with Hypercerts" button text on Authenticate page */
+/* Replace "Sign in with Hypercerts" button text with Certified branding on Authenticate page */
 /* This is the second button (the bg-gray-100 button after the primary button) */
 main.flex.flex-col.items-center > button:nth-of-type(2) {
   font-size: 0 !important;
