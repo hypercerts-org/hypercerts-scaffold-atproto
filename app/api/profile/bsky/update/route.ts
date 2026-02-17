@@ -103,7 +103,9 @@ export async function POST(req: Request) {
   } catch (error) {
     console.error("Bsky profile update error:", error);
     return NextResponse.json(
-      { error: `Profile update failed: ${(error as Error).message}` },
+      {
+        error: `Profile update failed: ${error instanceof Error ? error.message : String(error)}`,
+      },
       { status: 500 },
     );
   }

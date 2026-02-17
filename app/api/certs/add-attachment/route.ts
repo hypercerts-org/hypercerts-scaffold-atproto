@@ -138,7 +138,9 @@ export async function POST(req: NextRequest) {
   } catch (e) {
     console.error("Error in add-attachment API:", e);
     return NextResponse.json(
-      { error: `Failed to add attachment: ${(e as Error).message}` },
+      {
+        error: `Failed to add attachment: ${e instanceof Error ? e.message : String(e)}`,
+      },
       { status: 500 },
     );
   }

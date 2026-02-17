@@ -94,7 +94,9 @@ export async function POST(req: NextRequest) {
   } catch (e) {
     console.error("Error in add-location API:", e);
     return NextResponse.json(
-      { error: "Internal server error", details: (e as Error).message },
+      {
+        error: `Internal server error: ${e instanceof Error ? e.message : String(e)}`,
+      },
       { status: 500 },
     );
   }
