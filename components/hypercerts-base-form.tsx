@@ -640,7 +640,7 @@ export default function HypercertsBaseForm({
               aria-label="Save"
               className="font-[family-name:var(--font-outfit)]"
             >
-              {isSaving && <Spinner className="mr-2" />}
+              {isSaving ? <Spinner className="mr-2" /> : null}
               {isSaving && buttonClicked === "create"
                 ? "Creating..."
                 : "Create"}
@@ -653,7 +653,7 @@ export default function HypercertsBaseForm({
               aria-label="Save and go to Contributions"
               className="bg-create-accent hover:bg-create-accent/90 text-create-accent-foreground font-[family-name:var(--font-outfit)] font-medium min-w-[120px]"
             >
-              {isSaving && <Spinner className="mr-2" />}
+              {isSaving ? <Spinner className="mr-2" /> : null}
               {isSaving && buttonClicked === "saveNext"
                 ? "Creating..."
                 : "Next"}
@@ -668,7 +668,7 @@ export default function HypercertsBaseForm({
           type="submit"
           className="bg-create-accent hover:bg-create-accent/90 text-create-accent-foreground font-[family-name:var(--font-outfit)] font-medium"
         >
-          {isSaving && <Spinner />}
+          {isSaving ? <Spinner /> : null}
           {isSaving ? "Creating Hypercert" : "Create Hypercert"}
         </Button>
       ) : null}
