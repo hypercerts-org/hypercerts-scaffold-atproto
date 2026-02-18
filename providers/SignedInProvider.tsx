@@ -1,7 +1,6 @@
 import LoginDialog from "@/components/login-dialog";
 import Navbar from "@/components/navbar";
 import { getSession, getAuthenticatedRepo } from "@/lib/atproto-session";
-import { getBlobURL } from "@/lib/utils";
 import { cookies } from "next/headers";
 
 export async function SignedInProvider({
