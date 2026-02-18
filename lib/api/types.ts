@@ -5,9 +5,9 @@
 import type { CreateHypercertResult } from "@hypercerts-org/sdk-core";
 
 // Auth types
-export interface LoginRequest {
-  handle: string;
-}
+export type LoginRequest =
+  | { handle: string; mode?: never }
+  | { mode: "certified"; handle?: never };
 
 export interface LoginResponse {
   authUrl: string;

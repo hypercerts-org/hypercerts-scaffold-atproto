@@ -191,6 +191,7 @@ export const config = {
   
   // Network endpoints
   pdsUrl: process.env.NEXT_PUBLIC_PDS_URL!,
+  certifiedPdsUrl: process.env.CERTIFIED_PDS_URL || process.env.NEXT_PUBLIC_PDS_URL || 'https://certified.app',
   
   // Redis configuration
   redis: {

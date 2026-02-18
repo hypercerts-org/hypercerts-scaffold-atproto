@@ -6,12 +6,13 @@ import { apiClient } from "./client";
 import type { LoginRequest, LoginResponse } from "./types";
 
 /**
- * Initiate login flow
+ * Initiate login flow.
+ * Pass { handle } for ATProto handle-based login, or { mode: 'certified' } for Certified auth.
  */
-export async function login(handle: string): Promise<LoginResponse> {
+export async function login(request: LoginRequest): Promise<LoginResponse> {
   return apiClient<LoginResponse>("/api/auth/login", {
     method: "POST",
-    body: { handle } satisfies LoginRequest,
+    body: request satisfies LoginRequest,
   });
 }
 

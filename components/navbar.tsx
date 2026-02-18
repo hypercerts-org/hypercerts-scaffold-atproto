@@ -57,7 +57,7 @@ export default function Navbar({
 
   const handleSubmit: FormEventHandler<HTMLFormElement> = async (e) => {
     e.preventDefault();
-    loginMutation.mutate(handle, {
+    loginMutation.mutate({ handle }, {
       onSuccess: () => {
         setOpen(false);
         setHandle("");

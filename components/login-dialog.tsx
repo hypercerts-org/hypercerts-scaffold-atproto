@@ -27,14 +27,11 @@ export default function LoginDialog() {
 
   const handleSubmit: FormEventHandler<HTMLFormElement> = async (e) => {
     e.preventDefault();
-    loginMutation.mutate(handle);
+    loginMutation.mutate({ handle });
   };
 
   const redirectToAccountCreation = () => {
-    if (!process.env.NEXT_PUBLIC_PDS_URL) {
-      throw new Error("NEXT_PUBLIC_PDS_URL is not defined");
-    }
-    loginMutation.mutate(process.env.NEXT_PUBLIC_PDS_URL);
+    loginMutation.mutate({ mode: "certified" });
   };
 
   return (
