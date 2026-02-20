@@ -114,7 +114,7 @@ export default function HypercertMeasurementView({
                   >
                     <URILink
                       label={uri}
-                      uri={uri?.includes("https") ? uri : getPDSlsURI(uri)}
+                      uri={uri?.startsWith("https") ? uri : getPDSlsURI(uri)}
                     />
                   </div>
                 ))}
