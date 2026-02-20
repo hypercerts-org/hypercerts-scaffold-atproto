@@ -22,7 +22,7 @@ interface UseAddLocationMutationOptions {
 }
 
 export function useAddLocationMutation(
-  options?: UseAddLocationMutationOptions
+  options?: UseAddLocationMutationOptions,
 ) {
   return useMutation({
     mutationFn: (params: AddLocationParams) => addLocation(params),
@@ -32,7 +32,8 @@ export function useAddLocationMutation(
     },
     onError: (error) => {
       console.error("Add location error:", error);
-      toast.error("Failed to add location");
+      const message = error instanceof Error ? error.message : "Unknown error";
+      toast.error(`Failed to add location: ${message}`);
     },
   });
 }

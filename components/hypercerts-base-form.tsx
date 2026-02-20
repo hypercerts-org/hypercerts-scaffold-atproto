@@ -1,4 +1,5 @@
 "use client";
+import Image from "next/image";
 import HypercertRightsFields, {
   RightsState,
 } from "@/components/hypercerts-rights-fields";
@@ -7,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
 import { Textarea } from "@/components/ui/textarea";
-import * as Hypercert from "@/lexicons/types/org/hypercerts/claim/activity";
+import type { Record as HypercertRecord } from "@/lexicons/types/org/hypercerts/claim/activity";
 import type { CreateHypercertParams } from "@hypercerts-org/sdk-core";
 import { Label } from "@radix-ui/react-label";
 import {
@@ -34,7 +35,7 @@ export interface HypercertsBaseFormProps {
   saveDisabled: boolean;
   onSave?: (record: CreateHypercertParams, advance?: boolean) => void;
   updateActions?: boolean;
-  certInfo?: Hypercert.Record;
+  certInfo?: HypercertRecord;
   hypercertUri?: string;
   nextStepper: () => void;
 }
@@ -89,8 +90,11 @@ export default function HypercertsBaseForm({
   const [contributors, setContributors] = useState<ProfileView[]>([]);
   const [manualContributors, setManualContributors] = useState<string[]>([""]);
   const [contributionDescription, setContributionDescription] = useState("");
-  const [contributionStartDate, setContributionStartDate] = useState<Date | null>(null);
-  const [contributionEndDate, setContributionEndDate] = useState<Date | null>(null);
+  const [contributionStartDate, setContributionStartDate] =
+    useState<Date | null>(null);
+  const [contributionEndDate, setContributionEndDate] = useState<Date | null>(
+    null,
+  );
 
   // Image preview
   const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -114,7 +118,7 @@ export default function HypercertsBaseForm({
   // Contributor helper functions
   const addContributor = (user: ProfileView) => {
     const isAdded = contributors.find(
-      (contributor) => contributor.did === user.did
+      (contributor) => contributor.did === user.did,
     );
     if (!isAdded) {
       setContributors((prev) => [...prev, user]);
@@ -123,7 +127,7 @@ export default function HypercertsBaseForm({
 
   const removeContributor = (user: ProfileView) => {
     setContributors((prev) =>
-      prev.filter((contributor) => contributor.did !== user.did)
+      prev.filter((contributor) => contributor.did !== user.did),
     );
   };
 
@@ -147,8 +151,6 @@ export default function HypercertsBaseForm({
     contributors.length > 0 || manualContributors.some((c) => c.trim() !== "");
 
   const getRecord = (): CreateHypercertParams | undefined => {
-    const cleanedWorkScope = workScope.map((w) => w.trim()).filter(Boolean);
-
     if (
       !rights.name.trim() ||
       !rights.type.trim() ||
@@ -164,10 +166,11 @@ export default function HypercertsBaseForm({
     // Build contributions array if contributors exist
     let contributions: CreateHypercertParams["contributions"] = undefined;
     if (hasContributors && contributionRole.trim()) {
-      const mappedContributors = [
-        ...contributors.map(({ did }) => did),
-        ...manualContributors.filter((uri) => uri.trim() !== ""),
-      ];
+      const mappedContributors: string[] = [];
+      for (const c of contributors) mappedContributors.push(c.did);
+      for (const uri of manualContributors) {
+        if (uri.trim() !== "") mappedContributors.push(uri);
+      }
 
       contributions = [
         {
@@ -277,7 +280,10 @@ export default function HypercertsBaseForm({
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <Label htmlFor="title" className="text-sm font-[family-name:var(--font-outfit)] font-medium">
+          <Label
+            htmlFor="title"
+            className="text-sm font-[family-name:var(--font-outfit)] font-medium"
+          >
             Hypercert Name *
           </Label>
           <Input
@@ -291,7 +297,10 @@ export default function HypercertsBaseForm({
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <Label htmlFor="description" className="text-sm font-[family-name:var(--font-outfit)] font-medium">
+          <Label
+            htmlFor="description"
+            className="text-sm font-[family-name:var(--font-outfit)] font-medium"
+          >
             Short Description *
           </Label>
           <Textarea
@@ -340,10 +349,11 @@ export default function HypercertsBaseForm({
         >
           {imagePreview ? (
             <>
-              <img
+              <Image
                 src={imagePreview}
                 alt="Preview"
-                className="absolute inset-0 w-full h-full object-cover opacity-60 group-hover:opacity-40 transition-opacity"
+                fill
+                className="object-cover opacity-60 group-hover:opacity-40 transition-opacity"
               />
               <div className="relative z-10 flex flex-col items-center gap-1">
                 <Upload className="h-5 w-5 text-foreground/70" />
@@ -398,7 +408,7 @@ export default function HypercertsBaseForm({
                 required={index === 0}
                 className="w-40 font-[family-name:var(--font-outfit)] text-sm h-9"
               />
-              {workScope.length > 1 && index !== 0 && (
+              {workScope.length > 1 && index !== 0 ? (
                 <Button
                   type="button"
                   variant="ghost"
@@ -409,8 +419,8 @@ export default function HypercertsBaseForm({
                 >
                   <XIcon className="h-3.5 w-3.5" />
                 </Button>
-              )}
-              {!!workScope[index] && index === workScope.length - 1 && (
+              ) : null}
+              {!!workScope[index] && index === workScope.length - 1 ? (
                 <Button
                   type="button"
                   variant="outline"
@@ -421,7 +431,7 @@ export default function HypercertsBaseForm({
                 >
                   <PlusIcon className="h-3.5 w-3.5" />
                 </Button>
-              )}
+              ) : null}
             </div>
           ))}
         </div>
@@ -483,10 +493,13 @@ export default function HypercertsBaseForm({
           </div>
         </button>
 
-        {showContributions && (
+        {showContributions ? (
           <div className="rounded-xl border border-border/60 bg-muted/20 p-5 space-y-5 animate-fade-in-up">
             <div className="space-y-2">
-              <Label htmlFor="contribution-role" className="text-sm font-[family-name:var(--font-outfit)] font-medium">
+              <Label
+                htmlFor="contribution-role"
+                className="text-sm font-[family-name:var(--font-outfit)] font-medium"
+              >
                 Role / Title
               </Label>
               <Input
@@ -500,7 +513,9 @@ export default function HypercertsBaseForm({
             </div>
 
             <div className="space-y-2">
-              <Label className="text-sm font-[family-name:var(--font-outfit)] font-medium">Contributors</Label>
+              <Label className="text-sm font-[family-name:var(--font-outfit)] font-medium">
+                Contributors
+              </Label>
               <Tabs defaultValue="search" className="w-full">
                 <TabsList className="grid w-full grid-cols-2">
                   <TabsTrigger value="search">Search Users</TabsTrigger>
@@ -567,7 +582,10 @@ export default function HypercertsBaseForm({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="contribution-description" className="text-sm font-[family-name:var(--font-outfit)] font-medium">
+              <Label
+                htmlFor="contribution-description"
+                className="text-sm font-[family-name:var(--font-outfit)] font-medium"
+              >
                 Contribution Description (Optional)
               </Label>
               <Textarea
@@ -601,17 +619,17 @@ export default function HypercertsBaseForm({
               </div>
             </div>
 
-            {hasContributors && !contributionRole.trim() && (
+            {hasContributors && !contributionRole.trim() ? (
               <p className="text-sm text-amber-600 font-[family-name:var(--font-outfit)]">
                 Please enter a role for the contributors
               </p>
-            )}
+            ) : null}
           </div>
-        )}
+        ) : null}
       </div>
 
       {/* ── Actions ── */}
-      {!!updateActions && (
+      {!!updateActions ? (
         <div className="flex items-center justify-between gap-4 pt-6 mt-2 border-t border-border/50">
           <div />
           <div className="flex gap-3">
@@ -622,8 +640,10 @@ export default function HypercertsBaseForm({
               aria-label="Save"
               className="font-[family-name:var(--font-outfit)]"
             >
-              {isSaving && <Spinner className="mr-2" />}
-              {isSaving && buttonClicked === "create" ? "Creating..." : "Create"}
+              {isSaving ? <Spinner className="mr-2" /> : null}
+              {isSaving && buttonClicked === "create"
+                ? "Creating..."
+                : "Create"}
             </Button>
 
             <Button
@@ -633,23 +653,25 @@ export default function HypercertsBaseForm({
               aria-label="Save and go to Contributions"
               className="bg-create-accent hover:bg-create-accent/90 text-create-accent-foreground font-[family-name:var(--font-outfit)] font-medium min-w-[120px]"
             >
-              {isSaving && <Spinner className="mr-2" />}
-              {isSaving && buttonClicked === "saveNext" ? "Creating..." : "Next"}
+              {isSaving ? <Spinner className="mr-2" /> : null}
+              {isSaving && buttonClicked === "saveNext"
+                ? "Creating..."
+                : "Next"}
             </Button>
           </div>
         </div>
-      )}
+      ) : null}
 
-      {!updateActions && (
+      {!updateActions ? (
         <Button
           disabled={saveDisabled || isSaving}
           type="submit"
           className="bg-create-accent hover:bg-create-accent/90 text-create-accent-foreground font-[family-name:var(--font-outfit)] font-medium"
         >
-          {isSaving && <Spinner />}
+          {isSaving ? <Spinner /> : null}
           {isSaving ? "Creating Hypercert" : "Create Hypercert"}
         </Button>
-      )}
+      ) : null}
     </form>
   );
 }

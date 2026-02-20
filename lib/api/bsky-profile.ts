@@ -15,7 +15,7 @@ export async function updateBskyProfile(params: {
   banner?: File | null;
 }): Promise<UpdateBskyProfileResponse> {
   const formData = new FormData();
-  
+
   if (params.displayName !== undefined) {
     formData.set("displayName", params.displayName || "");
   }
@@ -31,6 +31,6 @@ export async function updateBskyProfile(params: {
 
   return apiClientFormData<UpdateBskyProfileResponse>(
     "/api/profile/bsky/update",
-    formData
+    formData,
   );
 }

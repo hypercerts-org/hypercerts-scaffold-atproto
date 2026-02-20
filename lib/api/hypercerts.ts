@@ -15,15 +15,12 @@ import type {
  * Create a new hypercert
  */
 export async function createHypercert(
-  params: CreateHypercertRequest
+  params: CreateHypercertRequest,
 ): Promise<CreateHypercertResponse> {
   const formData = new FormData();
   formData.append("title", params.title);
   formData.append("shortDescription", params.shortDescription);
-  formData.append(
-    "description",
-    params.description ?? params.shortDescription
-  );
+  formData.append("description", params.description ?? params.shortDescription);
   formData.append("startDate", params.startDate);
   formData.append("endDate", params.endDate);
   formData.append("rights", JSON.stringify(params.rights));
@@ -35,7 +32,7 @@ export async function createHypercert(
 
   return apiClientFormData<CreateHypercertResponse>(
     "/api/certs/create",
-    formData
+    formData,
   );
 }
 
@@ -43,15 +40,12 @@ export async function createHypercert(
  * Create hypercert using SDK params directly (from hypercerts-base-form)
  */
 export async function createHypercertFromParams(
-  params: import("@hypercerts-org/sdk-core").CreateHypercertParams
+  params: import("@hypercerts-org/sdk-core").CreateHypercertParams,
 ): Promise<CreateHypercertResponse> {
   const formData = new FormData();
   formData.append("title", params.title);
   formData.append("shortDescription", params.shortDescription);
-  formData.append(
-    "description",
-    params.description ?? params.shortDescription
-  );
+  formData.append("description", params.description ?? params.shortDescription);
   formData.append("startDate", params.startDate);
   formData.append("endDate", params.endDate);
   formData.append("rights", JSON.stringify(params.rights));
@@ -67,7 +61,7 @@ export async function createHypercertFromParams(
 
   return apiClientFormData<CreateHypercertResponse>(
     "/api/certs/create",
-    formData
+    formData,
   );
 }
 
@@ -88,14 +82,14 @@ export async function addAttachment(params: {
   const formData = new FormData();
   formData.append("title", params.title);
   formData.append("shortDescription", params.shortDescription);
-  
+
   if (params.description) {
     formData.append("description", params.description);
   }
   if (params.contentType) {
     formData.append("contentType", params.contentType);
   }
-  
+
   formData.append("hypercertUri", params.hypercertUri);
   formData.append("evidenceMode", params.evidenceMode);
 
@@ -115,9 +109,11 @@ export async function addAttachment(params: {
       formData.append("lpVersion", params.location.lpVersion);
       formData.append("srs", params.location.srs);
       formData.append("locationType", params.location.locationType);
-      if (params.location.name) formData.append("locationName", params.location.name);
-      if (params.location.description) formData.append("locationDescription", params.location.description);
-      
+      if (params.location.name)
+        formData.append("locationName", params.location.name);
+      if (params.location.description)
+        formData.append("locationDescription", params.location.description);
+
       if (typeof params.location.location === "string") {
         formData.append("locationContentMode", "link");
         formData.append("locationUrl", params.location.location);
@@ -130,7 +126,7 @@ export async function addAttachment(params: {
 
   return apiClientFormData<AddAttachmentResponse>(
     "/api/certs/add-attachment",
-    formData
+    formData,
   );
 }
 
@@ -172,6 +168,6 @@ export async function addLocation(params: {
 
   return apiClientFormData<AddLocationResponse>(
     "/api/certs/add-location",
-    formData
+    formData,
   );
 }

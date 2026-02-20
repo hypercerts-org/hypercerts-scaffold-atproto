@@ -5,6 +5,7 @@ import { NextRequest, NextResponse } from "next/server";
 export async function POST(req: NextRequest) {
   try {
     const formData = await req.formData();
+    const ctxPromise = getRepoContext();
     const title = formData.get("title") as string | null;
     const shortDescription = formData.get("shortDescription") as string | null;
     const description = formData.get("description") as string | null;
@@ -20,12 +21,14 @@ export async function POST(req: NextRequest) {
     if (!title || !shortDescription || !startDate || !endDate) {
       return NextResponse.json(
         { error: "Missing required fields" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     const rights = rightsRaw ? JSON.parse(rightsRaw) : undefined;
-    const contributions = contributionsRaw ? JSON.parse(contributionsRaw) : undefined;
+    const contributions = contributionsRaw
+      ? JSON.parse(contributionsRaw)
+      : undefined;
 
     const hypercertParams: CreateHypercertParams = {
       title,
@@ -39,11 +42,11 @@ export async function POST(req: NextRequest) {
       contributions,
     };
 
-    const ctx = await getRepoContext();
+    const ctx = await ctxPromise;
     if (!ctx) {
       return NextResponse.json(
         { error: "Could not authenticate repo" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -51,12 +54,9 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(data);
   } catch (e) {
     console.error("Error creating hypercert:", e);
-    if (e instanceof Error) {
-      return NextResponse.json({ error: e.message }, { status: 500 });
-    }
     return NextResponse.json(
-      { error: "Error creating hypercert" },
-      { status: 500 }
+      { error: "Failed to create hypercert" },
+      { status: 500 },
     );
   }
 }

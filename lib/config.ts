@@ -9,15 +9,46 @@
  * @see https://datatracker.ietf.org/doc/html/rfc8252 (OAuth for Native Apps)
  */
 
-import { ATPROTO_SCOPE, TRANSITION_SCOPES } from "@hypercerts-org/sdk-core";
+import {
+  ATPROTO_SCOPE,
+  TRANSITION_SCOPES,
+  HYPERCERT_COLLECTIONS,
+} from "@hypercerts-org/sdk-core";
 import { generateBrandingCss } from "./atproto-branding";
 
-/**
- * OAuth scope configuration
- * Currently using transition:generic, will migrate to granular scopes
- * also during local development transition:generic is a requirement
- */
-export const OAUTH_SCOPE = [ATPROTO_SCOPE, TRANSITION_SCOPES.GENERIC].join(" ");
+// Granular repo scope — collections with full CRUD access
+const REPO_COLLECTIONS = [
+  HYPERCERT_COLLECTIONS.CLAIM,
+  HYPERCERT_COLLECTIONS.RIGHTS,
+  HYPERCERT_COLLECTIONS.LOCATION,
+  HYPERCERT_COLLECTIONS.CONTRIBUTION_DETAILS,
+  HYPERCERT_COLLECTIONS.CONTRIBUTOR_INFORMATION,
+  HYPERCERT_COLLECTIONS.MEASUREMENT,
+  HYPERCERT_COLLECTIONS.EVALUATION,
+  HYPERCERT_COLLECTIONS.ATTACHMENT,
+  HYPERCERT_COLLECTIONS.COLLECTION,
+  HYPERCERT_COLLECTIONS.FUNDING_RECEIPT,
+  HYPERCERT_COLLECTIONS.WORK_SCOPE_TAG,
+  HYPERCERT_COLLECTIONS.CERTIFIED_PROFILE,
+];
+
+const HYPERCERT_REPO_SCOPE = `repo?${REPO_COLLECTIONS.map((c) => "collection=" + c).join("&")}&action=create&action=update&action=delete`;
+
+// Bsky profile scope — only create and update (no delete)
+const BSKY_PROFILE_SCOPE = `repo?collection=${HYPERCERT_COLLECTIONS.BSKY_PROFILE}&action=create&action=update`;
+
+const BLOB_SCOPE = "blob:*/*";
+const RPC_SCOPE =
+  "rpc:app.bsky.actor.getProfile?aud=did:web:api.bsky.app%23bsky_appview";
+
+const GRANULAR_SCOPE = [
+  ATPROTO_SCOPE,
+  HYPERCERT_REPO_SCOPE,
+  BSKY_PROFILE_SCOPE,
+  RPC_SCOPE,
+  BLOB_SCOPE,
+].join(" ");
+const LOOPBACK_SCOPE = [ATPROTO_SCOPE, TRANSITION_SCOPES.GENERIC].join(" ");
 
 /**
  * Validates a URL format
@@ -160,6 +191,13 @@ try {
   throw error;
 }
 
+/**
+ * OAuth scope configuration — environment-aware:
+ * - Loopback (local dev): "atproto transition:generic" (ATProto requirement for loopback clients)
+ * - Production: granular scopes (repo, rpc, blob) for precise permission requests
+ */
+export const OAUTH_SCOPE = GRANULAR_SCOPE;
+
 const redirectBaseUrl = getRedirectBaseUrl(baseUrl);
 const redirectUri = `${redirectBaseUrl}/api/auth/callback`;
 const jwksUri = `${redirectBaseUrl}/jwks.json`;
@@ -239,11 +277,11 @@ export function buildClientMetadata(): Record<string, unknown> {
     client_uri: config.baseUrl,
     redirect_uris: [config.redirectUri],
     scope: OAUTH_SCOPE,
-      logo_uri: `${config.baseUrl}/certified-logo.svg`,
-      grant_types: ["authorization_code", "refresh_token"],
-      response_types: ["code"],
-      token_endpoint_auth_method: "none",
-      application_type: "web",
+    logo_uri: `${config.baseUrl}/certified-logo.svg`,
+    grant_types: ["authorization_code", "refresh_token"],
+    response_types: ["code"],
+    token_endpoint_auth_method: "none",
+    application_type: "web",
     dpop_bound_access_tokens: true,
     branding: {
       css: generateBrandingCss(config.baseUrl),

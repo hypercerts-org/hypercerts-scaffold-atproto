@@ -1,18 +1,17 @@
 import LoginDialog from "@/components/login-dialog";
 import Navbar from "@/components/navbar";
 import { getSession, getAuthenticatedRepo } from "@/lib/atproto-session";
-import { getBlobURL } from "@/lib/utils";
+import { convertBlobUrlToCdn } from "@/lib/utils";
 import { cookies } from "next/headers";
+import { Suspense } from "react";
+import { AuthErrorToast } from "./AuthErrorToast";
 
 export async function SignedInProvider({
   children,
 }: {
   children?: React.ReactNode;
 }) {
-  const [session, cookieStore] = await Promise.all([
-    getSession(),
-    cookies(),
-  ]);
+  const [session, cookieStore] = await Promise.all([getSession(), cookies()]);
   const activeDid = cookieStore.get("active-did")?.value || session?.did;
 
   let avatarUrl: string | undefined = undefined;
@@ -22,17 +21,23 @@ export async function SignedInProvider({
 
   if (session) {
     const repo = await getAuthenticatedRepo();
+    if (repo) {
+      const profile = await repo.profile
+        .getCertifiedProfile()
+        .catch(() => null);
 
-    const profile = repo
-      ? await repo.profile.getCertifiedProfile().catch(() => null)
-      : null;
-
-    avatarUrl = profile?.avatar;
-    handle = profile?.handle || "";
+      avatarUrl = convertBlobUrlToCdn(profile?.avatar) || "";
+      handle = profile?.handle || "";
+      activeProfileName = profile?.displayName;
+      activeProfileHandle = profile?.handle;
+    }
   }
 
   return (
     <>
+      <Suspense fallback={null}>
+        <AuthErrorToast />
+      </Suspense>
       <Navbar
         isSignedIn={!!session}
         avatarUrl={avatarUrl}

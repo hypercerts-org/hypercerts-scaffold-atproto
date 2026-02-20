@@ -2,11 +2,11 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   /* config options here */
-  
+
   // Disable URL normalization in proxy to allow absolute redirect URLs
   // This is required for localhost → 127.0.0.1 redirect to work properly
   skipMiddlewareUrlNormalize: true,
-  
+
   images: {
     remotePatterns: [
       {

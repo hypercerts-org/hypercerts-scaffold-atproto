@@ -15,16 +15,6 @@ export default function LoginDialog() {
   const [handle, setHandle] = useState("");
   const loginMutation = useLoginMutation();
 
-  const pdsUrl = process.env.NEXT_PUBLIC_PDS_URL;
-  let hostname = "";
-  if (pdsUrl) {
-    try {
-      hostname = new URL(pdsUrl).hostname;
-    } catch (e) {
-      console.error("Invalid PDS URL:", pdsUrl, e);
-    }
-  }
-
   const handleSubmit: FormEventHandler<HTMLFormElement> = async (e) => {
     e.preventDefault();
     loginMutation.mutate(handle);
@@ -67,8 +57,8 @@ export default function LoginDialog() {
       </div>
 
       <div className="animate-fade-in-up [animation-delay:200ms] space-y-3">
-        <Button 
-          type="submit" 
+        <Button
+          type="submit"
           disabled={loginMutation.isPending}
           className="w-full bg-create-accent hover:bg-create-accent/90 text-white font-[family-name:var(--font-outfit)] font-medium transition-all"
         >

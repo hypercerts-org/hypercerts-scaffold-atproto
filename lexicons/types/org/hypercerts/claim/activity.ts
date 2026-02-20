@@ -1,62 +1,62 @@
 /**
  * GENERATED CODE - DO NOT MODIFY
  */
-import { type ValidationResult, BlobRef } from '@atproto/lexicon'
-import { CID } from 'multiformats/cid'
-import { validate as _validate } from '../../../../lexicons'
+import { type ValidationResult, BlobRef } from "@atproto/lexicon";
+import { CID } from "multiformats/cid";
+import { validate as _validate } from "../../../../lexicons";
 import {
   type $Typed,
   is$typed as _is$typed,
   type OmitKey,
-} from '../../../../util'
-import type * as OrgHypercertsDefs from '../defs.js'
-import type * as ComAtprotoRepoStrongRef from '../../../com/atproto/repo/strongRef.js'
+} from "../../../../util";
+import type * as OrgHypercertsDefs from "../defs.js";
+import type * as ComAtprotoRepoStrongRef from "../../../com/atproto/repo/strongRef.js";
 
 const is$typed = _is$typed,
-  validate = _validate
-const id = 'org.hypercerts.claim.activity'
+  validate = _validate;
+const id = "org.hypercerts.claim.activity";
 
 export interface Main {
-  $type: 'org.hypercerts.claim.activity'
+  $type: "org.hypercerts.claim.activity";
   /** Title of the hypercert */
-  title: string
+  title: string;
   /** Short blurb of the impact work done. */
-  shortDescription: string
+  shortDescription: string;
   /** Optional longer description of the impact work done. */
-  description?: string
+  description?: string;
   image?:
     | $Typed<OrgHypercertsDefs.Uri>
     | $Typed<OrgHypercertsDefs.SmallImage>
-    | { $type: string }
+    | { $type: string };
   /** Scope of the work performed */
-  workScope: string
+  workScope: string;
   /** When the work began */
-  workTimeFrameFrom: string
+  workTimeFrameFrom: string;
   /** When the work ended */
-  workTimeFrameTo: string
+  workTimeFrameTo: string;
   /** Supporting evidence, documentation, or external data URIs */
-  evidence?: ComAtprotoRepoStrongRef.Main[]
+  evidence?: ComAtprotoRepoStrongRef.Main[];
   /** A strong reference to the contributions done to create the impact in the hypercerts. The record referenced must conform with the lexicon org.hypercerts.claim.contributions */
-  contributions?: ComAtprotoRepoStrongRef.Main[]
-  rights?: ComAtprotoRepoStrongRef.Main
-  location?: ComAtprotoRepoStrongRef.Main
+  contributions?: ComAtprotoRepoStrongRef.Main[];
+  rights?: ComAtprotoRepoStrongRef.Main;
+  location?: ComAtprotoRepoStrongRef.Main;
   /** Client-declared timestamp when this record was originally created */
-  createdAt: string
-  [k: string]: unknown
+  createdAt: string;
+  [k: string]: unknown;
 }
 
-const hashMain = 'main'
+const hashMain = "main";
 
 export function isMain<V>(v: V) {
-  return is$typed(v, id, hashMain)
+  return is$typed(v, id, hashMain);
 }
 
 export function validateMain<V>(v: V) {
-  return validate<Main & V>(v, id, hashMain, true)
+  return validate<Main & V>(v, id, hashMain, true);
 }
 
 export {
   type Main as Record,
   isMain as isRecord,
   validateMain as validateRecord,
-}
+};

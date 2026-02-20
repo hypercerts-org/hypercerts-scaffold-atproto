@@ -33,7 +33,7 @@ export default function HypercertContributionForm({
 
   const addContributor = (user: ProfileView) => {
     const isAdded = contributors.find(
-      (contributor) => contributor.did === user.did
+      (contributor) => contributor.did === user.did,
     );
     if (!isAdded) {
       setContributors((prev) => [...prev, user]);
@@ -42,7 +42,7 @@ export default function HypercertContributionForm({
 
   const removeContributor = (user: ProfileView) => {
     setContributors((prev) =>
-      prev.filter((contributor) => contributor.did !== user.did)
+      prev.filter((contributor) => contributor.did !== user.did),
     );
   };
 
@@ -63,13 +63,14 @@ export default function HypercertContributionForm({
   };
 
   const handleContributionCreation = async () => {
-    const mappedContributors = [
-      ...contributors.map(({ did }) => did),
-      ...manualContributors.filter((uri) => uri.trim() !== ""),
-    ];
+    const mappedContributors: string[] = [];
+    for (const c of contributors) mappedContributors.push(c.did);
+    for (const uri of manualContributors) {
+      if (uri.trim() !== "") mappedContributors.push(uri);
+    }
 
     if (!mappedContributors.length) return;
-    
+
     // Validate hypercertUri exists
     if (!hypercertInfo?.hypercertUri) {
       throw new Error("Hypercert URI is required to create a contribution");
@@ -105,7 +106,8 @@ export default function HypercertContributionForm({
       onNext?.();
     } catch (error) {
       console.error("Error saving contribution:", error);
-      toast.error("Failed to create contribution");
+      const message = error instanceof Error ? error.message : "Unknown error";
+      toast.error(`Failed to create contribution: ${message}`);
     } finally {
       setSaving(false);
     }
@@ -121,7 +123,7 @@ export default function HypercertContributionForm({
       "did:plc:ragtjsm2j2vknwkz3zp4oxrd",
     ]);
     setDescription(
-      "Led the technical development and implementation of the community platform, including backend infrastructure, API design, and database architecture. Coordinated with stakeholders to ensure project milestones were met on time."
+      "Led the technical development and implementation of the community platform, including backend infrastructure, API design, and database architecture. Coordinated with stakeholders to ensure project milestones were met on time.",
     );
     const startDate = new Date();
     startDate.setMonth(startDate.getMonth() - 6);
@@ -133,7 +135,7 @@ export default function HypercertContributionForm({
 
   return (
     <FormInfo
-      stepLabel="Step 2 of 6"
+      stepLabel="Step 2 of 5" // NOTE: contributions step is currently disabled; stepLabel reflects the 5-step flow
       title="Add Contributions"
       description="Link roles, contributors, and timeframes to your hypercert."
     >
@@ -154,7 +156,10 @@ export default function HypercertContributionForm({
 
         {/* Role */}
         <div className="space-y-2">
-          <Label htmlFor="role" className="text-sm font-[family-name:var(--font-outfit)] font-medium">
+          <Label
+            htmlFor="role"
+            className="text-sm font-[family-name:var(--font-outfit)] font-medium"
+          >
             Role / Title *
           </Label>
           <Input
@@ -247,7 +252,10 @@ export default function HypercertContributionForm({
 
         {/* Description */}
         <div className="space-y-2">
-          <Label htmlFor="description" className="text-sm font-[family-name:var(--font-outfit)] font-medium">
+          <Label
+            htmlFor="description"
+            className="text-sm font-[family-name:var(--font-outfit)] font-medium"
+          >
             Description (Optional)
           </Label>
           <Textarea

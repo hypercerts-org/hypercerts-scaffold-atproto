@@ -1,50 +1,50 @@
 /**
  * GENERATED CODE - DO NOT MODIFY
  */
-import { type ValidationResult, BlobRef } from '@atproto/lexicon'
-import { CID } from 'multiformats/cid'
-import { validate as _validate } from '../../../../lexicons'
+import { type ValidationResult, BlobRef } from "@atproto/lexicon";
+import { CID } from "multiformats/cid";
+import { validate as _validate } from "../../../../lexicons";
 import {
   type $Typed,
   is$typed as _is$typed,
   type OmitKey,
-} from '../../../../util'
-import type * as ComAtprotoRepoStrongRef from '../../../com/atproto/repo/strongRef.js'
+} from "../../../../util";
+import type * as ComAtprotoRepoStrongRef from "../../../com/atproto/repo/strongRef.js";
 
 const is$typed = _is$typed,
-  validate = _validate
-const id = 'org.hypercerts.claim.contribution'
+  validate = _validate;
+const id = "org.hypercerts.claim.contribution";
 
 export interface Main {
-  $type: 'org.hypercerts.claim.contribution'
-  hypercert: ComAtprotoRepoStrongRef.Main
+  $type: "org.hypercerts.claim.contribution";
+  hypercert: ComAtprotoRepoStrongRef.Main;
   /** Role or title of the contributor(s). */
-  role?: string
+  role?: string;
   /** List of the contributors (names, pseudonyms, or DIDs). If multiple contributors are stored in the same hypercertContribution, then they would have the exact same role. */
-  contributors: string[]
+  contributors: string[];
   /** What the contribution concretely achieved */
-  description?: string
+  description?: string;
   /** When this contribution started. This should be a subset of the hypercert timeframe. */
-  workTimeframeFrom?: string
+  workTimeframeFrom?: string;
   /** When this contribution finished.  This should be a subset of the hypercert timeframe. */
-  workTimeframeTo?: string
+  workTimeframeTo?: string;
   /** Client-declared timestamp when this record was originally created */
-  createdAt: string
-  [k: string]: unknown
+  createdAt: string;
+  [k: string]: unknown;
 }
 
-const hashMain = 'main'
+const hashMain = "main";
 
 export function isMain<V>(v: V) {
-  return is$typed(v, id, hashMain)
+  return is$typed(v, id, hashMain);
 }
 
 export function validateMain<V>(v: V) {
-  return validate<Main & V>(v, id, hashMain, true)
+  return validate<Main & V>(v, id, hashMain, true);
 }
 
 export {
   type Main as Record,
   isMain as isRecord,
   validateMain as validateRecord,
-}
+};

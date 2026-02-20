@@ -68,7 +68,12 @@ export default function LinkFileSelector({
         </div>
       ) : (
         <div className="space-y-2">
-          <Input type="file" onChange={onFileChange} required={required} accept={accept} />
+          <Input
+            type="file"
+            onChange={onFileChange}
+            required={required}
+            accept={accept}
+          />
           <p className="text-xs text-muted-foreground">{fileHelpText}</p>
         </div>
       )}

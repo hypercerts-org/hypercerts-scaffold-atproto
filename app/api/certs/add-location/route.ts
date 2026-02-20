@@ -1,10 +1,11 @@
 import { getAuthenticatedRepo } from "@/lib/atproto-session";
-import { LocationParams } from "@hypercerts-org/sdk-core"
+import { LocationParams } from "@hypercerts-org/sdk-core";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
   try {
     const data = await req.formData();
+    const repoPromise = getAuthenticatedRepo();
 
     const hypercertUri = (data.get("hypercertUri") as string | null)?.trim();
     const srs = (data.get("srs") as string | null)?.trim();
@@ -21,18 +22,16 @@ export async function POST(req: NextRequest) {
     if (!locationType || !lpVersion || !srs) {
       return NextResponse.json(
         {
-          error: `Missing${locationType ? " locationType" : ""}. ${
-            lpVersion ? "lpVersion" : ""
-          }. ${srs ? "srs" : ""}. `,
+          error: `Missing${!locationType ? " locationType" : ""}${!lpVersion ? " lpVersion" : ""}${!srs ? " srs" : ""}`,
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     if (!hypercertUri) {
       return NextResponse.json(
         { error: "Missing hypercertUri." },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -43,7 +42,7 @@ export async function POST(req: NextRequest) {
       if (!locationUrl) {
         return NextResponse.json(
           { error: "Missing locationUrl for link mode." },
-          { status: 400 }
+          { status: 400 },
         );
       }
 
@@ -61,7 +60,7 @@ export async function POST(req: NextRequest) {
       if (!file || file.size === 0) {
         return NextResponse.json(
           { error: "Missing locationFile for file mode." },
-          { status: 400 }
+          { status: 400 },
         );
       }
 
@@ -74,29 +73,31 @@ export async function POST(req: NextRequest) {
     } else {
       return NextResponse.json(
         { error: `Invalid contentMode: ${contentMode}` },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
-    const personalRepository = await getAuthenticatedRepo();
+    const personalRepository = await repoPromise;
     if (!personalRepository) {
       return NextResponse.json(
         { error: "Could not authenticate repo" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
     const result = await personalRepository.hypercerts.attachLocation(
       hypercertUri,
-      locationPayload
+      locationPayload,
     );
 
     return NextResponse.json(result);
   } catch (e) {
     console.error("Error in add-location API:", e);
     return NextResponse.json(
-      { error: "Internal server error", details: (e as Error).message },
-      { status: 500 }
+      {
+        error: `Internal server error: ${e instanceof Error ? e.message : String(e)}`,
+      },
+      { status: 500 },
     );
   }
 }

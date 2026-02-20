@@ -63,14 +63,14 @@ This scaffold uses an **unreleased, pre-packaged version** of `@hypercerts-org/s
 
 ### Required Variables
 
-| Variable | Description |
-|----------|-------------|
+| Variable               | Description                                                                                                            |
+| ---------------------- | ---------------------------------------------------------------------------------------------------------------------- |
 | `NEXT_PUBLIC_BASE_URL` | Your application's base URL (e.g., `http://127.0.0.1:3000` for local dev, or `https://your-domain.com` for production) |
-| `ATPROTO_JWK_PRIVATE` | Private JWK for OAuth authentication (generated using `pnpm run generate-jwk`) |
-| `REDIS_HOST` | Redis server hostname |
-| `REDIS_PORT` | Redis server port |
-| `REDIS_PASSWORD` | Redis password |
-| `NEXT_PUBLIC_PDS_URL` | Personal Data Server URL |
+| `ATPROTO_JWK_PRIVATE`  | Private JWK for OAuth authentication (generated using `pnpm run generate-jwk`)                                         |
+| `REDIS_HOST`           | Redis server hostname                                                                                                  |
+| `REDIS_PORT`           | Redis server port                                                                                                      |
+| `REDIS_PASSWORD`       | Redis password                                                                                                         |
+| `NEXT_PUBLIC_PDS_URL`  | Personal Data Server URL                                                                                               |
 
 ### Local Development
 
@@ -170,7 +170,8 @@ This application automatically redirects requests from `localhost` to `127.0.0.1
 
 **Problem:** "OAuth callback failed" or "Invalid redirect_uri"
 
-**Solution:** 
+**Solution:**
+
 - Check that `NEXT_PUBLIC_BASE_URL` in `.env.local` uses `127.0.0.1` (not `localhost`)
 - Restart the dev server after changing `.env.local`
 - Clear browser cookies and try again
@@ -178,6 +179,7 @@ This application automatically redirects requests from `localhost` to `127.0.0.1
 **Problem:** Redirect loop after login
 
 **Solution:**
+
 - Clear browser cookies
 - Restart the dev server
 - Try in incognito/private browsing mode
@@ -186,6 +188,7 @@ This application automatically redirects requests from `localhost` to `127.0.0.1
 **Problem:** Works on `127.0.0.1` but not with ngrok
 
 **Solution:**
+
 - Update `NEXT_PUBLIC_BASE_URL` to your ngrok URL (e.g., `https://abc123.ngrok.io`)
 - Restart the dev server after changing the URL
 - Note: ngrok URLs change on each restart unless you have a paid plan with reserved domains
@@ -197,6 +200,7 @@ This application automatically redirects requests from `localhost` to `127.0.0.1
 This scaffold uses OAuth 2.0 with DPoP (Demonstrating Proof of Possession) for authentication, implemented via the Hypercerts SDK.
 
 **Flow:**
+
 1. User enters their handle (e.g., `user.example.com`)
 2. Application redirects to the ATProto authorization server
 3. User approves the application
@@ -214,18 +218,18 @@ import { getRepoContext } from "@/lib/repo-context";
 export async function GET() {
   // Get authenticated repository context
   const ctx = await getRepoContext();
-  
+
   if (!ctx) {
     return Response.json({ error: "Not authenticated" }, { status: 401 });
   }
-  
+
   // Available context properties:
   // ctx.userDid - the authenticated user's DID
   // ctx.activeDid - currently active profile DID
   // ctx.targetDid - the DID this operation targets
   // ctx.repository - repository routed to PDS
   // ctx.scopedRepo - repository scoped to targetDid
-  
+
   // Use scopedRepo for most operations
   const profile = await ctx.scopedRepo.profile.getCertifiedProfile();
   return Response.json(profile);
@@ -239,11 +243,11 @@ import { getAuthenticatedRepo } from "@/lib/atproto-session";
 
 export async function GET() {
   const repo = await getAuthenticatedRepo();
-  
+
   if (!repo) {
     return Response.json({ error: "Not authenticated" }, { status: 401 });
   }
-  
+
   const profile = await repo.profile.getCertifiedProfile();
   return Response.json(profile);
 }
@@ -258,24 +262,24 @@ import { getRepoContext } from "@/lib/repo-context";
 
 export async function GET() {
   const ctx = await getRepoContext();
-  
+
   if (!ctx) {
     return Response.json({ error: "Not authenticated" }, { status: 401 });
   }
-  
+
   // Access user profile
   const profile = await ctx.scopedRepo.profile.getCertifiedProfile();
-  
+
   // Create a hypercert
   await ctx.scopedRepo.hypercert.create({
     title: "My Hypercert",
     description: "A certificate of impact",
     // ... other fields
   });
-  
+
   // List hypercerts
   const hypercerts = await ctx.scopedRepo.hypercert.list();
-  
+
   return Response.json({ profile, hypercerts });
 }
 ```
@@ -304,11 +308,11 @@ export async function GET() {
 
 ### Key Files
 
-| File | Purpose |
-|------|---------|
-| `lib/hypercerts-sdk.ts` | SDK initialization and configuration |
-| `lib/repo-context.ts` | Helper to get authenticated repository context |
-| `lib/create-actions.ts` | Server actions for common operations |
+| File                    | Purpose                                        |
+| ----------------------- | ---------------------------------------------- |
+| `lib/hypercerts-sdk.ts` | SDK initialization and configuration           |
+| `lib/repo-context.ts`   | Helper to get authenticated repository context |
+| `lib/create-actions.ts` | Server actions for common operations           |
 
 ## Learn More
 

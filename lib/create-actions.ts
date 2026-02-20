@@ -3,9 +3,7 @@ import { getRepoContext } from "@/lib/repo-context";
 import { resolveRecordBlobs } from "./blob-utils";
 
 import { RepositoryRole } from "@hypercerts-org/sdk-core";
-import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
-import { after } from "next/server";
 import { getSession } from "./atproto-session";
 import sdk from "./hypercerts-sdk";
 
@@ -18,7 +16,9 @@ export const getActiveProfileInfo = async () => {
   const ctx = await getRepoContext();
   if (!ctx) return null;
 
-  const profile = await ctx.scopedRepo.profile.getCertifiedProfile().catch(() => null);
+  const profile = await ctx.scopedRepo.profile
+    .getCertifiedProfile()
+    .catch(() => null);
   if (!profile) return null;
   return {
     name: profile.displayName || profile.handle,
@@ -27,12 +27,15 @@ export const getActiveProfileInfo = async () => {
   };
 };
 export const switchActiveProfile = async (did: string) => {
+  const cookiePromise = cookies();
   const session = await getSession();
   if (!session) {
-    throw new Error("Authentication required to switch profiles");
+    throw new Error(
+      "Cannot switch profiles: no active session found. Please log in first.",
+    );
   }
 
-  const cookieStore = await cookies();
+  const cookieStore = await cookiePromise;
   cookieStore.set("active-did", did, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
@@ -50,7 +53,8 @@ export const logout = async () => {
 };
 
 // TODO addContribution in SDK needs to be updated so for now contributions will directly be added through hypercert create
-export const addContribution = async (params: {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export const addContribution = async (_params: {
   hypercertUri: string;
   contributors: string[];
   contributionDetails: {
@@ -60,7 +64,7 @@ export const addContribution = async (params: {
     endDate?: string;
   };
 }) => {
-  return true
+  return true;
   // const ctx = await getRepoContext();
 
   // if (!ctx) {
@@ -81,7 +85,9 @@ export const addEvaluation = async (params: {
 }) => {
   const ctx = await getRepoContext();
   if (!ctx) {
-    throw new Error("Unable to get repository context");
+    throw new Error(
+      "addEvaluation failed: could not establish repository context. The user session may have expired or the target DID is unreachable.",
+    );
   }
 
   const { hypercertUri, ...evaluationData } = params;
@@ -120,7 +126,9 @@ export const addMeasurement = async (params: {
 }) => {
   const ctx = await getRepoContext();
   if (!ctx) {
-    throw new Error("Unable to get repository context");
+    throw new Error(
+      "addMeasurement failed: could not establish repository context. The user session may have expired or the target DID is unreachable.",
+    );
   }
 
   return ctx.scopedRepo.hypercerts.addMeasurement({
@@ -139,7 +147,9 @@ export const getMeasurementRecord = async (params: {
   const { did, collection, rkey } = params;
   const ctx = await getRepoContext({ targetDid: did });
   if (!ctx) {
-    throw new Error("Unable to get repository context");
+    throw new Error(
+      "getMeasurementRecord failed: could not establish repository context. The user session may have expired or the target DID is unreachable.",
+    );
   }
 
   const data = await ctx.scopedRepo.records.get({ collection, rkey });
@@ -157,7 +167,9 @@ export const getEvaluationRecord = async (params: {
   const { did, collection, rkey } = params;
   const ctx = await getRepoContext({ targetDid: did });
   if (!ctx) {
-    throw new Error("Unable to get repository context");
+    throw new Error(
+      "getEvaluationRecord failed: could not establish repository context. The user session may have expired or the target DID is unreachable.",
+    );
   }
 
   const data = await ctx.scopedRepo.records.get({ collection, rkey });
@@ -175,7 +187,9 @@ export const getEvidenceRecord = async (params: {
   const { did, collection, rkey } = params;
   const ctx = await getRepoContext({ targetDid: did });
   if (!ctx) {
-    throw new Error("Unable to get repository context");
+    throw new Error(
+      "getEvidenceRecord failed: could not establish repository context. The user session may have expired or the target DID is unreachable.",
+    );
   }
 
   const data = await ctx.scopedRepo.records.get({ collection, rkey });
@@ -184,4 +198,3 @@ export const getEvidenceRecord = async (params: {
   }
   return JSON.parse(JSON.stringify(data));
 };
-

@@ -2,7 +2,6 @@
 
 import {
   FileText,
-  Users,
   Paperclip,
   MapPin,
   BarChart3,
@@ -22,11 +21,13 @@ export function StepperHeader({ step }: { step: number }) {
   return (
     <>
       {/* Desktop: Vertical sidebar stepper */}
-      <nav className="hidden lg:flex flex-col gap-1" aria-label="Create flow progress">
+      <nav
+        className="hidden lg:flex flex-col gap-1"
+        aria-label="Create flow progress"
+      >
         {STEPS.map((s, idx) => {
           const isCompleted = step > s.id;
           const isActive = step === s.id;
-          const isUpcoming = step < s.id;
           const Icon = s.icon;
 
           return (
@@ -37,11 +38,12 @@ export function StepperHeader({ step }: { step: number }) {
                   className={`
                     relative flex h-9 w-9 items-center justify-center rounded-xl
                     transition-all duration-300 ease-out
-                    ${isCompleted
-                      ? "bg-create-accent text-create-accent-foreground shadow-sm"
-                      : isActive
-                        ? "bg-create-accent text-create-accent-foreground shadow-md animate-pulse-glow"
-                        : "bg-muted text-muted-foreground"
+                    ${
+                      isCompleted
+                        ? "bg-create-accent text-create-accent-foreground shadow-sm"
+                        : isActive
+                          ? "bg-create-accent text-create-accent-foreground shadow-md animate-pulse-glow"
+                          : "bg-muted text-muted-foreground"
                     }
                   `}
                 >
@@ -67,11 +69,12 @@ export function StepperHeader({ step }: { step: number }) {
                 <p
                   className={`
                     text-sm font-[family-name:var(--font-outfit)] leading-tight transition-colors duration-200
-                    ${isActive
-                      ? "font-semibold text-foreground"
-                      : isCompleted
-                        ? "font-medium text-create-accent"
-                        : "font-normal text-muted-foreground"
+                    ${
+                      isActive
+                        ? "font-semibold text-foreground"
+                        : isCompleted
+                          ? "font-medium text-create-accent"
+                          : "font-normal text-muted-foreground"
                     }
                   `}
                 >
@@ -116,11 +119,12 @@ export function StepperHeader({ step }: { step: number }) {
                 key={s.id}
                 className={`
                   h-2 w-2 rounded-full transition-all duration-300
-                  ${isCompleted
-                    ? "bg-create-accent"
-                    : isActive
-                      ? "bg-create-accent animate-pulse-glow"
-                      : "bg-muted-foreground/30"
+                  ${
+                    isCompleted
+                      ? "bg-create-accent"
+                      : isActive
+                        ? "bg-create-accent animate-pulse-glow"
+                        : "bg-muted-foreground/30"
                   }
                 `}
               />

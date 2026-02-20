@@ -46,14 +46,17 @@ export default function HypercertMeasurementView({
               <dt className="text-xs font-[family-name:var(--font-outfit)] text-muted-foreground uppercase tracking-wider">
                 Measured On
               </dt>
-              <dd className="text-sm font-[family-name:var(--font-outfit)]" suppressHydrationWarning>
+              <dd
+                className="text-sm font-[family-name:var(--font-outfit)]"
+                suppressHydrationWarning
+              >
                 {new Date(measurement.createdAt).toLocaleString()}
               </dd>
             </div>
           </div>
 
           {/* Methodology */}
-          {measurement.measurementMethodURI && (
+          {measurement.measurementMethodURI ? (
             <div className="flex items-start gap-3">
               <FileText className="size-4 text-create-accent shrink-0 mt-0.5" />
               <div className="space-y-1 flex-1 min-w-0">
@@ -68,7 +71,7 @@ export default function HypercertMeasurementView({
                 </dd>
               </div>
             </div>
-          )}
+          ) : null}
 
           {/* Measurers */}
           <div className="flex items-start gap-3">
@@ -79,9 +82,13 @@ export default function HypercertMeasurementView({
               </dt>
               <dd className="space-y-1">
                 {measurement.measurers.map((measurer, index) => {
-                  const did = typeof measurer === "object" ? measurer.did : measurer;
+                  const did =
+                    typeof measurer === "object" ? measurer.did : measurer;
                   return (
-                    <div key={index} className="text-sm font-[family-name:var(--font-outfit)] break-all">
+                    <div
+                      key={index}
+                      className="text-sm font-[family-name:var(--font-outfit)] break-all"
+                    >
                       <URILink
                         uri={`https://bsky.app/profile/${did}`}
                         label={did}
@@ -94,20 +101,26 @@ export default function HypercertMeasurementView({
           </div>
 
           {/* Evidence */}
-          {measurement.evidenceURI && measurement.evidenceURI.length > 0 && (
+          {measurement.evidenceURI && measurement.evidenceURI.length > 0 ? (
             <div className="pt-4 border-t border-border/50">
               <dt className="text-xs font-[family-name:var(--font-outfit)] text-muted-foreground uppercase tracking-wider mb-2">
                 Evidence
               </dt>
               <dd className="space-y-1">
                 {measurement.evidenceURI.map((uri, index) => (
-                  <div key={index} className="text-sm font-[family-name:var(--font-outfit)] break-all">
-                    <URILink label={uri} uri={uri?.includes("https") ? uri : getPDSlsURI(uri)} />
+                  <div
+                    key={index}
+                    className="text-sm font-[family-name:var(--font-outfit)] break-all"
+                  >
+                    <URILink
+                      label={uri}
+                      uri={uri?.startsWith("https") ? uri : getPDSlsURI(uri)}
+                    />
                   </div>
                 ))}
               </dd>
             </div>
-          )}
+          ) : null}
         </dl>
       </CardContent>
     </Card>

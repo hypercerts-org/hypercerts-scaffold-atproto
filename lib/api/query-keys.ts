@@ -49,7 +49,12 @@ export const queryKeys = {
     constellation: {
       all: ["external", "constellation"] as const,
       backlinks: (subject: string, source: string) =>
-        [...queryKeys.external.constellation.all, "backlinks", subject, source] as const,
+        [
+          ...queryKeys.external.constellation.all,
+          "backlinks",
+          subject,
+          source,
+        ] as const,
     },
   },
 } as const;

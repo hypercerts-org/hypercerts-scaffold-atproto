@@ -10,7 +10,18 @@ import { addMeasurement, MeasurementLocationParam } from "@/lib/create-actions";
 import type { ProfileView } from "@atproto/api/dist/client/types/app/bsky/actor/defs";
 import type { CreateHypercertResult } from "@hypercerts-org/sdk-core";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Calendar, MapPin, Plus, PlusCircle, Trash, Wand2, BarChart3, Users, FlaskConical, FileCheck } from "lucide-react";
+import {
+  Calendar,
+  MapPin,
+  Plus,
+  PlusCircle,
+  Trash,
+  Wand2,
+  BarChart3,
+  Users,
+  FlaskConical,
+  FileCheck,
+} from "lucide-react";
 import { FormEventHandler, useState } from "react";
 import { toast } from "sonner";
 import FormFooter from "./form-footer";
@@ -109,14 +120,17 @@ export default function MeasurementForm({
       toast.success("Measurement added!");
       if (hypercertInfo.hypercertUri) {
         queryClient.invalidateQueries({
-          queryKey: queryKeys.hypercerts.measurements(hypercertInfo.hypercertUri),
+          queryKey: queryKeys.hypercerts.measurements(
+            hypercertInfo.hypercertUri,
+          ),
         });
       }
       onNext();
     },
     onError: (err) => {
       console.error(err);
-      toast.error("Failed to add measurement.");
+      const message = err instanceof Error ? err.message : "Unknown error";
+      toast.error(`Failed to add measurement: ${message}`);
     },
   });
 
@@ -174,7 +188,7 @@ export default function MeasurementForm({
     index: number,
     value: string,
     _uris: string[],
-    setter: React.Dispatch<React.SetStateAction<string[]>>
+    setter: React.Dispatch<React.SetStateAction<string[]>>,
   ) => {
     setter((prev) => {
       const newUris = [...prev];
@@ -185,7 +199,7 @@ export default function MeasurementForm({
 
   const addUriInput = (
     _uris: string[],
-    setter: React.Dispatch<React.SetStateAction<string[]>>
+    setter: React.Dispatch<React.SetStateAction<string[]>>,
   ) => {
     setter((prev) => [...prev, ""]);
   };
@@ -193,46 +207,43 @@ export default function MeasurementForm({
   const removeUriInput = (
     index: number,
     _uris: string[],
-    setter: React.Dispatch<React.SetStateAction<string[]>>
+    setter: React.Dispatch<React.SetStateAction<string[]>>,
   ) => {
     setter((prev) => prev.filter((_, i) => i !== index));
   };
 
   const buildLocationParams = (): MeasurementLocationParam[] => {
-    return locationEntries
-      .map((entry) => {
-        if (entry.mode === "string") {
-          return entry.stringValue.trim();
-        } else {
-          const effectiveLocationType =
-            entry.locationType === "other"
-              ? entry.locationTypeCustom.trim() || "coordinate-decimal"
-              : entry.locationType;
+    const result: MeasurementLocationParam[] = [];
+    for (const entry of locationEntries) {
+      if (entry.mode === "string") {
+        const str = entry.stringValue.trim();
+        if (str !== "") result.push(str);
+      } else {
+        const effectiveLocationType =
+          entry.locationType === "other"
+            ? entry.locationTypeCustom.trim() || "coordinate-decimal"
+            : entry.locationType;
 
-          const locationData =
-            entry.contentMode === "link"
-              ? entry.locationUrl.trim()
-              : entry.locationFile;
+        const locationData =
+          entry.contentMode === "link"
+            ? entry.locationUrl.trim()
+            : entry.locationFile;
 
-          if (!locationData) return null;
+        if (!locationData) continue;
 
-          return {
-            lpVersion: entry.lpVersion,
-            srs: entry.srs,
-            locationType: effectiveLocationType,
-            location: locationData,
-            ...(entry.name.trim() && { name: entry.name.trim() }),
-            ...(entry.description.trim() && {
-              description: entry.description.trim(),
-            }),
-          };
-        }
-      })
-      .filter((loc): loc is MeasurementLocationParam => {
-        if (loc === null) return false;
-        if (typeof loc === "string") return loc !== "";
-        return true;
-      });
+        result.push({
+          lpVersion: entry.lpVersion,
+          srs: entry.srs,
+          locationType: effectiveLocationType,
+          location: locationData,
+          ...(entry.name.trim() && { name: entry.name.trim() }),
+          ...(entry.description.trim() && {
+            description: entry.description.trim(),
+          }),
+        });
+      }
+    }
+    return result;
   };
 
   const addLocationEntry = () => {
@@ -243,14 +254,9 @@ export default function MeasurementForm({
     setLocationEntries((prev) => prev.filter((entry) => entry.id !== id));
   };
 
-  const updateLocationEntry = (
-    id: string,
-    updates: Partial<LocationEntry>
-  ) => {
+  const updateLocationEntry = (id: string, updates: Partial<LocationEntry>) => {
     setLocationEntries((prev) =>
-      prev.map((entry) =>
-        entry.id === id ? { ...entry, ...updates } : entry
-      )
+      prev.map((entry) => (entry.id === id ? { ...entry, ...updates } : entry)),
     );
   };
 
@@ -261,10 +267,11 @@ export default function MeasurementForm({
       return;
     }
 
-    const allMeasurerDids = [
-      ...measurers.map((m) => m.did),
-      ...manualDids.filter((did) => did.trim() !== ""),
-    ];
+    const allMeasurerDids: string[] = [];
+    for (const m of measurers) allMeasurerDids.push(m.did);
+    for (const did of manualDids) {
+      if (did.trim() !== "") allMeasurerDids.push(did);
+    }
 
     const locationParams = useLocations ? buildLocationParams() : [];
 
@@ -274,7 +281,8 @@ export default function MeasurementForm({
       value,
       unit,
       ...(allMeasurerDids.length > 0 && { measurers: allMeasurerDids }),
-      ...(useDates && startDate && { startDate: new Date(startDate).toISOString() }),
+      ...(useDates &&
+        startDate && { startDate: new Date(startDate).toISOString() }),
       ...(useDates && endDate && { endDate: new Date(endDate).toISOString() }),
       ...(useMethod && methodType && { methodType }),
       ...(useMethod && methodUri && { methodURI: methodUri }),
@@ -288,7 +296,7 @@ export default function MeasurementForm({
 
   return (
     <FormInfo
-      stepLabel="Step 5 of 6"
+      stepLabel="Step 4 of 5"
       title="Add Measurement"
       description="Record measurement data related to your hypercert."
     >
@@ -400,7 +408,12 @@ export default function MeasurementForm({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="metric" className="text-sm font-[family-name:var(--font-outfit)] font-medium">Metric *</Label>
+            <Label
+              htmlFor="metric"
+              className="text-sm font-[family-name:var(--font-outfit)] font-medium"
+            >
+              Metric *
+            </Label>
             <Input
               id="metric"
               value={metric}
@@ -415,7 +428,12 @@ export default function MeasurementForm({
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="value" className="text-sm font-[family-name:var(--font-outfit)] font-medium">Value *</Label>
+              <Label
+                htmlFor="value"
+                className="text-sm font-[family-name:var(--font-outfit)] font-medium"
+              >
+                Value *
+              </Label>
               <Input
                 id="value"
                 value={value}
@@ -428,7 +446,12 @@ export default function MeasurementForm({
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="unit" className="text-sm font-[family-name:var(--font-outfit)] font-medium">Unit *</Label>
+              <Label
+                htmlFor="unit"
+                className="text-sm font-[family-name:var(--font-outfit)] font-medium"
+              >
+                Unit *
+              </Label>
               <Input
                 id="unit"
                 value={unit}
@@ -453,7 +476,11 @@ export default function MeasurementForm({
             disabled={mutation.isPending}
             className="gap-2 font-[family-name:var(--font-outfit)]"
           >
-            {useDates ? <Trash className="h-3.5 w-3.5" /> : <Calendar className="h-3.5 w-3.5" />}
+            {useDates ? (
+              <Trash className="h-3.5 w-3.5" />
+            ) : (
+              <Calendar className="h-3.5 w-3.5" />
+            )}
             {useDates ? "Remove Dates" : "Add Dates"}
           </Button>
 
@@ -461,7 +488,12 @@ export default function MeasurementForm({
             <div className="space-y-4 pl-4 border-l-2 border-create-accent/30 animate-fade-in-up">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="start-date" className="text-sm font-[family-name:var(--font-outfit)] font-medium">Start Date</Label>
+                  <Label
+                    htmlFor="start-date"
+                    className="text-sm font-[family-name:var(--font-outfit)] font-medium"
+                  >
+                    Start Date
+                  </Label>
                   <Input
                     id="start-date"
                     type="datetime-local"
@@ -472,7 +504,12 @@ export default function MeasurementForm({
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="end-date" className="text-sm font-[family-name:var(--font-outfit)] font-medium">End Date</Label>
+                  <Label
+                    htmlFor="end-date"
+                    className="text-sm font-[family-name:var(--font-outfit)] font-medium"
+                  >
+                    End Date
+                  </Label>
                   <Input
                     id="end-date"
                     type="datetime-local"
@@ -497,14 +534,23 @@ export default function MeasurementForm({
             disabled={mutation.isPending}
             className="gap-2 font-[family-name:var(--font-outfit)]"
           >
-            {useMethod ? <Trash className="h-3.5 w-3.5" /> : <FlaskConical className="h-3.5 w-3.5" />}
+            {useMethod ? (
+              <Trash className="h-3.5 w-3.5" />
+            ) : (
+              <FlaskConical className="h-3.5 w-3.5" />
+            )}
             {useMethod ? "Remove Methodology" : "Add Methodology"}
           </Button>
 
           {useMethod && (
             <div className="space-y-4 pl-4 border-l-2 border-create-accent/30 animate-fade-in-up">
               <div className="space-y-2">
-                <Label htmlFor="method-type" className="text-sm font-[family-name:var(--font-outfit)] font-medium">Method Type</Label>
+                <Label
+                  htmlFor="method-type"
+                  className="text-sm font-[family-name:var(--font-outfit)] font-medium"
+                >
+                  Method Type
+                </Label>
                 <Input
                   id="method-type"
                   type="text"
@@ -516,11 +562,17 @@ export default function MeasurementForm({
                   className="font-[family-name:var(--font-outfit)]"
                 />
                 <p className="text-[11px] font-[family-name:var(--font-outfit)] text-muted-foreground">
-                  Short identifier for the measurement methodology (max 30 chars)
+                  Short identifier for the measurement methodology (max 30
+                  chars)
                 </p>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="method-uri" className="text-sm font-[family-name:var(--font-outfit)] font-medium">Method URI</Label>
+                <Label
+                  htmlFor="method-uri"
+                  className="text-sm font-[family-name:var(--font-outfit)] font-medium"
+                >
+                  Method URI
+                </Label>
                 <Input
                   id="method-uri"
                   type="text"
@@ -545,13 +597,19 @@ export default function MeasurementForm({
             disabled={mutation.isPending}
             className="gap-2 font-[family-name:var(--font-outfit)]"
           >
-            {useEvidence ? <Trash className="h-3.5 w-3.5" /> : <FileCheck className="h-3.5 w-3.5" />}
+            {useEvidence ? (
+              <Trash className="h-3.5 w-3.5" />
+            ) : (
+              <FileCheck className="h-3.5 w-3.5" />
+            )}
             {useEvidence ? "Remove Evidence" : "Add Evidence"}
           </Button>
 
           {useEvidence && (
             <div className="space-y-2 pl-4 border-l-2 border-create-accent/30 animate-fade-in-up">
-              <Label className="text-sm font-[family-name:var(--font-outfit)] font-medium">Evidence URIs</Label>
+              <Label className="text-sm font-[family-name:var(--font-outfit)] font-medium">
+                Evidence URIs
+              </Label>
               {evidenceUris.map((uri, index) => (
                 <div key={index} className="flex items-center gap-2">
                   <Input
@@ -559,7 +617,12 @@ export default function MeasurementForm({
                     placeholder="https://example.com/data.csv or at://did:plc:..."
                     value={uri}
                     onChange={(e) =>
-                      handleUriChange(index, e.target.value, evidenceUris, setEvidenceUris)
+                      handleUriChange(
+                        index,
+                        e.target.value,
+                        evidenceUris,
+                        setEvidenceUris,
+                      )
                     }
                     disabled={mutation.isPending}
                     className="font-[family-name:var(--font-outfit)]"
@@ -567,7 +630,9 @@ export default function MeasurementForm({
                   <Button
                     variant="ghost"
                     size="icon"
-                    onClick={() => removeUriInput(index, evidenceUris, setEvidenceUris)}
+                    onClick={() =>
+                      removeUriInput(index, evidenceUris, setEvidenceUris)
+                    }
                     disabled={evidenceUris.length === 1 || mutation.isPending}
                     className="text-muted-foreground hover:text-destructive"
                   >
@@ -615,7 +680,11 @@ export default function MeasurementForm({
             disabled={mutation.isPending}
             className="gap-2 font-[family-name:var(--font-outfit)]"
           >
-            {useLocations ? <Trash className="h-3.5 w-3.5" /> : <Plus className="h-3.5 w-3.5" />}
+            {useLocations ? (
+              <Trash className="h-3.5 w-3.5" />
+            ) : (
+              <Plus className="h-3.5 w-3.5" />
+            )}
             {useLocations ? "Remove Locations" : "Add Locations"}
           </Button>
 
@@ -635,7 +704,9 @@ export default function MeasurementForm({
                       variant="ghost"
                       size="icon"
                       onClick={() => removeLocationEntry(entry.id)}
-                      disabled={locationEntries.length === 1 || mutation.isPending}
+                      disabled={
+                        locationEntries.length === 1 || mutation.isPending
+                      }
                       className="text-muted-foreground hover:text-destructive"
                     >
                       <Trash className="h-4 w-4" />
@@ -644,13 +715,19 @@ export default function MeasurementForm({
 
                   {/* Mode selector */}
                   <div className="space-y-2">
-                    <Label className="text-sm font-[family-name:var(--font-outfit)] font-medium">Location Mode</Label>
+                    <Label className="text-sm font-[family-name:var(--font-outfit)] font-medium">
+                      Location Mode
+                    </Label>
                     <div className="flex gap-2">
                       <Button
                         type="button"
-                        variant={entry.mode === "string" ? "default" : "outline"}
+                        variant={
+                          entry.mode === "string" ? "default" : "outline"
+                        }
                         size="sm"
-                        onClick={() => updateLocationEntry(entry.id, { mode: "string" })}
+                        onClick={() =>
+                          updateLocationEntry(entry.id, { mode: "string" })
+                        }
                         disabled={mutation.isPending}
                         className="font-[family-name:var(--font-outfit)]"
                       >
@@ -658,9 +735,13 @@ export default function MeasurementForm({
                       </Button>
                       <Button
                         type="button"
-                        variant={entry.mode === "create" ? "default" : "outline"}
+                        variant={
+                          entry.mode === "create" ? "default" : "outline"
+                        }
                         size="sm"
-                        onClick={() => updateLocationEntry(entry.id, { mode: "create" })}
+                        onClick={() =>
+                          updateLocationEntry(entry.id, { mode: "create" })
+                        }
                         disabled={mutation.isPending}
                         className="font-[family-name:var(--font-outfit)]"
                       >
@@ -671,38 +752,55 @@ export default function MeasurementForm({
 
                   {entry.mode === "string" ? (
                     <div className="space-y-2">
-                      <Label className="text-sm font-[family-name:var(--font-outfit)] font-medium">Location Reference</Label>
+                      <Label className="text-sm font-[family-name:var(--font-outfit)] font-medium">
+                        Location Reference
+                      </Label>
                       <Input
                         type="text"
                         placeholder="at://did:plc:xxx/app.certified.location/xxx or simple string"
                         value={entry.stringValue}
                         onChange={(e) =>
-                          updateLocationEntry(entry.id, { stringValue: e.target.value })
+                          updateLocationEntry(entry.id, {
+                            stringValue: e.target.value,
+                          })
                         }
                         disabled={mutation.isPending}
                         className="font-[family-name:var(--font-outfit)]"
                       />
                       <p className="text-[11px] font-[family-name:var(--font-outfit)] text-muted-foreground">
-                        Enter an AT-URI to an existing location record or a simple string identifier
+                        Enter an AT-URI to an existing location record or a
+                        simple string identifier
                       </p>
                     </div>
                   ) : (
                     <div className="space-y-4">
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="space-y-2">
-                          <Label className="text-sm font-[family-name:var(--font-outfit)] font-medium">Location Protocol Version *</Label>
+                          <Label className="text-sm font-[family-name:var(--font-outfit)] font-medium">
+                            Location Protocol Version *
+                          </Label>
                           <Input
                             value={entry.lpVersion}
-                            onChange={(e) => updateLocationEntry(entry.id, { lpVersion: e.target.value })}
+                            onChange={(e) =>
+                              updateLocationEntry(entry.id, {
+                                lpVersion: e.target.value,
+                              })
+                            }
                             disabled={mutation.isPending}
                             className="font-[family-name:var(--font-outfit)]"
                           />
                         </div>
                         <div className="space-y-2">
-                          <Label className="text-sm font-[family-name:var(--font-outfit)] font-medium">Spatial Reference System (SRS) *</Label>
+                          <Label className="text-sm font-[family-name:var(--font-outfit)] font-medium">
+                            Spatial Reference System (SRS) *
+                          </Label>
                           <Input
                             value={entry.srs}
-                            onChange={(e) => updateLocationEntry(entry.id, { srs: e.target.value })}
+                            onChange={(e) =>
+                              updateLocationEntry(entry.id, {
+                                srs: e.target.value,
+                              })
+                            }
                             disabled={mutation.isPending}
                             className="font-[family-name:var(--font-outfit)]"
                           />
@@ -713,13 +811,23 @@ export default function MeasurementForm({
                       </div>
 
                       <div className="space-y-2">
-                        <Label className="text-sm font-[family-name:var(--font-outfit)] font-medium">Location Type *</Label>
+                        <Label className="text-sm font-[family-name:var(--font-outfit)] font-medium">
+                          Location Type *
+                        </Label>
                         <div className="flex flex-wrap gap-2">
                           <Button
                             type="button"
-                            variant={entry.locationType === "coordinate-decimal" ? "default" : "outline"}
+                            variant={
+                              entry.locationType === "coordinate-decimal"
+                                ? "default"
+                                : "outline"
+                            }
                             size="sm"
-                            onClick={() => updateLocationEntry(entry.id, { locationType: "coordinate-decimal" })}
+                            onClick={() =>
+                              updateLocationEntry(entry.id, {
+                                locationType: "coordinate-decimal",
+                              })
+                            }
                             disabled={mutation.isPending}
                             className="font-[family-name:var(--font-outfit)]"
                           >
@@ -727,9 +835,17 @@ export default function MeasurementForm({
                           </Button>
                           <Button
                             type="button"
-                            variant={entry.locationType === "geojson-point" ? "default" : "outline"}
+                            variant={
+                              entry.locationType === "geojson-point"
+                                ? "default"
+                                : "outline"
+                            }
                             size="sm"
-                            onClick={() => updateLocationEntry(entry.id, { locationType: "geojson-point" })}
+                            onClick={() =>
+                              updateLocationEntry(entry.id, {
+                                locationType: "geojson-point",
+                              })
+                            }
                             disabled={mutation.isPending}
                             className="font-[family-name:var(--font-outfit)]"
                           >
@@ -737,9 +853,17 @@ export default function MeasurementForm({
                           </Button>
                           <Button
                             type="button"
-                            variant={entry.locationType === "other" ? "default" : "outline"}
+                            variant={
+                              entry.locationType === "other"
+                                ? "default"
+                                : "outline"
+                            }
                             size="sm"
-                            onClick={() => updateLocationEntry(entry.id, { locationType: "other" })}
+                            onClick={() =>
+                              updateLocationEntry(entry.id, {
+                                locationType: "other",
+                              })
+                            }
                             disabled={mutation.isPending}
                             className="font-[family-name:var(--font-outfit)]"
                           >
@@ -750,7 +874,11 @@ export default function MeasurementForm({
                           <Input
                             placeholder="Custom locationType identifier"
                             value={entry.locationTypeCustom}
-                            onChange={(e) => updateLocationEntry(entry.id, { locationTypeCustom: e.target.value })}
+                            onChange={(e) =>
+                              updateLocationEntry(entry.id, {
+                                locationTypeCustom: e.target.value,
+                              })
+                            }
                             className="mt-2 font-[family-name:var(--font-outfit)]"
                             disabled={mutation.isPending}
                           />
@@ -758,11 +886,17 @@ export default function MeasurementForm({
                       </div>
 
                       <div className="space-y-2">
-                        <Label className="text-sm font-[family-name:var(--font-outfit)] font-medium">Location Name (Optional)</Label>
+                        <Label className="text-sm font-[family-name:var(--font-outfit)] font-medium">
+                          Location Name (Optional)
+                        </Label>
                         <Input
                           placeholder="e.g., Kathmandu Office, Field Site A"
                           value={entry.name}
-                          onChange={(e) => updateLocationEntry(entry.id, { name: e.target.value })}
+                          onChange={(e) =>
+                            updateLocationEntry(entry.id, {
+                              name: e.target.value,
+                            })
+                          }
                           maxLength={256}
                           disabled={mutation.isPending}
                           className="font-[family-name:var(--font-outfit)]"
@@ -770,11 +904,17 @@ export default function MeasurementForm({
                       </div>
 
                       <div className="space-y-2">
-                        <Label className="text-sm font-[family-name:var(--font-outfit)] font-medium">Location Description (Optional)</Label>
+                        <Label className="text-sm font-[family-name:var(--font-outfit)] font-medium">
+                          Location Description (Optional)
+                        </Label>
                         <Textarea
                           placeholder="Describe the location, region coverage, or context..."
                           value={entry.description}
-                          onChange={(e) => updateLocationEntry(entry.id, { description: e.target.value })}
+                          onChange={(e) =>
+                            updateLocationEntry(entry.id, {
+                              description: e.target.value,
+                            })
+                          }
                           rows={2}
                           disabled={mutation.isPending}
                           className="font-[family-name:var(--font-outfit)]"
@@ -785,10 +925,20 @@ export default function MeasurementForm({
                         label="Location Data *"
                         fileUploadDisabled={false}
                         mode={entry.contentMode}
-                        onModeChange={(mode) => updateLocationEntry(entry.id, { contentMode: mode as LocationContentMode })}
+                        onModeChange={(mode) =>
+                          updateLocationEntry(entry.id, {
+                            contentMode: mode as LocationContentMode,
+                          })
+                        }
                         urlPlaceholder="https://example.com/location.json"
-                        onUrlChange={(url) => updateLocationEntry(entry.id, { locationUrl: url })}
-                        onFileChange={(e) => updateLocationEntry(entry.id, { locationFile: e.target.files?.[0] ?? null })}
+                        onUrlChange={(url) =>
+                          updateLocationEntry(entry.id, { locationUrl: url })
+                        }
+                        onFileChange={(e) =>
+                          updateLocationEntry(entry.id, {
+                            locationFile: e.target.files?.[0] ?? null,
+                          })
+                        }
                         required
                         urlHelpText="Link to a resource encoding the location (e.g., GeoJSON point, CSV with coordinates)."
                         fileHelpText="Upload a file that contains location data. It will be stored as a blob."
@@ -822,13 +972,22 @@ export default function MeasurementForm({
             disabled={mutation.isPending}
             className="gap-2 font-[family-name:var(--font-outfit)]"
           >
-            {useComment ? <Trash className="h-3.5 w-3.5" /> : <Plus className="h-3.5 w-3.5" />}
+            {useComment ? (
+              <Trash className="h-3.5 w-3.5" />
+            ) : (
+              <Plus className="h-3.5 w-3.5" />
+            )}
             {useComment ? "Remove Comment" : "Add Comment"}
           </Button>
 
           {useComment && (
             <div className="space-y-2 pl-4 border-l-2 border-create-accent/30 animate-fade-in-up">
-              <Label htmlFor="comment" className="text-sm font-[family-name:var(--font-outfit)] font-medium">Comment</Label>
+              <Label
+                htmlFor="comment"
+                className="text-sm font-[family-name:var(--font-outfit)] font-medium"
+              >
+                Comment
+              </Label>
               <Textarea
                 id="comment"
                 value={comment}

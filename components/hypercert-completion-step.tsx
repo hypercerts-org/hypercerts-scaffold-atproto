@@ -50,13 +50,20 @@ export default function HypercertCompletionStep({
           <h2 className="text-2xl lg:text-3xl font-[family-name:var(--font-syne)] font-bold tracking-tight text-foreground mb-2 animate-fade-in-up">
             Hypercert Created
           </h2>
-          <p className="text-sm font-[family-name:var(--font-outfit)] text-muted-foreground max-w-md mx-auto mb-8 animate-fade-in-up" style={{ animationDelay: "100ms" }}>
-            Your impact claim is now live. Share it, view the details, or create another one.
+          <p
+            className="text-sm font-[family-name:var(--font-outfit)] text-muted-foreground max-w-md mx-auto mb-8 animate-fade-in-up"
+            style={{ animationDelay: "100ms" }}
+          >
+            Your impact claim is now live. Share it, view the details, or create
+            another one.
           </p>
 
           {/* CID display */}
-          {hypercertInfo?.hypercertCid && (
-            <div className="inline-block glass-panel rounded-xl px-5 py-3 mb-8 animate-fade-in-up" style={{ animationDelay: "200ms" }}>
+          {hypercertInfo?.hypercertCid ? (
+            <div
+              className="inline-block glass-panel rounded-xl px-5 py-3 mb-8 animate-fade-in-up"
+              style={{ animationDelay: "200ms" }}
+            >
               <p className="text-[11px] uppercase tracking-wider font-[family-name:var(--font-outfit)] font-medium text-muted-foreground mb-1">
                 Content Identifier
               </p>
@@ -64,18 +71,24 @@ export default function HypercertCompletionStep({
                 {hypercertInfo.hypercertCid}
               </p>
             </div>
-          )}
+          ) : null}
 
-          {!hypercertInfo?.hypercertCid && (
-            <p className="text-sm font-[family-name:var(--font-outfit)] text-muted-foreground mb-8 animate-fade-in-up" style={{ animationDelay: "200ms" }}>
-              We couldn&apos;t resolve a specific hypercert ID, but your
-              record should now be available in your hypercerts list.
+          {!hypercertInfo?.hypercertCid ? (
+            <p
+              className="text-sm font-[family-name:var(--font-outfit)] text-muted-foreground mb-8 animate-fade-in-up"
+              style={{ animationDelay: "200ms" }}
+            >
+              We couldn&apos;t resolve a specific hypercert ID, but your record
+              should now be available in your hypercerts list.
             </p>
-          )}
+          ) : null}
 
           {/* Actions */}
-          <div className="flex flex-wrap items-center justify-center gap-3 animate-fade-in-up" style={{ animationDelay: "300ms" }}>
-            {onBack && (
+          <div
+            className="flex flex-wrap items-center justify-center gap-3 animate-fade-in-up"
+            style={{ animationDelay: "300ms" }}
+          >
+            {onBack ? (
               <Button
                 type="button"
                 variant="ghost"
@@ -85,18 +98,18 @@ export default function HypercertCompletionStep({
                 <ArrowLeft className="h-4 w-4" />
                 Back
               </Button>
-            )}
+            ) : null}
 
-            {hypercertInfo?.hypercertCid && (
+            {hypercertInfo?.hypercertCid ? (
               <Link href={viewHref}>
                 <Button className="gap-2 bg-create-accent hover:bg-create-accent/90 text-create-accent-foreground font-[family-name:var(--font-outfit)] font-medium shadow-sm">
                   <ExternalLink className="h-4 w-4" />
                   View Hypercert
                 </Button>
               </Link>
-            )}
+            ) : null}
 
-            {onCreateAnother && (
+            {onCreateAnother ? (
               <Button
                 type="button"
                 variant="outline"
@@ -106,7 +119,7 @@ export default function HypercertCompletionStep({
                 <Plus className="h-4 w-4" />
                 Create Another
               </Button>
-            )}
+            ) : null}
           </div>
         </div>
       </div>

@@ -54,7 +54,7 @@ export default function HypercertEvaluationView({
         </p>
 
         {/* Score */}
-        {evaluation.score != null && (
+        {evaluation.score != null ? (
           <div className="inline-flex flex-col gap-2 px-5 py-4 bg-create-accent/10 border border-create-accent/20 rounded-xl">
             <p className="text-xs font-[family-name:var(--font-outfit)] text-create-accent uppercase tracking-wider font-semibold">
               Score
@@ -66,7 +66,7 @@ export default function HypercertEvaluationView({
               </span>
             </p>
           </div>
-        )}
+        ) : null}
 
         {/* Metadata */}
         <dl className="space-y-4">
@@ -79,9 +79,13 @@ export default function HypercertEvaluationView({
               </dt>
               <dd className="space-y-1">
                 {evaluation.evaluators.map((evaluator, index) => {
-                  const did = typeof evaluator === "object" ? evaluator.did : evaluator;
+                  const did =
+                    typeof evaluator === "object" ? evaluator.did : evaluator;
                   return (
-                    <div key={index} className="text-sm font-[family-name:var(--font-outfit)] break-all">
+                    <div
+                      key={index}
+                      className="text-sm font-[family-name:var(--font-outfit)] break-all"
+                    >
                       <URILink
                         uri={`https://bsky.app/profile/${did}`}
                         label={did}
@@ -94,7 +98,7 @@ export default function HypercertEvaluationView({
           </div>
 
           {/* Content */}
-          {evaluation.content && evaluation.content.length > 0 && (
+          {evaluation.content && evaluation.content.length > 0 ? (
             <div className="flex items-start gap-3 pt-4 border-t border-border/50">
               <FileText className="size-4 text-create-accent shrink-0 mt-0.5" />
               <div className="space-y-2 flex-1 min-w-0">
@@ -103,7 +107,10 @@ export default function HypercertEvaluationView({
                 </dt>
                 <dd className="space-y-1">
                   {evaluation.content.map((uri, index) => (
-                    <div key={index} className="text-sm font-[family-name:var(--font-outfit)] break-all">
+                    <div
+                      key={index}
+                      className="text-sm font-[family-name:var(--font-outfit)] break-all"
+                    >
                       <URILink
                         label={uri}
                         uri={uri.includes("https") ? uri : getPDSlsURI(uri)}
@@ -113,10 +120,10 @@ export default function HypercertEvaluationView({
                 </dd>
               </div>
             </div>
-          )}
+          ) : null}
 
           {/* Referenced Measurements */}
-          {evaluation.measurements && evaluation.measurements.length > 0 && (
+          {evaluation.measurements && evaluation.measurements.length > 0 ? (
             <div className="flex items-start gap-3 pt-4 border-t border-border/50">
               <FileText className="size-4 text-create-accent shrink-0 mt-0.5" />
               <div className="space-y-2 flex-1 min-w-0">
@@ -125,7 +132,10 @@ export default function HypercertEvaluationView({
                 </dt>
                 <dd className="space-y-1">
                   {evaluation.measurements.map((uri, index) => (
-                    <div key={index} className="text-sm font-[family-name:var(--font-outfit)] break-all">
+                    <div
+                      key={index}
+                      className="text-sm font-[family-name:var(--font-outfit)] break-all"
+                    >
                       <URILink
                         label={uri}
                         uri={uri.includes("https") ? uri : getPDSlsURI(uri)}
@@ -135,10 +145,10 @@ export default function HypercertEvaluationView({
                 </dd>
               </div>
             </div>
-          )}
+          ) : null}
 
           {/* Location */}
-          {evaluation.location && (
+          {evaluation.location ? (
             <div className="flex items-start gap-3 pt-4 border-t border-border/50">
               <MapPin className="size-4 text-create-accent shrink-0 mt-0.5" />
               <div className="space-y-1 flex-1 min-w-0">
@@ -157,7 +167,7 @@ export default function HypercertEvaluationView({
                 </dd>
               </div>
             </div>
-          )}
+          ) : null}
         </dl>
       </CardContent>
     </Card>

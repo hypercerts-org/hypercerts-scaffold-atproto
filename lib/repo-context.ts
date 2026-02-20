@@ -39,12 +39,17 @@ export interface RepoContext {
  * the user's session, and returns both the server-routed repository and a target-scoped repo.
  */
 export const getRepoContext = cache(async function getRepoContext(
-  options: RepoContextOptions = {}
+  options: RepoContextOptions = {},
 ): Promise<RepoContext | null> {
   const cookieStore = await cookies();
 
   const userDid = cookieStore.get("user-did")?.value;
-  if (!userDid) return null;
+  if (!userDid) {
+    console.warn(
+      "[getRepoContext] No user-did cookie found; user is not logged in or session has expired.",
+    );
+    return null;
+  }
 
   const activeDid = cookieStore.get("active-did")?.value || userDid;
   const targetDid = options.targetDid || activeDid;
@@ -62,7 +67,7 @@ export const getRepoContext = cache(async function getRepoContext(
   } catch (error) {
     console.error(
       `Failed to build repo context (userDid=${userDid}, targetDid=${targetDid}, server=${server}):`,
-      error
+      error,
     );
     return null;
   }

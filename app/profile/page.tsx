@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
-import { getAuthenticatedRepo, getSession } from "@/lib/atproto-session";
+import { getAuthenticatedRepo } from "@/lib/atproto-session";
 import ProfileForm from "@/components/profile-form";
-import { getBlobURL, convertBlobUrlToCdn } from "@/lib/utils";
+import { convertBlobUrlToCdn } from "@/lib/utils";
 import { UserCircle } from "lucide-react";
 
 export const metadata: Metadata = {

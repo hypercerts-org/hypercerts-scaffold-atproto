@@ -49,17 +49,25 @@ export default function HypercertEvidenceForm({
   const [evidenceFile, setEvidenceFile] = useState<File | null>(null);
 
   // Location state
-  const [locationMode, setLocationMode] = useState<"none" | "string" | "create">("none");
+  const [locationMode, setLocationMode] = useState<
+    "none" | "string" | "create"
+  >("none");
   const [locationString, setLocationString] = useState("");
 
   // For create mode
   const [lpVersion, setLpVersion] = useState("1.0.0");
-  const [srs, setSrs] = useState("http://www.opengis.net/def/crs/OGC/1.3/CRS84");
-  const [locationType, setLocationType] = useState<"coordinate-decimal" | "geojson-point" | "other">("coordinate-decimal");
+  const [srs, setSrs] = useState(
+    "http://www.opengis.net/def/crs/OGC/1.3/CRS84",
+  );
+  const [locationType, setLocationType] = useState<
+    "coordinate-decimal" | "geojson-point" | "other"
+  >("coordinate-decimal");
   const [locationTypeCustom, setLocationTypeCustom] = useState("");
   const [locationName, setLocationName] = useState("");
   const [locationDescription, setLocationDescription] = useState("");
-  const [locationContentMode, setLocationContentMode] = useState<"link" | "file">("link");
+  const [locationContentMode, setLocationContentMode] = useState<
+    "link" | "file"
+  >("link");
   const [locationUrl, setLocationUrl] = useState("");
   const [locationFile, setLocationFile] = useState<File | null>(null);
 
@@ -74,7 +82,9 @@ export default function HypercertEvidenceForm({
     setEvidenceFile(file ?? null);
   };
 
-  const handleLocationFileChange: React.ChangeEventHandler<HTMLInputElement> = (e) => {
+  const handleLocationFileChange: React.ChangeEventHandler<HTMLInputElement> = (
+    e,
+  ) => {
     const file = e.target.files?.[0];
     setLocationFile(file ?? null);
   };
@@ -93,28 +103,30 @@ export default function HypercertEvidenceForm({
 
   const buildLocationParam = (): AttachmentLocationParam | undefined => {
     if (locationMode === "none") return undefined;
-    
+
     if (locationMode === "string") {
       return locationString.trim() || undefined;
     }
-    
-    const effectiveLocationType = locationType === "other" 
-      ? locationTypeCustom.trim() || "coordinate-decimal"
-      : locationType;
-    
-    const locationData = locationContentMode === "link" 
-      ? locationUrl.trim()
-      : locationFile;
-    
+
+    const effectiveLocationType =
+      locationType === "other"
+        ? locationTypeCustom.trim() || "coordinate-decimal"
+        : locationType;
+
+    const locationData =
+      locationContentMode === "link" ? locationUrl.trim() : locationFile;
+
     if (!locationData) return undefined;
-    
+
     return {
       lpVersion,
       srs,
       locationType: effectiveLocationType,
       location: locationData,
       ...(locationName.trim() && { name: locationName.trim() }),
-      ...(locationDescription.trim() && { description: locationDescription.trim() }),
+      ...(locationDescription.trim() && {
+        description: locationDescription.trim(),
+      }),
     };
   };
 
@@ -144,7 +156,10 @@ export default function HypercertEvidenceForm({
       return false;
     }
 
-    if (contentType && !CONTENT_TYPES.includes(contentType as any)) {
+    if (
+      contentType &&
+      !(CONTENT_TYPES as readonly string[]).includes(contentType)
+    ) {
       toast.error("Invalid content type.");
       return false;
     }
@@ -156,10 +171,10 @@ export default function HypercertEvidenceForm({
     setTitle("Audit Report: Impact Verification");
     setContentType("audit");
     setShortDescription(
-      "This audit report verifies the outputs and outcomes claimed by the hypercert, including methodology and third-party validation."
+      "This audit report verifies the outputs and outcomes claimed by the hypercert, including methodology and third-party validation.",
     );
     setDescription(
-      "This document provides an independent verification of the hypercert claim. It includes:\n\n- A breakdown of the methodology used\n- Supporting quantitative metrics\n- Third-party validation steps\n- References to supporting documentation and outcomes\n\nUse this evidence to substantiate the core claim and demonstrate credibility."
+      "This document provides an independent verification of the hypercert claim. It includes:\n\n- A breakdown of the methodology used\n- Supporting quantitative metrics\n- Third-party validation steps\n- References to supporting documentation and outcomes\n\nUse this evidence to substantiate the core claim and demonstrate credibility.",
     );
 
     setEvidenceMode("link");
@@ -201,14 +216,15 @@ export default function HypercertEvidenceForm({
       hypercertUri: hypercertInfo.hypercertUri,
       evidenceMode,
       evidenceUrl: evidenceMode === "link" ? evidenceUrl.trim() : undefined,
-      evidenceFile: evidenceMode === "file" ? evidenceFile ?? undefined : undefined,
+      evidenceFile:
+        evidenceMode === "file" ? (evidenceFile ?? undefined) : undefined,
       location,
     });
   };
 
   return (
     <FormInfo
-      stepLabel="Step 3 of 6"
+      stepLabel="Step 2 of 5"
       title="Add Evidence"
       description="Attach a link or file that backs up this hypercert claim."
     >
@@ -229,7 +245,10 @@ export default function HypercertEvidenceForm({
 
         {/* Title */}
         <div className="space-y-2">
-          <Label htmlFor="title" className="text-sm font-[family-name:var(--font-outfit)] font-medium">
+          <Label
+            htmlFor="title"
+            className="text-sm font-[family-name:var(--font-outfit)] font-medium"
+          >
             Title *
           </Label>
           <Input
@@ -249,7 +268,10 @@ export default function HypercertEvidenceForm({
             <div className="h-6 w-6 rounded-lg bg-create-accent/10 flex items-center justify-center">
               <FileText className="h-3.5 w-3.5 text-create-accent" />
             </div>
-            <Label htmlFor="contentType" className="text-sm font-[family-name:var(--font-outfit)] font-medium">
+            <Label
+              htmlFor="contentType"
+              className="text-sm font-[family-name:var(--font-outfit)] font-medium"
+            >
               Attachment Type *
             </Label>
           </div>
@@ -257,7 +279,10 @@ export default function HypercertEvidenceForm({
             value={contentType}
             onValueChange={(val) => setContentType(val)}
           >
-            <SelectTrigger id="contentType" className="font-[family-name:var(--font-outfit)]">
+            <SelectTrigger
+              id="contentType"
+              className="font-[family-name:var(--font-outfit)]"
+            >
               <SelectValue placeholder="Choose the type of attachment..." />
             </SelectTrigger>
             <SelectContent>
@@ -275,7 +300,10 @@ export default function HypercertEvidenceForm({
 
         {/* Short Description */}
         <div className="space-y-2">
-          <Label htmlFor="shortDescription" className="text-sm font-[family-name:var(--font-outfit)] font-medium">
+          <Label
+            htmlFor="shortDescription"
+            className="text-sm font-[family-name:var(--font-outfit)] font-medium"
+          >
             Short Description *
           </Label>
           <Textarea
@@ -295,7 +323,10 @@ export default function HypercertEvidenceForm({
 
         {/* Detailed Description */}
         <div className="space-y-2">
-          <Label htmlFor="description" className="text-sm font-[family-name:var(--font-outfit)] font-medium">
+          <Label
+            htmlFor="description"
+            className="text-sm font-[family-name:var(--font-outfit)] font-medium"
+          >
             Detailed Description (Optional)
           </Label>
           <Textarea
@@ -385,7 +416,10 @@ export default function HypercertEvidenceForm({
           {/* String mode */}
           {locationMode === "string" && (
             <div className="space-y-2 animate-fade-in-up">
-              <Label htmlFor="locationString" className="text-sm font-[family-name:var(--font-outfit)] font-medium">
+              <Label
+                htmlFor="locationString"
+                className="text-sm font-[family-name:var(--font-outfit)] font-medium"
+              >
                 Location Reference
               </Label>
               <Input
@@ -407,7 +441,10 @@ export default function HypercertEvidenceForm({
             <div className="space-y-4 animate-fade-in-up rounded-xl border border-border/60 bg-muted/20 p-5">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="lpVersion" className="text-sm font-[family-name:var(--font-outfit)] font-medium">
+                  <Label
+                    htmlFor="lpVersion"
+                    className="text-sm font-[family-name:var(--font-outfit)] font-medium"
+                  >
                     Location Protocol Version
                   </Label>
                   <Input
@@ -418,7 +455,10 @@ export default function HypercertEvidenceForm({
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="srs" className="text-sm font-[family-name:var(--font-outfit)] font-medium">
+                  <Label
+                    htmlFor="srs"
+                    className="text-sm font-[family-name:var(--font-outfit)] font-medium"
+                  >
                     Spatial Reference System (SRS)
                   </Label>
                   <Input
@@ -434,11 +474,17 @@ export default function HypercertEvidenceForm({
               </div>
 
               <div className="space-y-2">
-                <Label className="text-sm font-[family-name:var(--font-outfit)] font-medium">Location Type</Label>
+                <Label className="text-sm font-[family-name:var(--font-outfit)] font-medium">
+                  Location Type
+                </Label>
                 <div className="flex flex-wrap gap-2">
                   <Button
                     type="button"
-                    variant={locationType === "coordinate-decimal" ? "default" : "outline"}
+                    variant={
+                      locationType === "coordinate-decimal"
+                        ? "default"
+                        : "outline"
+                    }
                     size="sm"
                     onClick={() => setLocationType("coordinate-decimal")}
                     className="font-[family-name:var(--font-outfit)]"
@@ -447,7 +493,9 @@ export default function HypercertEvidenceForm({
                   </Button>
                   <Button
                     type="button"
-                    variant={locationType === "geojson-point" ? "default" : "outline"}
+                    variant={
+                      locationType === "geojson-point" ? "default" : "outline"
+                    }
                     size="sm"
                     onClick={() => setLocationType("geojson-point")}
                     className="font-[family-name:var(--font-outfit)]"
@@ -475,7 +523,10 @@ export default function HypercertEvidenceForm({
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="locationName" className="text-sm font-[family-name:var(--font-outfit)] font-medium">
+                <Label
+                  htmlFor="locationName"
+                  className="text-sm font-[family-name:var(--font-outfit)] font-medium"
+                >
                   Location Name (Optional)
                 </Label>
                 <Input
@@ -489,7 +540,10 @@ export default function HypercertEvidenceForm({
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="locationDescription" className="text-sm font-[family-name:var(--font-outfit)] font-medium">
+                <Label
+                  htmlFor="locationDescription"
+                  className="text-sm font-[family-name:var(--font-outfit)] font-medium"
+                >
                   Location Description (Optional)
                 </Label>
                 <Textarea

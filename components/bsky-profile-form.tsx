@@ -138,7 +138,9 @@ export default function BskyProfileForm({
               className="bg-blue-500 hover:bg-blue-600 text-white font-[family-name:var(--font-outfit)] font-medium gap-2"
             >
               <Save className="size-4" />
-              {updateProfileMutation.isPending ? "Saving..." : "Save Bsky Profile"}
+              {updateProfileMutation.isPending
+                ? "Saving..."
+                : "Save Bsky Profile"}
             </Button>
           </div>
         </div>

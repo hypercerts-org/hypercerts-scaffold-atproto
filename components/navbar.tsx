@@ -41,8 +41,6 @@ export default function Navbar({
   isSignedIn,
   avatarUrl,
   handle: userHandle,
-  userDid,
-  activeDid,
   activeProfileName,
   activeProfileHandle,
 }: NavbarProps) {
@@ -93,7 +91,9 @@ export default function Navbar({
                 <Link
                   href="/hypercerts"
                   className={`px-3 py-1.5 text-sm font-[family-name:var(--font-outfit)] font-medium rounded-lg transition-colors ${
-                    pathname === "/hypercerts" || (pathname?.startsWith("/hypercerts") && pathname !== "/hypercerts/create")
+                    pathname === "/hypercerts" ||
+                    (pathname?.startsWith("/hypercerts") &&
+                      pathname !== "/hypercerts/create")
                       ? "bg-create-accent/10 text-create-accent hover:bg-create-accent/20"
                       : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
                   }`}
@@ -128,17 +128,22 @@ export default function Navbar({
                   </button>
                 </DropdownMenuTrigger>
 
-                <DropdownMenuContent align="end" className="w-56 glass-panel border-border/60">
+                <DropdownMenuContent
+                  align="end"
+                  className="w-56 glass-panel border-border/60"
+                >
                   <DropdownMenuLabel className="flex flex-col gap-1">
-                    <span className="text-sm font-[family-name:var(--font-outfit)] font-semibold">My Account</span>
-                    {userHandle && (
+                    <span className="text-sm font-[family-name:var(--font-outfit)] font-semibold">
+                      My Account
+                    </span>
+                    {userHandle ? (
                       <span className="text-xs font-[family-name:var(--font-outfit)] text-muted-foreground">
                         @{userHandle}
                       </span>
-                    )}
+                    ) : null}
                   </DropdownMenuLabel>
-                  
-                  {activeProfileName && (
+
+                  {activeProfileName ? (
                     <>
                       <DropdownMenuSeparator />
                       <DropdownMenuLabel className="flex flex-col gap-1">
@@ -148,19 +153,22 @@ export default function Navbar({
                         <span className="text-sm font-[family-name:var(--font-outfit)] font-semibold">
                           {activeProfileName}
                         </span>
-                        {activeProfileHandle && (
+                        {activeProfileHandle ? (
                           <span className="text-xs font-[family-name:var(--font-outfit)] text-muted-foreground">
                             @{activeProfileHandle}
                           </span>
-                        )}
+                        ) : null}
                       </DropdownMenuLabel>
                     </>
-                  )}
+                  ) : null}
 
                   <DropdownMenuSeparator />
 
                   <DropdownMenuItem className="font-[family-name:var(--font-outfit)]">
-                    <Link className="flex items-center gap-2 w-full" href="/profile">
+                    <Link
+                      className="flex items-center gap-2 w-full"
+                      href="/profile"
+                    >
                       <User className="h-4 w-4" />
                       Profile
                     </Link>
@@ -182,18 +190,23 @@ export default function Navbar({
           ) : (
             <Popover open={open} onOpenChange={setOpen}>
               <PopoverTrigger asChild>
-                <Button 
-                  disabled={isLoading} 
+                <Button
+                  disabled={isLoading}
                   size="sm"
                   className="bg-create-accent hover:bg-create-accent/90 text-create-accent-foreground font-[family-name:var(--font-outfit)] font-medium shadow-sm"
                 >
                   Sign In
                 </Button>
               </PopoverTrigger>
-              <PopoverContent align="end" className="w-80 glass-panel border-border/60">
+              <PopoverContent
+                align="end"
+                className="w-80 glass-panel border-border/60"
+              >
                 <form onSubmit={handleSubmit} className="grid gap-4">
                   <div className="space-y-2">
-                    <h4 className="text-base font-[family-name:var(--font-syne)] font-bold">Welcome back</h4>
+                    <h4 className="text-base font-[family-name:var(--font-syne)] font-bold">
+                      Welcome back
+                    </h4>
                     <p className="text-sm font-[family-name:var(--font-outfit)] text-muted-foreground">
                       Enter your handle to continue
                     </p>
@@ -211,9 +224,9 @@ export default function Navbar({
                     </InputGroupAddon>
                   </InputGroup>
                   <div className="flex flex-col gap-2">
-                    <Button 
-                      type="submit" 
-                      size="sm" 
+                    <Button
+                      type="submit"
+                      size="sm"
                       disabled={loginMutation.isPending}
                       className="bg-create-accent hover:bg-create-accent/90 text-create-accent-foreground font-[family-name:var(--font-outfit)] font-medium"
                     >

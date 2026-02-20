@@ -7,7 +7,18 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Trash, PlusCircle, Plus, Wand2, MapPin, Users, ClipboardCheck, BarChart3, FileCheck, Hash } from "lucide-react";
+import {
+  Trash,
+  PlusCircle,
+  Plus,
+  Wand2,
+  MapPin,
+  Users,
+  ClipboardCheck,
+  BarChart3,
+  FileCheck,
+  Hash,
+} from "lucide-react";
 import UserSelection from "./user-selection";
 import UserAvatar from "./user-avatar";
 import FormInfo from "./form-info";
@@ -54,14 +65,17 @@ export default function EvaluationForm({
       toast.success("Evaluation added!");
       if (hypercertInfo.hypercertUri) {
         queryClient.invalidateQueries({
-          queryKey: queryKeys.hypercerts.evaluations(hypercertInfo.hypercertUri),
+          queryKey: queryKeys.hypercerts.evaluations(
+            hypercertInfo.hypercertUri,
+          ),
         });
       }
       onNext();
     },
     onError: (error) => {
       console.error("Failed to add evaluation:", error);
-      toast.error("Failed to add evaluation");
+      const message = error instanceof Error ? error.message : "Unknown error";
+      toast.error(`Failed to add evaluation: ${message}`);
     },
   });
 
@@ -76,7 +90,7 @@ export default function EvaluationForm({
         "contributing to carbon sequestration and biodiversity restoration. Independent verification " +
         "confirmed a 95% survival rate after 6 months. The project engaged local communities through " +
         "educational workshops and created sustainable employment opportunities. Impact metrics show " +
-        "an estimated 125 tons of CO2 will be sequestered annually once trees reach maturity."
+        "an estimated 125 tons of CO2 will be sequestered annually once trees reach maturity.",
     );
     setUseScore(true);
     setScoreMin(1);
@@ -125,7 +139,7 @@ export default function EvaluationForm({
     index: number,
     value: string,
     _uris: string[],
-    setter: React.Dispatch<React.SetStateAction<string[]>>
+    setter: React.Dispatch<React.SetStateAction<string[]>>,
   ) => {
     setter((prev) => {
       const newUris = [...prev];
@@ -136,7 +150,7 @@ export default function EvaluationForm({
 
   const addUriInput = (
     _uris: string[],
-    setter: React.Dispatch<React.SetStateAction<string[]>>
+    setter: React.Dispatch<React.SetStateAction<string[]>>,
   ) => {
     setter((prev) => [...prev, ""]);
   };
@@ -144,7 +158,7 @@ export default function EvaluationForm({
   const removeUriInput = (
     index: number,
     _uris: string[],
-    setter: React.Dispatch<React.SetStateAction<string[]>>
+    setter: React.Dispatch<React.SetStateAction<string[]>>,
   ) => {
     setter((prev) => prev.filter((_, i) => i !== index));
   };
@@ -156,10 +170,13 @@ export default function EvaluationForm({
       return;
     }
 
-    const allEvaluatorDids = [
-      ...evaluators.map((e) => e.did),
-      ...manualDids.filter((did) => did.trim() !== ""),
-    ];
+    const didSet = new Set<string>();
+    for (const e of evaluators) didSet.add(e.did);
+    for (const did of manualDids) {
+      const trimmed = did.trim();
+      if (trimmed !== "") didSet.add(trimmed);
+    }
+    const allEvaluatorDids = Array.from(didSet);
 
     const evaluationPayload = {
       hypercertUri: hypercertInfo.hypercertUri,
@@ -185,7 +202,7 @@ export default function EvaluationForm({
 
   return (
     <FormInfo
-      stepLabel="Step 6 of 6"
+      stepLabel="Step 5 of 5"
       title="Add Evaluation"
       description="Provide an evaluation of the hypercert's impact."
     >
@@ -288,7 +305,10 @@ export default function EvaluationForm({
             <div className="h-6 w-6 rounded-lg bg-create-accent/10 flex items-center justify-center">
               <ClipboardCheck className="h-3.5 w-3.5 text-create-accent" />
             </div>
-            <Label htmlFor="summary" className="text-sm font-[family-name:var(--font-syne)] font-semibold uppercase tracking-wider text-muted-foreground">
+            <Label
+              htmlFor="summary"
+              className="text-sm font-[family-name:var(--font-syne)] font-semibold uppercase tracking-wider text-muted-foreground"
+            >
               Summary *
             </Label>
           </div>
@@ -315,16 +335,25 @@ export default function EvaluationForm({
             disabled={mutation.isPending}
             className="gap-2 font-[family-name:var(--font-outfit)]"
           >
-            {useScore ? <Trash className="h-3.5 w-3.5" /> : <Hash className="h-3.5 w-3.5" />}
+            {useScore ? (
+              <Trash className="h-3.5 w-3.5" />
+            ) : (
+              <Hash className="h-3.5 w-3.5" />
+            )}
             {useScore ? "Remove Score" : "Add Score"}
           </Button>
 
           {useScore && (
             <div className="space-y-4 pl-4 border-l-2 border-create-accent/30 animate-fade-in-up">
-              <Label className="text-sm font-[family-name:var(--font-outfit)] font-medium">Numeric Score</Label>
+              <Label className="text-sm font-[family-name:var(--font-outfit)] font-medium">
+                Numeric Score
+              </Label>
               <div className="grid grid-cols-3 gap-4">
                 <div className="space-y-1">
-                  <Label htmlFor="score-min" className="text-[11px] font-[family-name:var(--font-outfit)] text-muted-foreground">
+                  <Label
+                    htmlFor="score-min"
+                    className="text-[11px] font-[family-name:var(--font-outfit)] text-muted-foreground"
+                  >
                     Min
                   </Label>
                   <Input
@@ -337,20 +366,28 @@ export default function EvaluationForm({
                   />
                 </div>
                 <div className="space-y-1">
-                  <Label htmlFor="score-value" className="text-[11px] font-[family-name:var(--font-outfit)] text-muted-foreground">
+                  <Label
+                    htmlFor="score-value"
+                    className="text-[11px] font-[family-name:var(--font-outfit)] text-muted-foreground"
+                  >
                     Value
                   </Label>
                   <Input
                     id="score-value"
                     type="number"
                     value={scoreValue}
-                    onChange={(e) => setScoreValue(parseInt(e.target.value) || 0)}
+                    onChange={(e) =>
+                      setScoreValue(parseInt(e.target.value) || 0)
+                    }
                     disabled={mutation.isPending}
                     className="font-[family-name:var(--font-outfit)]"
                   />
                 </div>
                 <div className="space-y-1">
-                  <Label htmlFor="score-max" className="text-[11px] font-[family-name:var(--font-outfit)] text-muted-foreground">
+                  <Label
+                    htmlFor="score-max"
+                    className="text-[11px] font-[family-name:var(--font-outfit)] text-muted-foreground"
+                  >
                     Max
                   </Label>
                   <Input
@@ -377,13 +414,19 @@ export default function EvaluationForm({
             disabled={mutation.isPending}
             className="gap-2 font-[family-name:var(--font-outfit)]"
           >
-            {useContent ? <Trash className="h-3.5 w-3.5" /> : <FileCheck className="h-3.5 w-3.5" />}
+            {useContent ? (
+              <Trash className="h-3.5 w-3.5" />
+            ) : (
+              <FileCheck className="h-3.5 w-3.5" />
+            )}
             {useContent ? "Remove Content" : "Add Content"}
           </Button>
 
           {useContent && (
             <div className="space-y-2 pl-4 border-l-2 border-create-accent/30 animate-fade-in-up">
-              <Label className="text-sm font-[family-name:var(--font-outfit)] font-medium">Content URIs</Label>
+              <Label className="text-sm font-[family-name:var(--font-outfit)] font-medium">
+                Content URIs
+              </Label>
               {contentUris.map((uri, index) => (
                 <div key={index} className="flex items-center gap-2">
                   <Input
@@ -391,7 +434,12 @@ export default function EvaluationForm({
                     placeholder="https://example.com/report.pdf"
                     value={uri}
                     onChange={(e) =>
-                      handleUriChange(index, e.target.value, contentUris, setContentUris)
+                      handleUriChange(
+                        index,
+                        e.target.value,
+                        contentUris,
+                        setContentUris,
+                      )
                     }
                     disabled={mutation.isPending}
                     className="font-[family-name:var(--font-outfit)]"
@@ -399,7 +447,9 @@ export default function EvaluationForm({
                   <Button
                     variant="ghost"
                     size="icon"
-                    onClick={() => removeUriInput(index, contentUris, setContentUris)}
+                    onClick={() =>
+                      removeUriInput(index, contentUris, setContentUris)
+                    }
                     disabled={contentUris.length === 1 || mutation.isPending}
                     className="text-muted-foreground hover:text-destructive"
                   >
@@ -430,13 +480,19 @@ export default function EvaluationForm({
             disabled={mutation.isPending}
             className="gap-2 font-[family-name:var(--font-outfit)]"
           >
-            {useMeasurements ? <Trash className="h-3.5 w-3.5" /> : <BarChart3 className="h-3.5 w-3.5" />}
+            {useMeasurements ? (
+              <Trash className="h-3.5 w-3.5" />
+            ) : (
+              <BarChart3 className="h-3.5 w-3.5" />
+            )}
             {useMeasurements ? "Remove Measurements" : "Add Measurements"}
           </Button>
 
           {useMeasurements && (
             <div className="space-y-2 pl-4 border-l-2 border-create-accent/30 animate-fade-in-up">
-              <Label className="text-sm font-[family-name:var(--font-outfit)] font-medium">Measurement URIs</Label>
+              <Label className="text-sm font-[family-name:var(--font-outfit)] font-medium">
+                Measurement URIs
+              </Label>
               {measurementUris.map((uri, index) => (
                 <div key={index} className="flex items-center gap-2">
                   <Input
@@ -444,7 +500,12 @@ export default function EvaluationForm({
                     placeholder="at://did:plc:xxx/org.hypercerts.claim.measurement/xxx"
                     value={uri}
                     onChange={(e) =>
-                      handleUriChange(index, e.target.value, measurementUris, setMeasurementUris)
+                      handleUriChange(
+                        index,
+                        e.target.value,
+                        measurementUris,
+                        setMeasurementUris,
+                      )
                     }
                     disabled={mutation.isPending}
                     className="font-[family-name:var(--font-outfit)]"
@@ -452,8 +513,12 @@ export default function EvaluationForm({
                   <Button
                     variant="ghost"
                     size="icon"
-                    onClick={() => removeUriInput(index, measurementUris, setMeasurementUris)}
-                    disabled={measurementUris.length === 1 || mutation.isPending}
+                    onClick={() =>
+                      removeUriInput(index, measurementUris, setMeasurementUris)
+                    }
+                    disabled={
+                      measurementUris.length === 1 || mutation.isPending
+                    }
                     className="text-muted-foreground hover:text-destructive"
                   >
                     <Trash className="h-4 w-4" />
@@ -495,13 +560,22 @@ export default function EvaluationForm({
             disabled={mutation.isPending}
             className="gap-2 font-[family-name:var(--font-outfit)]"
           >
-            {useLocation ? <Trash className="h-3.5 w-3.5" /> : <Plus className="h-3.5 w-3.5" />}
+            {useLocation ? (
+              <Trash className="h-3.5 w-3.5" />
+            ) : (
+              <Plus className="h-3.5 w-3.5" />
+            )}
             {useLocation ? "Remove Location" : "Add Location"}
           </Button>
 
           {useLocation && (
             <div className="space-y-2 animate-fade-in-up">
-              <Label htmlFor="location" className="text-sm font-[family-name:var(--font-outfit)] font-medium">Location URI</Label>
+              <Label
+                htmlFor="location"
+                className="text-sm font-[family-name:var(--font-outfit)] font-medium"
+              >
+                Location URI
+              </Label>
               <Input
                 id="location"
                 value={locationUri}

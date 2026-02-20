@@ -18,7 +18,7 @@ import {
 // This prevents the page from going blank while loading and keeps the sidebar visible
 const HypercertsCreateForm = dynamic(
   () => import("@/components/hypercerts-create-form"),
-  { loading: () => <HypercertsCreateFormSkeleton /> }
+  { loading: () => <HypercertsCreateFormSkeleton /> },
 );
 // const HypercertContributionForm = dynamic(
 //   () => import("@/components/contributions-form"),
@@ -26,23 +26,21 @@ const HypercertsCreateForm = dynamic(
 // );
 const HypercertEvidenceForm = dynamic(
   () => import("@/components/evidence-form"),
-  { loading: () => <EvidenceFormSkeleton /> }
+  { loading: () => <EvidenceFormSkeleton /> },
 );
 const HypercertLocationForm = dynamic(
   () => import("@/components/locations-form"),
-  { loading: () => <LocationFormSkeleton /> }
+  { loading: () => <LocationFormSkeleton /> },
 );
-const MeasurementForm = dynamic(
-  () => import("@/components/measurement-form"),
-  { loading: () => <MeasurementFormSkeleton /> }
-);
-const EvaluationForm = dynamic(
-  () => import("@/components/evaluation-form"),
-  { loading: () => <EvaluationFormSkeleton /> }
-);
+const MeasurementForm = dynamic(() => import("@/components/measurement-form"), {
+  loading: () => <MeasurementFormSkeleton />,
+});
+const EvaluationForm = dynamic(() => import("@/components/evaluation-form"), {
+  loading: () => <EvaluationFormSkeleton />,
+});
 const HypercertCompletionStep = dynamic(
   () => import("@/components/hypercert-completion-step"),
-  { loading: () => <CompletionStepSkeleton /> }
+  { loading: () => <CompletionStepSkeleton /> },
 );
 
 export default function Home() {
@@ -65,7 +63,8 @@ export default function Home() {
             Create Hypercert
           </h1>
           <p className="mt-2 text-sm font-[family-name:var(--font-outfit)] text-muted-foreground max-w-xl">
-            Define your impact claim with verifiable details, evidence, and measurements.
+            Define your impact claim with verifiable details, evidence, and
+            measurements.
           </p>
         </div>
 
@@ -79,13 +78,13 @@ export default function Home() {
 
           {/* Main content area - only forms change with skeletons during loading */}
           <main className="min-w-0">
-            {step === 1 && (
+            {step === 1 ? (
               <HypercertsCreateForm
                 setHypercertInfo={setHypercertInfo}
                 hypercertInfo={hypercertInfo}
                 nextStepper={nextStepper}
               />
-            )}
+            ) : null}
             {/* TODO commented out for now while SDK addContribution stabilized */}
             {/* {step === 2 && hypercertInfo && (
               <HypercertContributionForm
@@ -94,41 +93,41 @@ export default function Home() {
                 onBack={previousStepper}
               />
             )} */}
-            {step === 2 && hypercertInfo && (
+            {step === 2 && hypercertInfo ? (
               <HypercertEvidenceForm
                 hypercertInfo={hypercertInfo}
                 onNext={nextStepper}
                 onBack={previousStepper}
               />
-            )}
-            {step === 3 && hypercertInfo && (
+            ) : null}
+            {step === 3 && hypercertInfo ? (
               <HypercertLocationForm
                 onNext={nextStepper}
                 onBack={previousStepper}
                 hypercertInfo={hypercertInfo}
               />
-            )}
-            {step === 4 && hypercertInfo && (
+            ) : null}
+            {step === 4 && hypercertInfo ? (
               <MeasurementForm
                 hypercertInfo={hypercertInfo}
                 onNext={nextStepper}
                 onBack={previousStepper}
               />
-            )}
-            {step === 5 && hypercertInfo && (
+            ) : null}
+            {step === 5 && hypercertInfo ? (
               <EvaluationForm
                 hypercertInfo={hypercertInfo}
                 onNext={nextStepper}
                 onBack={previousStepper}
               />
-            )}
-            {step === 6 && (
+            ) : null}
+            {step === 6 ? (
               <HypercertCompletionStep
                 onCreateAnother={() => setStep(1)}
                 onBack={previousStepper}
                 hypercertInfo={hypercertInfo}
               />
-            )}
+            ) : null}
           </main>
         </div>
       </div>
