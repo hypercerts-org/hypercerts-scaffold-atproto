@@ -79,18 +79,6 @@ function isLoopback(url: string): boolean {
 }
 
 /**
- * Returns the appropriate OAuth scope based on the environment.
- * - Loopback (local dev): uses "atproto transition:generic" (ATProto requirement for loopback clients)
- * - Production: uses granular scopes (repo, rpc, blob) for precise permission requests
- */
-function getOAuthScope(url: string): string {
-  if (isLoopback(url)) {
-    return LOOPBACK_SCOPE;
-  }
-  return GRANULAR_SCOPE;
-}
-
-/**
  * Get the base URL for the application
  * Priority:
  * 1. NEXT_PUBLIC_BASE_URL (explicit configuration)
@@ -208,7 +196,7 @@ try {
  * - Loopback (local dev): "atproto transition:generic" (ATProto requirement for loopback clients)
  * - Production: granular scopes (repo, rpc, blob) for precise permission requests
  */
-export const OAUTH_SCOPE = getOAuthScope(baseUrl);
+export const OAUTH_SCOPE = GRANULAR_SCOPE;
 
 const redirectBaseUrl = getRedirectBaseUrl(baseUrl);
 const redirectUri = `${redirectBaseUrl}/api/auth/callback`;
@@ -289,11 +277,11 @@ export function buildClientMetadata(): Record<string, unknown> {
     client_uri: config.baseUrl,
     redirect_uris: [config.redirectUri],
     scope: OAUTH_SCOPE,
-      logo_uri: `${config.baseUrl}/certified-logo.svg`,
-      grant_types: ["authorization_code", "refresh_token"],
-      response_types: ["code"],
-      token_endpoint_auth_method: "none",
-      application_type: "web",
+    logo_uri: `${config.baseUrl}/certified-logo.svg`,
+    grant_types: ["authorization_code", "refresh_token"],
+    response_types: ["code"],
+    token_endpoint_auth_method: "none",
+    application_type: "web",
     dpop_bound_access_tokens: true,
     branding: {
       css: generateBrandingCss(config.baseUrl),
