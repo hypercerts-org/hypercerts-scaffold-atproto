@@ -76,17 +76,13 @@ export default function HypercertEvaluationsSection({
         <div className="space-y-4">
           <EvaluationSkeleton />
         </div>
-      ) : null}
-
-      {isError ? (
+      ) : isError ? (
         <div className="glass-panel rounded-xl p-6 border border-red-500/20 bg-red-500/5">
           <p className="text-sm font-[family-name:var(--font-outfit)] text-red-500">
             Failed to load evaluations.
           </p>
         </div>
-      ) : null}
-
-      {!isLoading && !isError ? (
+      ) : (
         <>
           {evaluations && evaluations.length > 0 ? (
             <div className="space-y-4 stagger-children">
@@ -103,7 +99,7 @@ export default function HypercertEvaluationsSection({
             </div>
           )}
         </>
-      ) : null}
+      )}
     </div>
   );
 }

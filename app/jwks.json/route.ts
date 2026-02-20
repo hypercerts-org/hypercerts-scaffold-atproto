@@ -44,20 +44,26 @@ export async function GET() {
     );
   }
 
-  // Transform private keys to public keys for OAuth verification:
-  // - Remove private component ("d")
-  // - Remove any "use" or "key_ops" from private key
-  // - Add key_ops: ["verify"] for OAuth server validation
-  const PRIVATE_KEY_FIELDS = ["d", "use", "key_ops"] as const;
+  // Transform private keys to public keys for OAuth verification using an
+  // allowlist of known public JWK fields. This is safer than a denylist because
+  // any future private fields (e.g. RSA: p, q, dp, dq, qi, oth) are excluded
+  // by default rather than requiring explicit removal.
+  const PUBLIC_JWK_FIELDS = [
+    "kty",
+    "crv",
+    "x",
+    "y", // EC public fields
+    "n",
+    "e", // RSA public fields
+    "kid",
+    "alg", // Metadata
+  ] as const;
   const keys = (privateKey.keys as Array<{ [key: string]: unknown }>).map(
     (jwkWithPrivate) => {
-      // Remove private key components before exposing the public key
+      // Only include known public fields — private components are excluded by default
       const publicJwk = Object.fromEntries(
-        Object.entries(jwkWithPrivate).filter(
-          ([k]) =>
-            !PRIVATE_KEY_FIELDS.includes(
-              k as (typeof PRIVATE_KEY_FIELDS)[number],
-            ),
+        Object.entries(jwkWithPrivate).filter(([k]) =>
+          PUBLIC_JWK_FIELDS.includes(k as (typeof PUBLIC_JWK_FIELDS)[number]),
         ),
       );
       return {
