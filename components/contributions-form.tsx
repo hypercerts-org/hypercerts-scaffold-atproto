@@ -135,7 +135,7 @@ export default function HypercertContributionForm({
 
   return (
     <FormInfo
-      stepLabel="Step 2 of 6" // TODO: update stepLabel when contributions step is re-enabled
+      stepLabel="Step 2 of 5" // NOTE: contributions step is currently disabled; stepLabel reflects the 5-step flow
       title="Add Contributions"
       description="Link roles, contributors, and timeframes to your hypercert."
     >
