@@ -75,6 +75,7 @@ export default function ImageUploader({
               {isBanner ? (
                 <button
                   type="button"
+                  aria-label="Change image"
                   onClick={() => inputRef.current?.click()}
                   className="absolute z-10 bg-black/40 backdrop-blur-sm p-2 rounded-full hover:bg-black/60 transition-all duration-200 hover:scale-110 bottom-2 right-2"
                 >
@@ -105,6 +106,7 @@ export default function ImageUploader({
         {!isBanner && imageUrl ? (
           <button
             type="button"
+            aria-label="Change image"
             onClick={() => inputRef.current?.click()}
             className="absolute z-10 bg-black/40 backdrop-blur-sm p-2 rounded-full hover:bg-black/60 transition-all duration-200 hover:scale-110 bottom-0 right-0"
           >
