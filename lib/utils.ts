@@ -1,9 +1,9 @@
 import { BlobRef } from "@atproto/lexicon";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
-import * as Hypercert from "@/lexicons/types/org/hypercerts/claim/activity";
-import * as Contribution from "@/lexicons/types/org/hypercerts/claim/contribution";
-import * as Evaluation from "@/lexicons/types/org/hypercerts/claim/evaluation";
+import { OrgHypercertsClaimActivity as Hypercert } from "@hypercerts-org/sdk-core";
+import { OrgHypercertsClaimContributionDetails as Contribution } from "@hypercerts-org/sdk-core";
+import { OrgHypercertsClaimEvaluation as Evaluation } from "@hypercerts-org/sdk-core";
 import sdk from "@/lib/hypercerts-sdk";
 import type { OAuthSession } from "@atproto/oauth-client-node";
 
