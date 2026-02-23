@@ -16,6 +16,8 @@ export interface DisplayContributor {
   weight?: string;
   identityRef?: StrongRef;
   detailsRef?: StrongRef;
+  needsResolution: boolean; // true when identity comes from a StrongRef that needs fetching
+  displayName?: string; // resolved displayName from contributorInformation record
 }
 
 /** Type guard: checks if value is a ContributorIdentity (has `identity` string field) */
@@ -79,6 +81,7 @@ function extractDidFromAtUri(uri: string): string {
 export function parseContributor(contributor: Contributor): DisplayContributor {
   let identity = "";
   let identityRef: StrongRef | undefined;
+  let needsResolution = false;
 
   const rawIdentity = contributor.contributorIdentity;
 
@@ -86,7 +89,10 @@ export function parseContributor(contributor: Contributor): DisplayContributor {
     identity = rawIdentity.identity;
   } else if (isStrongRef(rawIdentity)) {
     identityRef = rawIdentity;
-    identity = extractDidFromAtUri(rawIdentity.uri);
+    // Use the full URI as a unique placeholder — do NOT extract DID from it
+    // (extracting the DID would give the repo owner's DID, not the contributor's DID)
+    identity = rawIdentity.uri;
+    needsResolution = true;
   } else {
     identity = String(rawIdentity);
   }
@@ -114,6 +120,7 @@ export function parseContributor(contributor: Contributor): DisplayContributor {
     weight,
     identityRef,
     detailsRef,
+    needsResolution,
   };
 }
 

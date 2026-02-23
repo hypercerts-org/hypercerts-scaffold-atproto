@@ -41,6 +41,8 @@ export default function HypercertContributorView({
           <p className="text-sm font-[family-name:var(--font-syne)] font-semibold leading-tight">
             {profile?.displayName ? (
               profile.displayName
+            ) : contributor.displayName ? (
+              contributor.displayName
             ) : (
               <span className="truncate block max-w-[200px]">
                 {contributor.identity}

@@ -2,8 +2,9 @@
 
 import type { OrgHypercertsClaimActivity } from "@hypercerts-org/sdk-core";
 import { Users } from "lucide-react";
+import { useMemo } from "react";
 import { parseContributors } from "@/lib/contributor-utils";
-import { useContributorProfilesQuery } from "@/queries/hypercerts";
+import { useContributorProfilesQuery, useResolveContributorIdentities } from "@/queries/hypercerts";
 import HypercertContributorView from "./hypercert-contributor-view";
 import { Skeleton } from "./ui/skeleton";
 
@@ -27,9 +28,33 @@ export default function HypercertContributorsSection({
   contributors,
 }: HypercertContributorsSectionProps) {
   const displayContributors = parseContributors(contributors);
-  const { profileMap, isLoading } = useContributorProfilesQuery(displayContributors);
 
-  const didContributors = displayContributors.filter((c) => c.isDid);
+  // Phase 1: Resolve StrongRef identities to actual DIDs
+  const { resolvedMap, isLoading: isResolvingIdentities } = useResolveContributorIdentities(displayContributors);
+
+  // Build resolved contributors list — replace placeholder identities with actual DIDs
+  const resolvedContributors = useMemo(() => {
+    return displayContributors.map((c) => {
+      if (c.needsResolution && resolvedMap.has(c.identity)) {
+        const resolved = resolvedMap.get(c.identity)!;
+        return {
+          ...c,
+          identity: resolved.identifier,
+          isDid: resolved.identifier.startsWith("did:"),
+          displayName: resolved.displayName,
+          needsResolution: false,
+        };
+      }
+      return c;
+    });
+  }, [displayContributors, resolvedMap]);
+
+  // Phase 2: Resolve DIDs to Bluesky profiles
+  const { profileMap, isLoading: isLoadingProfiles } = useContributorProfilesQuery(resolvedContributors);
+
+  const isLoading = isResolvingIdentities || isLoadingProfiles;
+
+  const didContributors = resolvedContributors.filter((c) => c.isDid);
 
   return (
     <div className="space-y-4">
@@ -49,10 +74,10 @@ export default function HypercertContributorsSection({
         </div>
       </div>
 
-      {/* Loading state — only shown while DID profiles are resolving */}
-      {isLoading && didContributors.length > 0 && (
+      {/* Loading state — shown while resolving StrongRef identities or DID profiles */}
+      {isLoading && (didContributors.length > 0 || displayContributors.some((c) => c.needsResolution)) && (
         <div className="space-y-3">
-          {didContributors.map((_, index) => (
+          {(didContributors.length > 0 ? didContributors : displayContributors).map((_, index) => (
             <ContributorSkeleton key={index} />
           ))}
         </div>
@@ -61,9 +86,9 @@ export default function HypercertContributorsSection({
       {/* Content */}
       {!isLoading && (
         <>
-          {displayContributors.length > 0 ? (
+          {resolvedContributors.length > 0 ? (
             <div className="space-y-3 stagger-children">
-              {displayContributors.map((contributor, index) => (
+              {resolvedContributors.map((contributor, index) => (
                 <HypercertContributorView
                   key={index}
                   contributor={contributor}
