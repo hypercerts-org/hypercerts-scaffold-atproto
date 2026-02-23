@@ -190,8 +190,7 @@ export const config = {
   jwksUri,
   scope: OAUTH_SCOPE,
 
-  // Network endpoints
-  pdsUrl: process.env.NEXT_PUBLIC_PDS_URL!,
+  handleResolver: process.env.NEXT_PUBLIC_HANDLE_RESOLVER || "https://bsky.social",
 
   // Redis configuration
   redis: {
@@ -270,7 +269,7 @@ for (const envVar of requiredEnvVars) {
 }
 
 // Log configuration at startup (helpful for debugging)
-if (typeof window === "undefined") {
+if (typeof window === "undefined" && process.env.NEXT_PUBLIC_VERCEL_TARGET_ENV !== "production") {
   console.log("\n🔧 Application Configuration:");
   console.log(`   Environment: ${isProduction ? "production" : "development"}`);
   console.log(`   Mode: ${isLoopbackMode ? "loopback (local)" : "production"}`);
@@ -278,5 +277,5 @@ if (typeof window === "undefined") {
   console.log(`   Client ID: ${clientId}`);
   console.log(`   Redirect URI: ${redirectUri}`);
   console.log(`   JWKS URI: ${jwksUri}`);
-  console.log(`   PDS: ${config.pdsUrl}\n`);
+  console.log(`   Handle Resolver: ${config.handleResolver}\n`);
 }

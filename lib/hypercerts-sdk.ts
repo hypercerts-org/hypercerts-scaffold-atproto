@@ -34,7 +34,7 @@ const sdk = createATProtoSDK({
     sessionStore,
     stateStore,
   },
-  handleResolver: config.pdsUrl,
+  handleResolver: config.handleResolver,
   logger: console,
 });
 
