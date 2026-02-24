@@ -24,15 +24,16 @@ export function getEpdsEndpoints(): {
   }
 
   const epdsUrl = config.epdsUrl;
+  const normalizedUrl = epdsUrl.replace(/\/+$/, "");
   const url = new URL(epdsUrl);
   const authHost = url.port
     ? `auth.${url.hostname}:${url.port}`
     : `auth.${url.hostname}`;
 
   return {
-    parEndpoint: `${epdsUrl}/oauth/par`,
+    parEndpoint: `${normalizedUrl}/oauth/par`,
     authEndpoint: `${url.protocol}//${authHost}/oauth/authorize`,
-    tokenEndpoint: `${epdsUrl}/oauth/token`,
+    tokenEndpoint: `${normalizedUrl}/oauth/token`,
   };
 }
 
