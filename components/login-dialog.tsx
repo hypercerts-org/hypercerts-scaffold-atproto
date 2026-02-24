@@ -109,8 +109,10 @@ function HandleForm() {
 
 function EmailForm() {
   const [email, setEmail] = useState("");
+  const [isRedirecting, setIsRedirecting] = useState(false);
 
   const handleContinue = () => {
+    setIsRedirecting(true);
     const url = email
       ? `/api/oauth/login?email=${encodeURIComponent(email)}`
       : `/api/oauth/login`;
@@ -118,7 +120,13 @@ function EmailForm() {
   };
 
   return (
-    <div className="w-full space-y-3 animate-fade-in">
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        handleContinue();
+      }}
+      className="w-full space-y-3 animate-fade-in"
+    >
       <div className="space-y-2">
         <InputGroup className="glass-panel border-border/50 focus-within:border-create-accent transition-colors">
           <InputGroupAddon className="text-create-accent/70">
@@ -138,13 +146,14 @@ function EmailForm() {
       </div>
 
       <Button
-        type="button"
-        onClick={handleContinue}
+        type="submit"
+        disabled={isRedirecting}
         className="w-full bg-create-accent hover:bg-create-accent/90 text-white font-[family-name:var(--font-outfit)] font-semibold transition-all"
       >
+        {isRedirecting && <Spinner />}
         Continue
       </Button>
-    </div>
+    </form>
   );
 }
 
