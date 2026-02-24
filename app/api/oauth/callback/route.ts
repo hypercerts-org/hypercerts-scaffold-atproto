@@ -106,6 +106,12 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     refresh_token?: string;
   };
 
+  // 10a. Validate sub is a DID
+  if (!tokenData.sub || !(tokenData.sub.startsWith('did:plc:') || tokenData.sub.startsWith('did:web:'))) {
+    console.error('[oauth/callback] Invalid sub in token response:', tokenData.sub)
+    return NextResponse.redirect(new URL('/?error=auth_failed', config.baseUrl))
+  }
+
   // 11. Construct NodeSavedSession and write to Redis
   // The issuer is the PDS origin (token endpoint without the /oauth/token path)
   const issuer = tokenEndpoint.replace("/oauth/token", "");
@@ -131,6 +137,8 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     },
   };
 
+  // TODO: RedisSessionStore.set() does not support TTL — sessions persist until manually deleted
+  // The SDK handles token refresh internally, so stale sessions get refreshed or error out
   await sessionStore.set(tokenData.sub, nodeSavedSession);
 
   // 12. Create redirect response to /
