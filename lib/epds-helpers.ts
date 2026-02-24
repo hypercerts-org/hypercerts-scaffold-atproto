@@ -158,7 +158,7 @@ export async function fetchWithDpopRetry(
 
   if (!res.ok) {
     const dpopNonce = res.headers.get("dpop-nonce");
-    if (dpopNonce && res.status === 400) {
+    if (dpopNonce && (res.status === 400 || res.status === 401)) {
       dpopProof = createDpopProof({
         privateKey,
         jwk: publicJwk,
