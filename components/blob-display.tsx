@@ -16,12 +16,12 @@ export function BlobDisplay({
   if (!content) return "—";
   const type = content.$type as string | undefined;
 
-  if (type === "app.certified.defs#uri") {
+  if (type === "org.hypercerts.defs#uri") {
     const uri = (content as $Typed<OrgHypercertsDefs.Uri>).uri;
     return <URILink uri={getPDSlsURI(uri)} label={uri} />;
   }
 
-  if (["smallBlob", "largeBlob", "blob"].includes(type || "")) {
+  if (["org.hypercerts.defs#smallBlob", "org.hypercerts.defs#largeBlob"].includes(type || "")) {
     const blobRef = (content as $Typed<OrgHypercertsDefs.SmallBlob>).blob;
     return (
       <p className="text-sm">
