@@ -4,6 +4,7 @@ import { useQueries } from "@tanstack/react-query";
 import { getProfile } from "@/lib/api/external/bluesky";
 import { getContributorInformationRecord } from "@/lib/create-actions";
 import { queryKeys } from "@/lib/api/query-keys";
+import { parseAtUri } from "@/lib/utils";
 import type { DisplayContributor } from "@/lib/contributor-utils";
 import type { BlueskyProfile } from "@/lib/api/types";
 
@@ -13,7 +14,9 @@ import type { BlueskyProfile } from "@/lib/api/types";
  * Non-DID contributors are skipped (no query created).
  * Failed lookups are silently ignored (retry: false, no throw).
  */
-export function useContributorProfilesQuery(contributors: DisplayContributor[]) {
+export function useContributorProfilesQuery(
+  contributors: DisplayContributor[],
+) {
   const didContributors = contributors.filter((c) => c.isDid);
   // Deduplicate DIDs
   const uniqueDids = [...new Set(didContributors.map((c) => c.identity))];
@@ -46,31 +49,25 @@ interface ResolvedContributorInfo {
 }
 
 /**
- * Parses an AT URI into its components.
- * e.g. "at://did:plc:xyz/org.hypercerts.claim.contributorInformation/abc"
- *   → { did: "did:plc:xyz", collection: "org.hypercerts.claim.contributorInformation", rkey: "abc" }
- */
-function parseAtUri(uri: string): { did: string; collection: string; rkey: string } {
-  const withoutScheme = uri.replace(/^at:\/\//, "");
-  const [did, collection, rkey] = withoutScheme.split("/");
-  return { did: did ?? "", collection: collection ?? "", rkey: rkey ?? "" };
-}
-
-/**
  * For each DisplayContributor with needsResolution=true, fetch the contributorInformation
  * record to get the actual contributor DID.
  * Returns a Map<string, ResolvedContributorInfo> keyed by the placeholder identity (the AT URI).
  */
-export function useResolveContributorIdentities(contributors: DisplayContributor[]) {
-  const needsResolution = contributors.filter((c) => c.needsResolution && c.identityRef);
+export function useResolveContributorIdentities(
+  contributors: DisplayContributor[],
+) {
+  const needsResolution = contributors.filter(
+    (c) => c.needsResolution && c.identityRef && parseAtUri(c.identityRef.uri),
+  );
 
   const queries = useQueries({
     queries: needsResolution.map((c) => {
       const ref = c.identityRef!;
-      const { did, collection, rkey } = parseAtUri(ref.uri);
+      const { did, collection, rkey } = parseAtUri(ref.uri)!;
       return {
         queryKey: queryKeys.hypercerts.contributorInformation(did, rkey),
-        queryFn: () => getContributorInformationRecord({ did, collection, rkey }),
+        queryFn: () =>
+          getContributorInformationRecord({ did, collection, rkey }),
         retry: 1,
         staleTime: 10 * 60 * 1000,
       };
