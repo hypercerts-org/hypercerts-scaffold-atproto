@@ -300,3 +300,50 @@
 .stepper-line-inactive {
   background: var(--border);
 }
+
+/* ─── Login Door Animations ─── */
+
+@keyframes expandDoor {
+  from {
+    opacity: 0.8;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes doorFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pillSlideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-8px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
+.animate-expand-door {
+  animation: expandDoor 0.3s ease-out both;
+}
+
+.animate-door-fade-in {
+  animation: doorFadeIn 0.3s ease-out both;
+}
+
+.animate-pill-slide-in {
+  animation: pillSlideIn 0.25s ease-out both;
+}
