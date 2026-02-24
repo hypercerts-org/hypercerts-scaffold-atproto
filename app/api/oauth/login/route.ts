@@ -56,10 +56,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     if (!parResponse.ok) {
       const errorBody = await parResponse.text().catch(() => "(unreadable)");
       console.error("[oauth/login] PAR failed", parResponse.status, errorBody);
-      return NextResponse.json(
-        { error: `PAR request failed: ${parResponse.statusText}`, details: errorBody },
-        { status: 502 },
-      );
+      return NextResponse.redirect(new URL("/?error=auth_failed", config.baseUrl));
     }
 
     // 7. Parse request_uri from PAR response
@@ -88,8 +85,8 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     // 11. Set session cookie
     response.cookies.set(EPDS_SESSION_COOKIE_NAME, encodedCookie, {
       httpOnly: true,
-      secure: config.isProduction,
-      sameSite: "lax",
+      secure: true,
+      sameSite: "strict",
       maxAge: 600,
       path: "/",
     });
