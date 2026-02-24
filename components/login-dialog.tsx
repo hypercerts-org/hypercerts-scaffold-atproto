@@ -145,14 +145,28 @@ function EmailForm() {
         </p>
       </div>
 
-      <Button
-        type="submit"
-        disabled={isRedirecting}
-        className="w-full bg-create-accent hover:bg-create-accent/90 text-white font-[family-name:var(--font-outfit)] font-semibold transition-all"
-      >
-        {isRedirecting && <Spinner />}
-        Continue
-      </Button>
+      <div className="space-y-2">
+        <Button
+          type="submit"
+          disabled={isRedirecting}
+          className="w-full bg-create-accent hover:bg-create-accent/90 text-white font-[family-name:var(--font-outfit)] font-semibold transition-all"
+        >
+          {isRedirecting && <Spinner />}
+          Continue
+        </Button>
+        <Button
+          type="button"
+          disabled={isRedirecting}
+          onClick={() => {
+            setIsRedirecting(true);
+            window.location.href = "/api/oauth/login";
+          }}
+          variant="ghost"
+          className="w-full font-[family-name:var(--font-outfit)] text-muted-foreground hover:text-create-accent hover:bg-muted/50 transition-colors"
+        >
+          Don&apos;t have an account? Create one
+        </Button>
+      </div>
     </form>
   );
 }
