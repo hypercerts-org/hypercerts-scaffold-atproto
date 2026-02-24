@@ -33,6 +33,12 @@ const nextConfig: NextConfig = {
         port: "",
         pathname: "/**",
       },
+      {
+        protocol: "https",
+        hostname: "epds-poc1.test.certified.app",
+        port: "",
+        pathname: "/**",
+      },
     ],
   },
 };
