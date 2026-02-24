@@ -134,12 +134,12 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     // 12. Create redirect response to /
     const response = NextResponse.redirect(new URL("/", config.baseUrl));
 
-    // 13. Set user-did cookie
+    // 13. Set user-did cookie (session cookie — no maxAge, expires when browser closes)
+    // Avoids stale cookie outliving the backend session (Redis/refresh token)
     response.cookies.set("user-did", tokenData.sub, {
       httpOnly: true,
       secure: config.isProduction,
       sameSite: 'lax',
-      maxAge: 60 * 60 * 24 * 7, // 1 week
       path: "/",
     });
 
