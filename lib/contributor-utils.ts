@@ -93,6 +93,8 @@ export function parseContributor(contributor: Contributor): DisplayContributor {
     // (extracting the DID would give the repo owner's DID, not the contributor's DID)
     identity = rawIdentity.uri;
     needsResolution = true;
+  } else if (rawIdentity == null) {
+    identity = "Unknown contributor";
   } else {
     identity = String(rawIdentity);
   }
@@ -129,7 +131,7 @@ export function parseContributor(contributor: Contributor): DisplayContributor {
  * Returns an empty array if contributors is undefined or empty.
  */
 export function parseContributors(
-  contributors?: Contributor[]
+  contributors?: Contributor[],
 ): DisplayContributor[] {
   if (!contributors || contributors.length === 0) {
     return [];
