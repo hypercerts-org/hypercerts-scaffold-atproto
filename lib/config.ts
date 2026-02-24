@@ -233,7 +233,7 @@ export function buildClientMetadata(): Record<string, unknown> {
         ? [config.redirectUri, config.epdsRedirectUri]
         : [config.redirectUri],
       scope: OAUTH_SCOPE,
-      logo_uri: `${config.baseUrl}/certified-logo.svg`,
+      logo_uri: `${config.baseUrl}/certified.png`,
       email_template_uri: `${config.baseUrl}/email-template.html`,
       email_subject_template: "{{code}} — Your {{app_name}} verification code",
       brand_color: "#1c1e21",
@@ -255,7 +255,7 @@ export function buildClientMetadata(): Record<string, unknown> {
       ? [config.redirectUri, config.epdsRedirectUri]
       : [config.redirectUri],
     scope: OAUTH_SCOPE,
-      logo_uri: `${config.baseUrl}/certified-logo.svg`,
+      logo_uri: `${config.baseUrl}/certified.png`,
       email_template_uri: `${config.baseUrl}/email-template.html`,
       email_subject_template: "{{code}} — Your {{app_name}} verification code",
       brand_color: "#1c1e21",
