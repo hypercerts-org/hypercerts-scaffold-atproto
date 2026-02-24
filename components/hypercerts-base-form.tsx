@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
 import { Textarea } from "@/components/ui/textarea";
-import type { Record as HypercertRecord } from "@/lexicons/types/org/hypercerts/claim/activity";
+import { OrgHypercertsClaimActivity as Hypercert } from "@hypercerts-org/sdk-core";
 import type { CreateHypercertParams } from "@hypercerts-org/sdk-core";
 import { Label } from "@radix-ui/react-label";
 import {
@@ -60,9 +60,10 @@ export default function HypercertsBaseForm({
   hypercertUri,
   nextStepper,
 }: HypercertsBaseFormProps) {
-  const initialWorkScope = certInfo?.workScope
-    .split(",")
-    .map((scope) => scope.trim());
+  const initialWorkScope =
+    certInfo?.workScope && Hypercert.isWorkScopeString(certInfo.workScope)
+      ? certInfo.workScope.scope.split(",").map((scope: string) => scope.trim())
+      : undefined;
   const [title, setTitle] = useState(certInfo?.title || "");
   const [backgroundImage, setBackgroundImage] = useState<File | undefined>();
   const [shortDescription, setShortDescription] = useState(
@@ -73,10 +74,10 @@ export default function HypercertsBaseForm({
     initialWorkScope || [""],
   );
   const [startDate, setStartDate] = useState<Date | null>(
-    certInfo?.workTimeFrameFrom ? new Date(certInfo?.workTimeFrameFrom) : null,
+    certInfo?.startDate ? new Date(certInfo.startDate) : null,
   );
   const [endDate, setEndDate] = useState<Date | null>(
-    certInfo?.workTimeFrameTo ? new Date(certInfo?.workTimeFrameTo) : null,
+    certInfo?.endDate ? new Date(certInfo.endDate) : null,
   );
   const [rights, setRights] = useState<RightsState>({
     name: "",

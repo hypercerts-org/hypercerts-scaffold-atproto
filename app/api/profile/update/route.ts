@@ -122,7 +122,9 @@ export async function POST(req: Request) {
     const detail = error instanceof Error ? error.message : String(error);
     console.error("Profile update error:", detail);
     return NextResponse.json(
-      { error: "Profile update failed" },
+      {
+        error: `Failed to update profile: ${error instanceof Error ? error.message : String(error)}`,
+      },
       { status: 500 },
     );
   }

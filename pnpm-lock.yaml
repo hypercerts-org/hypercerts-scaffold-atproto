@@ -21,10 +21,10 @@ importers:
         specifier: ^0.3.14
         version: 0.3.15
       '@hypercerts-org/lexicon':
-        specifier: 0.10.0-beta.3
-        version: 0.10.0-beta.3(@atproto/xrpc@0.7.7)
+        specifier: 0.10.0-beta.14
+        version: 0.10.0-beta.14(@atproto/xrpc@0.7.7)
       '@hypercerts-org/sdk-core':
-        specifier: file:vendor/hypercerts-org-sdk-core-0.10.0-beta.8.tgz
+        specifier: file:./vendor/hypercerts-org-sdk-core-0.10.0-beta.8.tgz
         version: file:vendor/hypercerts-org-sdk-core-0.10.0-beta.8.tgz(@atproto/xrpc@0.7.7)
       '@radix-ui/react-accordion':
         specifier: ^1.2.12
@@ -463,13 +463,8 @@ packages:
     peerDependencies:
       '@atproto/xrpc': '*'
 
-  '@hypercerts-org/lexicon@0.10.0-beta.3':
-    resolution: {integrity: sha512-mQKDeRVwvWrR5mkwAdFHJUZyxNDwaHiFX1emykQ7G1RJPTCTGS2Tqi3C2iR/vzCU4oUkaweQ9zDWogG/ViZXbg==}
-    peerDependencies:
-      '@atproto/xrpc': '*'
-
   '@hypercerts-org/sdk-core@file:vendor/hypercerts-org-sdk-core-0.10.0-beta.8.tgz':
-    resolution: {integrity: sha512-mBIQcuJMwEoOKPKY5H2Ob8RqZryou6lAMTSaI+plwc0VFPDH64Zqhhej7zbyXNsNgQc0tI17KsXNP6m7R72xUw==, tarball: file:vendor/hypercerts-org-sdk-core-0.10.0-beta.8.tgz}
+    resolution: {integrity: sha512-Hxm0vSjRIV/6dYZY3T8/MM0DhLvmvrmqn+EFf/xot5SATGUt3j1dJArB2mVHDsqoUugrVX3G0fhjBrd4VVjZaQ==, tarball: file:vendor/hypercerts-org-sdk-core-0.10.0-beta.8.tgz}
     version: 0.10.0-beta.8
 
   '@img/colour@1.0.0':
@@ -3161,8 +3156,8 @@ packages:
     resolution: {integrity: sha512-XleUoc9uwGXqjWwXaUTZAmzMcFZ5858QA2vvx1Ur5xIcixXIP+8LnFDgRplU30us6teqdlskFfu+ae4K79Ooew==}
     engines: {node: '>= 0.8.0'}
 
-  type-fest@5.4.1:
-    resolution: {integrity: sha512-xygQcmneDyzsEuKZrFbRMne5HDqMs++aFzefrJTgEIKjQ3rekM+RPfFCVq2Gp1VIDqddoYeppCj4Pcb+RZW0GQ==}
+  type-fest@5.4.4:
+    resolution: {integrity: sha512-JnTrzGu+zPV3aXIUhnyWJj4z/wigMsdYajGLIYakqyOW1nPllzXEJee0QQbHj+CTIQtXGlAjuK0UY+2xTyjVAw==}
     engines: {node: '>=20'}
 
   type-is@1.6.18:
@@ -3811,13 +3806,6 @@ snapshots:
       '@atproto/xrpc': 0.7.7
       multiformats: 13.4.2
 
-  '@hypercerts-org/lexicon@0.10.0-beta.3(@atproto/xrpc@0.7.7)':
-    dependencies:
-      '@atcute/leaflet': 1.0.15
-      '@atproto/lexicon': 0.6.0
-      '@atproto/xrpc': 0.7.7
-      multiformats: 13.4.2
-
   '@hypercerts-org/sdk-core@file:vendor/hypercerts-org-sdk-core-0.10.0-beta.8.tgz(@atproto/xrpc@0.7.7)':
     dependencies:
       '@atproto/api': 0.18.10
@@ -3826,7 +3814,7 @@ snapshots:
       '@atproto/oauth-client-node': 0.3.15
       '@hypercerts-org/lexicon': 0.10.0-beta.14(@atproto/xrpc@0.7.7)
       eventemitter3: 5.0.4
-      type-fest: 5.4.1
+      type-fest: 5.4.4
       zod: 3.25.76
     transitivePeerDependencies:
       - '@atproto/xrpc'
@@ -6650,7 +6638,7 @@ snapshots:
     dependencies:
       prelude-ls: 1.2.1
 
-  type-fest@5.4.1:
+  type-fest@5.4.4:
     dependencies:
       tagged-tag: 1.0.0
 

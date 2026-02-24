@@ -1,9 +1,9 @@
 import { Agent } from "@atproto/api";
-import * as HypercertClaim from "@/lexicons/types/org/hypercerts/claim/activity";
-import * as HypercertEvaluation from "@/lexicons/types/org/hypercerts/claim/evaluation";
-import * as HypercertContribution from "@/lexicons/types/org/hypercerts/claim/contribution";
-import * as HypercertEvidence from "@/lexicons/types/org/hypercerts/claim/evidence";
-import * as HypercertLocation from "@/lexicons/types/app/certified/location";
+import { OrgHypercertsClaimActivity as HypercertClaim } from "@hypercerts-org/sdk-core";
+import { OrgHypercertsClaimEvaluation as HypercertEvaluation } from "@hypercerts-org/sdk-core";
+import { OrgHypercertsClaimContributionDetails as HypercertContribution } from "@hypercerts-org/sdk-core";
+import { OrgHypercertsClaimAttachment as HypercertEvidence } from "@hypercerts-org/sdk-core";
+import { AppCertifiedLocation as HypercertLocation } from "@hypercerts-org/sdk-core";
 import { Collections } from "@/lib/types";
 import { parseAtUri } from "@/lib/utils";
 

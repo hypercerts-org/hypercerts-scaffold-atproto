@@ -391,7 +391,7 @@ Once your domain is added to the trusted list, the PDS will apply your branding 
 
 **Solutions:**
 
-- Update `NEXT_PUBLIC_BASE_URL` to your ngrok URL (e.g., `https://abc123.ngrok.io`)
+- Update `NEXT_PUBLIC_BASE_URL` to your ngrok URL (e.g., `https://abc123.ngrok-free.app`)
 - Restart dev server after changing URL
 - Note: ngrok URLs change on each restart unless you have a paid plan
 

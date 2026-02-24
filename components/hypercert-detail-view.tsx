@@ -10,6 +10,7 @@ import {
   EvidenceSectionSkeleton,
   EvaluationsSectionSkeleton,
 } from "./detail-view-skeletons";
+import HypercertContributorsSection from "./hypercert-contributors-section";
 import { Calendar, Clock, Link as LinkIcon } from "lucide-react";
 import Image from "next/image";
 
@@ -36,6 +37,11 @@ export default function HypercertDetailsView({
   imageUri?: string;
 }) {
   const workScope = Array.isArray(record.workScope) ? record.workScope : [];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- contributors field exists on record but not in HypercertClaim type yet
+  const rawContributors = (record as any).contributors;
+  const contributors = Array.isArray(rawContributors)
+    ? rawContributors
+    : undefined;
 
   return (
     <div className="space-y-6">
@@ -151,9 +157,14 @@ export default function HypercertDetailsView({
         </div>
       </div>
 
+      {/* Contributors Section */}
+      <div className="animate-fade-in-up [animation-delay:150ms]">
+        <HypercertContributorsSection contributors={contributors} />
+      </div>
+
       {/* Full Description */}
       {record.description ? (
-        <div className="animate-fade-in-up [animation-delay:200ms]">
+        <div className="animate-fade-in-up [animation-delay:250ms]">
           <div className="glass-panel rounded-xl p-6 border border-border/50 space-y-3">
             <h2 className="text-lg font-[family-name:var(--font-syne)] font-semibold">
               Description
@@ -166,7 +177,7 @@ export default function HypercertDetailsView({
       ) : null}
 
       {/* Sections */}
-      <div className="animate-fade-in-up [animation-delay:300ms] space-y-6">
+      <div className="animate-fade-in-up [animation-delay:350ms] space-y-6">
         <HypercertMeasurementsSection hypercertUri={hypercertUri} />
         <HypercertEvidenceSection hypercertUri={hypercertUri} />
         <HypercertEvaluationsSection hypercertUri={hypercertUri} />

@@ -198,3 +198,22 @@ export const getEvidenceRecord = async (params: {
   }
   return JSON.parse(JSON.stringify(data));
 };
+
+export const getContributorInformationRecord = async (params: {
+  did: string;
+  collection: string;
+  rkey: string;
+}) => {
+  const { did, collection, rkey } = params;
+  const ctx = await getRepoContext({ targetDid: did });
+  if (!ctx) {
+    throw new Error(
+      "getContributorInformationRecord failed: could not establish repository context. The user session may have expired or the target DID is unreachable.",
+    );
+  }
+  const data = await ctx.scopedRepo.records.get({ collection, rkey });
+  if (data?.value) {
+    data.value = await resolveRecordBlobs(data.value, did);
+  }
+  return JSON.parse(JSON.stringify(data));
+};

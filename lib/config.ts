@@ -79,6 +79,18 @@ function isLoopback(url: string): boolean {
 }
 
 /**
+ * Returns the appropriate OAuth scope based on the environment.
+ * - Loopback (local dev): uses "atproto transition:generic" (ATProto requirement for loopback clients)
+ * - Production: uses granular scopes (repo, rpc, blob) for precise permission requests
+ */
+function getOAuthScope(url: string): string {
+  if (isLoopback(url)) {
+    return LOOPBACK_SCOPE;
+  }
+  return GRANULAR_SCOPE;
+}
+
+/**
  * Get the base URL for the application
  * Priority:
  * 1. NEXT_PUBLIC_BASE_URL (explicit configuration)
@@ -228,7 +240,11 @@ export const config = {
   jwksUri,
   scope: OAUTH_SCOPE,
 
-  handleResolver: process.env.NEXT_PUBLIC_HANDLE_RESOLVER || "https://bsky.social",
+  handleResolver:
+    process.env.NEXT_PUBLIC_HANDLE_RESOLVER || "https://bsky.social",
+
+  // Network endpoints
+  pdsUrl: process.env.NEXT_PUBLIC_PDS_URL!,
 
   // Redis configuration
   redis: {
@@ -307,7 +323,10 @@ for (const envVar of requiredEnvVars) {
 }
 
 // Log configuration at startup (helpful for debugging)
-if (typeof window === "undefined" && process.env.NEXT_PUBLIC_VERCEL_TARGET_ENV !== "production") {
+if (
+  typeof window === "undefined" &&
+  process.env.NEXT_PUBLIC_VERCEL_TARGET_ENV !== "production"
+) {
   console.log("\n🔧 Application Configuration:");
   console.log(`   Environment: ${isProduction ? "production" : "development"}`);
   console.log(`   Mode: ${isLoopbackMode ? "loopback (local)" : "production"}`);
