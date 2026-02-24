@@ -119,11 +119,10 @@ export async function POST(req: Request) {
       },
     });
   } catch (error) {
-    console.error("Profile update error:", error);
+    const detail = error instanceof Error ? error.message : String(error);
+    console.error("Profile update error:", detail);
     return NextResponse.json(
-      {
-        error: `Profile update failed: ${error instanceof Error ? error.message : String(error)}`,
-      },
+      { error: "Profile update failed" },
       { status: 500 },
     );
   }
