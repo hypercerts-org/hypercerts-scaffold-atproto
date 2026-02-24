@@ -138,16 +138,16 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     // Avoids stale cookie outliving the backend session (Redis/refresh token)
     response.cookies.set("user-did", tokenData.sub, {
       httpOnly: true,
-      secure: config.isProduction,
-      sameSite: 'lax',
+      secure: true,
+      sameSite: 'strict',
       path: "/",
     });
 
     // 14. Delete the epds-oauth-session cookie
     response.cookies.set(EPDS_SESSION_COOKIE_NAME, "", {
       httpOnly: true,
-      secure: config.isProduction,
-      sameSite: 'lax',
+      secure: true,
+      sameSite: 'strict',
       maxAge: 0,
       path: "/",
     });
