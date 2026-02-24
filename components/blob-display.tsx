@@ -21,7 +21,11 @@ export function BlobDisplay({
     return <URILink uri={getPDSlsURI(uri)} label={uri} />;
   }
 
-  if (["org.hypercerts.defs#smallBlob", "org.hypercerts.defs#largeBlob"].includes(type || "")) {
+  if (
+    ["org.hypercerts.defs#smallBlob", "org.hypercerts.defs#largeBlob"].includes(
+      type || "",
+    )
+  ) {
     const blobRef = (content as $Typed<OrgHypercertsDefs.SmallBlob>).blob;
     return (
       <p className="text-sm">
