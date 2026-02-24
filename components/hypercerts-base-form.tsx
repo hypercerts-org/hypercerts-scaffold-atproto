@@ -60,14 +60,10 @@ export default function HypercertsBaseForm({
   hypercertUri,
   nextStepper,
 }: HypercertsBaseFormProps) {
-  // workScope is now a union type in the new schema; extract string value if it's a WorkScopeString
-  const workScopeStr =
-    certInfo?.workScope && "$type" in certInfo.workScope
-      ? ((certInfo.workScope as Hypercert.WorkScopeString).scope ?? "")
+  const initialWorkScope =
+    certInfo?.workScope && Hypercert.isWorkScopeString(certInfo.workScope)
+      ? certInfo.workScope.scope.split(",").map((scope: string) => scope.trim())
       : undefined;
-  const initialWorkScope = workScopeStr
-    ? workScopeStr.split(",").map((scope: string) => scope.trim())
-    : undefined;
   const [title, setTitle] = useState(certInfo?.title || "");
   const [backgroundImage, setBackgroundImage] = useState<File | undefined>();
   const [shortDescription, setShortDescription] = useState(
