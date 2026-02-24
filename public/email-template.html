@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Your verification code</title>
+</head>
+<body style="margin:0; padding:0; background-color:#f8f8fa; font-family:'Outfit',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f8f8fa; padding:40px 20px;">
+    <tr>
+      <td align="center">
+        <table width="100%" cellpadding="0" cellspacing="0" style="max-width:460px; background:#ffffff; border-radius:12px; border:1px solid #e8e8ec; overflow:hidden;">
+          <!-- Logo header -->
+          <tr>
+            <td style="padding:32px 32px 0 32px; text-align:center;">
+              <img src="{{logo_uri}}" alt="{{app_name}}" width="40" height="44" style="display:block; margin:0 auto;">
+            </td>
+          </tr>
+          <!-- Heading -->
+          <tr>
+            <td style="padding:20px 32px 0 32px; text-align:center;">
+              <h1 style="margin:0; font-size:22px; font-weight:700; color:#1c1e21; letter-spacing:-0.02em;">Your verification code</h1>
+            </td>
+          </tr>
+          <!-- Code -->
+          <tr>
+            <td style="padding:24px 32px; text-align:center;">
+              <div style="display:inline-block; padding:16px 32px; background:#f8f8fa; border-radius:10px; border:1px solid #e8e8ec; letter-spacing:0.3em; font-size:32px; font-weight:700; color:#1c1e21; font-family:'Outfit',monospace;">
+                {{code}}
+              </div>
+            </td>
+          </tr>
+          <!-- Instructions -->
+          <tr>
+            <td style="padding:0 32px 32px 32px; text-align:center;">
+              <p style="margin:0 0 8px 0; font-size:14px; color:#7c7c85; line-height:1.5;">
+                Enter this code to sign in to <strong style="color:#1c1e21;">{{app_name}}</strong>.
+              </p>
+              <p style="margin:0; font-size:13px; color:#7c7c85; line-height:1.5;">
+                This code expires in 10 minutes. If you didn't request this, you can safely ignore this email.
+              </p>
+            </td>
+          </tr>
+          {{#is_new_user}}
+          <!-- New user welcome -->
+          <tr>
+            <td style="padding:0 32px 32px 32px; text-align:center; border-top:1px solid #e8e8ec;">
+              <p style="margin:24px 0 0 0; font-size:14px; color:#7c7c85; line-height:1.5;">
+                Welcome! A new account will be created for you automatically.
+              </p>
+            </td>
+          </tr>
+          {{/is_new_user}}
+        </table>
+        <!-- Footer -->
+        <table width="100%" cellpadding="0" cellspacing="0" style="max-width:460px;">
+          <tr>
+            <td style="padding:24px 32px; text-align:center;">
+              <p style="margin:0; font-size:12px; color:#a0a0a8; line-height:1.5;">
+                Sent by {{app_name}} · Powered by Certified
+              </p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
