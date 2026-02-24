@@ -21,11 +21,11 @@ importers:
         specifier: ^0.3.14
         version: 0.3.15
       '@hypercerts-org/lexicon':
-        specifier: 0.10.0-beta.3
-        version: 0.10.0-beta.3(@atproto/xrpc@0.7.7)
+        specifier: 0.10.0-beta.15
+        version: 0.10.0-beta.15(@atproto/xrpc@0.7.7)
       '@hypercerts-org/sdk-core':
-        specifier: file:vendor/hypercerts-org-sdk-core-0.10.0-beta.8.tgz
-        version: file:vendor/hypercerts-org-sdk-core-0.10.0-beta.8.tgz(@atproto/xrpc@0.7.7)
+        specifier: 0.2.0-beta.0
+        version: 0.2.0-beta.0(@atproto/xrpc@0.7.7)
       '@radix-ui/react-accordion':
         specifier: ^1.2.12
         version: 1.2.12(@types/react-dom@19.2.3(@types/react@19.2.7))(@types/react@19.2.7)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
@@ -209,9 +209,6 @@ packages:
 
   '@atproto/api@0.17.7':
     resolution: {integrity: sha512-V+OJBZq9chcrD21xk1bUa6oc5DSKfQj5DmUPf5rmZncqL1w9ZEbS38H5cMyqqdhfgo2LWeDRdZHD0rvNyJsIaw==}
-
-  '@atproto/api@0.18.10':
-    resolution: {integrity: sha512-q23wreAGhktrMLepulvljZWHsUOrTIDwhU3gr/uSX3R1TZIZ3i4SxQZVlMqaQHpNJ/5Xj8J1hozkwVpaOX37eA==}
 
   '@atproto/common-web@0.4.10':
     resolution: {integrity: sha512-TLDZSgSKzT8ZgOrBrTGK87J1CXve9TEuY6NVVUBRkOMzRRtQzpFb9/ih5WVS/hnaWVvE30CfuyaetRoma+WKNw==}
@@ -458,19 +455,18 @@ packages:
     resolution: {integrity: sha512-bV0Tgo9K4hfPCek+aMAn81RppFKv2ySDQeMoSZuvTASywNTnVJCArCZE2FWqpvIatKu7VMRLWlR1EazvVhDyhQ==}
     engines: {node: '>=18.18'}
 
-  '@hypercerts-org/lexicon@0.10.0-beta.14':
-    resolution: {integrity: sha512-/IsVvqVScjuwRMtu/4S4FarcjHd8BkEchbMOKWOmCH1DNp0XSwh+O9h2HSnBcaMr5lMtUtghLyWSd70YsQ0N4Q==}
+  '@hypercerts-org/lexicon@0.10.0-beta.15':
+    resolution: {integrity: sha512-PCIsk8NWBeSDJ1oYmKX2hs9a1TChE23WnU2RQdi78cZJMrzdn0kWtbQ6bov8j9SiOYgkd3yn6+lnoWehJ+8KyA==}
     peerDependencies:
       '@atproto/xrpc': '*'
 
-  '@hypercerts-org/lexicon@0.10.0-beta.3':
-    resolution: {integrity: sha512-mQKDeRVwvWrR5mkwAdFHJUZyxNDwaHiFX1emykQ7G1RJPTCTGS2Tqi3C2iR/vzCU4oUkaweQ9zDWogG/ViZXbg==}
+  '@hypercerts-org/lexicon@0.2.0-beta.0':
+    resolution: {integrity: sha512-MEqxho5gLZGeHMTpBZi08bOgEFVlHE9Rtl1BKkObp/t61Dj66JqkoD0HPqb5X6SBOhObXzRhZW+njol4MzkrOQ==}
     peerDependencies:
       '@atproto/xrpc': '*'
 
-  '@hypercerts-org/sdk-core@file:vendor/hypercerts-org-sdk-core-0.10.0-beta.8.tgz':
-    resolution: {integrity: sha512-lqpn/K/JUg3tlOR87MGTGeGnvNBGGXqmrE4zTwbkXg5Grq6EBL31+AxeIUuFGEaN/ZX3GzMqcHQzpqGWVwpRsQ==, tarball: file:vendor/hypercerts-org-sdk-core-0.10.0-beta.8.tgz}
-    version: 0.10.0-beta.8
+  '@hypercerts-org/sdk-core@0.2.0-beta.0':
+    resolution: {integrity: sha512-7go+uOI/mMyPcomv+4aSOAVflt0CvU/f6LqW0zslZG61hI6pYZ1RP5NoNWF9T6pqDczeWjPjSKrdeVKsDy5HBA==}
 
   '@img/colour@1.0.0':
     resolution: {integrity: sha512-A5P/LfWGFSl6nsckYtjw9da+19jB8hkJ6ACTGcDfEJ0aE+l2n2El7dsVM7UVHZQ9s2lmYMWlrS21YLy2IR1LUw==}
@@ -3106,10 +3102,6 @@ packages:
     resolution: {integrity: sha512-ot0WnXS9fgdkgIcePe6RHNk1WA8+muPa6cSjeR3V8K27q9BB1rTE3R1p7Hv0z1ZyAc8s6Vvv8DIyWf681MAt0w==}
     engines: {node: '>= 0.4'}
 
-  tagged-tag@1.0.0:
-    resolution: {integrity: sha512-yEFYrVhod+hdNyx7g5Bnkkb0G6si8HJurOoOEgC8B/O0uXLHlaey/65KRv6cuWBNhBgHKAROVpc7QyYqE5gFng==}
-    engines: {node: '>=20'}
-
   tailwind-merge@3.4.0:
     resolution: {integrity: sha512-uSaO4gnW+b3Y2aWoWfFpX62vn2sR3skfhbjsEnaBI81WD1wBLlHZe5sWf0AqjksNdYTbGBEd0UasQMT3SNV15g==}
 
@@ -3160,10 +3152,6 @@ packages:
   type-check@0.4.0:
     resolution: {integrity: sha512-XleUoc9uwGXqjWwXaUTZAmzMcFZ5858QA2vvx1Ur5xIcixXIP+8LnFDgRplU30us6teqdlskFfu+ae4K79Ooew==}
     engines: {node: '>= 0.8.0'}
-
-  type-fest@5.4.1:
-    resolution: {integrity: sha512-xygQcmneDyzsEuKZrFbRMne5HDqMs++aFzefrJTgEIKjQ3rekM+RPfFCVq2Gp1VIDqddoYeppCj4Pcb+RZW0GQ==}
-    engines: {node: '>=20'}
 
   type-is@1.6.18:
     resolution: {integrity: sha512-TkRKr9sUTxEH8MdfuCSP7VizJyzRNMjj2J2do2Jr3Kym598JVdEksuzPQCnlFPW4ky9Q+iA+ma9BGm06XQBy8g==}
@@ -3413,17 +3401,6 @@ snapshots:
     dependencies:
       '@atproto/common-web': 0.4.10
       '@atproto/lexicon': 0.5.2
-      '@atproto/syntax': 0.4.2
-      '@atproto/xrpc': 0.7.7
-      await-lock: 2.2.2
-      multiformats: 9.9.0
-      tlds: 1.261.0
-      zod: 3.25.76
-
-  '@atproto/api@0.18.10':
-    dependencies:
-      '@atproto/common-web': 0.4.10
-      '@atproto/lexicon': 0.6.0
       '@atproto/syntax': 0.4.2
       '@atproto/xrpc': 0.7.7
       await-lock: 2.2.2
@@ -3803,7 +3780,7 @@ snapshots:
 
   '@humanwhocodes/retry@0.4.3': {}
 
-  '@hypercerts-org/lexicon@0.10.0-beta.14(@atproto/xrpc@0.7.7)':
+  '@hypercerts-org/lexicon@0.10.0-beta.15(@atproto/xrpc@0.7.7)':
     dependencies:
       '@atcute/bluesky': 3.2.15
       '@atcute/leaflet': 1.0.15
@@ -3811,22 +3788,20 @@ snapshots:
       '@atproto/xrpc': 0.7.7
       multiformats: 13.4.2
 
-  '@hypercerts-org/lexicon@0.10.0-beta.3(@atproto/xrpc@0.7.7)':
+  '@hypercerts-org/lexicon@0.2.0-beta.0(@atproto/xrpc@0.7.7)':
     dependencies:
-      '@atcute/leaflet': 1.0.15
-      '@atproto/lexicon': 0.6.0
+      '@atproto/lexicon': 0.5.2
       '@atproto/xrpc': 0.7.7
       multiformats: 13.4.2
 
-  '@hypercerts-org/sdk-core@file:vendor/hypercerts-org-sdk-core-0.10.0-beta.8.tgz(@atproto/xrpc@0.7.7)':
+  '@hypercerts-org/sdk-core@0.2.0-beta.0(@atproto/xrpc@0.7.7)':
     dependencies:
-      '@atproto/api': 0.18.10
-      '@atproto/lexicon': 0.6.0
+      '@atproto/api': 0.17.7
+      '@atproto/lexicon': 0.5.2
       '@atproto/oauth-client': 0.5.13
       '@atproto/oauth-client-node': 0.3.15
-      '@hypercerts-org/lexicon': 0.10.0-beta.14(@atproto/xrpc@0.7.7)
+      '@hypercerts-org/lexicon': 0.2.0-beta.0(@atproto/xrpc@0.7.7)
       eventemitter3: 5.0.4
-      type-fest: 5.4.1
       zod: 3.25.76
     transitivePeerDependencies:
       - '@atproto/xrpc'
@@ -6601,8 +6576,6 @@ snapshots:
 
   supports-preserve-symlinks-flag@1.0.0: {}
 
-  tagged-tag@1.0.0: {}
-
   tailwind-merge@3.4.0: {}
 
   tailwindcss@4.1.18: {}
@@ -6649,10 +6622,6 @@ snapshots:
   type-check@0.4.0:
     dependencies:
       prelude-ls: 1.2.1
-
-  type-fest@5.4.1:
-    dependencies:
-      tagged-tag: 1.0.0
 
   type-is@1.6.18:
     dependencies:
