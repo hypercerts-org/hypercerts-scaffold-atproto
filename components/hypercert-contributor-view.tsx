@@ -53,9 +53,7 @@ export default function HypercertContributorView({
           {/* Handle/DID line */}
           {(profile?.handle || contributor.isDid) && (
             <p className="text-xs text-muted-foreground font-[family-name:var(--font-outfit)] truncate">
-              {profile?.handle
-                ? `@${profile.handle}`
-                : contributor.identity}
+              {profile?.handle ? `@${profile.handle}` : contributor.identity}
             </p>
           )}
 

@@ -4,7 +4,10 @@ import type { OrgHypercertsClaimActivity } from "@hypercerts-org/sdk-core";
 import { Users } from "lucide-react";
 import { useMemo } from "react";
 import { parseContributors } from "@/lib/contributor-utils";
-import { useContributorProfilesQuery, useResolveContributorIdentities } from "@/queries/hypercerts";
+import {
+  useContributorProfilesQuery,
+  useResolveContributorIdentities,
+} from "@/queries/hypercerts";
 import HypercertContributorView from "./hypercert-contributor-view";
 import { Skeleton } from "./ui/skeleton";
 
@@ -30,7 +33,8 @@ export default function HypercertContributorsSection({
   const displayContributors = parseContributors(contributors);
 
   // Phase 1: Resolve StrongRef identities to actual DIDs
-  const { resolvedMap, isLoading: isResolvingIdentities } = useResolveContributorIdentities(displayContributors);
+  const { resolvedMap, isLoading: isResolvingIdentities } =
+    useResolveContributorIdentities(displayContributors);
 
   // Build resolved contributors list — replace placeholder identities with actual DIDs
   const resolvedContributors = useMemo(() => {
@@ -50,7 +54,8 @@ export default function HypercertContributorsSection({
   }, [displayContributors, resolvedMap]);
 
   // Phase 2: Resolve DIDs to Bluesky profiles
-  const { profileMap, isLoading: isLoadingProfiles } = useContributorProfilesQuery(resolvedContributors);
+  const { profileMap, isLoading: isLoadingProfiles } =
+    useContributorProfilesQuery(resolvedContributors);
 
   const isLoading = isResolvingIdentities || isLoadingProfiles;
 
@@ -75,13 +80,18 @@ export default function HypercertContributorsSection({
       </div>
 
       {/* Loading state — shown while resolving StrongRef identities or DID profiles */}
-      {isLoading && (didContributors.length > 0 || displayContributors.some((c) => c.needsResolution)) && (
-        <div className="space-y-3">
-          {(didContributors.length > 0 ? didContributors : displayContributors).map((_, index) => (
-            <ContributorSkeleton key={index} />
-          ))}
-        </div>
-      )}
+      {isLoading &&
+        (didContributors.length > 0 ||
+          displayContributors.some((c) => c.needsResolution)) && (
+          <div className="space-y-3">
+            {(didContributors.length > 0
+              ? didContributors
+              : displayContributors
+            ).map((_, index) => (
+              <ContributorSkeleton key={index} />
+            ))}
+          </div>
+        )}
 
       {/* Content */}
       {!isLoading && (
