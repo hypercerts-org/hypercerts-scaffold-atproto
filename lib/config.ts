@@ -208,7 +208,7 @@ try {
  * - Loopback (local dev): "atproto transition:generic" (ATProto requirement for loopback clients)
  * - Production: granular scopes (repo, rpc, blob) for precise permission requests
  */
-export const OAUTH_SCOPE = getOAuthScope(baseUrl);
+export const OAUTH_SCOPE = GRANULAR_SCOPE;
 
 const redirectBaseUrl = getRedirectBaseUrl(baseUrl);
 const redirectUri = `${redirectBaseUrl}/api/auth/callback`;

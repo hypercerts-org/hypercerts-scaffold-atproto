@@ -75,6 +75,7 @@ export default function ImageUploader({
               {isBanner ? (
                 <button
                   type="button"
+                  aria-label="Change image"
                   onClick={() => inputRef.current?.click()}
                   className="absolute z-10 bg-black/40 backdrop-blur-sm p-2 rounded-full hover:bg-black/60 transition-all duration-200 hover:scale-110 bottom-2 right-2"
                 >
@@ -83,9 +84,10 @@ export default function ImageUploader({
               ) : null}
             </>
           ) : (
-            // If no image, show upload UI (button click triggers the shared input above)
+            // If no image, show upload UI (label click triggers the shared input above)
             <button
               type="button"
+              aria-label="Upload image"
               onClick={() => inputRef.current?.click()}
               className={cn(
                 "flex flex-col items-center justify-center w-full h-full cursor-pointer border-2 border-dashed border-create-accent/20 hover:border-create-accent/40 hover:bg-create-accent/5 transition-all duration-200",
@@ -104,6 +106,7 @@ export default function ImageUploader({
         {!isBanner && imageUrl ? (
           <button
             type="button"
+            aria-label="Change image"
             onClick={() => inputRef.current?.click()}
             className="absolute z-10 bg-black/40 backdrop-blur-sm p-2 rounded-full hover:bg-black/60 transition-all duration-200 hover:scale-110 bottom-0 right-0"
           >

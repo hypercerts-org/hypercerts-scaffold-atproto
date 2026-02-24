@@ -139,7 +139,9 @@ export async function POST(req: NextRequest) {
     console.error("Error in add-attachment API:", e);
     const message = e instanceof Error ? e.message : "Unknown error";
     return NextResponse.json(
-      { error: `Failed to add attachment: ${message}` },
+      {
+        error: `Failed to add attachment: ${e instanceof Error ? e.message : String(e)}`,
+      },
       { status: 500 },
     );
   }

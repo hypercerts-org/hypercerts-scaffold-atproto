@@ -16,8 +16,6 @@ export async function SignedInProvider({
 
   let avatarUrl: string | undefined = undefined;
   let handle: string | undefined = undefined;
-  const activeProfileName: string | undefined = undefined;
-  const activeProfileHandle: string | undefined = undefined;
 
   if (session) {
     const repo = await getAuthenticatedRepo();
@@ -42,8 +40,6 @@ export async function SignedInProvider({
         handle={handle}
         userDid={session?.did}
         activeDid={activeDid}
-        activeProfileName={activeProfileName}
-        activeProfileHandle={activeProfileHandle}
       />
       {session ? (
         <>{children}</>

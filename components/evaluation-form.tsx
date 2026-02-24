@@ -170,11 +170,13 @@ export default function EvaluationForm({
       return;
     }
 
-    const allEvaluatorDids: string[] = [];
-    for (const e of evaluators) allEvaluatorDids.push(e.did);
+    const didSet = new Set<string>();
+    for (const e of evaluators) didSet.add(e.did);
     for (const did of manualDids) {
-      if (did.trim() !== "") allEvaluatorDids.push(did);
+      const trimmed = did.trim();
+      if (trimmed !== "") didSet.add(trimmed);
     }
+    const allEvaluatorDids = Array.from(didSet);
 
     const evaluationPayload = {
       hypercertUri: hypercertInfo.hypercertUri,

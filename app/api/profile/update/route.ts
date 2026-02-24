@@ -43,9 +43,13 @@ export async function POST(req: Request) {
     let existingProfile;
     try {
       existingProfile = await repo.profile.getCertifiedProfile();
-    } catch {
-      // Profile doesn't exist yet
-      existingProfile = null;
+    } catch (err: unknown) {
+      const isNotFound = err instanceof Error && /not found/i.test(err.message);
+      if (isNotFound) {
+        existingProfile = null;
+      } else {
+        throw err;
+      }
     }
 
     // If no displayName, assume no profile record exists yet
@@ -115,9 +119,12 @@ export async function POST(req: Request) {
       },
     });
   } catch (error) {
-    console.error("Profile update error:", error);
+    const detail = error instanceof Error ? error.message : String(error);
+    console.error("Profile update error:", detail);
     return NextResponse.json(
-      { error: `Profile update failed: ${(error as Error).message}` },
+      {
+        error: `Failed to update profile: ${error instanceof Error ? error.message : String(error)}`,
+      },
       { status: 500 },
     );
   }
