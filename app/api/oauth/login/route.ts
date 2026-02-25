@@ -11,10 +11,7 @@ import {
   getEpdsClientId,
   getEpdsRedirectUri,
 } from "@/lib/epds-config";
-import {
-  encodeEpdsSessionCookie,
-  EPDS_SESSION_COOKIE_NAME,
-} from "@/lib/epds-session-cookie";
+import { epdsStateStore } from "@/lib/hypercerts-sdk";
 import { config, OAUTH_SCOPE } from "@/lib/config";
 
 export async function GET(req: NextRequest): Promise<NextResponse> {
@@ -66,9 +63,8 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
       request_uri: string;
     };
 
-    // 8. Encode session cookie
-    const encodedCookie = encodeEpdsSessionCookie({
-      state,
+    // 8. Store OAuth state in Redis
+    await epdsStateStore.set(state, {
       codeVerifier,
       dpopPrivateJwk: privateJwk,
     });
@@ -84,16 +80,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     // 10. Create redirect response
     const response = NextResponse.redirect(authUrl.toString());
 
-    // 11. Set session cookie
-    response.cookies.set(EPDS_SESSION_COOKIE_NAME, encodedCookie, {
-      httpOnly: true,
-      secure: true,
-      sameSite: "strict",
-      maxAge: 600,
-      path: "/",
-    });
-
-    // 12. Return redirect response
+    // 11. Return redirect response
     return response;
   } catch (error) {
     console.error("[oauth/login] Unexpected error:", error);
