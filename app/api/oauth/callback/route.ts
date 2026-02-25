@@ -5,11 +5,7 @@ import {
   getEpdsClientId,
   getEpdsRedirectUri,
 } from "@/lib/epds-config";
-import {
-  decodeEpdsSessionCookie,
-  EPDS_SESSION_COOKIE_NAME,
-} from "@/lib/epds-session-cookie";
-import { sessionStore } from "@/lib/hypercerts-sdk";
+import { sessionStore, epdsStateStore } from "@/lib/hypercerts-sdk";
 import { config } from "@/lib/config";
 import type { NodeSavedSession } from "@atproto/oauth-client-node";
 
@@ -28,42 +24,24 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
       );
     }
 
-    // 2. Read the epds-oauth-session cookie
-    const cookieValue = req.cookies.get(EPDS_SESSION_COOKIE_NAME)?.value;
-    if (!cookieValue) {
-      console.error("[oauth/callback] No OAuth session cookie found");
+    // 2. Retrieve OAuth state from Redis
+    const oauthState = await epdsStateStore.get(state);
+    if (!oauthState) {
+      console.error(
+        "[oauth/callback] No OAuth state found in Redis for state:",
+        state,
+      );
       return NextResponse.redirect(
         new URL("/?error=auth_failed", config.baseUrl),
       );
     }
 
-    // 3. Decode the session cookie
-    let savedState: string;
-    let codeVerifier: string;
-    let dpopPrivateJwk: import("node:crypto").JsonWebKey;
-    try {
-      const sessionData = decodeEpdsSessionCookie(cookieValue);
-      savedState = sessionData.state;
-      codeVerifier = sessionData.codeVerifier;
-      dpopPrivateJwk =
-        sessionData.dpopPrivateJwk as import("node:crypto").JsonWebKey;
-    } catch (err) {
-      console.error("[oauth/callback] Invalid session cookie:", err);
-      return NextResponse.redirect(
-        new URL("/?error=auth_failed", config.baseUrl),
-      );
-    }
-
-    // 4. Verify state matches
-    if (state !== savedState) {
-      console.error("[oauth/callback] State mismatch");
-      return NextResponse.redirect(
-        new URL("/?error=auth_failed", config.baseUrl),
-      );
-    }
+    const { codeVerifier, dpopPrivateJwk } = oauthState;
 
     // 5. Restore DPoP key pair from the private JWK stored in the cookie
-    const { privateKey, publicJwk } = restoreDpopKeyPair(dpopPrivateJwk);
+    const { privateKey, publicJwk } = restoreDpopKeyPair(
+      dpopPrivateJwk as import("node:crypto").JsonWebKey,
+    );
 
     // 6. Get endpoints and client info
     const { tokenEndpoint } = getEpdsEndpoints();
@@ -101,6 +79,9 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
         new URL("/?error=auth_failed", config.baseUrl),
       );
     }
+
+    // Clean up the transient OAuth state from Redis
+    await epdsStateStore.del(state);
 
     // 10. Parse token response
     const tokenData = (await tokenResponse.json()) as {
@@ -168,15 +149,6 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
       httpOnly: true,
       secure: true,
       sameSite: "strict",
-      path: "/",
-    });
-
-    // 14. Delete the epds-oauth-session cookie
-    response.cookies.set(EPDS_SESSION_COOKIE_NAME, "", {
-      httpOnly: true,
-      secure: true,
-      sameSite: "strict",
-      maxAge: 0,
       path: "/",
     });
 
