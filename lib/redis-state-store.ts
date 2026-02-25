@@ -72,7 +72,7 @@ export class RedisEpdsStateStore {
 
   async get(state: string): Promise<EpdsOAuthState | undefined> {
     const key = `${EPDS_STATE_PREFIX}${state}`;
-    const data = await redisClient.get(key);
+    const data = await redisClient.getDel(key);
     return data ? (JSON.parse(data) as EpdsOAuthState) : undefined;
   }
 

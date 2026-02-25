@@ -80,9 +80,6 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
       );
     }
 
-    // Clean up the transient OAuth state from Redis
-    await epdsStateStore.del(state);
-
     // 10. Parse token response
     const tokenData = (await tokenResponse.json()) as {
       access_token: string;
