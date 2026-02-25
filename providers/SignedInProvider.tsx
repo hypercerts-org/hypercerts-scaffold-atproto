@@ -11,8 +11,7 @@ export async function SignedInProvider({
 }: {
   children?: React.ReactNode;
 }) {
-  const [session, cookieStore] = await Promise.all([getSession(), cookies()]);
-  const activeDid = cookieStore.get("active-did")?.value || session?.did;
+  const [session] = await Promise.all([getSession()]);
 
   let avatarUrl: string | undefined = undefined;
   let handle: string | undefined = undefined;
@@ -39,7 +38,6 @@ export async function SignedInProvider({
         avatarUrl={avatarUrl}
         handle={handle}
         userDid={session?.did}
-        activeDid={activeDid}
       />
       {session ? (
         <>{children}</>
