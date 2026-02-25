@@ -1,15 +1,11 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { LogOut, User, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useState } from "react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -21,7 +17,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useLogoutMutation } from "@/queries/auth";
-import LoginDialog from "@/components/login-dialog";
+import LoginDialog, { AuthMode } from "@/components/login-dialog";
 
 export interface NavbarProps {
   isSignedIn: boolean;
@@ -41,6 +37,8 @@ export default function Navbar({
   activeProfileHandle,
 }: NavbarProps) {
   const pathname = usePathname();
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [loginMode, setLoginMode] = useState<AuthMode>("signin");
 
   const logoutMutation = useLogoutMutation();
 
@@ -171,21 +169,41 @@ export default function Navbar({
               </DropdownMenu>
             </>
           ) : (
-            <Dialog>
-              <DialogTrigger asChild>
+            <>
+              <div className="flex items-center gap-2">
                 <Button
                   disabled={isLoading}
                   size="sm"
+                  variant="outline"
+                  onClick={() => {
+                    setLoginMode("signup");
+                    setDialogOpen(true);
+                  }}
+                  className="font-[family-name:var(--font-outfit)] font-medium"
+                >
+                  Create Account
+                </Button>
+                <Button
+                  disabled={isLoading}
+                  size="sm"
+                  onClick={() => {
+                    setLoginMode("signin");
+                    setDialogOpen(true);
+                  }}
                   className="bg-create-accent hover:bg-create-accent/90 text-create-accent-foreground font-[family-name:var(--font-outfit)] font-medium shadow-sm"
                 >
                   Sign In
                 </Button>
-              </DialogTrigger>
-              <DialogContent className="sm:max-w-sm glass-panel border-border/60 p-6">
-                <DialogTitle className="sr-only">Sign In</DialogTitle>
-                <LoginDialog />
-              </DialogContent>
-            </Dialog>
+              </div>
+              <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+                <DialogContent className="sm:max-w-sm glass-panel border-border/60 p-6">
+                  <DialogTitle className="sr-only">
+                    {loginMode === "signin" ? "Sign In" : "Create Account"}
+                  </DialogTitle>
+                  <LoginDialog key={loginMode} initialMode={loginMode} />
+                </DialogContent>
+              </Dialog>
+            </>
           )}
         </div>
       </div>

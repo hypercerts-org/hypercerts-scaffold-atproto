@@ -32,7 +32,6 @@ export default async function Home() {
   const profile = personalRepo
     ? await personalRepo.profile.getCertifiedProfile().catch(() => null)
     : null;
-  const isSignedIn = !!session;
 
   return (
     <div className="relative min-h-screen noise-bg">
@@ -60,47 +59,27 @@ export default async function Home() {
             </p>
 
             <div className="flex flex-wrap items-center justify-center gap-4 pt-4">
-              {isSignedIn ? (
-                <>
-                  <Button
-                    asChild
-                    size="lg"
-                    className="bg-create-accent hover:bg-create-accent/90 text-create-accent-foreground font-[family-name:var(--font-outfit)] font-semibold shadow-md"
-                  >
-                    <Link href="/hypercerts/create" className="gap-2">
-                      <Sparkles className="h-5 w-5" />
-                      Create Hypercert
-                    </Link>
-                  </Button>
-                  <Button
-                    asChild
-                    variant="outline"
-                    size="lg"
-                    className="font-[family-name:var(--font-outfit)] font-medium"
-                  >
-                    <Link href="/hypercerts" className="gap-2">
-                      View My Hypercerts
-                      <ArrowRight className="h-4 w-4" />
-                    </Link>
-                  </Button>
-                </>
-              ) : (
-                <div className="glass-panel rounded-xl p-6 max-w-md w-full">
-                  <p className="text-sm font-[family-name:var(--font-outfit)] text-muted-foreground text-center mb-4">
-                    Sign in to get started creating hypercerts
-                  </p>
-                  <Button
-                    asChild
-                    size="lg"
-                    className="w-full bg-create-accent hover:bg-create-accent/90 text-create-accent-foreground font-[family-name:var(--font-outfit)] font-semibold"
-                  >
-                    <Link href="#" className="gap-2">
-                      Sign In to Continue
-                      <ArrowRight className="h-4 w-4" />
-                    </Link>
-                  </Button>
-                </div>
-              )}
+              <Button
+                asChild
+                size="lg"
+                className="bg-create-accent hover:bg-create-accent/90 text-create-accent-foreground font-[family-name:var(--font-outfit)] font-semibold shadow-md"
+              >
+                <Link href="/hypercerts/create" className="gap-2">
+                  <Sparkles className="h-5 w-5" />
+                  Create Hypercert
+                </Link>
+              </Button>
+              <Button
+                asChild
+                variant="outline"
+                size="lg"
+                className="font-[family-name:var(--font-outfit)] font-medium"
+              >
+                <Link href="/hypercerts" className="gap-2">
+                  View My Hypercerts
+                  <ArrowRight className="h-4 w-4" />
+                </Link>
+              </Button>
             </div>
           </div>
         </div>
@@ -165,8 +144,8 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* Session Info (if signed in) */}
-      {isSignedIn && session ? (
+      {/* Session Info */}
+      {session ? (
         <section className="relative z-10 max-w-6xl mx-auto px-6 pb-16 lg:pb-24">
           <div className="glass-panel rounded-2xl p-8 space-y-6 animate-fade-in-up">
             <div className="flex items-start justify-between">
@@ -247,39 +226,24 @@ export default async function Home() {
                 decentralized infrastructure
               </p>
               <div className="flex flex-wrap items-center justify-center gap-4">
-                {isSignedIn ? (
-                  <>
-                    <Button
-                      asChild
-                      size="lg"
-                      className="bg-create-accent hover:bg-create-accent/90 text-create-accent-foreground font-[family-name:var(--font-outfit)] font-semibold shadow-md"
-                    >
-                      <Link href="/hypercerts/create" className="gap-2">
-                        <Sparkles className="h-5 w-5" />
-                        Create Hypercert
-                      </Link>
-                    </Button>
-                    <Button
-                      asChild
-                      variant="outline"
-                      size="lg"
-                      className="font-[family-name:var(--font-outfit)] font-medium"
-                    >
-                      <Link href="/hypercerts">View Hypercerts</Link>
-                    </Button>
-                  </>
-                ) : (
-                  <Button
-                    asChild
-                    size="lg"
-                    className="bg-create-accent hover:bg-create-accent/90 text-create-accent-foreground font-[family-name:var(--font-outfit)] font-semibold shadow-md"
-                  >
-                    <Link href="#" className="gap-2">
-                      Sign In to Get Started
-                      <ArrowRight className="h-5 w-5" />
-                    </Link>
-                  </Button>
-                )}
+                <Button
+                  asChild
+                  size="lg"
+                  className="bg-create-accent hover:bg-create-accent/90 text-create-accent-foreground font-[family-name:var(--font-outfit)] font-semibold shadow-md"
+                >
+                  <Link href="/hypercerts/create" className="gap-2">
+                    <Sparkles className="h-5 w-5" />
+                    Create Hypercert
+                  </Link>
+                </Button>
+                <Button
+                  asChild
+                  variant="outline"
+                  size="lg"
+                  className="font-[family-name:var(--font-outfit)] font-medium"
+                >
+                  <Link href="/hypercerts">View Hypercerts</Link>
+                </Button>
               </div>
             </div>
           </div>
