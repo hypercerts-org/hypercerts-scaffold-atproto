@@ -15,7 +15,7 @@ import {
   encodeEpdsSessionCookie,
   EPDS_SESSION_COOKIE_NAME,
 } from "@/lib/epds-session-cookie";
-import { config } from "@/lib/config";
+import { config, OAUTH_SCOPE } from "@/lib/config";
 
 export async function GET(req: NextRequest): Promise<NextResponse> {
   try {
@@ -38,7 +38,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
       client_id: clientId,
       redirect_uri: redirectUri,
       response_type: "code",
-      scope: "atproto transition:generic",
+      scope: OAUTH_SCOPE,
       state,
       code_challenge: codeChallenge,
       code_challenge_method: "S256",
