@@ -1,8 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import {
-  restoreDpopKeyPair,
-  fetchWithDpopRetry,
-} from "@/lib/epds-helpers";
+import { restoreDpopKeyPair, fetchWithDpopRetry } from "@/lib/epds-helpers";
 import {
   getEpdsEndpoints,
   getEpdsClientId,
@@ -23,15 +20,21 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     const state = req.nextUrl.searchParams.get("state");
 
     if (!code || !state) {
-      console.error("[oauth/callback] Missing required query parameters: code and state");
-      return NextResponse.redirect(new URL("/?error=auth_failed", config.baseUrl));
+      console.error(
+        "[oauth/callback] Missing required query parameters: code and state",
+      );
+      return NextResponse.redirect(
+        new URL("/?error=auth_failed", config.baseUrl),
+      );
     }
 
     // 2. Read the epds-oauth-session cookie
     const cookieValue = req.cookies.get(EPDS_SESSION_COOKIE_NAME)?.value;
     if (!cookieValue) {
       console.error("[oauth/callback] No OAuth session cookie found");
-      return NextResponse.redirect(new URL("/?error=auth_failed", config.baseUrl));
+      return NextResponse.redirect(
+        new URL("/?error=auth_failed", config.baseUrl),
+      );
     }
 
     // 3. Decode the session cookie
@@ -42,16 +45,21 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
       const sessionData = decodeEpdsSessionCookie(cookieValue);
       savedState = sessionData.state;
       codeVerifier = sessionData.codeVerifier;
-      dpopPrivateJwk = sessionData.dpopPrivateJwk as import("node:crypto").JsonWebKey;
+      dpopPrivateJwk =
+        sessionData.dpopPrivateJwk as import("node:crypto").JsonWebKey;
     } catch (err) {
       console.error("[oauth/callback] Invalid session cookie:", err);
-      return NextResponse.redirect(new URL("/?error=auth_failed", config.baseUrl));
+      return NextResponse.redirect(
+        new URL("/?error=auth_failed", config.baseUrl),
+      );
     }
 
     // 4. Verify state matches
     if (state !== savedState) {
       console.error("[oauth/callback] State mismatch");
-      return NextResponse.redirect(new URL("/?error=auth_failed", config.baseUrl));
+      return NextResponse.redirect(
+        new URL("/?error=auth_failed", config.baseUrl),
+      );
     }
 
     // 5. Restore DPoP key pair from the private JWK stored in the cookie
@@ -81,9 +89,17 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
 
     // 9. Handle token exchange error
     if (!tokenResponse.ok) {
-      const errorBody = await tokenResponse.text().catch(() => tokenResponse.statusText);
-      console.error("[oauth/callback] Token exchange failed:", tokenResponse.status, errorBody);
-      return NextResponse.redirect(new URL("/?error=auth_failed", config.baseUrl));
+      const errorBody = await tokenResponse
+        .text()
+        .catch(() => tokenResponse.statusText);
+      console.error(
+        "[oauth/callback] Token exchange failed:",
+        tokenResponse.status,
+        errorBody,
+      );
+      return NextResponse.redirect(
+        new URL("/?error=auth_failed", config.baseUrl),
+      );
     }
 
     // 10. Parse token response
@@ -97,9 +113,20 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     };
 
     // 10a. Validate sub is a DID
-    if (!tokenData.sub || !(tokenData.sub.startsWith('did:plc:') || tokenData.sub.startsWith('did:web:'))) {
-      console.error('[oauth/callback] Invalid sub in token response:', tokenData.sub)
-      return NextResponse.redirect(new URL('/?error=auth_failed', config.baseUrl))
+    if (
+      !tokenData.sub ||
+      !(
+        tokenData.sub.startsWith("did:plc:") ||
+        tokenData.sub.startsWith("did:web:")
+      )
+    ) {
+      console.error(
+        "[oauth/callback] Invalid sub in token response:",
+        tokenData.sub,
+      );
+      return NextResponse.redirect(
+        new URL("/?error=auth_failed", config.baseUrl),
+      );
     }
 
     // 11. Construct NodeSavedSession and write to Redis
@@ -117,7 +144,8 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
         iss: issuer,
         sub: tokenData.sub as unknown as NodeSavedSession["tokenSet"]["sub"],
         aud: issuer, // audience = PDS URL (same as issuer for ePDS users)
-        scope: (tokenData.scope ?? "atproto transition:generic") as NodeSavedSession["tokenSet"]["scope"],
+        scope: (tokenData.scope ??
+          "atproto transition:generic") as NodeSavedSession["tokenSet"]["scope"],
         access_token: tokenData.access_token,
         token_type: "DPoP" as const,
         refresh_token: tokenData.refresh_token,
@@ -139,7 +167,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     response.cookies.set("user-did", tokenData.sub, {
       httpOnly: true,
       secure: true,
-      sameSite: 'strict',
+      sameSite: "strict",
       path: "/",
     });
 
@@ -147,7 +175,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     response.cookies.set(EPDS_SESSION_COOKIE_NAME, "", {
       httpOnly: true,
       secure: true,
-      sameSite: 'strict',
+      sameSite: "strict",
       maxAge: 0,
       path: "/",
     });
@@ -155,6 +183,8 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     return response;
   } catch (error) {
     console.error("[oauth/callback] Unexpected error:", error);
-    return NextResponse.redirect(new URL("/?error=auth_failed", config.baseUrl));
+    return NextResponse.redirect(
+      new URL("/?error=auth_failed", config.baseUrl),
+    );
   }
 }

@@ -188,15 +188,9 @@ export default function LoginDialog() {
         </p>
       </div>
 
-      {hasEpds && (
-        <PillToggle active={activeTab} onChange={setActiveTab} />
-      )}
+      {hasEpds && <PillToggle active={activeTab} onChange={setActiveTab} />}
 
-      {activeTab === "handle" || !hasEpds ? (
-        <HandleForm />
-      ) : (
-        <EmailForm />
-      )}
+      {activeTab === "handle" || !hasEpds ? <HandleForm /> : <EmailForm />}
     </div>
   );
 }

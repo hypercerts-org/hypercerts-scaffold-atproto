@@ -56,7 +56,9 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     if (!parResponse.ok) {
       const errorBody = await parResponse.text().catch(() => "(unreadable)");
       console.error("[oauth/login] PAR failed", parResponse.status, errorBody);
-      return NextResponse.redirect(new URL("/?error=auth_failed", config.baseUrl));
+      return NextResponse.redirect(
+        new URL("/?error=auth_failed", config.baseUrl),
+      );
     }
 
     // 7. Parse request_uri from PAR response
@@ -95,6 +97,8 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     return response;
   } catch (error) {
     console.error("[oauth/login] Unexpected error:", error);
-    return NextResponse.redirect(new URL("/?error=auth_failed", config.baseUrl));
+    return NextResponse.redirect(
+      new URL("/?error=auth_failed", config.baseUrl),
+    );
   }
 }

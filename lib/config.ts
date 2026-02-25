@@ -242,7 +242,7 @@ export const config = {
   jwksUri,
   scope: OAUTH_SCOPE,
 
-    // ePDS (certified PDS) configuration — optional, only needed for ePDS login
+  // ePDS (certified PDS) configuration — optional, only needed for ePDS login
   epdsUrl: process.env.NEXT_PUBLIC_EPDS_URL,
 
   // Server-only secret for HMAC-signing the transient OAuth session cookie
@@ -306,15 +306,15 @@ export function buildClientMetadata(): Record<string, unknown> {
       ? [config.redirectUri, config.epdsRedirectUri]
       : [config.redirectUri],
     scope: OAUTH_SCOPE,
-      logo_uri: `${config.baseUrl}/certified.png`,
-      email_template_uri: `${config.baseUrl}/email-template.html`,
-      email_subject_template: "{{code}} — Your {{app_name}} verification code",
-      brand_color: "#1c1e21",
-      background_color: "#f8f8fa",
-      grant_types: ["authorization_code", "refresh_token"],
-      response_types: ["code"],
-      token_endpoint_auth_method: "none",
-      application_type: "web",
+    logo_uri: `${config.baseUrl}/certified.png`,
+    email_template_uri: `${config.baseUrl}/email-template.html`,
+    email_subject_template: "{{code}} — Your {{app_name}} verification code",
+    brand_color: "#1c1e21",
+    background_color: "#f8f8fa",
+    grant_types: ["authorization_code", "refresh_token"],
+    response_types: ["code"],
+    token_endpoint_auth_method: "none",
+    application_type: "web",
     dpop_bound_access_tokens: true,
     branding: {
       css: generateBrandingCss(config.baseUrl),
