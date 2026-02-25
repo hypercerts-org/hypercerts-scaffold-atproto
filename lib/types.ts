@@ -1,8 +1,8 @@
-import type * as HypercertRecord from "@/lexicons/types/org/hypercerts/claim/activity";
-import type * as HypercertContribution from "@/lexicons/types/org/hypercerts/claim/contribution";
-import type * as HypercertEvidence from "@/lexicons/types/org/hypercerts/claim/evidence";
-import type * as HypercertRights from "@/lexicons/types/org/hypercerts/claim/rights";
-import type * as HypercertLocation from "@/lexicons/types/app/certified/location";
+import type { OrgHypercertsClaimActivity as HypercertRecord } from "@hypercerts-org/sdk-core";
+import type { OrgHypercertsClaimContributionDetails as HypercertContribution } from "@hypercerts-org/sdk-core";
+import type { OrgHypercertsClaimAttachment as HypercertEvidence } from "@hypercerts-org/sdk-core";
+import type { OrgHypercertsClaimRights as HypercertRights } from "@hypercerts-org/sdk-core";
+import type { AppCertifiedLocation as HypercertLocation } from "@hypercerts-org/sdk-core";
 import type { ComAtprotoRepoGetRecord } from "@atproto/api";
 import type { CreateHypercertResult } from "@hypercerts-org/sdk-core";
 

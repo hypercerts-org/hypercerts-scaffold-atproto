@@ -16,8 +16,6 @@ export async function SignedInProvider({
 
   let avatarUrl: string | undefined = undefined;
   let handle: string | undefined = undefined;
-  let activeProfileName: string | undefined = undefined;
-  let activeProfileHandle: string | undefined = undefined;
 
   if (session) {
     const repo = await getAuthenticatedRepo();
@@ -28,8 +26,6 @@ export async function SignedInProvider({
 
       avatarUrl = convertBlobUrlToCdn(profile?.avatar) || "";
       handle = profile?.handle || "";
-      activeProfileName = profile?.displayName;
-      activeProfileHandle = profile?.handle;
     }
   }
 
@@ -44,8 +40,6 @@ export async function SignedInProvider({
         handle={handle}
         userDid={session?.did}
         activeDid={activeDid}
-        activeProfileName={activeProfileName}
-        activeProfileHandle={activeProfileHandle}
       />
       {session ? (
         <>{children}</>

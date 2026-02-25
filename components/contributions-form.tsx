@@ -66,7 +66,8 @@ export default function HypercertContributionForm({
     const mappedContributors: string[] = [];
     for (const c of contributors) mappedContributors.push(c.did);
     for (const uri of manualContributors) {
-      if (uri.trim() !== "") mappedContributors.push(uri);
+      const trimmed = uri.trim();
+      if (trimmed !== "") mappedContributors.push(trimmed);
     }
 
     if (!mappedContributors.length) return;

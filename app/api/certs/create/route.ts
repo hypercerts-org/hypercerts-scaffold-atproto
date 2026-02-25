@@ -55,7 +55,9 @@ export async function POST(req: NextRequest) {
   } catch (e) {
     console.error("Error creating hypercert:", e);
     return NextResponse.json(
-      { error: "Failed to create hypercert" },
+      {
+        error: `Failed to create hypercert: ${e instanceof Error ? e.message : String(e)}`,
+      },
       { status: 500 },
     );
   }
