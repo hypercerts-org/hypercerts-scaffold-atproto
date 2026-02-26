@@ -3,7 +3,7 @@
 import { ReactNode } from "react";
 
 export function LabelSmall({ children }: { children: ReactNode }) {
-  return <div className="text-xs text-muted-foreground mb-1">{children}</div>;
+  return <div className="text-muted-foreground mb-1 text-xs">{children}</div>;
 }
 
 export function Field({

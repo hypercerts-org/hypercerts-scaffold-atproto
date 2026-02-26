@@ -55,23 +55,23 @@ export default function Home() {
   };
 
   return (
-    <div className="relative min-h-screen noise-bg">
-      <div className="relative z-10 max-w-7xl mx-auto px-4 py-8 lg:py-12">
+    <div className="noise-bg relative min-h-screen">
+      <div className="relative z-10 mx-auto max-w-7xl px-4 py-8 lg:py-12">
         {/* Page header */}
-        <div className="mb-8 lg:mb-10 animate-fade-in">
-          <h1 className="text-3xl lg:text-4xl font-[family-name:var(--font-syne)] font-bold tracking-tight text-foreground">
+        <div className="animate-fade-in mb-8 lg:mb-10">
+          <h1 className="text-foreground font-[family-name:var(--font-syne)] text-3xl font-bold tracking-tight lg:text-4xl">
             Create Hypercert
           </h1>
-          <p className="mt-2 text-sm font-[family-name:var(--font-outfit)] text-muted-foreground max-w-xl">
+          <p className="text-muted-foreground mt-2 max-w-xl font-[family-name:var(--font-outfit)] text-sm">
             Define your impact claim with verifiable details, evidence, and
             measurements.
           </p>
         </div>
 
         {/* Two-column layout: sidebar + main */}
-        <div className="grid grid-cols-1 lg:grid-cols-[260px_1fr] gap-8 lg:gap-12">
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-[260px_1fr] lg:gap-12">
           {/* Sidebar - persistent and always visible */}
-          <aside className="lg:sticky lg:top-8 lg:self-start space-y-6">
+          <aside className="space-y-6 lg:sticky lg:top-8 lg:self-start">
             <ActiveProfileInfoBox />
             <StepperHeader step={step} />
           </aside>

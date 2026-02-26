@@ -207,14 +207,14 @@ export default function EvaluationForm({
       description="Provide an evaluation of the hypercert's impact."
     >
       {/* Autofill */}
-      <div className="flex justify-end mb-6">
+      <div className="mb-6 flex justify-end">
         <Button
           type="button"
           variant="outline"
           size="sm"
           onClick={handleAutofill}
           disabled={mutation.isPending}
-          className="gap-2 text-xs font-[family-name:var(--font-outfit)]"
+          className="gap-2 font-[family-name:var(--font-outfit)] text-xs"
         >
           <Wand2 className="h-3.5 w-3.5" />
           Autofill Demo
@@ -225,10 +225,10 @@ export default function EvaluationForm({
         {/* Evaluators */}
         <div className="space-y-3">
           <div className="flex items-center gap-2">
-            <div className="h-6 w-6 rounded-lg bg-create-accent/10 flex items-center justify-center">
-              <Users className="h-3.5 w-3.5 text-create-accent" />
+            <div className="bg-create-accent/10 flex h-6 w-6 items-center justify-center rounded-lg">
+              <Users className="text-create-accent h-3.5 w-3.5" />
             </div>
-            <Label className="text-sm font-[family-name:var(--font-syne)] font-semibold uppercase tracking-wider text-muted-foreground">
+            <Label className="text-muted-foreground font-[family-name:var(--font-syne)] text-sm font-semibold tracking-wider uppercase">
               Evaluators *
             </Label>
           </div>
@@ -245,7 +245,7 @@ export default function EvaluationForm({
                   {evaluators.map((evaluator) => (
                     <div
                       key={evaluator.did}
-                      className="flex justify-between items-center gap-4 border border-border/60 p-3 rounded-lg bg-background/50"
+                      className="border-border/60 bg-background/50 flex items-center justify-between gap-4 rounded-lg border p-3"
                     >
                       <UserAvatar user={evaluator} />
                       <Button
@@ -301,13 +301,13 @@ export default function EvaluationForm({
 
         {/* Summary */}
         <div className="space-y-2">
-          <div className="flex items-center gap-2 mb-1">
-            <div className="h-6 w-6 rounded-lg bg-create-accent/10 flex items-center justify-center">
-              <ClipboardCheck className="h-3.5 w-3.5 text-create-accent" />
+          <div className="mb-1 flex items-center gap-2">
+            <div className="bg-create-accent/10 flex h-6 w-6 items-center justify-center rounded-lg">
+              <ClipboardCheck className="text-create-accent h-3.5 w-3.5" />
             </div>
             <Label
               htmlFor="summary"
-              className="text-sm font-[family-name:var(--font-syne)] font-semibold uppercase tracking-wider text-muted-foreground"
+              className="text-muted-foreground font-[family-name:var(--font-syne)] text-sm font-semibold tracking-wider uppercase"
             >
               Summary *
             </Label>
@@ -344,15 +344,15 @@ export default function EvaluationForm({
           </Button>
 
           {useScore && (
-            <div className="space-y-4 pl-4 border-l-2 border-create-accent/30 animate-fade-in-up">
-              <Label className="text-sm font-[family-name:var(--font-outfit)] font-medium">
+            <div className="border-create-accent/30 animate-fade-in-up space-y-4 border-l-2 pl-4">
+              <Label className="font-[family-name:var(--font-outfit)] text-sm font-medium">
                 Numeric Score
               </Label>
               <div className="grid grid-cols-3 gap-4">
                 <div className="space-y-1">
                   <Label
                     htmlFor="score-min"
-                    className="text-[11px] font-[family-name:var(--font-outfit)] text-muted-foreground"
+                    className="text-muted-foreground font-[family-name:var(--font-outfit)] text-[11px]"
                   >
                     Min
                   </Label>
@@ -368,7 +368,7 @@ export default function EvaluationForm({
                 <div className="space-y-1">
                   <Label
                     htmlFor="score-value"
-                    className="text-[11px] font-[family-name:var(--font-outfit)] text-muted-foreground"
+                    className="text-muted-foreground font-[family-name:var(--font-outfit)] text-[11px]"
                   >
                     Value
                   </Label>
@@ -386,7 +386,7 @@ export default function EvaluationForm({
                 <div className="space-y-1">
                   <Label
                     htmlFor="score-max"
-                    className="text-[11px] font-[family-name:var(--font-outfit)] text-muted-foreground"
+                    className="text-muted-foreground font-[family-name:var(--font-outfit)] text-[11px]"
                   >
                     Max
                   </Label>
@@ -423,8 +423,8 @@ export default function EvaluationForm({
           </Button>
 
           {useContent && (
-            <div className="space-y-2 pl-4 border-l-2 border-create-accent/30 animate-fade-in-up">
-              <Label className="text-sm font-[family-name:var(--font-outfit)] font-medium">
+            <div className="border-create-accent/30 animate-fade-in-up space-y-2 border-l-2 pl-4">
+              <Label className="font-[family-name:var(--font-outfit)] text-sm font-medium">
                 Content URIs
               </Label>
               {contentUris.map((uri, index) => (
@@ -489,8 +489,8 @@ export default function EvaluationForm({
           </Button>
 
           {useMeasurements && (
-            <div className="space-y-2 pl-4 border-l-2 border-create-accent/30 animate-fade-in-up">
-              <Label className="text-sm font-[family-name:var(--font-outfit)] font-medium">
+            <div className="border-create-accent/30 animate-fade-in-up space-y-2 border-l-2 pl-4">
+              <Label className="font-[family-name:var(--font-outfit)] text-sm font-medium">
                 Measurement URIs
               </Label>
               {measurementUris.map((uri, index) => (
@@ -539,15 +539,15 @@ export default function EvaluationForm({
         </div>
 
         {/* Location Section */}
-        <div className="space-y-5 pt-6 border-t border-border/50">
+        <div className="border-border/50 space-y-5 border-t pt-6">
           <div className="flex items-center gap-2">
-            <div className="h-6 w-6 rounded-lg bg-create-accent/10 flex items-center justify-center">
-              <MapPin className="h-3.5 w-3.5 text-create-accent" />
+            <div className="bg-create-accent/10 flex h-6 w-6 items-center justify-center rounded-lg">
+              <MapPin className="text-create-accent h-3.5 w-3.5" />
             </div>
-            <h3 className="text-sm font-[family-name:var(--font-syne)] font-semibold uppercase tracking-wider text-muted-foreground">
+            <h3 className="text-muted-foreground font-[family-name:var(--font-syne)] text-sm font-semibold tracking-wider uppercase">
               Location
             </h3>
-            <span className="text-[11px] font-[family-name:var(--font-outfit)] text-muted-foreground/60">
+            <span className="text-muted-foreground/60 font-[family-name:var(--font-outfit)] text-[11px]">
               Optional
             </span>
           </div>
@@ -569,10 +569,10 @@ export default function EvaluationForm({
           </Button>
 
           {useLocation && (
-            <div className="space-y-2 animate-fade-in-up">
+            <div className="animate-fade-in-up space-y-2">
               <Label
                 htmlFor="location"
-                className="text-sm font-[family-name:var(--font-outfit)] font-medium"
+                className="font-[family-name:var(--font-outfit)] text-sm font-medium"
               >
                 Location URI
               </Label>

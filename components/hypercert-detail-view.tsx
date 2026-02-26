@@ -49,7 +49,7 @@ export default function HypercertDetailsView({
       <div className="animate-fade-in-up space-y-4">
         {/* Hero Image */}
         {imageUri ? (
-          <div className="relative aspect-[16/7] rounded-xl overflow-hidden glass-panel border border-border/50">
+          <div className="glass-panel border-border/50 relative aspect-[16/7] overflow-hidden rounded-xl border">
             <Image
               fill
               alt={record.title || "Hypercert cover"}
@@ -63,11 +63,11 @@ export default function HypercertDetailsView({
 
         {/* Title & Description */}
         <div className="space-y-3">
-          <h1 className="text-3xl md:text-4xl font-[family-name:var(--font-syne)] font-bold tracking-tight">
+          <h1 className="font-[family-name:var(--font-syne)] text-3xl font-bold tracking-tight md:text-4xl">
             {record.title || "Untitled"}
           </h1>
           {record.shortDescription ? (
-            <p className="text-lg font-[family-name:var(--font-outfit)] text-muted-foreground">
+            <p className="text-muted-foreground font-[family-name:var(--font-outfit)] text-lg">
               {record.shortDescription}
             </p>
           ) : null}
@@ -76,18 +76,18 @@ export default function HypercertDetailsView({
 
       {/* Metadata Grid */}
       <div className="animate-fade-in-up [animation-delay:100ms]">
-        <div className="glass-panel rounded-xl p-6 border border-border/50 space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="glass-panel border-border/50 space-y-4 rounded-xl border p-6">
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
             {/* Created At */}
             <div className="flex items-start gap-3">
-              <div className="size-10 rounded-full bg-create-accent/10 flex items-center justify-center shrink-0">
-                <Calendar className="size-5 text-create-accent" />
+              <div className="bg-create-accent/10 flex size-10 shrink-0 items-center justify-center rounded-full">
+                <Calendar className="text-create-accent size-5" />
               </div>
               <div className="space-y-1">
-                <dt className="text-xs font-[family-name:var(--font-outfit)] text-muted-foreground uppercase tracking-wider">
+                <dt className="text-muted-foreground font-[family-name:var(--font-outfit)] text-xs tracking-wider uppercase">
                   Created
                 </dt>
-                <dd className="text-sm font-[family-name:var(--font-outfit)] font-medium">
+                <dd className="font-[family-name:var(--font-outfit)] text-sm font-medium">
                   {record.createdAt
                     ? new Date(record.createdAt).toLocaleString()
                     : "—"}
@@ -97,14 +97,14 @@ export default function HypercertDetailsView({
 
             {/* Work Period */}
             <div className="flex items-start gap-3">
-              <div className="size-10 rounded-full bg-create-accent/10 flex items-center justify-center shrink-0">
-                <Clock className="size-5 text-create-accent" />
+              <div className="bg-create-accent/10 flex size-10 shrink-0 items-center justify-center rounded-full">
+                <Clock className="text-create-accent size-5" />
               </div>
               <div className="space-y-1">
-                <dt className="text-xs font-[family-name:var(--font-outfit)] text-muted-foreground uppercase tracking-wider">
+                <dt className="text-muted-foreground font-[family-name:var(--font-outfit)] text-xs tracking-wider uppercase">
                   Work Period
                 </dt>
-                <dd className="text-sm font-[family-name:var(--font-outfit)] font-medium">
+                <dd className="font-[family-name:var(--font-outfit)] text-sm font-medium">
                   {record.startDate && record.endDate ? (
                     <>
                       {new Date(record.startDate).toLocaleDateString()} →{" "}
@@ -119,14 +119,14 @@ export default function HypercertDetailsView({
 
             {/* URI */}
             <div className="flex items-start gap-3 md:col-span-2">
-              <div className="size-10 rounded-full bg-create-accent/10 flex items-center justify-center shrink-0">
-                <LinkIcon className="size-5 text-create-accent" />
+              <div className="bg-create-accent/10 flex size-10 shrink-0 items-center justify-center rounded-full">
+                <LinkIcon className="text-create-accent size-5" />
               </div>
-              <div className="space-y-1 min-w-0 flex-1">
-                <dt className="text-xs font-[family-name:var(--font-outfit)] text-muted-foreground uppercase tracking-wider">
+              <div className="min-w-0 flex-1 space-y-1">
+                <dt className="text-muted-foreground font-[family-name:var(--font-outfit)] text-xs tracking-wider uppercase">
                   Hypercert URI
                 </dt>
-                <dd className="text-sm font-[family-name:var(--font-outfit)] break-all">
+                <dd className="font-[family-name:var(--font-outfit)] text-sm break-all">
                   <URILink
                     uri={getPDSlsURI(hypercertUri)}
                     label={hypercertUri}
@@ -138,15 +138,15 @@ export default function HypercertDetailsView({
 
           {/* Work Scope Tags */}
           {workScope.length > 0 ? (
-            <div className="pt-4 border-t border-border/50">
-              <dt className="text-xs font-[family-name:var(--font-outfit)] text-muted-foreground uppercase tracking-wider mb-2">
+            <div className="border-border/50 border-t pt-4">
+              <dt className="text-muted-foreground mb-2 font-[family-name:var(--font-outfit)] text-xs tracking-wider uppercase">
                 Work Scope
               </dt>
               <dd className="flex flex-wrap gap-2">
                 {workScope.map((scope: string) => (
                   <span
                     key={scope}
-                    className="inline-flex items-center px-3 py-1 rounded-full text-sm font-[family-name:var(--font-outfit)] bg-create-accent/10 text-create-accent border border-create-accent/20"
+                    className="bg-create-accent/10 text-create-accent border-create-accent/20 inline-flex items-center rounded-full border px-3 py-1 font-[family-name:var(--font-outfit)] text-sm"
                   >
                     {scope}
                   </span>
@@ -165,11 +165,11 @@ export default function HypercertDetailsView({
       {/* Full Description */}
       {record.description ? (
         <div className="animate-fade-in-up [animation-delay:250ms]">
-          <div className="glass-panel rounded-xl p-6 border border-border/50 space-y-3">
-            <h2 className="text-lg font-[family-name:var(--font-syne)] font-semibold">
+          <div className="glass-panel border-border/50 space-y-3 rounded-xl border p-6">
+            <h2 className="font-[family-name:var(--font-syne)] text-lg font-semibold">
               Description
             </h2>
-            <p className="text-sm font-[family-name:var(--font-outfit)] text-muted-foreground whitespace-pre-wrap leading-relaxed">
+            <p className="text-muted-foreground font-[family-name:var(--font-outfit)] text-sm leading-relaxed whitespace-pre-wrap">
               {record.description}
             </p>
           </div>
@@ -177,7 +177,7 @@ export default function HypercertDetailsView({
       ) : null}
 
       {/* Sections */}
-      <div className="animate-fade-in-up [animation-delay:350ms] space-y-6">
+      <div className="animate-fade-in-up space-y-6 [animation-delay:350ms]">
         <HypercertMeasurementsSection hypercertUri={hypercertUri} />
         <HypercertEvidenceSection hypercertUri={hypercertUri} />
         <HypercertEvaluationsSection hypercertUri={hypercertUri} />

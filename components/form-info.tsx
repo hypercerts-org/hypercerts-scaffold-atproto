@@ -14,21 +14,21 @@ export default function FormInfo({
   children: ReactNode;
 }) {
   return (
-    <div className="glass-panel rounded-2xl overflow-hidden">
+    <div className="glass-panel overflow-hidden rounded-2xl">
       {/* Header */}
-      <div className="px-6 pt-6 pb-4 border-b border-border/50">
+      <div className="border-border/50 border-b px-6 pt-6 pb-4">
         <div className="flex items-center justify-between">
           <div>
             {stepLabel && (
-              <span className="inline-flex items-center rounded-full bg-create-accent/10 px-2.5 py-0.5 text-[11px] font-[family-name:var(--font-outfit)] font-medium text-create-accent uppercase tracking-wider mb-2">
+              <span className="bg-create-accent/10 text-create-accent mb-2 inline-flex items-center rounded-full px-2.5 py-0.5 font-[family-name:var(--font-outfit)] text-[11px] font-medium tracking-wider uppercase">
                 {stepLabel}
               </span>
             )}
-            <h2 className="text-xl lg:text-2xl font-[family-name:var(--font-syne)] font-bold tracking-tight text-foreground">
+            <h2 className="text-foreground font-[family-name:var(--font-syne)] text-xl font-bold tracking-tight lg:text-2xl">
               {title}
             </h2>
             {description && (
-              <p className="mt-1 text-sm font-[family-name:var(--font-outfit)] text-muted-foreground max-w-lg">
+              <p className="text-muted-foreground mt-1 max-w-lg font-[family-name:var(--font-outfit)] text-sm">
                 {description}
               </p>
             )}

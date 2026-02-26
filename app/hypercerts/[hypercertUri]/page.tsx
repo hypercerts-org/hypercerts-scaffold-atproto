@@ -92,20 +92,20 @@ export default async function HypercertViewPage({
   }
 
   return (
-    <main className="relative min-h-screen noise-bg">
+    <main className="noise-bg relative min-h-screen">
       <div className="gradient-mesh absolute inset-0 -z-10" />
 
-      <div className="relative z-10 max-w-4xl mx-auto py-8 px-4 space-y-6">
+      <div className="relative z-10 mx-auto max-w-4xl space-y-6 px-4 py-8">
         {/* Back navigation */}
         <div className="animate-fade-in-up">
           <Button
             asChild
             variant="ghost"
             size="sm"
-            className="font-[family-name:var(--font-outfit)] text-muted-foreground hover:text-create-accent transition-colors"
+            className="text-muted-foreground hover:text-create-accent font-[family-name:var(--font-outfit)] transition-colors"
           >
             <Link href="/hypercerts">
-              <ArrowLeft className="size-4 mr-2" />
+              <ArrowLeft className="mr-2 size-4" />
               Back to Hypercerts
             </Link>
           </Button>

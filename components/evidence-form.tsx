@@ -236,7 +236,7 @@ export default function HypercertEvidenceForm({
             variant="outline"
             size="sm"
             onClick={handleAutofill}
-            className="gap-2 text-xs font-[family-name:var(--font-outfit)]"
+            className="gap-2 font-[family-name:var(--font-outfit)] text-xs"
           >
             <Wand2 className="h-3.5 w-3.5" />
             Autofill Demo
@@ -247,7 +247,7 @@ export default function HypercertEvidenceForm({
         <div className="space-y-2">
           <Label
             htmlFor="title"
-            className="text-sm font-[family-name:var(--font-outfit)] font-medium"
+            className="font-[family-name:var(--font-outfit)] text-sm font-medium"
           >
             Title *
           </Label>
@@ -265,12 +265,12 @@ export default function HypercertEvidenceForm({
         {/* Attachment Type */}
         <div className="space-y-2">
           <div className="flex items-center gap-2">
-            <div className="h-6 w-6 rounded-lg bg-create-accent/10 flex items-center justify-center">
-              <FileText className="h-3.5 w-3.5 text-create-accent" />
+            <div className="bg-create-accent/10 flex h-6 w-6 items-center justify-center rounded-lg">
+              <FileText className="text-create-accent h-3.5 w-3.5" />
             </div>
             <Label
               htmlFor="contentType"
-              className="text-sm font-[family-name:var(--font-outfit)] font-medium"
+              className="font-[family-name:var(--font-outfit)] text-sm font-medium"
             >
               Attachment Type *
             </Label>
@@ -293,7 +293,7 @@ export default function HypercertEvidenceForm({
               <SelectItem value="methodology">Methodology</SelectItem>
             </SelectContent>
           </Select>
-          <p className="text-[11px] font-[family-name:var(--font-outfit)] text-muted-foreground">
+          <p className="text-muted-foreground font-[family-name:var(--font-outfit)] text-[11px]">
             Specify the type of attachment you are providing.
           </p>
         </div>
@@ -302,7 +302,7 @@ export default function HypercertEvidenceForm({
         <div className="space-y-2">
           <Label
             htmlFor="shortDescription"
-            className="text-sm font-[family-name:var(--font-outfit)] font-medium"
+            className="font-[family-name:var(--font-outfit)] text-sm font-medium"
           >
             Short Description *
           </Label>
@@ -316,7 +316,7 @@ export default function HypercertEvidenceForm({
             required
             className="font-[family-name:var(--font-outfit)]"
           />
-          <p className="text-[11px] font-[family-name:var(--font-outfit)] text-muted-foreground">
+          <p className="text-muted-foreground font-[family-name:var(--font-outfit)] text-[11px]">
             {shortDescription.length} / 3000 characters
           </p>
         </div>
@@ -325,7 +325,7 @@ export default function HypercertEvidenceForm({
         <div className="space-y-2">
           <Label
             htmlFor="description"
-            className="text-sm font-[family-name:var(--font-outfit)] font-medium"
+            className="font-[family-name:var(--font-outfit)] text-sm font-medium"
           >
             Detailed Description (Optional)
           </Label>
@@ -338,7 +338,7 @@ export default function HypercertEvidenceForm({
             rows={5}
             className="font-[family-name:var(--font-outfit)]"
           />
-          <p className="text-[11px] font-[family-name:var(--font-outfit)] text-muted-foreground">
+          <p className="text-muted-foreground font-[family-name:var(--font-outfit)] text-[11px]">
             {description.length} / 30000 characters
           </p>
         </div>
@@ -358,15 +358,15 @@ export default function HypercertEvidenceForm({
         />
 
         {/* Location Section */}
-        <div className="space-y-5 pt-6 border-t border-border/50">
+        <div className="border-border/50 space-y-5 border-t pt-6">
           <div className="flex items-center gap-2">
-            <div className="h-6 w-6 rounded-lg bg-create-accent/10 flex items-center justify-center">
-              <MapPin className="h-3.5 w-3.5 text-create-accent" />
+            <div className="bg-create-accent/10 flex h-6 w-6 items-center justify-center rounded-lg">
+              <MapPin className="text-create-accent h-3.5 w-3.5" />
             </div>
-            <h3 className="text-sm font-[family-name:var(--font-syne)] font-semibold uppercase tracking-wider text-muted-foreground">
+            <h3 className="text-muted-foreground font-[family-name:var(--font-syne)] text-sm font-semibold tracking-wider uppercase">
               Location
             </h3>
-            <span className="text-[11px] font-[family-name:var(--font-outfit)] text-muted-foreground/60">
+            <span className="text-muted-foreground/60 font-[family-name:var(--font-outfit)] text-[11px]">
               Optional
             </span>
           </div>
@@ -405,7 +405,7 @@ export default function HypercertEvidenceForm({
                     setLocationUrl("");
                     setLocationFile(null);
                   }}
-                  className="font-[family-name:var(--font-outfit)] text-muted-foreground"
+                  className="text-muted-foreground font-[family-name:var(--font-outfit)]"
                 >
                   Clear
                 </Button>
@@ -415,10 +415,10 @@ export default function HypercertEvidenceForm({
 
           {/* String mode */}
           {locationMode === "string" && (
-            <div className="space-y-2 animate-fade-in-up">
+            <div className="animate-fade-in-up space-y-2">
               <Label
                 htmlFor="locationString"
-                className="text-sm font-[family-name:var(--font-outfit)] font-medium"
+                className="font-[family-name:var(--font-outfit)] text-sm font-medium"
               >
                 Location Reference
               </Label>
@@ -430,7 +430,7 @@ export default function HypercertEvidenceForm({
                 onChange={(e) => setLocationString(e.target.value)}
                 className="font-[family-name:var(--font-outfit)]"
               />
-              <p className="text-[11px] font-[family-name:var(--font-outfit)] text-muted-foreground">
+              <p className="text-muted-foreground font-[family-name:var(--font-outfit)] text-[11px]">
                 Enter an AT-URI to an existing location record
               </p>
             </div>
@@ -438,12 +438,12 @@ export default function HypercertEvidenceForm({
 
           {/* Create mode */}
           {locationMode === "create" && (
-            <div className="space-y-4 animate-fade-in-up rounded-xl border border-border/60 bg-muted/20 p-5">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="animate-fade-in-up border-border/60 bg-muted/20 space-y-4 rounded-xl border p-5">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <div className="space-y-2">
                   <Label
                     htmlFor="lpVersion"
-                    className="text-sm font-[family-name:var(--font-outfit)] font-medium"
+                    className="font-[family-name:var(--font-outfit)] text-sm font-medium"
                   >
                     Location Protocol Version
                   </Label>
@@ -457,7 +457,7 @@ export default function HypercertEvidenceForm({
                 <div className="space-y-2">
                   <Label
                     htmlFor="srs"
-                    className="text-sm font-[family-name:var(--font-outfit)] font-medium"
+                    className="font-[family-name:var(--font-outfit)] text-sm font-medium"
                   >
                     Spatial Reference System (SRS)
                   </Label>
@@ -467,14 +467,14 @@ export default function HypercertEvidenceForm({
                     onChange={(e) => setSrs(e.target.value)}
                     className="font-[family-name:var(--font-outfit)]"
                   />
-                  <p className="text-[11px] font-[family-name:var(--font-outfit)] text-muted-foreground">
+                  <p className="text-muted-foreground font-[family-name:var(--font-outfit)] text-[11px]">
                     e.g., http://www.opengis.net/def/crs/OGC/1.3/CRS84
                   </p>
                 </div>
               </div>
 
               <div className="space-y-2">
-                <Label className="text-sm font-[family-name:var(--font-outfit)] font-medium">
+                <Label className="font-[family-name:var(--font-outfit)] text-sm font-medium">
                   Location Type
                 </Label>
                 <div className="flex flex-wrap gap-2">
@@ -525,7 +525,7 @@ export default function HypercertEvidenceForm({
               <div className="space-y-2">
                 <Label
                   htmlFor="locationName"
-                  className="text-sm font-[family-name:var(--font-outfit)] font-medium"
+                  className="font-[family-name:var(--font-outfit)] text-sm font-medium"
                 >
                   Location Name (Optional)
                 </Label>
@@ -542,7 +542,7 @@ export default function HypercertEvidenceForm({
               <div className="space-y-2">
                 <Label
                   htmlFor="locationDescription"
-                  className="text-sm font-[family-name:var(--font-outfit)] font-medium"
+                  className="font-[family-name:var(--font-outfit)] text-sm font-medium"
                 >
                   Location Description (Optional)
                 </Label>

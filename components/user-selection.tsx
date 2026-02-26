@@ -34,7 +34,7 @@ export default function UserSelection({ onUserSelect }: UserSelectionProps) {
   };
 
   return (
-    <Command className="shadow-xs border " shouldFilter={false}>
+    <Command className="border shadow-xs" shouldFilter={false}>
       <CommandInput
         value={search}
         onValueChange={setSearch}

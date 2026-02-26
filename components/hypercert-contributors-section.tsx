@@ -18,9 +18,9 @@ interface HypercertContributorsSectionProps {
 }
 
 const ContributorSkeleton = () => (
-  <div className="glass-panel p-4 border border-border/50 rounded-xl flex items-center gap-3">
+  <div className="glass-panel border-border/50 flex items-center gap-3 rounded-xl border p-4">
     <Skeleton className="size-10 rounded-full" />
-    <div className="space-y-2 flex-1">
+    <div className="flex-1 space-y-2">
       <Skeleton className="h-4 w-1/3" />
       <Skeleton className="h-3 w-1/4" />
     </div>
@@ -65,14 +65,14 @@ export default function HypercertContributorsSection({
     <div className="space-y-4">
       {/* Section Header */}
       <div className="flex items-center gap-3">
-        <div className="size-10 rounded-full bg-create-accent/10 flex items-center justify-center">
-          <Users className="size-5 text-create-accent" />
+        <div className="bg-create-accent/10 flex size-10 items-center justify-center rounded-full">
+          <Users className="text-create-accent size-5" />
         </div>
         <div className="flex-1">
-          <h3 className="text-xl font-[family-name:var(--font-syne)] font-semibold">
+          <h3 className="font-[family-name:var(--font-syne)] text-xl font-semibold">
             Contributors
           </h3>
-          <p className="text-xs font-[family-name:var(--font-outfit)] text-muted-foreground">
+          <p className="text-muted-foreground font-[family-name:var(--font-outfit)] text-xs">
             {displayContributors.length}{" "}
             {displayContributors.length === 1 ? "contributor" : "contributors"}
           </p>
@@ -97,7 +97,7 @@ export default function HypercertContributorsSection({
       {!isLoading && (
         <>
           {resolvedContributors.length > 0 ? (
-            <div className="space-y-3 stagger-children">
+            <div className="stagger-children space-y-3">
               {resolvedContributors.map((contributor, index) => (
                 <HypercertContributorView
                   key={index}
@@ -107,9 +107,9 @@ export default function HypercertContributorsSection({
               ))}
             </div>
           ) : (
-            <div className="glass-panel rounded-xl p-8 border border-border/50 text-center">
-              <Users className="size-12 text-muted-foreground/30 mx-auto mb-3" />
-              <p className="text-sm font-[family-name:var(--font-outfit)] text-muted-foreground">
+            <div className="glass-panel border-border/50 rounded-xl border p-8 text-center">
+              <Users className="text-muted-foreground/30 mx-auto mb-3 size-12" />
+              <p className="text-muted-foreground font-[family-name:var(--font-outfit)] text-sm">
                 No contributors listed for this hypercert.
               </p>
             </div>

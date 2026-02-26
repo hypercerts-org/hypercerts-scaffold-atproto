@@ -57,7 +57,7 @@ export default function ProfileForm({
   };
 
   return (
-    <div className="glass-panel rounded-2xl overflow-hidden">
+    <div className="glass-panel overflow-hidden rounded-2xl">
       {/* Visual header: Banner + Avatar overlap */}
       <div className="relative">
         {/* Banner */}
@@ -79,7 +79,7 @@ export default function ProfileForm({
 
         {/* Avatar — overlapping the banner bottom edge */}
         <div className="absolute -bottom-10 left-6 z-10">
-          <div className="rounded-full ring-4 ring-background shadow-lg">
+          <div className="ring-background rounded-full shadow-lg ring-4">
             <ImageUploader
               aspect="square"
               imageUrl={avatarUrl}
@@ -98,13 +98,13 @@ export default function ProfileForm({
 
       {/* Form content — extra top padding to clear the overlapping avatar */}
       <form onSubmit={handleSubmit} className="px-6 pt-14 pb-6">
-        <div className="space-y-6 stagger-children">
+        <div className="stagger-children space-y-6">
           {/* Display Name + Pronouns row */}
-          <div className="grid grid-cols-1 sm:grid-cols-[1fr_160px] gap-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-[1fr_160px]">
             <div className="space-y-2">
               <Label
                 htmlFor="displayName"
-                className="text-xs uppercase tracking-wider font-[family-name:var(--font-outfit)] text-muted-foreground"
+                className="text-muted-foreground font-[family-name:var(--font-outfit)] text-xs tracking-wider uppercase"
               >
                 Display Name
               </Label>
@@ -120,7 +120,7 @@ export default function ProfileForm({
             <div className="space-y-2">
               <Label
                 htmlFor="pronouns"
-                className="text-xs uppercase tracking-wider font-[family-name:var(--font-outfit)] text-muted-foreground"
+                className="text-muted-foreground font-[family-name:var(--font-outfit)] text-xs tracking-wider uppercase"
               >
                 Pronouns
               </Label>
@@ -132,7 +132,7 @@ export default function ProfileForm({
                 maxLength={20}
                 className="font-[family-name:var(--font-outfit)]"
               />
-              <p className="text-[10px] font-[family-name:var(--font-outfit)] text-muted-foreground">
+              <p className="text-muted-foreground font-[family-name:var(--font-outfit)] text-[10px]">
                 Max 20 characters
               </p>
             </div>
@@ -142,7 +142,7 @@ export default function ProfileForm({
           <div className="space-y-2">
             <Label
               htmlFor="description"
-              className="text-xs uppercase tracking-wider font-[family-name:var(--font-outfit)] text-muted-foreground"
+              className="text-muted-foreground font-[family-name:var(--font-outfit)] text-xs tracking-wider uppercase"
             >
               Bio
             </Label>
@@ -152,7 +152,7 @@ export default function ProfileForm({
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               rows={4}
-              className="font-[family-name:var(--font-outfit)] resize-none"
+              className="resize-none font-[family-name:var(--font-outfit)]"
             />
           </div>
 
@@ -160,7 +160,7 @@ export default function ProfileForm({
           <div className="space-y-2">
             <Label
               htmlFor="website"
-              className="text-xs uppercase tracking-wider font-[family-name:var(--font-outfit)] text-muted-foreground"
+              className="text-muted-foreground font-[family-name:var(--font-outfit)] text-xs tracking-wider uppercase"
             >
               Website
             </Label>
@@ -181,7 +181,7 @@ export default function ProfileForm({
             <Button
               type="submit"
               disabled={updateProfileMutation.isPending}
-              className="bg-create-accent hover:bg-create-accent/90 text-create-accent-foreground font-[family-name:var(--font-outfit)] font-medium gap-2"
+              className="bg-create-accent hover:bg-create-accent/90 text-create-accent-foreground gap-2 font-[family-name:var(--font-outfit)] font-medium"
             >
               <Save className="size-4" />
               {updateProfileMutation.isPending ? "Saving..." : "Save Profile"}

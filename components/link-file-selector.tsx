@@ -36,7 +36,7 @@ export default function LinkFileSelector({
     <div className="space-y-3">
       <Label>{label}</Label>
 
-      <div className="inline-flex rounded-md border gap-2 px-2 py-1 divide-x overflow-hidden">
+      <div className="inline-flex gap-2 divide-x overflow-hidden rounded-md border px-2 py-1">
         <Button
           type="button"
           variant={mode === "link" ? "default" : "outline"}
@@ -64,7 +64,7 @@ export default function LinkFileSelector({
             onChange={(e) => onUrlChange(e.target.value)}
             required={required}
           />
-          <p className="text-xs text-muted-foreground">{urlHelpText}</p>
+          <p className="text-muted-foreground text-xs">{urlHelpText}</p>
         </div>
       ) : (
         <div className="space-y-2">
@@ -74,7 +74,7 @@ export default function LinkFileSelector({
             required={required}
             accept={accept}
           />
-          <p className="text-xs text-muted-foreground">{fileHelpText}</p>
+          <p className="text-muted-foreground text-xs">{fileHelpText}</p>
         </div>
       )}
     </div>

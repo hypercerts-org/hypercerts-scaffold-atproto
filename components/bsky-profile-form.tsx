@@ -51,7 +51,7 @@ export default function BskyProfileForm({
   };
 
   return (
-    <div className="glass-panel rounded-2xl overflow-hidden">
+    <div className="glass-panel overflow-hidden rounded-2xl">
       {/* Visual header: Banner + Avatar overlap */}
       <div className="relative">
         {/* Banner */}
@@ -73,7 +73,7 @@ export default function BskyProfileForm({
 
         {/* Avatar — overlapping the banner bottom edge */}
         <div className="absolute -bottom-10 left-6 z-10">
-          <div className="rounded-full ring-4 ring-background shadow-lg">
+          <div className="ring-background rounded-full shadow-lg ring-4">
             <ImageUploader
               aspect="square"
               imageUrl={avatarUrl}
@@ -92,12 +92,12 @@ export default function BskyProfileForm({
 
       {/* Form content — extra top padding to clear the overlapping avatar */}
       <form onSubmit={handleSubmit} className="px-6 pt-14 pb-6">
-        <div className="space-y-6 stagger-children">
+        <div className="stagger-children space-y-6">
           {/* Display Name */}
           <div className="space-y-2">
             <Label
               htmlFor="displayName"
-              className="text-xs uppercase tracking-wider font-[family-name:var(--font-outfit)] text-muted-foreground"
+              className="text-muted-foreground font-[family-name:var(--font-outfit)] text-xs tracking-wider uppercase"
             >
               Display Name
             </Label>
@@ -114,7 +114,7 @@ export default function BskyProfileForm({
           <div className="space-y-2">
             <Label
               htmlFor="description"
-              className="text-xs uppercase tracking-wider font-[family-name:var(--font-outfit)] text-muted-foreground"
+              className="text-muted-foreground font-[family-name:var(--font-outfit)] text-xs tracking-wider uppercase"
             >
               Bio
             </Label>
@@ -124,7 +124,7 @@ export default function BskyProfileForm({
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               rows={4}
-              className="font-[family-name:var(--font-outfit)] resize-none"
+              className="resize-none font-[family-name:var(--font-outfit)]"
             />
           </div>
 
@@ -135,7 +135,7 @@ export default function BskyProfileForm({
             <Button
               type="submit"
               disabled={updateProfileMutation.isPending}
-              className="bg-blue-500 hover:bg-blue-600 text-white font-[family-name:var(--font-outfit)] font-medium gap-2"
+              className="gap-2 bg-blue-500 font-[family-name:var(--font-outfit)] font-medium text-white hover:bg-blue-600"
             >
               <Save className="size-4" />
               {updateProfileMutation.isPending

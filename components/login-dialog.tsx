@@ -24,11 +24,11 @@ function PillToggle({
   onChange: (tab: Tab) => void;
 }) {
   return (
-    <div className="flex w-full rounded-full bg-muted p-1">
+    <div className="bg-muted flex w-full rounded-full p-1">
       <button
         type="button"
         onClick={() => onChange("handle")}
-        className={`flex-1 rounded-full px-4 py-1.5 text-sm font-[family-name:var(--font-outfit)] font-medium transition-all duration-200 ${
+        className={`flex-1 rounded-full px-4 py-1.5 font-[family-name:var(--font-outfit)] text-sm font-medium transition-all duration-200 ${
           active === "handle"
             ? "bg-background text-foreground shadow-sm"
             : "text-muted-foreground hover:text-foreground"
@@ -39,7 +39,7 @@ function PillToggle({
       <button
         type="button"
         onClick={() => onChange("email")}
-        className={`flex-1 rounded-full px-4 py-1.5 text-sm font-[family-name:var(--font-outfit)] font-medium transition-all duration-200 ${
+        className={`flex-1 rounded-full px-4 py-1.5 font-[family-name:var(--font-outfit)] text-sm font-medium transition-all duration-200 ${
           active === "email"
             ? "bg-background text-foreground shadow-sm"
             : "text-muted-foreground hover:text-foreground"
@@ -70,7 +70,7 @@ function HandleForm() {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="w-full space-y-3 animate-fade-in">
+    <form onSubmit={handleSubmit} className="animate-fade-in w-full space-y-3">
       <InputGroup className="glass-panel border-border/50 focus-within:border-create-accent transition-colors">
         <InputGroupAddon className="text-create-accent">
           <AtSignIcon />
@@ -79,15 +79,15 @@ function HandleForm() {
           onChange={(e) => setHandle(e.target.value)}
           value={handle}
           placeholder="kzoeps.bsky.social"
-          className="font-[family-name:var(--font-outfit)] bg-transparent"
+          className="bg-transparent font-[family-name:var(--font-outfit)]"
         />
       </InputGroup>
 
-      <div className="animate-fade-in-up [animation-delay:200ms] space-y-3">
+      <div className="animate-fade-in-up space-y-3 [animation-delay:200ms]">
         <Button
           type="submit"
           disabled={loginMutation.isPending}
-          className="w-full bg-create-accent hover:bg-create-accent/90 text-white font-[family-name:var(--font-outfit)] font-medium transition-all"
+          className="bg-create-accent hover:bg-create-accent/90 w-full font-[family-name:var(--font-outfit)] font-medium text-white transition-all"
         >
           {loginMutation.isPending && <Spinner />}
           Sign In
@@ -97,7 +97,7 @@ function HandleForm() {
           onClick={redirectToAccountCreation}
           variant="ghost"
           type="button"
-          className="w-full font-[family-name:var(--font-outfit)] text-muted-foreground hover:text-create-accent hover:bg-muted/50 transition-colors"
+          className="text-muted-foreground hover:text-create-accent hover:bg-muted/50 w-full font-[family-name:var(--font-outfit)] transition-colors"
         >
           Create an account
         </Button>
@@ -132,7 +132,7 @@ function EmailForm({
         e.preventDefault();
         handleContinue();
       }}
-      className="w-full space-y-3 animate-fade-in"
+      className="animate-fade-in w-full space-y-3"
     >
       <div className="space-y-2">
         <InputGroup className="glass-panel border-border/50 focus-within:border-create-accent transition-colors">
@@ -144,10 +144,10 @@ function EmailForm({
             onChange={(e) => setEmail(e.target.value)}
             value={email}
             placeholder="you@example.com"
-            className="font-[family-name:var(--font-outfit)] bg-transparent"
+            className="bg-transparent font-[family-name:var(--font-outfit)]"
           />
         </InputGroup>
-        <p className="text-xs font-[family-name:var(--font-outfit)] text-muted-foreground px-1">
+        <p className="text-muted-foreground px-1 font-[family-name:var(--font-outfit)] text-xs">
           {mode === "signup"
             ? "Enter your email to create your account"
             : "Enter your email for a direct code, or continue without"}
@@ -158,7 +158,7 @@ function EmailForm({
         <Button
           type="submit"
           disabled={isRedirecting}
-          className="w-full bg-create-accent hover:bg-create-accent/90 text-white font-[family-name:var(--font-outfit)] font-semibold transition-all"
+          className="bg-create-accent hover:bg-create-accent/90 w-full font-[family-name:var(--font-outfit)] font-semibold text-white transition-all"
         >
           {isRedirecting && <Spinner />}
           {mode === "signup" ? "Create Account" : "Continue"}
@@ -168,7 +168,7 @@ function EmailForm({
           disabled={isRedirecting}
           onClick={() => setMode(mode === "signup" ? "signin" : "signup")}
           variant="ghost"
-          className="w-full font-[family-name:var(--font-outfit)] text-muted-foreground hover:text-create-accent hover:bg-muted/50 transition-colors"
+          className="text-muted-foreground hover:text-create-accent hover:bg-muted/50 w-full font-[family-name:var(--font-outfit)] transition-colors"
         >
           {mode === "signup"
             ? "Already have an account? Sign in"
@@ -191,10 +191,10 @@ export default function LoginDialog({
   return (
     <div className="w-full max-w-sm space-y-5">
       <div>
-        <h2 className="text-xl font-[family-name:var(--font-syne)] font-bold text-foreground tracking-tight">
+        <h2 className="text-foreground font-[family-name:var(--font-syne)] text-xl font-bold tracking-tight">
           {mode === "signup" ? "Create Account" : "Sign In"}
         </h2>
-        <p className="text-sm font-[family-name:var(--font-outfit)] text-muted-foreground">
+        <p className="text-muted-foreground font-[family-name:var(--font-outfit)] text-sm">
           {mode === "signup"
             ? "Get started with your account"
             : "Choose how to continue"}

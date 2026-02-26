@@ -14,11 +14,11 @@ function FormInfoHeaderSkeleton({
   showDescription?: boolean;
 }) {
   return (
-    <div className="px-6 pt-6 pb-4 border-b border-border/50">
+    <div className="border-border/50 border-b px-6 pt-6 pb-4">
       <div className="flex items-center justify-between">
         <div className="w-full">
-          {stepLabel && <Skeleton className="h-5 w-24 rounded-full mb-2" />}
-          <Skeleton className="h-7 w-48 mb-2" />
+          {stepLabel && <Skeleton className="mb-2 h-5 w-24 rounded-full" />}
+          <Skeleton className="mb-2 h-7 w-48" />
           {showDescription && <Skeleton className="h-4 w-full max-w-lg" />}
         </div>
       </div>
@@ -28,7 +28,7 @@ function FormInfoHeaderSkeleton({
 
 function FormFooterSkeleton() {
   return (
-    <div className="flex items-center justify-between pt-6 border-t border-border/50">
+    <div className="border-border/50 flex items-center justify-between border-t pt-6">
       <Skeleton className="h-10 w-24" />
       <div className="flex gap-3">
         <Skeleton className="h-10 w-20" />
@@ -74,7 +74,7 @@ function TextareaFieldSkeleton({
 
 function IconLabelSkeleton() {
   return (
-    <div className="flex items-center gap-2 mb-3">
+    <div className="mb-3 flex items-center gap-2">
       <Skeleton className="h-6 w-6 rounded-lg" />
       <Skeleton className="h-4 w-32" />
     </div>
@@ -84,7 +84,7 @@ function IconLabelSkeleton() {
 // Step 1: Create Hypercert Form Skeleton
 export function HypercertsCreateFormSkeleton() {
   return (
-    <div className="glass-panel rounded-2xl overflow-hidden animate-fade-in-up">
+    <div className="glass-panel animate-fade-in-up overflow-hidden rounded-2xl">
       <FormInfoHeaderSkeleton />
 
       <div className="px-6 py-6">
@@ -96,7 +96,7 @@ export function HypercertsCreateFormSkeleton() {
           <TextareaFieldSkeleton rows={4} charCount />
 
           {/* Work Period */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <InputFieldSkeleton />
             <InputFieldSkeleton />
           </div>
@@ -111,7 +111,7 @@ export function HypercertsCreateFormSkeleton() {
 // Step 2: Contribution Form Skeleton
 export function ContributionFormSkeleton() {
   return (
-    <div className="glass-panel rounded-2xl overflow-hidden animate-fade-in-up">
+    <div className="glass-panel animate-fade-in-up overflow-hidden rounded-2xl">
       <FormInfoHeaderSkeleton stepLabel="Step 2 of 5" />{" "}
       {/* NOTE: contributions step is currently disabled; stepLabel reflects the 5-step flow */}
       <div className="px-6 py-6">
@@ -131,7 +131,7 @@ export function ContributionFormSkeleton() {
           <TextareaFieldSkeleton rows={4} charCount />
 
           {/* Dates */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <InputFieldSkeleton />
             <InputFieldSkeleton />
           </div>
@@ -146,7 +146,7 @@ export function ContributionFormSkeleton() {
 // Step 2: Evidence Form Skeleton
 export function EvidenceFormSkeleton() {
   return (
-    <div className="glass-panel rounded-2xl overflow-hidden animate-fade-in-up">
+    <div className="glass-panel animate-fade-in-up overflow-hidden rounded-2xl">
       <FormInfoHeaderSkeleton stepLabel="Step 2 of 5" />
 
       <div className="px-6 py-6">
@@ -180,7 +180,7 @@ export function EvidenceFormSkeleton() {
           </div>
 
           {/* Location Section */}
-          <div className="space-y-5 pt-6 border-t border-border/50">
+          <div className="border-border/50 space-y-5 border-t pt-6">
             <IconLabelSkeleton />
             <div className="flex gap-2">
               <Skeleton className="h-9 w-40" />
@@ -198,7 +198,7 @@ export function EvidenceFormSkeleton() {
 // Step 3: Location Form Skeleton
 export function LocationFormSkeleton() {
   return (
-    <div className="glass-panel rounded-2xl overflow-hidden animate-fade-in-up">
+    <div className="glass-panel animate-fade-in-up overflow-hidden rounded-2xl">
       <FormInfoHeaderSkeleton stepLabel="Step 3 of 5" />
 
       <div className="px-6 py-6">
@@ -206,7 +206,7 @@ export function LocationFormSkeleton() {
           {/* Spatial Configuration */}
           <div className="space-y-4">
             <IconLabelSkeleton />
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <InputFieldSkeleton helpText />
               <InputFieldSkeleton helpText />
             </div>
@@ -215,7 +215,7 @@ export function LocationFormSkeleton() {
           {/* Location Type */}
           <div className="space-y-3">
             <IconLabelSkeleton />
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+            <div className="grid grid-cols-1 gap-2 md:grid-cols-3">
               <Skeleton className="h-10 w-full" />
               <Skeleton className="h-10 w-full" />
               <Skeleton className="h-10 w-full" />
@@ -245,7 +245,7 @@ export function LocationFormSkeleton() {
 // Step 4: Measurement Form Skeleton
 export function MeasurementFormSkeleton() {
   return (
-    <div className="glass-panel rounded-2xl overflow-hidden animate-fade-in-up">
+    <div className="glass-panel animate-fade-in-up overflow-hidden rounded-2xl">
       <FormInfoHeaderSkeleton stepLabel="Step 4 of 5" />
 
       <div className="px-6 py-6">
@@ -267,7 +267,7 @@ export function MeasurementFormSkeleton() {
           <div className="space-y-4">
             <IconLabelSkeleton />
             <InputFieldSkeleton />
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <InputFieldSkeleton />
               <InputFieldSkeleton />
             </div>
@@ -281,7 +281,7 @@ export function MeasurementFormSkeleton() {
           </div>
 
           {/* Locations Section */}
-          <div className="space-y-5 pt-6 border-t border-border/50">
+          <div className="border-border/50 space-y-5 border-t pt-6">
             <IconLabelSkeleton />
             <Skeleton className="h-9 w-36" />
           </div>
@@ -296,7 +296,7 @@ export function MeasurementFormSkeleton() {
 // Step 5: Evaluation Form Skeleton
 export function EvaluationFormSkeleton() {
   return (
-    <div className="glass-panel rounded-2xl overflow-hidden animate-fade-in-up">
+    <div className="glass-panel animate-fade-in-up overflow-hidden rounded-2xl">
       <FormInfoHeaderSkeleton stepLabel="Step 5 of 5" />
 
       <div className="px-6 py-6">
@@ -328,7 +328,7 @@ export function EvaluationFormSkeleton() {
           </div>
 
           {/* Location Section */}
-          <div className="space-y-5 pt-6 border-t border-border/50">
+          <div className="border-border/50 space-y-5 border-t pt-6">
             <IconLabelSkeleton />
             <Skeleton className="h-9 w-36" />
           </div>
@@ -344,21 +344,21 @@ export function EvaluationFormSkeleton() {
 // Note: This step uses gradient-mesh design, not glass-panel like other forms
 export function CompletionStepSkeleton() {
   return (
-    <div className="relative overflow-hidden rounded-2xl gradient-mesh animate-fade-in-up">
+    <div className="gradient-mesh animate-fade-in-up relative overflow-hidden rounded-2xl">
       <div className="noise-bg relative">
-        <div className="relative z-10 px-8 py-12 lg:py-16 text-center">
+        <div className="relative z-10 px-8 py-12 text-center lg:py-16">
           {/* Success icon */}
-          <div className="inline-flex items-center justify-center mb-6">
+          <div className="mb-6 inline-flex items-center justify-center">
             <Skeleton className="h-20 w-20 rounded-2xl" />
           </div>
 
           {/* Title */}
-          <Skeleton className="h-8 w-64 mx-auto mb-2" />
-          <Skeleton className="h-4 w-96 max-w-full mx-auto mb-8" />
+          <Skeleton className="mx-auto mb-2 h-8 w-64" />
+          <Skeleton className="mx-auto mb-8 h-4 w-96 max-w-full" />
 
           {/* CID display */}
-          <div className="inline-block rounded-xl px-5 py-3 mb-8">
-            <Skeleton className="h-3 w-32 mb-1 mx-auto" />
+          <div className="mb-8 inline-block rounded-xl px-5 py-3">
+            <Skeleton className="mx-auto mb-1 h-3 w-32" />
             <Skeleton className="h-4 w-96 max-w-full" />
           </div>
 

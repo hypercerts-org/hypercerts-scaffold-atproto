@@ -148,7 +148,7 @@ export default function HypercertContributionForm({
             variant="outline"
             size="sm"
             onClick={handleAutofill}
-            className="gap-2 text-xs font-[family-name:var(--font-outfit)]"
+            className="gap-2 font-[family-name:var(--font-outfit)] text-xs"
           >
             <Wand2 className="h-3.5 w-3.5" />
             Autofill Demo
@@ -159,7 +159,7 @@ export default function HypercertContributionForm({
         <div className="space-y-2">
           <Label
             htmlFor="role"
-            className="text-sm font-[family-name:var(--font-outfit)] font-medium"
+            className="font-[family-name:var(--font-outfit)] text-sm font-medium"
           >
             Role / Title *
           </Label>
@@ -178,10 +178,10 @@ export default function HypercertContributionForm({
         {/* Contributors */}
         <div className="space-y-3">
           <div className="flex items-center gap-2">
-            <div className="h-6 w-6 rounded-lg bg-create-accent/10 flex items-center justify-center">
-              <Users className="h-3.5 w-3.5 text-create-accent" />
+            <div className="bg-create-accent/10 flex h-6 w-6 items-center justify-center rounded-lg">
+              <Users className="text-create-accent h-3.5 w-3.5" />
             </div>
-            <Label className="text-sm font-[family-name:var(--font-outfit)] font-medium">
+            <Label className="font-[family-name:var(--font-outfit)] text-sm font-medium">
               Contributors *
             </Label>
           </div>
@@ -196,7 +196,7 @@ export default function HypercertContributionForm({
                 {contributors.map((contributor) => (
                   <div
                     key={contributor.did}
-                    className="flex justify-between items-center gap-4 border border-border/60 p-3 rounded-lg bg-background/50"
+                    className="border-border/60 bg-background/50 flex items-center justify-between gap-4 rounded-lg border p-3"
                   >
                     <UserAvatar user={contributor} />
                     <Button
@@ -255,7 +255,7 @@ export default function HypercertContributionForm({
         <div className="space-y-2">
           <Label
             htmlFor="description"
-            className="text-sm font-[family-name:var(--font-outfit)] font-medium"
+            className="font-[family-name:var(--font-outfit)] text-sm font-medium"
           >
             Description (Optional)
           </Label>
@@ -269,13 +269,13 @@ export default function HypercertContributionForm({
             disabled={saving}
             className="font-[family-name:var(--font-outfit)]"
           />
-          <p className="text-[11px] font-[family-name:var(--font-outfit)] text-muted-foreground">
+          <p className="text-muted-foreground font-[family-name:var(--font-outfit)] text-[11px]">
             {description.length} / 2000 characters
           </p>
         </div>
 
         {/* Dates */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <div className="space-y-2">
             <DatePicker
               label="Work Started"
