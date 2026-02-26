@@ -326,30 +326,49 @@ export async function GET() {
 ```
 ├── app/
 │   ├── api/
-│   │   ├── auth/           # Authentication endpoints
-│   │   ├── certs/          # Hypercert operations
-│   │   └── profile/        # Profile management
-│   ├── hypercerts/         # Hypercert pages
-│   └── profile/            # Profile page
-├── components/             # React components
+│   │   ├── auth/              # Standard ATProto OAuth (login, callback, logout)
+│   │   ├── oauth/             # ePDS email OAuth (login, callback)
+│   │   ├── certs/             # Hypercert operations (create, add-attachment, add-location)
+│   │   └── profile/           # Profile management (certified + bluesky)
+│   ├── client-metadata.json/  # OAuth client metadata endpoint
+│   ├── jwks.json/             # Public JWKS endpoint
+│   ├── hypercerts/            # Hypercert pages (list, create, [detail])
+│   ├── profile/               # Certified profile page
+│   └── bsky-profile/          # Bluesky profile page
+├── components/                # React components (login dialog, forms, detail views)
+│   └── ui/                    # shadcn/ui primitives (button, dialog, input, etc.)
 ├── lib/
-│   ├── api/                # Centralized API client
-│   ├── create-actions.ts   # Server actions
-│   ├── hypercerts-sdk.ts   # SDK initialization
-│   ├── repo-context.ts     # Repository context helper
-│   └── ...
-├── providers/              # React context providers
-├── queries/                # TanStack Query hooks
-└── lexicons/               # ATProto lexicon definitions
+│   ├── api/                   # Client-side API functions and types
+│   ├── config.ts              # Centralized app configuration
+│   ├── hypercerts-sdk.ts      # SDK initialization and singleton
+│   ├── redis.ts               # Redis client setup
+│   ├── redis-state-store.ts   # Redis stores (sessions, OAuth state, ePDS state)
+│   ├── atproto-session.ts     # Server-side session helpers
+│   ├── repo-context.ts        # Repository context helper
+│   ├── create-actions.ts      # Server actions for CRUD operations
+│   ├── epds-config.ts         # ePDS OAuth endpoint configuration
+│   ├── epds-helpers.ts        # ePDS PKCE + DPoP utilities
+│   └── atproto-branding.ts    # OAuth page branding (CSS, logos)
+├── providers/                 # React providers (QueryClient, auth gating)
+├── queries/                   # TanStack Query hooks (auth, hypercerts, profile)
+├── public/                    # Static assets (logos, email template)
+├── scripts/                   # Utility scripts (JWK generation)
+├── vendor/                    # Packed SDK tarballs (unreleased)
+└── lexicons/                  # ATProto lexicon definitions
 ```
 
 ### Key Files
 
-| File                    | Purpose                                        |
-| ----------------------- | ---------------------------------------------- |
-| `lib/hypercerts-sdk.ts` | SDK initialization and configuration           |
-| `lib/repo-context.ts`   | Helper to get authenticated repository context |
-| `lib/create-actions.ts` | Server actions for common operations           |
+| File                                | Purpose                                                                        |
+| ----------------------------------- | ------------------------------------------------------------------------------ |
+| `lib/config.ts`                     | Centralized configuration — base URLs, OAuth client IDs, redirect URIs, scopes |
+| `lib/hypercerts-sdk.ts`             | SDK initialization with OAuth config, Redis storage, handle resolver           |
+| `lib/redis-state-store.ts`          | Three Redis-backed stores: sessions, standard OAuth state, ePDS OAuth state    |
+| `lib/repo-context.ts`               | Helper to get authenticated repository context in server components            |
+| `lib/epds-config.ts`                | Derives ePDS OAuth endpoints (PAR, auth, token) from `NEXT_PUBLIC_EPDS_URL`    |
+| `lib/epds-helpers.ts`               | PKCE code verifier/challenge, DPoP key generation and proof creation           |
+| `components/login-dialog.tsx`       | Dual-mode login UI with Handle/Email pill toggle                               |
+| `app/client-metadata.json/route.ts` | OAuth client metadata (RFC 7591) — serves client_id, redirect_uris, branding   |
 
 ## Learn More
 
