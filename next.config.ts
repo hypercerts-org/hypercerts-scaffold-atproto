@@ -5,7 +5,7 @@ const nextConfig: NextConfig = {
 
   // Disable URL normalization in proxy to allow absolute redirect URLs
   // This is required for localhost → 127.0.0.1 redirect to work properly
-  skipMiddlewareUrlNormalize: true,
+  skipProxyUrlNormalize: true,
 
   images: {
     remotePatterns: [
