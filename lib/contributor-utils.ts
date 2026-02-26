@@ -53,18 +53,6 @@ export function isStrongRef(v: unknown): v is StrongRef {
 }
 
 /**
- * Extracts the DID from an AT Protocol URI.
- * e.g. "at://did:plc:xyz/org.hypercerts.claim.contributorInformation/abc" → "did:plc:xyz"
- */
-function extractDidFromAtUri(uri: string): string {
-  // AT URIs have the form: at://<authority>/<collection>/<rkey>
-  // authority is typically a DID
-  const withoutScheme = uri.replace(/^at:\/\//, "");
-  const authority = withoutScheme.split("/")[0];
-  return authority ?? uri;
-}
-
-/**
  * Parses a single Contributor record into a DisplayContributor ready for UI rendering.
  *
  * Logic:

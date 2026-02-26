@@ -15,6 +15,11 @@ const eslintConfig = defineConfig([
       "react-compiler/react-compiler": "warn",
     },
   },
+  {
+    rules: {
+      "@typescript-eslint/no-unused-vars": "error",
+    },
+  },
   prettierConfig,
   // Override default ignores of eslint-config-next.
   globalIgnores([

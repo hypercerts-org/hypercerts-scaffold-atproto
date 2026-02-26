@@ -2,7 +2,6 @@ import LoginDialog from "@/components/login-dialog";
 import Navbar from "@/components/navbar";
 import { getSession, getAuthenticatedRepo } from "@/lib/atproto-session";
 import { convertBlobUrlToCdn } from "@/lib/utils";
-import { cookies } from "next/headers";
 import { Suspense } from "react";
 import { AuthErrorToast } from "./AuthErrorToast";
 
