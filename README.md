@@ -63,14 +63,22 @@ This scaffold uses an **unreleased, pre-packaged version** of `@hypercerts-org/s
 
 ### Required Variables
 
-| Variable               | Description                                                                                                            |
-| ---------------------- | ---------------------------------------------------------------------------------------------------------------------- |
-| `NEXT_PUBLIC_BASE_URL` | Your application's base URL (e.g., `http://127.0.0.1:3000` for local dev, or `https://your-domain.com` for production) |
-| `ATPROTO_JWK_PRIVATE`  | Private JWK for OAuth authentication (generated using `pnpm run generate-jwk`)                                         |
-| `REDIS_HOST`           | Redis server hostname                                                                                                  |
-| `REDIS_PORT`           | Redis server port                                                                                                      |
-| `REDIS_PASSWORD`       | Redis password                                                                                                         |
-| `NEXT_PUBLIC_PDS_URL`  | Personal Data Server URL                                                                                               |
+| Variable               | Description                                                                                    |
+| ---------------------- | ---------------------------------------------------------------------------------------------- |
+| `NEXT_PUBLIC_BASE_URL` | App base URL. Use `http://127.0.0.1:3000` for local dev. Falls back to `VERCEL_URL` on Vercel. |
+| `ATPROTO_JWK_PRIVATE`  | Private JWK (JWKS format) for OAuth client assertion. Generate with `pnpm run generate-jwk`.   |
+| `REDIS_HOST`           | Redis server hostname (e.g., `localhost` for Docker, or cloud Redis host)                      |
+| `REDIS_PORT`           | Redis server port (default: `6379`)                                                            |
+| `REDIS_PASSWORD`       | Redis password (empty string for local Docker)                                                 |
+| `NEXT_PUBLIC_PDS_URL`  | Personal Data Server URL (e.g., `https://pds-eu-west4.test.certified.app`)                     |
+
+### Optional Variables
+
+| Variable                      | Description                                                                                                                  |
+| ----------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| `NEXT_PUBLIC_EPDS_URL`        | ePDS URL for email-based login. When set, enables the Email login tab in the UI. Example: `https://epds1.test.certified.app` |
+| `REDIS_USERNAME`              | Redis username. Defaults to `default` when `REDIS_PASSWORD` is set.                                                          |
+| `NEXT_PUBLIC_HANDLE_RESOLVER` | Handle resolver URL. Defaults to `https://bsky.social`.                                                                      |
 
 ### Local Development
 
@@ -88,6 +96,8 @@ For development and testing, use these servers:
 
 ```env
 NEXT_PUBLIC_PDS_URL=https://pds-eu-west4.test.certified.app
+# Optional: Enable email login via ePDS
+NEXT_PUBLIC_EPDS_URL=https://epds1.test.certified.app
 ```
 
 ### Testing with ngrok
@@ -195,7 +205,7 @@ This application automatically redirects requests from `localhost` to `127.0.0.1
 
 ## Authentication
 
-### How It Works
+### Flow 1: Handle Login (Standard ATProto)
 
 This scaffold uses OAuth 2.0 with DPoP (Demonstrating Proof of Possession) for authentication, implemented via the Hypercerts SDK.
 
@@ -207,6 +217,33 @@ This scaffold uses OAuth 2.0 with DPoP (Demonstrating Proof of Possession) for a
 4. OAuth callback receives the authorization code
 5. SDK exchanges code for session credentials (stored in Redis)
 6. A `user-did` cookie tracks the authenticated user for subsequent requests
+
+### Flow 2: Email Login (ePDS)
+
+> Requires `NEXT_PUBLIC_EPDS_URL` to be set. When configured, an Email tab appears in the login dialog.
+
+1. User enters their email address (or leaves it blank for the ePDS to collect it)
+2. App sends a Pushed Authorization Request (PAR) to the ePDS with a PKCE challenge and DPoP proof
+3. App stores OAuth state (code verifier + DPoP private key) in Redis
+4. User is redirected to the ePDS authorization page
+5. ePDS sends a one-time password (OTP) to the user's email
+6. User enters the OTP code on the ePDS page
+7. ePDS redirects back to `/api/oauth/callback` with an authorization code
+8. App exchanges the code for tokens using DPoP, creates a session in Redis
+9. User is authenticated — same `user-did` cookie as the standard flow
+
+**Key technical details:**
+
+- DPoP (Demonstrating Proof-of-Possession) uses EC P-256 keys to bind tokens to the client
+- PKCE with S256 challenge method prevents authorization code interception
+- OAuth state is stored in Redis (not cookies) to avoid cross-site redirect issues
+- The ePDS flow supports custom branding (logo, colors) and a custom email template for OTP codes
+
+### How the Login UI Works
+
+- When only `NEXT_PUBLIC_PDS_URL` is set: the login dialog shows only the Handle tab
+- When `NEXT_PUBLIC_EPDS_URL` is also set: the login dialog shows a pill toggle with Handle and Email tabs
+- Both flows result in the same session format — downstream code is agnostic to the login method
 
 ### Server-Side Authentication
 
