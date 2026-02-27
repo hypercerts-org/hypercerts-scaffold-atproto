@@ -193,8 +193,8 @@ try {
 export const OAUTH_SCOPE = GRANULAR_SCOPE;
 
 const redirectBaseUrl = getRedirectBaseUrl(baseUrl);
-const redirectUri = `${redirectBaseUrl}/api/auth/callback`;
-const epdsRedirectUri = `${redirectBaseUrl}/api/oauth/callback`;
+const redirectUri = `${redirectBaseUrl}/api/oauth/callback`;
+const epdsRedirectUri = `${redirectBaseUrl}/api/oauth/epds/callback`;
 const jwksUri = `${redirectBaseUrl}/jwks.json`;
 const epdsClientId = buildClientId(baseUrl, OAUTH_SCOPE, epdsRedirectUri);
 const clientId = buildClientId(baseUrl, OAUTH_SCOPE, redirectUri);

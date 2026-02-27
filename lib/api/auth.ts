@@ -9,7 +9,7 @@ import type { LoginRequest, LoginResponse } from "./types";
  * Initiate login flow
  */
 export async function login(handle: string): Promise<LoginResponse> {
-  return apiClient<LoginResponse>("/api/auth/login", {
+  return apiClient<LoginResponse>("/api/oauth/login", {
     method: "POST",
     body: { handle } satisfies LoginRequest,
   });
@@ -19,7 +19,7 @@ export async function login(handle: string): Promise<LoginResponse> {
  * Logout current user
  */
 export async function logout(): Promise<void> {
-  await apiClient<void>("/api/auth/logout", {
+  await apiClient<void>("/api/oauth/logout", {
     method: "GET",
   });
 }
