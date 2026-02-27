@@ -10,20 +10,21 @@ export default function UserAvatar({
   className?: string;
 }) {
   return (
-    <div className={cn("flex gap-4 items-center", className)}>
+    <div className={cn("flex items-center gap-4", className)}>
       {!!user.avatar && (
         <Image
           src={user.avatar}
           width={32}
           height={32}
           alt="avatar"
-          className="w-8 h-8 rounded-full"
+          className="h-8 w-8 rounded-full"
         />
       )}
       {!user.avatar && (
-        <div className="flex justify-center items-center rounded-full w-8 h-8 bg-gray-500 text-white">
-          {user.displayName?.[0].toUpperCase() ||
-            user.handle?.[0].toUpperCase()}
+        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-500 text-white">
+          {user.displayName?.[0]?.toUpperCase() ??
+            user.handle?.[0]?.toUpperCase() ??
+            "?"}
         </div>
       )}
       <div className="flex flex-col gap-1">

@@ -36,9 +36,9 @@ export default function HypercertEvaluationView({
   }
 
   return (
-    <Card className="glass-panel rounded-xl border border-border/50 overflow-hidden">
+    <Card className="glass-panel border-border/50 overflow-hidden rounded-xl border">
       <CardHeader className="pb-4">
-        <CardTitle className="text-lg font-[family-name:var(--font-syne)]">
+        <CardTitle className="font-[family-name:var(--font-syne)] text-lg">
           Evaluation
         </CardTitle>
         <CardDescription className="font-[family-name:var(--font-outfit)]">
@@ -49,19 +49,19 @@ export default function HypercertEvaluationView({
       </CardHeader>
       <CardContent className="space-y-6">
         {/* Summary */}
-        <p className="text-sm font-[family-name:var(--font-outfit)] text-muted-foreground whitespace-pre-wrap leading-relaxed">
+        <p className="text-muted-foreground font-[family-name:var(--font-outfit)] text-sm leading-relaxed whitespace-pre-wrap">
           {evaluation.summary}
         </p>
 
         {/* Score */}
         {evaluation.score != null ? (
-          <div className="inline-flex flex-col gap-2 px-5 py-4 bg-create-accent/10 border border-create-accent/20 rounded-xl">
-            <p className="text-xs font-[family-name:var(--font-outfit)] text-create-accent uppercase tracking-wider font-semibold">
+          <div className="bg-create-accent/10 border-create-accent/20 inline-flex flex-col gap-2 rounded-xl border px-5 py-4">
+            <p className="text-create-accent font-[family-name:var(--font-outfit)] text-xs font-semibold tracking-wider uppercase">
               Score
             </p>
-            <p className="text-3xl font-[family-name:var(--font-syne)] font-bold text-create-accent">
+            <p className="text-create-accent font-[family-name:var(--font-syne)] text-3xl font-bold">
               {evaluation.score.value}{" "}
-              <span className="text-xl font-normal text-create-accent/60">
+              <span className="text-create-accent/60 text-xl font-normal">
                 / {evaluation.score.max}
               </span>
             </p>
@@ -72,9 +72,9 @@ export default function HypercertEvaluationView({
         <dl className="space-y-4">
           {/* Evaluators */}
           <div className="flex items-start gap-3">
-            <Users className="size-4 text-create-accent shrink-0 mt-0.5" />
-            <div className="space-y-2 flex-1 min-w-0">
-              <dt className="text-xs font-[family-name:var(--font-outfit)] text-muted-foreground uppercase tracking-wider">
+            <Users className="text-create-accent mt-0.5 size-4 shrink-0" />
+            <div className="min-w-0 flex-1 space-y-2">
+              <dt className="text-muted-foreground font-[family-name:var(--font-outfit)] text-xs tracking-wider uppercase">
                 Evaluators
               </dt>
               <dd className="space-y-1">
@@ -84,7 +84,7 @@ export default function HypercertEvaluationView({
                   return (
                     <div
                       key={index}
-                      className="text-sm font-[family-name:var(--font-outfit)] break-all"
+                      className="font-[family-name:var(--font-outfit)] text-sm break-all"
                     >
                       <URILink
                         uri={`https://bsky.app/profile/${did}`}
@@ -99,17 +99,17 @@ export default function HypercertEvaluationView({
 
           {/* Content */}
           {evaluation.content && evaluation.content.length > 0 ? (
-            <div className="flex items-start gap-3 pt-4 border-t border-border/50">
-              <FileText className="size-4 text-create-accent shrink-0 mt-0.5" />
-              <div className="space-y-2 flex-1 min-w-0">
-                <dt className="text-xs font-[family-name:var(--font-outfit)] text-muted-foreground uppercase tracking-wider">
+            <div className="border-border/50 flex items-start gap-3 border-t pt-4">
+              <FileText className="text-create-accent mt-0.5 size-4 shrink-0" />
+              <div className="min-w-0 flex-1 space-y-2">
+                <dt className="text-muted-foreground font-[family-name:var(--font-outfit)] text-xs tracking-wider uppercase">
                   Content
                 </dt>
                 <dd className="space-y-1">
                   {evaluation.content.map((uri, index) => (
                     <div
                       key={index}
-                      className="text-sm font-[family-name:var(--font-outfit)] break-all"
+                      className="font-[family-name:var(--font-outfit)] text-sm break-all"
                     >
                       <URILink
                         label={uri}
@@ -124,17 +124,17 @@ export default function HypercertEvaluationView({
 
           {/* Referenced Measurements */}
           {evaluation.measurements && evaluation.measurements.length > 0 ? (
-            <div className="flex items-start gap-3 pt-4 border-t border-border/50">
-              <FileText className="size-4 text-create-accent shrink-0 mt-0.5" />
-              <div className="space-y-2 flex-1 min-w-0">
-                <dt className="text-xs font-[family-name:var(--font-outfit)] text-muted-foreground uppercase tracking-wider">
+            <div className="border-border/50 flex items-start gap-3 border-t pt-4">
+              <FileText className="text-create-accent mt-0.5 size-4 shrink-0" />
+              <div className="min-w-0 flex-1 space-y-2">
+                <dt className="text-muted-foreground font-[family-name:var(--font-outfit)] text-xs tracking-wider uppercase">
                   Referenced Measurements
                 </dt>
                 <dd className="space-y-1">
                   {evaluation.measurements.map((uri, index) => (
                     <div
                       key={index}
-                      className="text-sm font-[family-name:var(--font-outfit)] break-all"
+                      className="font-[family-name:var(--font-outfit)] text-sm break-all"
                     >
                       <URILink
                         label={uri}
@@ -149,13 +149,13 @@ export default function HypercertEvaluationView({
 
           {/* Location */}
           {evaluation.location ? (
-            <div className="flex items-start gap-3 pt-4 border-t border-border/50">
-              <MapPin className="size-4 text-create-accent shrink-0 mt-0.5" />
-              <div className="space-y-1 flex-1 min-w-0">
-                <dt className="text-xs font-[family-name:var(--font-outfit)] text-muted-foreground uppercase tracking-wider">
+            <div className="border-border/50 flex items-start gap-3 border-t pt-4">
+              <MapPin className="text-create-accent mt-0.5 size-4 shrink-0" />
+              <div className="min-w-0 flex-1 space-y-1">
+                <dt className="text-muted-foreground font-[family-name:var(--font-outfit)] text-xs tracking-wider uppercase">
                   Location
                 </dt>
-                <dd className="text-sm font-[family-name:var(--font-outfit)] break-all">
+                <dd className="font-[family-name:var(--font-outfit)] text-sm break-all">
                   <URILink
                     label={evaluation.location}
                     uri={

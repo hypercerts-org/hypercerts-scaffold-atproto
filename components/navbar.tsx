@@ -51,14 +51,14 @@ export default function Navbar({
   const fallback = userHandle?.slice(0, 2).toUpperCase() || "ME";
 
   return (
-    <nav className="sticky top-0 z-50 border-b border-border/40 glass-panel">
-      <div className="flex h-16 items-center justify-between px-6 max-w-7xl mx-auto">
+    <nav className="border-border/40 glass-panel sticky top-0 z-50 border-b">
+      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
         {/* Logo */}
-        <Link href="/" className="flex items-center gap-2 group">
-          <div className="h-8 w-8 rounded-lg bg-create-accent/15 flex items-center justify-center group-hover:bg-create-accent/25 transition-colors">
-            <Sparkles className="h-4 w-4 text-create-accent" />
+        <Link href="/" className="group flex items-center gap-2">
+          <div className="bg-create-accent/15 group-hover:bg-create-accent/25 flex h-8 w-8 items-center justify-center rounded-lg transition-colors">
+            <Sparkles className="text-create-accent h-4 w-4" />
           </div>
-          <span className="text-lg font-[family-name:var(--font-syne)] font-bold tracking-tight">
+          <span className="font-[family-name:var(--font-syne)] text-lg font-bold tracking-tight">
             Hypercerts
           </span>
         </Link>
@@ -68,10 +68,10 @@ export default function Navbar({
           {isSignedIn ? (
             <>
               {/* Nav Links */}
-              <div className="hidden md:flex items-center gap-1">
+              <div className="hidden items-center gap-1 md:flex">
                 <Link
                   href="/hypercerts"
-                  className={`px-3 py-1.5 text-sm font-[family-name:var(--font-outfit)] font-medium rounded-lg transition-colors ${
+                  className={`rounded-lg px-3 py-1.5 font-[family-name:var(--font-outfit)] text-sm font-medium transition-colors ${
                     pathname === "/hypercerts" ||
                     (pathname?.startsWith("/hypercerts") &&
                       pathname !== "/hypercerts/create")
@@ -83,7 +83,7 @@ export default function Navbar({
                 </Link>
                 <Link
                   href="/hypercerts/create"
-                  className={`px-3 py-1.5 text-sm font-[family-name:var(--font-outfit)] font-medium rounded-lg transition-colors ${
+                  className={`rounded-lg px-3 py-1.5 font-[family-name:var(--font-outfit)] text-sm font-medium transition-colors ${
                     pathname === "/hypercerts/create"
                       ? "bg-create-accent/10 text-create-accent hover:bg-create-accent/20"
                       : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
@@ -97,10 +97,10 @@ export default function Navbar({
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <button
-                    className="rounded-full focus:outline-none focus:ring-2 focus:ring-create-accent focus:ring-offset-2"
+                    className="focus:ring-create-accent rounded-full focus:ring-2 focus:ring-offset-2 focus:outline-none"
                     aria-label="Open user menu"
                   >
-                    <Avatar className="h-9 w-9 ring-2 ring-border hover:ring-create-accent/50 transition-all">
+                    <Avatar className="ring-border hover:ring-create-accent/50 h-9 w-9 ring-2 transition-all">
                       <AvatarImage src={avatarUrl} />
                       <AvatarFallback className="bg-create-accent/15 text-create-accent font-[family-name:var(--font-syne)] font-semibold">
                         {fallback}
@@ -111,14 +111,14 @@ export default function Navbar({
 
                 <DropdownMenuContent
                   align="end"
-                  className="w-56 glass-panel border-border/60"
+                  className="glass-panel border-border/60 w-56"
                 >
                   <DropdownMenuLabel className="flex flex-col gap-1">
-                    <span className="text-sm font-[family-name:var(--font-outfit)] font-semibold">
+                    <span className="font-[family-name:var(--font-outfit)] text-sm font-semibold">
                       My Account
                     </span>
                     {userHandle ? (
-                      <span className="text-xs font-[family-name:var(--font-outfit)] text-muted-foreground">
+                      <span className="text-muted-foreground font-[family-name:var(--font-outfit)] text-xs">
                         @{userHandle}
                       </span>
                     ) : null}
@@ -128,14 +128,14 @@ export default function Navbar({
                     <>
                       <DropdownMenuSeparator />
                       <DropdownMenuLabel className="flex flex-col gap-1">
-                        <span className="text-xs uppercase tracking-wider font-[family-name:var(--font-outfit)] font-medium text-muted-foreground">
+                        <span className="text-muted-foreground font-[family-name:var(--font-outfit)] text-xs font-medium tracking-wider uppercase">
                           Active Profile
                         </span>
-                        <span className="text-sm font-[family-name:var(--font-outfit)] font-semibold">
+                        <span className="font-[family-name:var(--font-outfit)] text-sm font-semibold">
                           {activeProfileName}
                         </span>
                         {activeProfileHandle ? (
-                          <span className="text-xs font-[family-name:var(--font-outfit)] text-muted-foreground">
+                          <span className="text-muted-foreground font-[family-name:var(--font-outfit)] text-xs">
                             @{activeProfileHandle}
                           </span>
                         ) : null}
@@ -147,7 +147,7 @@ export default function Navbar({
 
                   <DropdownMenuItem className="font-[family-name:var(--font-outfit)]">
                     <Link
-                      className="flex items-center gap-2 w-full"
+                      className="flex w-full items-center gap-2"
                       href="/profile"
                     >
                       <User className="h-4 w-4" />
@@ -196,7 +196,7 @@ export default function Navbar({
                 </Button>
               </div>
               <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-                <DialogContent className="sm:max-w-sm glass-panel border-border/60 p-6">
+                <DialogContent className="glass-panel border-border/60 p-6 sm:max-w-sm">
                   <DialogTitle className="sr-only">
                     {loginMode === "signin" ? "Sign In" : "Create Account"}
                   </DialogTitle>

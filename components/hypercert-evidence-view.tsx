@@ -45,11 +45,11 @@ export default function HypercertEvidenceView({
   };
 
   return (
-    <Card className="glass-panel rounded-xl border border-border/50 overflow-hidden">
+    <Card className="glass-panel border-border/50 overflow-hidden rounded-xl border">
       <CardHeader className="pb-4">
-        <div className="flex items-start justify-between gap-4 flex-wrap">
-          <div className="space-y-2 flex-1">
-            <CardTitle className="text-lg font-[family-name:var(--font-syne)]">
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div className="flex-1 space-y-2">
+            <CardTitle className="font-[family-name:var(--font-syne)] text-lg">
               {evidence.title}
             </CardTitle>
             <CardDescription className="font-[family-name:var(--font-outfit)]">
@@ -59,7 +59,7 @@ export default function HypercertEvidenceView({
             </CardDescription>
           </div>
           <Badge
-            className={`${getContentTypeColor()} font-[family-name:var(--font-outfit)] shrink-0`}
+            className={`${getContentTypeColor()} shrink-0 font-[family-name:var(--font-outfit)]`}
           >
             {evidence.contentType
               ? evidence.contentType.charAt(0).toUpperCase() +
@@ -70,30 +70,30 @@ export default function HypercertEvidenceView({
       </CardHeader>
       <CardContent className="space-y-5">
         <div className="space-y-2">
-          <p className="text-sm font-[family-name:var(--font-outfit)] font-medium">
+          <p className="font-[family-name:var(--font-outfit)] text-sm font-medium">
             {evidence.shortDescription}
           </p>
           {evidence.description ? (
-            <p className="text-sm font-[family-name:var(--font-outfit)] text-muted-foreground whitespace-pre-wrap leading-relaxed">
+            <p className="text-muted-foreground font-[family-name:var(--font-outfit)] text-sm leading-relaxed whitespace-pre-wrap">
               {evidence.description}
             </p>
           ) : null}
         </div>
 
         {evidence.content && evidence.content.length > 0 ? (
-          <div className="space-y-3 pt-2 border-t border-border/50">
+          <div className="border-border/50 space-y-3 border-t pt-2">
             {evidence.content.map((contentItem, index) => {
               const contentUrl = getContentUrl(contentItem);
               return (
                 <div key={index} className="flex items-start gap-3">
-                  <LinkIcon className="size-4 text-create-accent shrink-0 mt-0.5" />
-                  <div className="space-y-1 flex-1 min-w-0">
-                    <dt className="text-xs font-[family-name:var(--font-outfit)] text-muted-foreground uppercase tracking-wider">
+                  <LinkIcon className="text-create-accent mt-0.5 size-4 shrink-0" />
+                  <div className="min-w-0 flex-1 space-y-1">
+                    <dt className="text-muted-foreground font-[family-name:var(--font-outfit)] text-xs tracking-wider uppercase">
                       {evidence.content.length > 1
                         ? `Evidence Source ${index + 1}`
                         : "Evidence Source"}
                     </dt>
-                    <dd className="text-sm font-[family-name:var(--font-outfit)] break-all">
+                    <dd className="font-[family-name:var(--font-outfit)] text-sm break-all">
                       {contentUrl ? (
                         <URILink
                           label={contentUrl}

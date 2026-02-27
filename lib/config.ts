@@ -9,11 +9,8 @@
  * @see https://datatracker.ietf.org/doc/html/rfc8252 (OAuth for Native Apps)
  */
 
-import {
-  ATPROTO_SCOPE,
-  TRANSITION_SCOPES,
-  HYPERCERT_COLLECTIONS,
-} from "@hypercerts-org/sdk-core";
+import { ATPROTO_SCOPE, HYPERCERT_COLLECTIONS } from "@hypercerts-org/sdk-core";
+import { OAuthClientMetadataInput } from "@atproto/oauth-client-node";
 import { generateBrandingCss } from "./atproto-branding";
 
 // Granular repo scope — collections with full CRUD access
@@ -48,7 +45,6 @@ const GRANULAR_SCOPE = [
   RPC_SCOPE,
   BLOB_SCOPE,
 ].join(" ");
-const LOOPBACK_SCOPE = [ATPROTO_SCOPE, TRANSITION_SCOPES.GENERIC].join(" ");
 
 /**
  * Validates a URL format
@@ -76,18 +72,6 @@ function isLoopback(url: string): boolean {
   } catch {
     return false;
   }
-}
-
-/**
- * Returns the appropriate OAuth scope based on the environment.
- * - Loopback (local dev): uses "atproto transition:generic" (ATProto requirement for loopback clients)
- * - Production: uses granular scopes (repo, rpc, blob) for precise permission requests
- */
-function getOAuthScope(url: string): string {
-  if (isLoopback(url)) {
-    return LOOPBACK_SCOPE;
-  }
-  return GRANULAR_SCOPE;
 }
 
 /**
@@ -204,16 +188,15 @@ try {
 }
 
 /**
- * OAuth scope configuration — environment-aware:
- * - Loopback (local dev): "atproto transition:generic" (ATProto requirement for loopback clients)
- * - Production: granular scopes (repo, rpc, blob) for precise permission requests
+ * OAuth scope — granular scopes (repo, rpc, blob) for all environments.
  */
 export const OAUTH_SCOPE = GRANULAR_SCOPE;
 
 const redirectBaseUrl = getRedirectBaseUrl(baseUrl);
-const redirectUri = `${redirectBaseUrl}/api/auth/callback`;
-const epdsRedirectUri = `${redirectBaseUrl}/api/oauth/callback`;
+const redirectUri = `${redirectBaseUrl}/api/oauth/callback`;
+const epdsRedirectUri = `${redirectBaseUrl}/api/oauth/epds/callback`;
 const jwksUri = `${redirectBaseUrl}/jwks.json`;
+const epdsClientId = buildClientId(baseUrl, OAUTH_SCOPE, epdsRedirectUri);
 const clientId = buildClientId(baseUrl, OAUTH_SCOPE, redirectUri);
 
 // Environment flags
@@ -244,6 +227,7 @@ export const config = {
 
   // ePDS (certified PDS) configuration — optional, only needed for ePDS login
   epdsUrl: process.env.NEXT_PUBLIC_EPDS_URL,
+  epdsClientId,
 
   // Server-only secret for HMAC-signing the transient OAuth session cookie
   // Must be 32+ characters. Only needed if ePDS login is used.
@@ -273,9 +257,10 @@ export const config = {
  * @returns OAuth client metadata object
  * @see https://datatracker.ietf.org/doc/html/rfc7591
  */
-export function buildClientMetadata(): Record<string, unknown> {
+export function buildClientMetadata(): OAuthClientMetadataInput &
+  Record<string, unknown> {
   if (config.isLoopback) {
-    // Loopback mode: no branding, application_type is "native"
+    // Loopback mode: minimal metadata, application_type is "web"
     return {
       client_id: config.clientId,
       client_name: "Hypercerts Scaffold",
@@ -292,12 +277,12 @@ export function buildClientMetadata(): Record<string, unknown> {
       grant_types: ["authorization_code", "refresh_token"],
       response_types: ["code"],
       token_endpoint_auth_method: "none",
-      application_type: "native",
+      jwks_uri: config.jwksUri,
+      application_type: "web",
       dpop_bound_access_tokens: true,
     };
   }
 
-  // Production mode: include branding, application_type is "web"
   return {
     client_id: config.clientId,
     client_name: "Hypercerts Scaffold",
@@ -306,6 +291,7 @@ export function buildClientMetadata(): Record<string, unknown> {
       ? [config.redirectUri, config.epdsRedirectUri]
       : [config.redirectUri],
     scope: OAUTH_SCOPE,
+    jwks_uri: config.jwksUri,
     logo_uri: `${config.baseUrl}/certified.png`,
     email_template_uri: `${config.baseUrl}/email-template.html`,
     email_subject_template: "{{code}} — Your {{app_name}} verification code",

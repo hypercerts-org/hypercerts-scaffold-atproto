@@ -29,22 +29,22 @@ export default function HypercertContributorView({
               className="rounded-full object-cover"
             />
           ) : (
-            <div className="w-10 h-10 rounded-full bg-create-accent/10 flex items-center justify-center">
-              <User className="size-5 text-create-accent" />
+            <div className="bg-create-accent/10 flex h-10 w-10 items-center justify-center rounded-full">
+              <User className="text-create-accent size-5" />
             </div>
           )}
         </div>
 
         {/* Info area */}
-        <div className="flex-1 min-w-0 space-y-1">
+        <div className="min-w-0 flex-1 space-y-1">
           {/* Name line */}
-          <p className="text-sm font-[family-name:var(--font-syne)] font-semibold leading-tight">
+          <p className="font-[family-name:var(--font-syne)] text-sm leading-tight font-semibold">
             {profile?.displayName ? (
               profile.displayName
             ) : contributor.displayName ? (
               contributor.displayName
             ) : (
-              <span className="truncate block max-w-[200px]">
+              <span className="block max-w-[200px] truncate">
                 {contributor.identity}
               </span>
             )}
@@ -52,14 +52,14 @@ export default function HypercertContributorView({
 
           {/* Handle/DID line */}
           {(profile?.handle || contributor.isDid) && (
-            <p className="text-xs text-muted-foreground font-[family-name:var(--font-outfit)] truncate">
+            <p className="text-muted-foreground truncate font-[family-name:var(--font-outfit)] text-xs">
               {profile?.handle ? `@${profile.handle}` : contributor.identity}
             </p>
           )}
 
           {/* Role badge */}
           {contributor.role && (
-            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-[family-name:var(--font-outfit)] bg-create-accent/10 text-create-accent border border-create-accent/20">
+            <span className="bg-create-accent/10 text-create-accent border-create-accent/20 inline-flex items-center rounded-full border px-2 py-0.5 font-[family-name:var(--font-outfit)] text-xs">
               {contributor.role}
             </span>
           )}
@@ -68,10 +68,10 @@ export default function HypercertContributorView({
         {/* Weight area */}
         {contributor.weight && (
           <div className="shrink-0 text-right">
-            <p className="text-lg font-[family-name:var(--font-syne)] font-bold text-create-accent leading-tight">
+            <p className="text-create-accent font-[family-name:var(--font-syne)] text-lg leading-tight font-bold">
               {contributor.weight}
             </p>
-            <p className="text-xs text-muted-foreground font-[family-name:var(--font-outfit)]">
+            <p className="text-muted-foreground font-[family-name:var(--font-outfit)] text-xs">
               weight
             </p>
           </div>
@@ -81,7 +81,7 @@ export default function HypercertContributorView({
   );
 
   return (
-    <Card className="glass-panel rounded-xl border border-border/50 hover:border-create-accent/40 transition-colors overflow-hidden">
+    <Card className="glass-panel border-border/50 hover:border-create-accent/40 overflow-hidden rounded-xl border transition-colors">
       {contributor.isDid ? (
         <a
           href={`https://bsky.app/profile/${contributor.identity}`}

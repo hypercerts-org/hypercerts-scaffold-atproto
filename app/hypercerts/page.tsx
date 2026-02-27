@@ -37,17 +37,17 @@ export default async function MyHypercertsPage() {
   ]);
 
   return (
-    <main className="relative min-h-screen noise-bg">
+    <main className="noise-bg relative min-h-screen">
       <div className="gradient-mesh absolute inset-0 -z-10" />
 
-      <div className="max-w-5xl mx-auto py-12 px-4 space-y-8">
+      <div className="mx-auto max-w-5xl space-y-8 px-4 py-12">
         {/* Header */}
-        <div className="text-center space-y-3 animate-fade-in-up">
+        <div className="animate-fade-in-up space-y-3 text-center">
           <div className="flex items-center justify-center gap-3">
-            <div className="size-10 rounded-full bg-create-accent/10 flex items-center justify-center">
-              <Award className="size-5 text-create-accent" />
+            <div className="bg-create-accent/10 flex size-10 items-center justify-center rounded-full">
+              <Award className="text-create-accent size-5" />
             </div>
-            <h1 className="text-4xl md:text-5xl font-[family-name:var(--font-syne)] font-bold tracking-tight">
+            <h1 className="font-[family-name:var(--font-syne)] text-4xl font-bold tracking-tight md:text-5xl">
               Hypercerts
             </h1>
           </div>
@@ -56,29 +56,29 @@ export default async function MyHypercertsPage() {
         {/* Content */}
         {!records ? (
           <div className="animate-fade-in-up [animation-delay:100ms]">
-            <div className="glass-panel rounded-2xl p-12 max-w-md mx-auto">
+            <div className="glass-panel mx-auto max-w-md rounded-2xl p-12">
               <Loader />
             </div>
           </div>
         ) : records.length === 0 ? (
           <div className="animate-fade-in-up [animation-delay:100ms]">
-            <div className="glass-panel rounded-2xl p-12 max-w-md mx-auto text-center space-y-4">
-              <div className="size-16 rounded-full bg-create-accent/10 flex items-center justify-center mx-auto">
-                <FileText className="size-8 text-create-accent" />
+            <div className="glass-panel mx-auto max-w-md space-y-4 rounded-2xl p-12 text-center">
+              <div className="bg-create-accent/10 mx-auto flex size-16 items-center justify-center rounded-full">
+                <FileText className="text-create-accent size-8" />
               </div>
-              <h2 className="text-xl font-[family-name:var(--font-syne)] font-semibold">
+              <h2 className="font-[family-name:var(--font-syne)] text-xl font-semibold">
                 No hypercerts found
               </h2>
-              <p className="text-sm font-[family-name:var(--font-outfit)] text-muted-foreground">
+              <p className="text-muted-foreground font-[family-name:var(--font-outfit)] text-sm">
                 Get started by creating your first hypercert to track and verify
                 your impact.
               </p>
               <Button
                 asChild
-                className="bg-create-accent hover:bg-create-accent/90 text-white font-[family-name:var(--font-outfit)] mt-2"
+                className="bg-create-accent hover:bg-create-accent/90 mt-2 font-[family-name:var(--font-outfit)] text-white"
               >
                 <Link href="/hypercerts/create">
-                  <Plus className="size-4 mr-2" />
+                  <Plus className="mr-2 size-4" />
                   Create Hypercert
                 </Link>
               </Button>
@@ -86,7 +86,7 @@ export default async function MyHypercertsPage() {
           </div>
         ) : (
           <div className="animate-fade-in-up [animation-delay:100ms]">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 stagger-children">
+            <div className="stagger-children grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {records.map(({ record: cert, uri }) => {
                 const imageUrl =
                   ctx.activeDid && cert.image
@@ -110,36 +110,36 @@ export default async function MyHypercertsPage() {
                     href={`/hypercerts/${encodeURIComponent(uri)}`}
                     className="group"
                   >
-                    <Card className="glass-panel rounded-xl overflow-hidden border border-border/50 hover:border-create-accent/50 hover:shadow-lg transition-all duration-300 h-full flex flex-col">
+                    <Card className="glass-panel border-border/50 hover:border-create-accent/50 flex h-full flex-col overflow-hidden rounded-xl border transition-all duration-300 hover:shadow-lg">
                       {/* Image or Placeholder */}
-                      <div className="relative aspect-[4/3] overflow-hidden bg-gradient-to-br from-create-accent/20 via-create-accent/10 to-transparent">
+                      <div className="from-create-accent/20 via-create-accent/10 relative aspect-[4/3] overflow-hidden bg-gradient-to-br to-transparent">
                         {imageUrl ? (
                           <Image
                             fill
                             alt={cert.title || "Hypercert cover"}
                             src={imageUrl}
-                            className="object-cover group-hover:scale-105 transition-transform duration-300"
+                            className="object-cover transition-transform duration-300 group-hover:scale-105"
                           />
                         ) : (
                           <div className="absolute inset-0 flex items-center justify-center">
-                            <Award className="size-16 text-create-accent/30" />
+                            <Award className="text-create-accent/30 size-16" />
                           </div>
                         )}
                       </div>
 
                       {/* Content */}
                       <CardHeader className="flex-1">
-                        <CardTitle className="font-[family-name:var(--font-syne)] text-lg line-clamp-1 group-hover:text-create-accent transition-colors">
+                        <CardTitle className="group-hover:text-create-accent line-clamp-1 font-[family-name:var(--font-syne)] text-lg transition-colors">
                           {cert.title || "Untitled"}
                         </CardTitle>
-                        <CardDescription className="font-[family-name:var(--font-outfit)] text-sm line-clamp-2">
+                        <CardDescription className="line-clamp-2 font-[family-name:var(--font-outfit)] text-sm">
                           {cert.shortDescription || "No description provided"}
                         </CardDescription>
 
                         {/* Metadata */}
                         <div className="flex flex-col gap-2 pt-3">
                           {createdDate ? (
-                            <div className="flex items-center gap-1.5 text-xs text-muted-foreground font-[family-name:var(--font-outfit)]">
+                            <div className="text-muted-foreground flex items-center gap-1.5 font-[family-name:var(--font-outfit)] text-xs">
                               <Calendar className="size-3" />
                               <span>{createdDate}</span>
                             </div>
@@ -150,13 +150,13 @@ export default async function MyHypercertsPage() {
                               {workScope.slice(0, 3).map((scope: string) => (
                                 <span
                                   key={scope}
-                                  className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-[family-name:var(--font-outfit)] bg-create-accent/10 text-create-accent border border-create-accent/20"
+                                  className="bg-create-accent/10 text-create-accent border-create-accent/20 inline-flex items-center rounded-full border px-2 py-0.5 font-[family-name:var(--font-outfit)] text-xs"
                                 >
                                   {scope}
                                 </span>
                               ))}
                               {workScope.length > 3 ? (
-                                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-[family-name:var(--font-outfit)] text-muted-foreground">
+                                <span className="text-muted-foreground inline-flex items-center rounded-full px-2 py-0.5 font-[family-name:var(--font-outfit)] text-xs">
                                   +{workScope.length - 3}
                                 </span>
                               ) : null}

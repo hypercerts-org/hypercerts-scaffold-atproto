@@ -125,7 +125,7 @@ export default function HypercertLocationForm({
             variant="outline"
             size="sm"
             onClick={handleAutofill}
-            className="gap-2 text-xs font-[family-name:var(--font-outfit)]"
+            className="gap-2 font-[family-name:var(--font-outfit)] text-xs"
           >
             <Wand2 className="h-3.5 w-3.5" />
             Autofill Demo
@@ -134,20 +134,20 @@ export default function HypercertLocationForm({
 
         {/* Protocol & SRS */}
         <div className="space-y-4">
-          <div className="flex items-center gap-2 mb-1">
-            <div className="h-6 w-6 rounded-lg bg-create-accent/10 flex items-center justify-center">
-              <Globe className="h-3.5 w-3.5 text-create-accent" />
+          <div className="mb-1 flex items-center gap-2">
+            <div className="bg-create-accent/10 flex h-6 w-6 items-center justify-center rounded-lg">
+              <Globe className="text-create-accent h-3.5 w-3.5" />
             </div>
-            <h3 className="text-sm font-[family-name:var(--font-syne)] font-semibold uppercase tracking-wider text-muted-foreground">
+            <h3 className="text-muted-foreground font-[family-name:var(--font-syne)] text-sm font-semibold tracking-wider uppercase">
               Spatial Configuration
             </h3>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <div className="space-y-2">
               <Label
                 htmlFor="lpVersion"
-                className="text-sm font-[family-name:var(--font-outfit)] font-medium"
+                className="font-[family-name:var(--font-outfit)] text-sm font-medium"
               >
                 Location Protocol Version *
               </Label>
@@ -163,7 +163,7 @@ export default function HypercertLocationForm({
             <div className="space-y-2">
               <Label
                 htmlFor="srs"
-                className="text-sm font-[family-name:var(--font-outfit)] font-medium"
+                className="font-[family-name:var(--font-outfit)] text-sm font-medium"
               >
                 Spatial Reference System (SRS) URI *
               </Label>
@@ -174,7 +174,7 @@ export default function HypercertLocationForm({
                 required
                 className="font-[family-name:var(--font-outfit)]"
               />
-              <p className="text-[11px] font-[family-name:var(--font-outfit)] text-muted-foreground">
+              <p className="text-muted-foreground font-[family-name:var(--font-outfit)] text-[11px]">
                 e.g., http://www.opengis.net/def/crs/OGC/1.3/CRS84
               </p>
             </div>
@@ -183,15 +183,15 @@ export default function HypercertLocationForm({
 
         {/* Location Type */}
         <div className="space-y-3">
-          <div className="flex items-center gap-2 mb-1">
-            <div className="h-6 w-6 rounded-lg bg-create-accent/10 flex items-center justify-center">
-              <MapPin className="h-3.5 w-3.5 text-create-accent" />
+          <div className="mb-1 flex items-center gap-2">
+            <div className="bg-create-accent/10 flex h-6 w-6 items-center justify-center rounded-lg">
+              <MapPin className="text-create-accent h-3.5 w-3.5" />
             </div>
-            <Label className="text-sm font-[family-name:var(--font-syne)] font-semibold uppercase tracking-wider text-muted-foreground">
+            <Label className="text-muted-foreground font-[family-name:var(--font-syne)] text-sm font-semibold tracking-wider uppercase">
               Location Type *
             </Label>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+          <div className="grid grid-cols-1 gap-2 md:grid-cols-3">
             <Button
               type="button"
               variant={
@@ -224,14 +224,14 @@ export default function HypercertLocationForm({
             </Button>
           </div>
           {locationTypePreset === "other" && (
-            <div className="space-y-1 mt-2 animate-fade-in-up">
+            <div className="animate-fade-in-up mt-2 space-y-1">
               <Input
                 placeholder="Custom locationType identifier"
                 value={locationTypeCustom}
                 onChange={(e) => setLocationTypeCustom(e.target.value)}
                 className="font-[family-name:var(--font-outfit)]"
               />
-              <p className="text-[11px] font-[family-name:var(--font-outfit)] text-muted-foreground">
+              <p className="text-muted-foreground font-[family-name:var(--font-outfit)] text-[11px]">
                 Provide a format identifier, e.g., coordinate-utm,
                 geojson-feature, etc.
               </p>
@@ -244,7 +244,7 @@ export default function HypercertLocationForm({
           <div className="space-y-2">
             <Label
               htmlFor="name"
-              className="text-sm font-[family-name:var(--font-outfit)] font-medium"
+              className="font-[family-name:var(--font-outfit)] text-sm font-medium"
             >
               Location Name (Optional)
             </Label>
@@ -260,7 +260,7 @@ export default function HypercertLocationForm({
           <div className="space-y-2">
             <Label
               htmlFor="description"
-              className="text-sm font-[family-name:var(--font-outfit)] font-medium"
+              className="font-[family-name:var(--font-outfit)] text-sm font-medium"
             >
               Location Description (Optional)
             </Label>

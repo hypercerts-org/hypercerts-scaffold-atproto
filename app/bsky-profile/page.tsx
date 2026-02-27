@@ -23,30 +23,30 @@ export default async function BskyProfilePage() {
   const bannerUrl = profile.banner || "";
 
   return (
-    <div className="relative min-h-screen noise-bg">
-      <div className="relative z-10 max-w-7xl mx-auto px-4 py-8 lg:py-12">
+    <div className="noise-bg relative min-h-screen">
+      <div className="relative z-10 mx-auto max-w-7xl px-4 py-8 lg:py-12">
         {/* Page header */}
-        <div className="mb-8 lg:mb-10 animate-fade-in">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="size-10 rounded-full bg-blue-500/10 flex items-center justify-center">
+        <div className="animate-fade-in mb-8 lg:mb-10">
+          <div className="mb-2 flex items-center gap-3">
+            <div className="flex size-10 items-center justify-center rounded-full bg-blue-500/10">
               <UserCircle className="size-5 text-blue-500" />
             </div>
             <div className="flex items-center gap-2">
-              <h1 className="text-3xl lg:text-4xl font-[family-name:var(--font-syne)] font-bold tracking-tight text-foreground">
+              <h1 className="text-foreground font-[family-name:var(--font-syne)] text-3xl font-bold tracking-tight lg:text-4xl">
                 Bsky Profile
               </h1>
-              <span className="px-2 py-0.5 text-xs font-medium bg-blue-500/20 text-blue-600 dark:text-blue-400 rounded-md border border-blue-500/30">
+              <span className="rounded-md border border-blue-500/30 bg-blue-500/20 px-2 py-0.5 text-xs font-medium text-blue-600 dark:text-blue-400">
                 Bluesky
               </span>
             </div>
           </div>
-          <p className="mt-2 text-sm font-[family-name:var(--font-outfit)] text-muted-foreground max-w-xl pl-[52px]">
+          <p className="text-muted-foreground mt-2 max-w-xl pl-[52px] font-[family-name:var(--font-outfit)] text-sm">
             Manage your Bluesky display name, bio, avatar, and banner.
           </p>
         </div>
 
         {/* Main content */}
-        <main className="max-w-2xl animate-fade-in-up">
+        <main className="animate-fade-in-up max-w-2xl">
           <BskyProfileForm
             initialProfile={{
               displayName: profile.displayName || "",

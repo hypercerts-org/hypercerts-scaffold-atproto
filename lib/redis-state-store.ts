@@ -5,6 +5,7 @@ import { NodeSavedSession, NodeSavedState } from "@atproto/oauth-client-node";
 const STATE_PREFIX = "oauth-state:";
 const SESSION_PREFIX = "session:";
 const STATE_EXPIRATION_SECONDS = 600; // 10 minutes for temporary OAuth state
+const SESSION_EXPIRATION_SECONDS = 86400; // 24 hours for user sessions
 const EPDS_STATE_PREFIX = "epds-oauth-state:";
 
 export interface EpdsOAuthState {
@@ -43,7 +44,9 @@ export class RedisStateStore implements StateStore {
 export class RedisSessionStore implements SessionStore {
   async set(did: string, session: NodeSavedSession): Promise<void> {
     const key = `${SESSION_PREFIX}${did}`;
-    await redisClient.set(key, JSON.stringify(session));
+    await redisClient.set(key, JSON.stringify(session), {
+      EX: SESSION_EXPIRATION_SECONDS,
+    });
   }
 
   async get(did: string): Promise<NodeSavedSession | undefined> {

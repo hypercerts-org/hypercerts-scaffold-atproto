@@ -52,7 +52,7 @@ export function getEpdsClientId(): string {
     );
   }
 
-  return config.clientId;
+  return config.epdsClientId;
 }
 
 /**

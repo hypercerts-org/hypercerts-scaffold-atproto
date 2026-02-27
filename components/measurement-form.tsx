@@ -301,14 +301,14 @@ export default function MeasurementForm({
       description="Record measurement data related to your hypercert."
     >
       {/* Autofill */}
-      <div className="flex justify-end mb-6">
+      <div className="mb-6 flex justify-end">
         <Button
           type="button"
           variant="outline"
           size="sm"
           onClick={handleAutofill}
           disabled={mutation.isPending}
-          className="gap-2 text-xs font-[family-name:var(--font-outfit)]"
+          className="gap-2 font-[family-name:var(--font-outfit)] text-xs"
         >
           <Wand2 className="h-3.5 w-3.5" />
           Autofill Demo
@@ -319,13 +319,13 @@ export default function MeasurementForm({
         {/* Measurers */}
         <div className="space-y-3">
           <div className="flex items-center gap-2">
-            <div className="h-6 w-6 rounded-lg bg-create-accent/10 flex items-center justify-center">
-              <Users className="h-3.5 w-3.5 text-create-accent" />
+            <div className="bg-create-accent/10 flex h-6 w-6 items-center justify-center rounded-lg">
+              <Users className="text-create-accent h-3.5 w-3.5" />
             </div>
-            <Label className="text-sm font-[family-name:var(--font-syne)] font-semibold uppercase tracking-wider text-muted-foreground">
+            <Label className="text-muted-foreground font-[family-name:var(--font-syne)] text-sm font-semibold tracking-wider uppercase">
               Measurers
             </Label>
-            <span className="text-[11px] font-[family-name:var(--font-outfit)] text-muted-foreground/60">
+            <span className="text-muted-foreground/60 font-[family-name:var(--font-outfit)] text-[11px]">
               Optional
             </span>
           </div>
@@ -342,7 +342,7 @@ export default function MeasurementForm({
                   {measurers.map((measurer) => (
                     <div
                       key={measurer.did}
-                      className="flex justify-between items-center gap-4 border border-border/60 p-3 rounded-lg bg-background/50"
+                      className="border-border/60 bg-background/50 flex items-center justify-between gap-4 rounded-lg border p-3"
                     >
                       <UserAvatar user={measurer} />
                       <Button
@@ -398,11 +398,11 @@ export default function MeasurementForm({
 
         {/* Metric / Value / Unit */}
         <div className="space-y-4">
-          <div className="flex items-center gap-2 mb-1">
-            <div className="h-6 w-6 rounded-lg bg-create-accent/10 flex items-center justify-center">
-              <BarChart3 className="h-3.5 w-3.5 text-create-accent" />
+          <div className="mb-1 flex items-center gap-2">
+            <div className="bg-create-accent/10 flex h-6 w-6 items-center justify-center rounded-lg">
+              <BarChart3 className="text-create-accent h-3.5 w-3.5" />
             </div>
-            <h3 className="text-sm font-[family-name:var(--font-syne)] font-semibold uppercase tracking-wider text-muted-foreground">
+            <h3 className="text-muted-foreground font-[family-name:var(--font-syne)] text-sm font-semibold tracking-wider uppercase">
               Measurement Data
             </h3>
           </div>
@@ -410,7 +410,7 @@ export default function MeasurementForm({
           <div className="space-y-2">
             <Label
               htmlFor="metric"
-              className="text-sm font-[family-name:var(--font-outfit)] font-medium"
+              className="font-[family-name:var(--font-outfit)] text-sm font-medium"
             >
               Metric *
             </Label>
@@ -426,11 +426,11 @@ export default function MeasurementForm({
             />
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <div className="space-y-2">
               <Label
                 htmlFor="value"
-                className="text-sm font-[family-name:var(--font-outfit)] font-medium"
+                className="font-[family-name:var(--font-outfit)] text-sm font-medium"
               >
                 Value *
               </Label>
@@ -448,7 +448,7 @@ export default function MeasurementForm({
             <div className="space-y-2">
               <Label
                 htmlFor="unit"
-                className="text-sm font-[family-name:var(--font-outfit)] font-medium"
+                className="font-[family-name:var(--font-outfit)] text-sm font-medium"
               >
                 Unit *
               </Label>
@@ -485,12 +485,12 @@ export default function MeasurementForm({
           </Button>
 
           {useDates && (
-            <div className="space-y-4 pl-4 border-l-2 border-create-accent/30 animate-fade-in-up">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="border-create-accent/30 animate-fade-in-up space-y-4 border-l-2 pl-4">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <div className="space-y-2">
                   <Label
                     htmlFor="start-date"
-                    className="text-sm font-[family-name:var(--font-outfit)] font-medium"
+                    className="font-[family-name:var(--font-outfit)] text-sm font-medium"
                   >
                     Start Date
                   </Label>
@@ -506,7 +506,7 @@ export default function MeasurementForm({
                 <div className="space-y-2">
                   <Label
                     htmlFor="end-date"
-                    className="text-sm font-[family-name:var(--font-outfit)] font-medium"
+                    className="font-[family-name:var(--font-outfit)] text-sm font-medium"
                   >
                     End Date
                   </Label>
@@ -543,11 +543,11 @@ export default function MeasurementForm({
           </Button>
 
           {useMethod && (
-            <div className="space-y-4 pl-4 border-l-2 border-create-accent/30 animate-fade-in-up">
+            <div className="border-create-accent/30 animate-fade-in-up space-y-4 border-l-2 pl-4">
               <div className="space-y-2">
                 <Label
                   htmlFor="method-type"
-                  className="text-sm font-[family-name:var(--font-outfit)] font-medium"
+                  className="font-[family-name:var(--font-outfit)] text-sm font-medium"
                 >
                   Method Type
                 </Label>
@@ -561,7 +561,7 @@ export default function MeasurementForm({
                   disabled={mutation.isPending}
                   className="font-[family-name:var(--font-outfit)]"
                 />
-                <p className="text-[11px] font-[family-name:var(--font-outfit)] text-muted-foreground">
+                <p className="text-muted-foreground font-[family-name:var(--font-outfit)] text-[11px]">
                   Short identifier for the measurement methodology (max 30
                   chars)
                 </p>
@@ -569,7 +569,7 @@ export default function MeasurementForm({
               <div className="space-y-2">
                 <Label
                   htmlFor="method-uri"
-                  className="text-sm font-[family-name:var(--font-outfit)] font-medium"
+                  className="font-[family-name:var(--font-outfit)] text-sm font-medium"
                 >
                   Method URI
                 </Label>
@@ -606,8 +606,8 @@ export default function MeasurementForm({
           </Button>
 
           {useEvidence && (
-            <div className="space-y-2 pl-4 border-l-2 border-create-accent/30 animate-fade-in-up">
-              <Label className="text-sm font-[family-name:var(--font-outfit)] font-medium">
+            <div className="border-create-accent/30 animate-fade-in-up space-y-2 border-l-2 pl-4">
+              <Label className="font-[family-name:var(--font-outfit)] text-sm font-medium">
                 Evidence URIs
               </Label>
               {evidenceUris.map((uri, index) => (
@@ -654,15 +654,15 @@ export default function MeasurementForm({
         </div>
 
         {/* Locations Section */}
-        <div className="space-y-5 pt-6 border-t border-border/50">
+        <div className="border-border/50 space-y-5 border-t pt-6">
           <div className="flex items-center gap-2">
-            <div className="h-6 w-6 rounded-lg bg-create-accent/10 flex items-center justify-center">
-              <MapPin className="h-3.5 w-3.5 text-create-accent" />
+            <div className="bg-create-accent/10 flex h-6 w-6 items-center justify-center rounded-lg">
+              <MapPin className="text-create-accent h-3.5 w-3.5" />
             </div>
-            <h3 className="text-sm font-[family-name:var(--font-syne)] font-semibold uppercase tracking-wider text-muted-foreground">
+            <h3 className="text-muted-foreground font-[family-name:var(--font-syne)] text-sm font-semibold tracking-wider uppercase">
               Locations
             </h3>
-            <span className="text-[11px] font-[family-name:var(--font-outfit)] text-muted-foreground/60">
+            <span className="text-muted-foreground/60 font-[family-name:var(--font-outfit)] text-[11px]">
               Optional
             </span>
           </div>
@@ -689,14 +689,14 @@ export default function MeasurementForm({
           </Button>
 
           {useLocations && (
-            <div className="space-y-6 animate-fade-in-up">
+            <div className="animate-fade-in-up space-y-6">
               {locationEntries.map((entry, idx) => (
                 <div
                   key={entry.id}
-                  className="space-y-4 p-5 border border-border/60 rounded-xl bg-muted/20"
+                  className="border-border/60 bg-muted/20 space-y-4 rounded-xl border p-5"
                 >
                   <div className="flex items-center justify-between">
-                    <Label className="text-sm font-[family-name:var(--font-outfit)] font-semibold">
+                    <Label className="font-[family-name:var(--font-outfit)] text-sm font-semibold">
                       Location {idx + 1}
                     </Label>
                     <Button
@@ -715,7 +715,7 @@ export default function MeasurementForm({
 
                   {/* Mode selector */}
                   <div className="space-y-2">
-                    <Label className="text-sm font-[family-name:var(--font-outfit)] font-medium">
+                    <Label className="font-[family-name:var(--font-outfit)] text-sm font-medium">
                       Location Mode
                     </Label>
                     <div className="flex gap-2">
@@ -752,7 +752,7 @@ export default function MeasurementForm({
 
                   {entry.mode === "string" ? (
                     <div className="space-y-2">
-                      <Label className="text-sm font-[family-name:var(--font-outfit)] font-medium">
+                      <Label className="font-[family-name:var(--font-outfit)] text-sm font-medium">
                         Location Reference
                       </Label>
                       <Input
@@ -767,16 +767,16 @@ export default function MeasurementForm({
                         disabled={mutation.isPending}
                         className="font-[family-name:var(--font-outfit)]"
                       />
-                      <p className="text-[11px] font-[family-name:var(--font-outfit)] text-muted-foreground">
+                      <p className="text-muted-foreground font-[family-name:var(--font-outfit)] text-[11px]">
                         Enter an AT-URI to an existing location record or a
                         simple string identifier
                       </p>
                     </div>
                   ) : (
                     <div className="space-y-4">
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                         <div className="space-y-2">
-                          <Label className="text-sm font-[family-name:var(--font-outfit)] font-medium">
+                          <Label className="font-[family-name:var(--font-outfit)] text-sm font-medium">
                             Location Protocol Version *
                           </Label>
                           <Input
@@ -791,7 +791,7 @@ export default function MeasurementForm({
                           />
                         </div>
                         <div className="space-y-2">
-                          <Label className="text-sm font-[family-name:var(--font-outfit)] font-medium">
+                          <Label className="font-[family-name:var(--font-outfit)] text-sm font-medium">
                             Spatial Reference System (SRS) *
                           </Label>
                           <Input
@@ -804,14 +804,14 @@ export default function MeasurementForm({
                             disabled={mutation.isPending}
                             className="font-[family-name:var(--font-outfit)]"
                           />
-                          <p className="text-[11px] font-[family-name:var(--font-outfit)] text-muted-foreground">
+                          <p className="text-muted-foreground font-[family-name:var(--font-outfit)] text-[11px]">
                             e.g., http://www.opengis.net/def/crs/OGC/1.3/CRS84
                           </p>
                         </div>
                       </div>
 
                       <div className="space-y-2">
-                        <Label className="text-sm font-[family-name:var(--font-outfit)] font-medium">
+                        <Label className="font-[family-name:var(--font-outfit)] text-sm font-medium">
                           Location Type *
                         </Label>
                         <div className="flex flex-wrap gap-2">
@@ -886,7 +886,7 @@ export default function MeasurementForm({
                       </div>
 
                       <div className="space-y-2">
-                        <Label className="text-sm font-[family-name:var(--font-outfit)] font-medium">
+                        <Label className="font-[family-name:var(--font-outfit)] text-sm font-medium">
                           Location Name (Optional)
                         </Label>
                         <Input
@@ -904,7 +904,7 @@ export default function MeasurementForm({
                       </div>
 
                       <div className="space-y-2">
-                        <Label className="text-sm font-[family-name:var(--font-outfit)] font-medium">
+                        <Label className="font-[family-name:var(--font-outfit)] text-sm font-medium">
                           Location Description (Optional)
                         </Label>
                         <Textarea
@@ -981,10 +981,10 @@ export default function MeasurementForm({
           </Button>
 
           {useComment && (
-            <div className="space-y-2 pl-4 border-l-2 border-create-accent/30 animate-fade-in-up">
+            <div className="border-create-accent/30 animate-fade-in-up space-y-2 border-l-2 pl-4">
               <Label
                 htmlFor="comment"
-                className="text-sm font-[family-name:var(--font-outfit)] font-medium"
+                className="font-[family-name:var(--font-outfit)] text-sm font-medium"
               >
                 Comment
               </Label>

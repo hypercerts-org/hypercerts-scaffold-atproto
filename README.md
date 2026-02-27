@@ -63,14 +63,22 @@ This scaffold uses an **unreleased, pre-packaged version** of `@hypercerts-org/s
 
 ### Required Variables
 
-| Variable               | Description                                                                                                            |
-| ---------------------- | ---------------------------------------------------------------------------------------------------------------------- |
-| `NEXT_PUBLIC_BASE_URL` | Your application's base URL (e.g., `http://127.0.0.1:3000` for local dev, or `https://your-domain.com` for production) |
-| `ATPROTO_JWK_PRIVATE`  | Private JWK for OAuth authentication (generated using `pnpm run generate-jwk`)                                         |
-| `REDIS_HOST`           | Redis server hostname                                                                                                  |
-| `REDIS_PORT`           | Redis server port                                                                                                      |
-| `REDIS_PASSWORD`       | Redis password                                                                                                         |
-| `NEXT_PUBLIC_PDS_URL`  | Personal Data Server URL                                                                                               |
+| Variable               | Description                                                                                    |
+| ---------------------- | ---------------------------------------------------------------------------------------------- |
+| `NEXT_PUBLIC_BASE_URL` | App base URL. Use `http://127.0.0.1:3000` for local dev. Falls back to `VERCEL_URL` on Vercel. |
+| `ATPROTO_JWK_PRIVATE`  | Private JWK (JWKS format) for OAuth client assertion. Generate with `pnpm run generate-jwk`.   |
+| `REDIS_HOST`           | Redis server hostname (e.g., `localhost` for Docker, or cloud Redis host)                      |
+| `REDIS_PORT`           | Redis server port (default: `6379`)                                                            |
+| `REDIS_PASSWORD`       | Redis password (empty string for local Docker)                                                 |
+| `NEXT_PUBLIC_PDS_URL`  | Personal Data Server URL (e.g., `https://pds-eu-west4.test.certified.app`)                     |
+
+### Optional Variables
+
+| Variable                      | Description                                                                                                                  |
+| ----------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| `NEXT_PUBLIC_EPDS_URL`        | ePDS URL for email-based login. When set, enables the Email login tab in the UI. Example: `https://epds1.test.certified.app` |
+| `REDIS_USERNAME`              | Redis username. Defaults to `default` when `REDIS_PASSWORD` is set.                                                          |
+| `NEXT_PUBLIC_HANDLE_RESOLVER` | Handle resolver URL. Defaults to `https://bsky.social`.                                                                      |
 
 ### Local Development
 
@@ -88,6 +96,8 @@ For development and testing, use these servers:
 
 ```env
 NEXT_PUBLIC_PDS_URL=https://pds-eu-west4.test.certified.app
+# Optional: Enable email login via ePDS
+NEXT_PUBLIC_EPDS_URL=https://epds1.test.certified.app
 ```
 
 ### Testing with ngrok
@@ -125,32 +135,35 @@ The script outputs the complete environment variable line. You can either copy i
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                         Client (Browser)                         │
-│         OAuthProvider  │  SessionProvider  │  React Query        │
-└────────────────────────────────┬────────────────────────────────┘
-                                 │
-                                 ▼
-┌─────────────────────────────────────────────────────────────────┐
-│            Next.js API Routes OR Server Actions                 │
-│       /api/auth/*  │  /api/certs/*  │  /api/profile/*           │
-└────────────────────────────────┬────────────────────────────────┘
-                                 │
-                                 ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                     Hypercerts SDK (sdk-core)                    │
-│       OAuth Client  │  Session Management  │  Repository Ops     │
-└───────────┬─────────────────────┬───────────────────┘
-            │                     │
-            ▼                     ▼
-     ┌───────────┐         ┌───────────┐
-     │   Redis   │         │    PDS    │
-     │ (sessions)│         │ (personal)│
-     └───────────┘         └───────────┘
+│                       Client (Browser)                          │
+│   Login Dialog (Handle │ Email)  │  React Query  │  Forms       │
+└──────────────┬──────────────────────────┬───────────────────────┘
+               │                          │
+    ┌──────────▼──────────┐    ┌──────────▼──────────┐
+    │  /api/oauth/*       │    │  /api/oauth/epds/*   │
+    │  (Standard ATProto) │    │  (ePDS Email Login)  │
+    │  SDK-managed OAuth  │    │  Manual DPoP + PKCE  │
+    └──────────┬──────────┘    └──────────┬───────────┘
+               │                          │
+               ▼                          ▼
+    ┌─────────────────────────────────────────────────┐
+    │           Hypercerts SDK (sdk-core)              │
+    │  Session Restore  │  Repository Ops  │  CRUD    │
+    └──────────┬──────────────────────┬───────────────┘
+               │                      │
+        ┌──────▼──────┐        ┌──────▼──────────┐
+        │    Redis    │        │   PDS / ePDS    │
+        │  Sessions   │        │   User Data     │
+        │ OAuth State │        │                 │
+        └─────────────┘        └─────────────────┘
 ```
+
+Also served: `/client-metadata.json` and `/jwks.json` (OAuth metadata endpoints, no auth required).
 
 ### Personal Data Server (PDS)
 
-The **PDS (Personal Data Server)** stores all user data - your profile and your hypercerts. All operations in this application interact with your personal PDS.
+- **PDS (Personal Data Server)** stores user data (profiles, hypercerts). Standard ATProto login authenticates against the user's PDS using handle-based OAuth managed by the Hypercerts SDK.
+- **ePDS (Email PDS)** is a Certified Auth PDS that supports email-based login with OTP verification. It serves the same role as a standard PDS but uses an email address instead of a handle for authentication. The ePDS flow is enabled when `NEXT_PUBLIC_EPDS_URL` is set.
 
 ## Localhost Redirect
 
@@ -195,7 +208,7 @@ This application automatically redirects requests from `localhost` to `127.0.0.1
 
 ## Authentication
 
-### How It Works
+### Flow 1: Handle Login (Standard ATProto)
 
 This scaffold uses OAuth 2.0 with DPoP (Demonstrating Proof of Possession) for authentication, implemented via the Hypercerts SDK.
 
@@ -207,6 +220,33 @@ This scaffold uses OAuth 2.0 with DPoP (Demonstrating Proof of Possession) for a
 4. OAuth callback receives the authorization code
 5. SDK exchanges code for session credentials (stored in Redis)
 6. A `user-did` cookie tracks the authenticated user for subsequent requests
+
+### Flow 2: Email Login (ePDS)
+
+> Requires `NEXT_PUBLIC_EPDS_URL` to be set. When configured, an Email tab appears in the login dialog.
+
+1. User enters their email address (or leaves it blank for the ePDS to collect it)
+2. App sends a Pushed Authorization Request (PAR) to the ePDS with a PKCE challenge and DPoP proof
+3. App stores OAuth state (code verifier + DPoP private key) in Redis
+4. User is redirected to the ePDS authorization page
+5. ePDS sends a one-time password (OTP) to the user's email
+6. User enters the OTP code on the ePDS page
+7. ePDS redirects back to `/api/oauth/epds/callback` with an authorization code
+8. App exchanges the code for tokens using DPoP, creates a session in Redis
+9. User is authenticated — same `user-did` cookie as the standard flow
+
+**Key technical details:**
+
+- DPoP (Demonstrating Proof-of-Possession) uses EC P-256 keys to bind tokens to the client
+- PKCE with S256 challenge method prevents authorization code interception
+- OAuth state is stored in Redis (not cookies) to avoid cross-site redirect issues
+- The ePDS flow supports custom branding (logo, colors) and a custom email template for OTP codes
+
+### How the Login UI Works
+
+- When only `NEXT_PUBLIC_PDS_URL` is set: the login dialog shows only the Handle tab
+- When `NEXT_PUBLIC_EPDS_URL` is also set: the login dialog shows a pill toggle with Handle and Email tabs
+- Both flows result in the same session format — downstream code is agnostic to the login method
 
 ### Server-Side Authentication
 
@@ -289,30 +329,49 @@ export async function GET() {
 ```
 ├── app/
 │   ├── api/
-│   │   ├── auth/           # Authentication endpoints
-│   │   ├── certs/          # Hypercert operations
-│   │   └── profile/        # Profile management
-│   ├── hypercerts/         # Hypercert pages
-│   └── profile/            # Profile page
-├── components/             # React components
+│   │   ├── oauth/             # ATProto OAuth (login, callback, logout)
+│   │   │   └── epds/          # ePDS email OAuth (login, callback)
+│   │   ├── certs/             # Hypercert operations (create, add-attachment, add-location)
+│   │   └── profile/           # Profile management (certified + bluesky)
+│   ├── client-metadata.json/  # OAuth client metadata endpoint
+│   ├── jwks.json/             # Public JWKS endpoint
+│   ├── hypercerts/            # Hypercert pages (list, create, [detail])
+│   ├── profile/               # Certified profile page
+│   └── bsky-profile/          # Bluesky profile page
+├── components/                # React components (login dialog, forms, detail views)
+│   └── ui/                    # shadcn/ui primitives (button, dialog, input, etc.)
 ├── lib/
-│   ├── api/                # Centralized API client
-│   ├── create-actions.ts   # Server actions
-│   ├── hypercerts-sdk.ts   # SDK initialization
-│   ├── repo-context.ts     # Repository context helper
-│   └── ...
-├── providers/              # React context providers
-├── queries/                # TanStack Query hooks
-└── lexicons/               # ATProto lexicon definitions
+│   ├── api/                   # Client-side API functions and types
+│   ├── config.ts              # Centralized app configuration
+│   ├── hypercerts-sdk.ts      # SDK initialization and singleton
+│   ├── redis.ts               # Redis client setup
+│   ├── redis-state-store.ts   # Redis stores (sessions, OAuth state, ePDS state)
+│   ├── atproto-session.ts     # Server-side session helpers
+│   ├── repo-context.ts        # Repository context helper
+│   ├── create-actions.ts      # Server actions for CRUD operations
+│   ├── epds-config.ts         # ePDS OAuth endpoint configuration
+│   ├── epds-helpers.ts        # ePDS PKCE + DPoP utilities
+│   └── atproto-branding.ts    # OAuth page branding (CSS, logos)
+├── providers/                 # React providers (QueryClient, auth gating)
+├── queries/                   # TanStack Query hooks (auth, hypercerts, profile)
+├── public/                    # Static assets (logos, email template)
+├── scripts/                   # Utility scripts (JWK generation)
+├── vendor/                    # Packed SDK tarballs (unreleased)
+└── lexicons/                  # ATProto lexicon definitions
 ```
 
 ### Key Files
 
-| File                    | Purpose                                        |
-| ----------------------- | ---------------------------------------------- |
-| `lib/hypercerts-sdk.ts` | SDK initialization and configuration           |
-| `lib/repo-context.ts`   | Helper to get authenticated repository context |
-| `lib/create-actions.ts` | Server actions for common operations           |
+| File                                | Purpose                                                                        |
+| ----------------------------------- | ------------------------------------------------------------------------------ |
+| `lib/config.ts`                     | Centralized configuration — base URLs, OAuth client IDs, redirect URIs, scopes |
+| `lib/hypercerts-sdk.ts`             | SDK initialization with OAuth config, Redis storage, handle resolver           |
+| `lib/redis-state-store.ts`          | Three Redis-backed stores: sessions, standard OAuth state, ePDS OAuth state    |
+| `lib/repo-context.ts`               | Helper to get authenticated repository context in server components            |
+| `lib/epds-config.ts`                | Derives ePDS OAuth endpoints (PAR, auth, token) from `NEXT_PUBLIC_EPDS_URL`    |
+| `lib/epds-helpers.ts`               | PKCE code verifier/challenge, DPoP key generation and proof creation           |
+| `components/login-dialog.tsx`       | Dual-mode login UI with Handle/Email pill toggle                               |
+| `app/client-metadata.json/route.ts` | OAuth client metadata (RFC 7591) — serves client_id, redirect_uris, branding   |
 
 ## Learn More
 

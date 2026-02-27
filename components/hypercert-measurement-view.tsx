@@ -23,16 +23,16 @@ export default function HypercertMeasurementView({
     return null;
   }
   return (
-    <Card className="glass-panel rounded-xl border border-border/50 overflow-hidden">
+    <Card className="glass-panel border-border/50 overflow-hidden rounded-xl border">
       <CardHeader className="pb-4">
-        <CardTitle className="text-lg font-[family-name:var(--font-syne)]">
+        <CardTitle className="font-[family-name:var(--font-syne)] text-lg">
           {measurement.metric}
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
         {/* Value Display */}
-        <div className="inline-flex items-center px-4 py-3 rounded-lg bg-create-accent/10 border border-create-accent/20">
-          <span className="text-3xl font-[family-name:var(--font-syne)] font-bold text-create-accent">
+        <div className="bg-create-accent/10 border-create-accent/20 inline-flex items-center rounded-lg border px-4 py-3">
+          <span className="text-create-accent font-[family-name:var(--font-syne)] text-3xl font-bold">
             {measurement.value}
           </span>
         </div>
@@ -41,13 +41,13 @@ export default function HypercertMeasurementView({
         <dl className="space-y-4">
           {/* Measured On */}
           <div className="flex items-start gap-3">
-            <Calendar className="size-4 text-create-accent shrink-0 mt-0.5" />
-            <div className="space-y-1 flex-1">
-              <dt className="text-xs font-[family-name:var(--font-outfit)] text-muted-foreground uppercase tracking-wider">
+            <Calendar className="text-create-accent mt-0.5 size-4 shrink-0" />
+            <div className="flex-1 space-y-1">
+              <dt className="text-muted-foreground font-[family-name:var(--font-outfit)] text-xs tracking-wider uppercase">
                 Measured On
               </dt>
               <dd
-                className="text-sm font-[family-name:var(--font-outfit)]"
+                className="font-[family-name:var(--font-outfit)] text-sm"
                 suppressHydrationWarning
               >
                 {new Date(measurement.createdAt).toLocaleString()}
@@ -58,12 +58,12 @@ export default function HypercertMeasurementView({
           {/* Methodology */}
           {measurement.measurementMethodURI ? (
             <div className="flex items-start gap-3">
-              <FileText className="size-4 text-create-accent shrink-0 mt-0.5" />
-              <div className="space-y-1 flex-1 min-w-0">
-                <dt className="text-xs font-[family-name:var(--font-outfit)] text-muted-foreground uppercase tracking-wider">
+              <FileText className="text-create-accent mt-0.5 size-4 shrink-0" />
+              <div className="min-w-0 flex-1 space-y-1">
+                <dt className="text-muted-foreground font-[family-name:var(--font-outfit)] text-xs tracking-wider uppercase">
                   Methodology
                 </dt>
-                <dd className="text-sm font-[family-name:var(--font-outfit)] break-all">
+                <dd className="font-[family-name:var(--font-outfit)] text-sm break-all">
                   <URILink
                     label={measurement.measurementMethodURI}
                     uri={getPDSlsURI(measurement.measurementMethodURI)}
@@ -75,9 +75,9 @@ export default function HypercertMeasurementView({
 
           {/* Measurers */}
           <div className="flex items-start gap-3">
-            <Users className="size-4 text-create-accent shrink-0 mt-0.5" />
-            <div className="space-y-2 flex-1 min-w-0">
-              <dt className="text-xs font-[family-name:var(--font-outfit)] text-muted-foreground uppercase tracking-wider">
+            <Users className="text-create-accent mt-0.5 size-4 shrink-0" />
+            <div className="min-w-0 flex-1 space-y-2">
+              <dt className="text-muted-foreground font-[family-name:var(--font-outfit)] text-xs tracking-wider uppercase">
                 Measurers
               </dt>
               <dd className="space-y-1">
@@ -87,7 +87,7 @@ export default function HypercertMeasurementView({
                   return (
                     <div
                       key={index}
-                      className="text-sm font-[family-name:var(--font-outfit)] break-all"
+                      className="font-[family-name:var(--font-outfit)] text-sm break-all"
                     >
                       <URILink
                         uri={`https://bsky.app/profile/${did}`}
@@ -102,15 +102,15 @@ export default function HypercertMeasurementView({
 
           {/* Evidence */}
           {measurement.evidenceURI && measurement.evidenceURI.length > 0 ? (
-            <div className="pt-4 border-t border-border/50">
-              <dt className="text-xs font-[family-name:var(--font-outfit)] text-muted-foreground uppercase tracking-wider mb-2">
+            <div className="border-border/50 border-t pt-4">
+              <dt className="text-muted-foreground mb-2 font-[family-name:var(--font-outfit)] text-xs tracking-wider uppercase">
                 Evidence
               </dt>
               <dd className="space-y-1">
                 {measurement.evidenceURI.map((uri, index) => (
                   <div
                     key={index}
-                    className="text-sm font-[family-name:var(--font-outfit)] break-all"
+                    className="font-[family-name:var(--font-outfit)] text-sm break-all"
                   >
                     <URILink
                       label={uri}
