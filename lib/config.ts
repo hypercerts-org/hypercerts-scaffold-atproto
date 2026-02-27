@@ -260,7 +260,7 @@ export const config = {
 export function buildClientMetadata(): OAuthClientMetadataInput &
   Record<string, unknown> {
   if (config.isLoopback) {
-    // Loopback mode: no branding, application_type is "native"
+    // Loopback mode: minimal metadata, application_type is "web"
     return {
       client_id: config.clientId,
       client_name: "Hypercerts Scaffold",

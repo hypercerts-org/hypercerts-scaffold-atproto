@@ -329,8 +329,8 @@ export async function GET() {
 ```
 ├── app/
 │   ├── api/
-│   │   ├── auth/              # Standard ATProto OAuth (login, callback, logout)
-│   │   ├── oauth/             # ePDS email OAuth (login, callback)
+│   │   ├── oauth/             # ATProto OAuth (login, callback, logout)
+│   │   │   └── epds/          # ePDS email OAuth (login, callback)
 │   │   ├── certs/             # Hypercert operations (create, add-attachment, add-location)
 │   │   └── profile/           # Profile management (certified + bluesky)
 │   ├── client-metadata.json/  # OAuth client metadata endpoint

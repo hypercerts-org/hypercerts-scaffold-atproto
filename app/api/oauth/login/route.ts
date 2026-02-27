@@ -2,8 +2,19 @@ import sdk from "@/lib/hypercerts-sdk";
 import { NextResponse } from "next/server";
 
 export async function POST(request: Request) {
-  const body = await request.json();
-  const handle = body.handle;
+  let body: unknown;
+  try {
+    body = await request.json();
+  } catch {
+    return Response.json({ error: "Invalid request body" }, { status: 400 });
+  }
+  const handle = (body as Record<string, unknown>).handle;
+  if (!handle || typeof handle !== "string") {
+    return Response.json(
+      { error: "Missing or invalid handle" },
+      { status: 400 },
+    );
+  }
   try {
     const authUrl = await sdk.authorize(handle);
     return NextResponse.json({ authUrl });
