@@ -17,7 +17,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
 
     if (!code || !state) {
       console.error(
-        "[oauth/callback] Missing required query parameters: code and state",
+        "[oauth/epds/callback] Missing required query parameters: code and state",
       );
       return NextResponse.redirect(
         new URL("/?error=auth_failed", config.baseUrl),
@@ -28,7 +28,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     const oauthState = await epdsStateStore.get(state);
     if (!oauthState) {
       console.error(
-        "[oauth/callback] No OAuth state found in Redis for state:",
+        "[oauth/epds/callback] No OAuth state found in Redis for state:",
         state,
       );
       return NextResponse.redirect(
@@ -71,7 +71,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
         .text()
         .catch(() => tokenResponse.statusText);
       console.error(
-        "[oauth/callback] Token exchange failed:",
+        "[oauth/epds/callback] Token exchange failed:",
         tokenResponse.status,
         errorBody,
       );
@@ -99,7 +99,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
       )
     ) {
       console.error(
-        "[oauth/callback] Invalid sub in token response:",
+        "[oauth/epds/callback] Invalid sub in token response:",
         tokenData.sub,
       );
       return NextResponse.redirect(
@@ -151,7 +151,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
 
     return response;
   } catch (error) {
-    console.error("[oauth/callback] Unexpected error:", error);
+    console.error("[oauth/epds/callback] Unexpected error:", error);
     return NextResponse.redirect(
       new URL("/?error=auth_failed", config.baseUrl),
     );
