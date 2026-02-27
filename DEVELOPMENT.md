@@ -483,7 +483,7 @@ If you're making breaking changes to the scaffold:
 hypercerts-scaffold/
 ├── app/                    # Next.js app directory
 │   ├── api/               # API routes
-│   │   ├── auth/         # Authentication endpoints
+│   │   ├── oauth/        # OAuth flow endpoints (ATProto + ePDS)
 │   │   ├── certs/        # Hypercert operations
 │   │   └── profile/      # Profile management
 │   ├── hypercerts/       # Hypercert pages
@@ -504,13 +504,14 @@ hypercerts-scaffold/
 
 ### Key Files
 
-| File                          | Purpose                                          |
-| ----------------------------- | ------------------------------------------------ |
-| `lib/hypercerts-sdk.ts`       | Initializes the Hypercerts SDK with OAuth config |
-| `lib/repo-context.ts`         | Helper to get authenticated repository context   |
-| `lib/create-actions.ts`       | Server actions for common operations             |
-| `providers/OAuthProvider.tsx` | Client-side OAuth state management               |
-| `app/api/auth/*`              | OAuth flow endpoints (login, callback, logout)   |
+| File                          | Purpose                                                |
+| ----------------------------- | ------------------------------------------------------ |
+| `lib/hypercerts-sdk.ts`       | Initializes the Hypercerts SDK with OAuth config       |
+| `lib/repo-context.ts`         | Helper to get authenticated repository context         |
+| `lib/create-actions.ts`       | Server actions for common operations                   |
+| `providers/OAuthProvider.tsx` | Client-side OAuth state management                     |
+| `app/api/oauth/*`             | ATProto OAuth flow endpoints (login, callback, logout) |
+| `app/api/oauth/epds/*`        | ePDS email OAuth flow endpoints (login, callback)      |
 
 ---
 
