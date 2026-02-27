@@ -133,8 +133,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
       },
     };
 
-    // TODO: RedisSessionStore.set() does not support TTL — sessions persist until manually deleted
-    // The SDK handles token refresh internally, so stale sessions get refreshed or error out
+    // Session persists in Redis for 24h; SDK handles token refresh within that window
     await sessionStore.set(tokenData.sub, nodeSavedSession);
 
     // 12. Create redirect response to /
