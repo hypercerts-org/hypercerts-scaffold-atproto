@@ -15,6 +15,8 @@ type Contributor = OrgHypercertsClaimActivity.Contributor;
 
 interface HypercertContributorsSectionProps {
   contributors?: Contributor[];
+  hypercertUri?: string;
+  isOwner?: boolean;
 }
 
 const ContributorSkeleton = () => (
@@ -72,10 +74,14 @@ export default function HypercertContributorsSection({
           <h3 className="font-[family-name:var(--font-syne)] text-xl font-semibold">
             Contributors
           </h3>
-          <p className="text-muted-foreground font-[family-name:var(--font-outfit)] text-xs">
-            {displayContributors.length}{" "}
-            {displayContributors.length === 1 ? "contributor" : "contributors"}
-          </p>
+          {displayContributors.length > 0 ? (
+            <p className="text-muted-foreground font-[family-name:var(--font-outfit)] text-xs">
+              {displayContributors.length}{" "}
+              {displayContributors.length === 1
+                ? "contributor"
+                : "contributors"}
+            </p>
+          ) : null}
         </div>
       </div>
 
@@ -116,6 +122,8 @@ export default function HypercertContributorsSection({
           )}
         </>
       )}
+
+      {/* Add Contributor button is intentionally hidden until the contribution form is implemented */}
     </div>
   );
 }

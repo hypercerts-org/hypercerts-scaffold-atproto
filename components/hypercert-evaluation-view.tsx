@@ -1,5 +1,6 @@
 "use client";
 
+import React from "react";
 import { getPDSlsURI } from "@/lib/utils";
 import {
   Card,
@@ -28,8 +29,10 @@ export interface Evaluation {
 
 export default function HypercertEvaluationView({
   evaluation,
+  actions,
 }: {
   evaluation?: Evaluation;
+  actions?: React.ReactNode;
 }) {
   if (!evaluation) {
     return null;
@@ -38,14 +41,19 @@ export default function HypercertEvaluationView({
   return (
     <Card className="glass-panel border-border/50 overflow-hidden rounded-xl border">
       <CardHeader className="pb-4">
-        <CardTitle className="font-[family-name:var(--font-syne)] text-lg">
-          Evaluation
-        </CardTitle>
-        <CardDescription className="font-[family-name:var(--font-outfit)]">
-          <time dateTime={evaluation.createdAt} suppressHydrationWarning>
-            {new Date(evaluation.createdAt).toLocaleString()}
-          </time>
-        </CardDescription>
+        <div className="flex items-start justify-between gap-2">
+          <div className="min-w-0 flex-1">
+            <CardTitle className="font-[family-name:var(--font-syne)] text-lg">
+              Evaluation
+            </CardTitle>
+            <CardDescription className="font-[family-name:var(--font-outfit)]">
+              <time dateTime={evaluation.createdAt} suppressHydrationWarning>
+                {new Date(evaluation.createdAt).toLocaleString()}
+              </time>
+            </CardDescription>
+          </div>
+          {actions && <div className="shrink-0">{actions}</div>}
+        </div>
       </CardHeader>
       <CardContent className="space-y-6">
         {/* Summary */}

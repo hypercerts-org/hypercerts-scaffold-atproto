@@ -1,5 +1,6 @@
 "use client";
 
+import React from "react";
 import { getPDSlsURI } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { URILink } from "./uri-link";
@@ -16,8 +17,10 @@ export interface Measurement {
 
 export default function HypercertMeasurementView({
   measurement,
+  actions,
 }: {
   measurement?: Measurement;
+  actions?: React.ReactNode;
 }) {
   if (!measurement) {
     return null;
@@ -25,9 +28,12 @@ export default function HypercertMeasurementView({
   return (
     <Card className="glass-panel border-border/50 overflow-hidden rounded-xl border">
       <CardHeader className="pb-4">
-        <CardTitle className="font-[family-name:var(--font-syne)] text-lg">
-          {measurement.metric}
-        </CardTitle>
+        <div className="flex items-start justify-between gap-2">
+          <CardTitle className="min-w-0 flex-1 font-[family-name:var(--font-syne)] text-lg">
+            {measurement.metric}
+          </CardTitle>
+          {actions && <div className="shrink-0">{actions}</div>}
+        </div>
       </CardHeader>
       <CardContent className="space-y-6">
         {/* Value Display */}

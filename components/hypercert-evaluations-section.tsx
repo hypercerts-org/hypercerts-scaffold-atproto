@@ -8,8 +8,19 @@ import { Skeleton } from "./ui/skeleton";
 import {
   useEvaluationLinksQuery,
   useEvaluationRecordsQuery,
+  useDeleteRecordMutation,
 } from "@/queries/hypercerts";
-import { ClipboardCheck } from "lucide-react";
+import { ClipboardCheck, Plus } from "lucide-react";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { DeleteConfirmDialog } from "@/components/delete-confirm-dialog";
+import { useQueryClient } from "@tanstack/react-query";
+import { queryKeys } from "@/lib/api/query-keys";
+
+interface EvaluationWithUri {
+  evaluation: Evaluation;
+  recordUri: string;
+}
 
 const EvaluationSkeleton = () => (
   <div className="glass-panel border-border/50 space-y-4 rounded-xl border p-6">
@@ -21,9 +32,13 @@ const EvaluationSkeleton = () => (
 
 export default function HypercertEvaluationsSection({
   hypercertUri,
+  isOwner,
 }: {
   hypercertUri: string;
+  isOwner?: boolean;
 }) {
+  const queryClient = useQueryClient();
+
   const {
     data: evaluationLinks,
     isLoading: isLoadingLinks,
@@ -32,21 +47,38 @@ export default function HypercertEvaluationsSection({
 
   const evaluationQueries = useEvaluationRecordsQuery(evaluationLinks);
 
-  const { isLoadingDetails, isErrorDetails, evaluations } = useMemo(() => {
-    let loading = false;
-    let error = false;
-    const items: Evaluation[] = [];
-    for (const q of evaluationQueries) {
-      if (q.isLoading) loading = true;
-      if (q.isError) error = true;
-      if (q.isSuccess && q.data) items.push(q.data.value as Evaluation);
-    }
-    return {
-      isLoadingDetails: loading,
-      isErrorDetails: error,
-      evaluations: items,
-    };
-  }, [evaluationQueries]);
+  const { isLoadingDetails, isErrorDetails, evaluationsWithUris } =
+    useMemo(() => {
+      let loading = false;
+      let error = false;
+      const items: EvaluationWithUri[] = [];
+      for (let i = 0; i < evaluationQueries.length; i++) {
+        const q = evaluationQueries[i];
+        if (q.isLoading) loading = true;
+        if (q.isError) error = true;
+        if (q.isSuccess && q.data && evaluationLinks?.[i]) {
+          const link = evaluationLinks[i];
+          const recordUri = `at://${link.did}/${link.collection}/${link.rkey}`;
+          items.push({
+            evaluation: q.data.value as Evaluation,
+            recordUri,
+          });
+        }
+      }
+      return {
+        isLoadingDetails: loading,
+        isErrorDetails: error,
+        evaluationsWithUris: items,
+      };
+    }, [evaluationQueries, evaluationLinks]);
+
+  const deleteRecordMutation = useDeleteRecordMutation({
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.hypercerts.evaluations(hypercertUri),
+      });
+    },
+  });
 
   const isLoading = isLoadingLinks || isLoadingDetails;
   const isError = isErrorLinks || isErrorDetails;
@@ -62,10 +94,10 @@ export default function HypercertEvaluationsSection({
           <h3 className="font-[family-name:var(--font-syne)] text-xl font-semibold">
             Evaluations
           </h3>
-          {evaluations && evaluations.length > 0 ? (
+          {evaluationsWithUris && evaluationsWithUris.length > 0 ? (
             <p className="text-muted-foreground font-[family-name:var(--font-outfit)] text-xs">
-              {evaluations.length}{" "}
-              {evaluations.length === 1 ? "evaluation" : "evaluations"}
+              {evaluationsWithUris.length}{" "}
+              {evaluationsWithUris.length === 1 ? "evaluation" : "evaluations"}
             </p>
           ) : null}
         </div>
@@ -88,10 +120,29 @@ export default function HypercertEvaluationsSection({
 
       {!isLoading && !isError ? (
         <>
-          {evaluations && evaluations.length > 0 ? (
+          {evaluationsWithUris && evaluationsWithUris.length > 0 ? (
             <div className="stagger-children space-y-4">
-              {evaluations.map((evaluation, index) => (
-                <HypercertEvaluationView key={index} evaluation={evaluation} />
+              {evaluationsWithUris.map(({ evaluation, recordUri }, index) => (
+                <HypercertEvaluationView
+                  key={index}
+                  evaluation={evaluation}
+                  actions={
+                    isOwner ? (
+                      <DeleteConfirmDialog
+                        itemType="evaluation"
+                        itemName={evaluation.summary}
+                        isDeleting={
+                          deleteRecordMutation.isPending &&
+                          deleteRecordMutation.variables?.recordUri ===
+                            recordUri
+                        }
+                        onConfirm={() =>
+                          deleteRecordMutation.mutate({ recordUri })
+                        }
+                      />
+                    ) : undefined
+                  }
+                />
               ))}
             </div>
           ) : (
@@ -104,6 +155,23 @@ export default function HypercertEvaluationsSection({
           )}
         </>
       ) : null}
+
+      {isOwner && (
+        <div className="pt-4">
+          <Button
+            asChild
+            variant="outline"
+            size="sm"
+            className="gap-2 font-[family-name:var(--font-outfit)]"
+          >
+            <Link
+              href={`/hypercerts/${encodeURIComponent(hypercertUri)}/add/evaluation`}
+            >
+              <Plus className="h-4 w-4" /> Add Evaluation
+            </Link>
+          </Button>
+        </div>
+      )}
     </div>
   );
 }

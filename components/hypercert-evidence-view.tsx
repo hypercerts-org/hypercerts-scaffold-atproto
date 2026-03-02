@@ -1,5 +1,6 @@
 "use client";
 
+import React from "react";
 import { getPDSlsURI } from "@/lib/utils";
 import {
   Card,
@@ -17,8 +18,10 @@ type Attachment = OrgHypercertsClaimAttachment.Main;
 
 export default function HypercertEvidenceView({
   evidence,
+  actions,
 }: {
   evidence?: Attachment;
+  actions?: React.ReactNode;
 }) {
   if (!evidence) {
     return null;
@@ -48,7 +51,7 @@ export default function HypercertEvidenceView({
     <Card className="glass-panel border-border/50 overflow-hidden rounded-xl border">
       <CardHeader className="pb-4">
         <div className="flex flex-wrap items-start justify-between gap-4">
-          <div className="flex-1 space-y-2">
+          <div className="min-w-0 flex-1 space-y-2">
             <CardTitle className="font-[family-name:var(--font-syne)] text-lg">
               {evidence.title}
             </CardTitle>
@@ -58,14 +61,17 @@ export default function HypercertEvidenceView({
               </time>
             </CardDescription>
           </div>
-          <Badge
-            className={`${getContentTypeColor()} shrink-0 font-[family-name:var(--font-outfit)]`}
-          >
-            {evidence.contentType
-              ? evidence.contentType.charAt(0).toUpperCase() +
-                evidence.contentType.slice(1)
-              : "Evidence"}
-          </Badge>
+          <div className="flex shrink-0 items-center gap-2">
+            <Badge
+              className={`${getContentTypeColor()} font-[family-name:var(--font-outfit)]`}
+            >
+              {evidence.contentType
+                ? evidence.contentType.charAt(0).toUpperCase() +
+                  evidence.contentType.slice(1)
+                : "Evidence"}
+            </Badge>
+            {actions}
+          </div>
         </div>
       </CardHeader>
       <CardContent className="space-y-5">

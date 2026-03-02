@@ -8,8 +8,14 @@ import { Skeleton } from "./ui/skeleton";
 import {
   useMeasurementLinksQuery,
   useMeasurementRecordsQuery,
+  useDeleteRecordMutation,
 } from "@/queries/hypercerts";
-import { BarChart3 } from "lucide-react";
+import { queryKeys } from "@/lib/api/query-keys";
+import { BarChart3, Plus } from "lucide-react";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { DeleteConfirmDialog } from "@/components/delete-confirm-dialog";
+import { useQueryClient } from "@tanstack/react-query";
 
 const MeasurementSkeleton = () => (
   <div className="glass-panel border-border/50 space-y-4 rounded-xl border p-6">
@@ -28,11 +34,24 @@ const MeasurementSkeleton = () => (
   </div>
 );
 
+type MeasurementWithUri = Measurement & { _uri: string };
+
 export default function HypercertMeasurementsSection({
   hypercertUri,
+  isOwner,
 }: {
   hypercertUri: string;
+  isOwner?: boolean;
 }) {
+  const queryClient = useQueryClient();
+  const deleteMutation = useDeleteRecordMutation({
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.hypercerts.measurements(hypercertUri),
+      });
+    },
+  });
+
   const {
     data: measurementLinks,
     isLoading: isLoadingLinks,
@@ -44,18 +63,25 @@ export default function HypercertMeasurementsSection({
   const { isLoadingDetails, isErrorDetails, measurements } = useMemo(() => {
     let loading = false;
     let error = false;
-    const items: Measurement[] = [];
-    for (const q of measurementQueries) {
+    const items: MeasurementWithUri[] = [];
+    for (let idx = 0; idx < measurementQueries.length; idx++) {
+      const q = measurementQueries[idx];
       if (q.isLoading) loading = true;
       if (q.isError) error = true;
-      if (q.isSuccess && q.data) items.push(q.data.value as Measurement);
+      if (q.isSuccess && q.data && measurementLinks?.[idx]) {
+        const link = measurementLinks[idx];
+        items.push({
+          ...(q.data.value as Measurement),
+          _uri: `at://${link.did}/${link.collection}/${link.rkey}`,
+        });
+      }
     }
     return {
       isLoadingDetails: loading,
       isErrorDetails: error,
       measurements: items,
     };
-  }, [measurementQueries]);
+  }, [measurementQueries, measurementLinks]);
 
   const isLoading = isLoadingLinks || isLoadingDetails;
   const isError = isErrorLinks || isErrorDetails;
@@ -104,6 +130,22 @@ export default function HypercertMeasurementsSection({
                 <HypercertMeasurementView
                   key={index}
                   measurement={measurement}
+                  actions={
+                    isOwner ? (
+                      <DeleteConfirmDialog
+                        itemType="measurement"
+                        itemName={measurement.metric}
+                        isDeleting={
+                          deleteMutation.isPending &&
+                          deleteMutation.variables?.recordUri ===
+                            measurement._uri
+                        }
+                        onConfirm={() =>
+                          deleteMutation.mutate({ recordUri: measurement._uri })
+                        }
+                      />
+                    ) : undefined
+                  }
                 />
               ))}
             </div>
@@ -117,6 +159,23 @@ export default function HypercertMeasurementsSection({
           )}
         </>
       ) : null}
+
+      {isOwner && (
+        <div className="pt-4">
+          <Button
+            asChild
+            variant="outline"
+            size="sm"
+            className="gap-2 font-[family-name:var(--font-outfit)]"
+          >
+            <Link
+              href={`/hypercerts/${encodeURIComponent(hypercertUri)}/add/measurement`}
+            >
+              <Plus className="h-4 w-4" /> Add Measurement
+            </Link>
+          </Button>
+        </div>
+      )}
     </div>
   );
 }

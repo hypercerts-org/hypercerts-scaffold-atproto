@@ -11,8 +11,19 @@ import {
   EvaluationsSectionSkeleton,
 } from "./detail-view-skeletons";
 import HypercertContributorsSection from "./hypercert-contributors-section";
-import { Calendar, Clock, Link as LinkIcon } from "lucide-react";
+import {
+  Calendar,
+  Clock,
+  Link as LinkIcon,
+  Pencil,
+  Trash2,
+} from "lucide-react";
 import Image from "next/image";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useDeleteHypercertMutation } from "@/queries/hypercerts";
+import { DeleteConfirmDialog } from "@/components/delete-confirm-dialog";
 
 const HypercertMeasurementsSection = dynamic(
   () => import("./hypercert-measurements-section"),
@@ -31,11 +42,19 @@ export default function HypercertDetailsView({
   hypercertUri,
   record,
   imageUri,
+  isOwner,
 }: {
   hypercertUri: string;
   record: HypercertClaim;
   imageUri?: string;
+  isOwner?: boolean;
 }) {
+  const router = useRouter();
+  const deleteMutation = useDeleteHypercertMutation({
+    onSuccess: () => {
+      router.push("/hypercerts");
+    },
+  });
   const workScope = Array.isArray(record.workScope) ? record.workScope : [];
   // eslint-disable-next-line @typescript-eslint/no-explicit-any -- contributors field exists on record but not in HypercertClaim type yet
   const rawContributors = (record as any).contributors;
@@ -47,6 +66,40 @@ export default function HypercertDetailsView({
     <div className="space-y-6">
       {/* Hero Section */}
       <div className="animate-fade-in-up space-y-4">
+        {/* Owner Actions */}
+        {isOwner && (
+          <div className="flex items-center justify-end gap-2">
+            <Button
+              asChild
+              variant="outline"
+              size="sm"
+              className="gap-2 font-[family-name:var(--font-outfit)]"
+            >
+              <Link
+                href={`/hypercerts/${encodeURIComponent(hypercertUri)}/edit`}
+              >
+                <Pencil className="h-4 w-4" /> Edit
+              </Link>
+            </Button>
+            <DeleteConfirmDialog
+              itemType="hypercert"
+              itemName={record.title}
+              isDeleting={deleteMutation.isPending}
+              onConfirm={() => deleteMutation.mutate({ hypercertUri })}
+              trigger={
+                <Button
+                  variant="outline"
+                  size="sm"
+                  aria-label="Delete hypercert"
+                  className="text-destructive hover:text-destructive gap-2 font-[family-name:var(--font-outfit)]"
+                >
+                  <Trash2 className="h-4 w-4" /> Delete
+                </Button>
+              }
+            />
+          </div>
+        )}
+
         {/* Hero Image */}
         {imageUri ? (
           <div className="glass-panel border-border/50 relative aspect-[16/7] overflow-hidden rounded-xl border">
@@ -159,7 +212,11 @@ export default function HypercertDetailsView({
 
       {/* Contributors Section */}
       <div className="animate-fade-in-up [animation-delay:150ms]">
-        <HypercertContributorsSection contributors={contributors} />
+        <HypercertContributorsSection
+          contributors={contributors}
+          hypercertUri={hypercertUri}
+          isOwner={isOwner}
+        />
       </div>
 
       {/* Full Description */}
@@ -178,9 +235,18 @@ export default function HypercertDetailsView({
 
       {/* Sections */}
       <div className="animate-fade-in-up space-y-6 [animation-delay:350ms]">
-        <HypercertMeasurementsSection hypercertUri={hypercertUri} />
-        <HypercertEvidenceSection hypercertUri={hypercertUri} />
-        <HypercertEvaluationsSection hypercertUri={hypercertUri} />
+        <HypercertMeasurementsSection
+          hypercertUri={hypercertUri}
+          isOwner={isOwner}
+        />
+        <HypercertEvidenceSection
+          hypercertUri={hypercertUri}
+          isOwner={isOwner}
+        />
+        <HypercertEvaluationsSection
+          hypercertUri={hypercertUri}
+          isOwner={isOwner}
+        />
       </div>
     </div>
   );
