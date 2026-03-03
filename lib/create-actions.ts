@@ -3,10 +3,10 @@ import { getRepoContext } from "@/lib/repo-context";
 import { resolveRecordBlobs } from "./blob-utils";
 import { parseAtUri } from "@/lib/utils";
 
-import { RepositoryRole } from "@hypercerts-org/sdk-core";
+export type RepositoryRole = "admin" | "writer" | "reader";
 import { cookies } from "next/headers";
 import { getSession } from "./atproto-session";
-import sdk from "./hypercerts-sdk";
+import oauthClient from "./hypercerts-sdk";
 
 export interface GrantAccessParams {
   repoDid: string;
@@ -50,7 +50,7 @@ export const logout = async () => {
   if (!session) {
     return;
   }
-  sdk.revokeSession(session.sub);
+  oauthClient.revoke(session.sub);
 };
 
 export const addContribution = async (params: {
