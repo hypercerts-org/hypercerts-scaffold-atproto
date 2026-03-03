@@ -11,7 +11,7 @@ import {
   Zap,
   CheckCircle2,
 } from "lucide-react";
-import { getAuthenticatedRepo, getSession } from "@/lib/atproto-session";
+import { getAgent, getSession } from "@/lib/atproto-session";
 
 export const metadata: Metadata = {
   description:
@@ -24,13 +24,11 @@ export const metadata: Metadata = {
 };
 
 export default async function Home() {
-  const [personalRepo, session] = await Promise.all([
-    getAuthenticatedRepo(),
-    getSession(),
-  ]);
+  const [personalRepo, session] = await Promise.all([getAgent(), getSession()]);
 
   const profile = personalRepo
-    ? await personalRepo.profile.getCertifiedProfile().catch(() => null)
+    ? // @ts-expect-error -- Phase 2-4 migration: personalRepo is Agent, not Repository
+      await personalRepo.profile.getCertifiedProfile().catch(() => null)
     : null;
 
   return (

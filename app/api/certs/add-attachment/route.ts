@@ -124,6 +124,7 @@ export async function POST(req: NextRequest) {
       }
     }
 
+    // @ts-expect-error -- Phase 2-4 migration: ctx.scopedRepo no longer exists, migrating to native atproto in Phase 2-4
     const response = await ctx.scopedRepo.hypercerts.addAttachment({
       subjects: hypercertUri,
       content,

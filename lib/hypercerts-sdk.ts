@@ -23,7 +23,13 @@ const oauthClient = new NodeOAuthClient({
   // For loopback, token_endpoint_auth_method is 'none' so keyset is optional
   ...(config.jwkPrivate
     ? {
-        keyset: [await JoseKey.fromJWK(JSON.parse(config.jwkPrivate))],
+        keyset: await Promise.all(
+          (
+            JSON.parse(config.jwkPrivate).keys ?? [
+              JSON.parse(config.jwkPrivate),
+            ]
+          ).map((jwk: Record<string, unknown>) => JoseKey.fromJWK(jwk)),
+        ),
       }
     : {}),
 });

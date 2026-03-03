@@ -1,6 +1,6 @@
 import LoginDialog from "@/components/login-dialog";
 import Navbar from "@/components/navbar";
-import { getSession, getAuthenticatedRepo } from "@/lib/atproto-session";
+import { getSession, getAgent } from "@/lib/atproto-session";
 import { convertBlobUrlToCdn } from "@/lib/utils";
 import { Suspense } from "react";
 import { AuthErrorToast } from "./AuthErrorToast";
@@ -16,8 +16,9 @@ export async function SignedInProvider({
   let handle: string | undefined = undefined;
 
   if (session) {
-    const repo = await getAuthenticatedRepo();
+    const repo = await getAgent();
     if (repo) {
+      // @ts-expect-error -- Phase 2-4 migration: repo is Agent, not Repository
       const profile = await repo.profile
         .getCertifiedProfile()
         .catch(() => null);

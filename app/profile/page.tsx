@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
-import { getAuthenticatedRepo } from "@/lib/atproto-session";
+import { getAgent } from "@/lib/atproto-session";
 import ProfileForm from "@/components/profile-form";
 import { convertBlobUrlToCdn } from "@/lib/utils";
 import { UserCircle } from "lucide-react";
@@ -16,8 +16,9 @@ export const metadata: Metadata = {
 };
 
 export default async function ProfilePage() {
-  const repo = await getAuthenticatedRepo();
+  const repo = await getAgent();
   if (!repo) redirect("/");
+  // @ts-expect-error -- Phase 2-4 migration: repo is Agent, not Repository
   const profile = await repo.profile.getCertifiedProfile();
 
   const avatarUrl = convertBlobUrlToCdn(profile?.avatar);

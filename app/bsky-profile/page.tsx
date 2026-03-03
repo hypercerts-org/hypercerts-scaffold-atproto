@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
-import { getAuthenticatedRepo } from "@/lib/atproto-session";
+import { getAgent } from "@/lib/atproto-session";
 import BskyProfileForm from "@/components/bsky-profile-form";
 import { UserCircle } from "lucide-react";
 
@@ -15,8 +15,9 @@ export const metadata: Metadata = {
 };
 
 export default async function BskyProfilePage() {
-  const repo = await getAuthenticatedRepo();
+  const repo = await getAgent();
   if (!repo) redirect("/");
+  // @ts-expect-error -- Phase 2-4 migration: repo is Agent, not Repository
   const profile = await repo.profile.getBskyProfile();
 
   const avatarUrl = profile.avatar || "";

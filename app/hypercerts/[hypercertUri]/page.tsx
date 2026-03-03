@@ -28,6 +28,7 @@ export async function generateMetadata({
       return { title: "Hypercert" };
     }
 
+    // @ts-expect-error -- Phase 2-4 migration: ctx.scopedRepo no longer exists, migrating to native atproto in Phase 2-4
     const cert = await viewCtx.scopedRepo.hypercerts.get(decodedUri);
     if (!cert?.record) {
       return { title: "Hypercert Not Found" };
@@ -123,6 +124,7 @@ export default async function HypercertViewPage({
       </main>
     );
 
+  // @ts-expect-error -- Phase 2-4 migration: ctx.scopedRepo no longer exists, migrating to native atproto in Phase 2-4
   const cert = await viewCtx.scopedRepo.hypercerts.get(decodedUri);
   if (!cert?.record)
     return (

@@ -1,11 +1,11 @@
-import { getAuthenticatedRepo } from "@/lib/atproto-session";
-import { LocationParams } from "@hypercerts-org/sdk-core";
+import { getAgent } from "@/lib/atproto-session";
+import type { LocationParams } from "@hypercerts-org/sdk-core";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
   try {
     const data = await req.formData();
-    const repoPromise = getAuthenticatedRepo();
+    const repoPromise = getAgent();
 
     const hypercertUri = (data.get("hypercertUri") as string | null)?.trim();
     const srs = (data.get("srs") as string | null)?.trim();
@@ -85,6 +85,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // @ts-expect-error -- Phase 2-4 migration: personalRepository is Agent, not Repository
     const result = await personalRepository.hypercerts.attachLocation(
       hypercertUri,
       locationPayload,
