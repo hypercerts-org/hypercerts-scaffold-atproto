@@ -2,6 +2,11 @@
 import { getRepoContext } from "@/lib/repo-context";
 import { resolveRecordBlobs } from "./blob-utils";
 import { parseAtUri } from "@/lib/utils";
+import {
+  resolveStrongRef,
+  processLocations,
+  type StrongRef,
+} from "./atproto-writes";
 
 export type RepositoryRole = "admin" | "writer" | "reader";
 import { cookies } from "next/headers";
@@ -78,12 +83,85 @@ export const addContribution = async (params: {
     );
   }
 
-  // @ts-expect-error -- Phase 2-4 migration: ctx.scopedRepo no longer exists, migrating to native atproto in Phase 2-4
-  return ctx.scopedRepo.hypercerts.addContribution({
-    hypercertUri: params.hypercertUri,
-    contributors: params.contributors,
-    contributionDetails: params.contributionDetails,
+  // 1. Create contributionDetails record
+  const detailsRecord: Record<string, unknown> = {
+    $type: "org.hypercerts.claim.contributionDetails",
+    role: params.contributionDetails.role,
+    createdAt: new Date().toISOString(),
+  };
+  if (params.contributionDetails.contributionDescription) {
+    detailsRecord.contributionDescription =
+      params.contributionDetails.contributionDescription;
+  }
+  if (params.contributionDetails.startDate)
+    detailsRecord.startDate = params.contributionDetails.startDate;
+  if (params.contributionDetails.endDate)
+    detailsRecord.endDate = params.contributionDetails.endDate;
+
+  const detailsResult = await ctx.agent.com.atproto.repo.createRecord({
+    repo: ctx.activeDid,
+    collection: "org.hypercerts.claim.contributionDetails",
+    record: detailsRecord,
   });
+  const detailsRef = {
+    uri: detailsResult.data.uri,
+    cid: detailsResult.data.cid,
+  };
+
+  // 2. Create contributorInformation records for each contributor
+  const contributorRefs = await Promise.all(
+    params.contributors.map(async (identifier) => {
+      const infoRecord: Record<string, unknown> = {
+        $type: "org.hypercerts.claim.contributorInformation",
+        identifier,
+        createdAt: new Date().toISOString(),
+      };
+      const infoResult = await ctx.agent.com.atproto.repo.createRecord({
+        repo: ctx.activeDid,
+        collection: "org.hypercerts.claim.contributorInformation",
+        record: infoRecord,
+      });
+      return { uri: infoResult.data.uri, cid: infoResult.data.cid };
+    }),
+  );
+
+  // 3. Fetch existing hypercert and append contributors
+  await resolveStrongRef(
+    ctx.agent,
+    params.hypercertUri,
+    "org.hypercerts.claim.activity",
+  );
+  const hypercertParsed = parseAtUri(params.hypercertUri);
+  if (!hypercertParsed) throw new Error("Invalid hypercertUri");
+
+  const existingHypercertResult = await ctx.agent.com.atproto.repo.getRecord({
+    repo: hypercertParsed.did,
+    collection: hypercertParsed.collection || "org.hypercerts.claim.activity",
+    rkey: hypercertParsed.rkey,
+  });
+  const existingRecord = existingHypercertResult.data.value as Record<
+    string,
+    unknown
+  >;
+
+  // Build new contributor entries
+  const newContributors = contributorRefs.map((ref) => ({
+    contributorIdentity: ref,
+    contributionDetails: detailsRef,
+  }));
+
+  const existingContributors = (existingRecord.contributors as unknown[]) || [];
+  existingRecord.contributors = [...existingContributors, ...newContributors];
+
+  // 4. Update hypercert with appended contributors
+  const updateResult = await ctx.agent.com.atproto.repo.putRecord({
+    repo: ctx.activeDid,
+    collection: hypercertParsed.collection || "org.hypercerts.claim.activity",
+    rkey: hypercertParsed.rkey,
+    record: existingRecord,
+  });
+
+  return { uri: updateResult.data.uri, cid: updateResult.data.cid };
 };
 
 export const addEvaluation = async (params: {
@@ -104,11 +182,33 @@ export const addEvaluation = async (params: {
 
   const { hypercertUri, ...evaluationData } = params;
 
-  // @ts-expect-error -- Phase 2-4 migration: ctx.scopedRepo no longer exists, migrating to native atproto in Phase 2-4
-  return ctx.scopedRepo.hypercerts.addEvaluation({
-    ...evaluationData,
-    subjectUri: hypercertUri,
+  // Resolve subject hypercert to StrongRef
+  const subject = await resolveStrongRef(
+    ctx.agent,
+    hypercertUri,
+    "org.hypercerts.claim.activity",
+  );
+
+  const record: Record<string, unknown> = {
+    $type: "org.hypercerts.claim.evaluation",
+    subject,
+    evaluators: evaluationData.evaluators.map((did) => ({ did })),
+    summary: evaluationData.summary,
+    createdAt: new Date().toISOString(),
+  };
+  if (evaluationData.score) record.score = evaluationData.score;
+  if (evaluationData.content) record.content = evaluationData.content;
+  if (evaluationData.measurements)
+    record.measurements = evaluationData.measurements;
+  if (evaluationData.location) record.location = evaluationData.location;
+
+  const result = await ctx.agent.com.atproto.repo.createRecord({
+    repo: ctx.activeDid,
+    collection: "org.hypercerts.claim.evaluation",
+    record,
   });
+
+  return { uri: result.data.uri, cid: result.data.cid };
 };
 
 // Location parameter for measurements - can be a string (AT-URI) or full location creation params
@@ -144,13 +244,48 @@ export const addMeasurement = async (params: {
     );
   }
 
-  // @ts-expect-error -- Phase 2-4 migration: ctx.scopedRepo no longer exists, migrating to native atproto in Phase 2-4
-  return ctx.scopedRepo.hypercerts.addMeasurement({
-    ...params,
-    measurers: (params.measurers || []).map((measurer) => {
-      return { did: measurer };
-    }),
+  // Resolve subject to StrongRef
+  const subject = await resolveStrongRef(
+    ctx.agent,
+    params.subject,
+    "org.hypercerts.claim.activity",
+  );
+
+  // Process locations if provided
+  let locationRefs: StrongRef[] | undefined;
+  if (params.locations && params.locations.length > 0) {
+    locationRefs = await processLocations(
+      ctx.agent,
+      ctx.activeDid,
+      params.locations,
+    );
+  }
+
+  const record: Record<string, unknown> = {
+    $type: "org.hypercerts.claim.measurement",
+    subject,
+    metric: params.metric,
+    value: params.value,
+    unit: params.unit,
+    createdAt: new Date().toISOString(),
+  };
+  if (params.measurers?.length)
+    record.measurers = params.measurers.map((did) => ({ did }));
+  if (params.startDate) record.startDate = params.startDate;
+  if (params.endDate) record.endDate = params.endDate;
+  if (params.methodType) record.methodType = params.methodType;
+  if (params.methodURI) record.methodURI = params.methodURI;
+  if (params.evidenceURI?.length) record.evidenceURI = params.evidenceURI;
+  if (params.comment) record.comment = params.comment;
+  if (locationRefs?.length) record.locations = locationRefs;
+
+  const result = await ctx.agent.com.atproto.repo.createRecord({
+    repo: ctx.activeDid,
+    collection: "org.hypercerts.claim.measurement",
+    record,
   });
+
+  return { uri: result.data.uri, cid: result.data.cid };
 };
 
 export const getMeasurementRecord = async (params: {
@@ -309,16 +444,44 @@ export const updateMeasurement = async (params: {
       "updateMeasurement failed: Forbidden — URI DID does not match active session DID.",
     );
   }
-  // Map measurers to SDK format if provided
-  const sdkUpdates = { ...params.updates } as Record<string, unknown>;
-  if (params.updates.measurers) {
-    sdkUpdates.measurers = params.updates.measurers.map((did) => ({ did }));
+  // Fetch existing measurement
+  const existingResult = await ctx.agent.com.atproto.repo.getRecord({
+    repo: parsed.did,
+    collection: parsed.collection || "org.hypercerts.claim.measurement",
+    rkey: parsed.rkey,
+  });
+  const existing = existingResult.data.value as Record<string, unknown>;
+
+  // Merge updates, preserving immutable fields
+  const record: Record<string, unknown> = {
+    ...existing,
+    $type: "org.hypercerts.claim.measurement",
+  };
+
+  // Apply individual updates
+  const updates = params.updates;
+  if (updates.metric !== undefined) record.metric = updates.metric;
+  if (updates.value !== undefined) record.value = updates.value;
+  if (updates.unit !== undefined) record.unit = updates.unit;
+  if (updates.startDate !== undefined) record.startDate = updates.startDate;
+  if (updates.endDate !== undefined) record.endDate = updates.endDate;
+  if (updates.methodType !== undefined) record.methodType = updates.methodType;
+  if (updates.methodURI !== undefined) record.methodURI = updates.methodURI;
+  if (updates.evidenceURI !== undefined)
+    record.evidenceURI = updates.evidenceURI;
+  if (updates.comment !== undefined) record.comment = updates.comment;
+  if (updates.measurers !== undefined) {
+    record.measurers = updates.measurers.map((did) => ({ did }));
   }
-  // @ts-expect-error -- Phase 2-4 migration: ctx.scopedRepo no longer exists, migrating to native atproto in Phase 2-4
-  return ctx.scopedRepo.hypercerts.updateMeasurement(
-    params.measurementUri,
-    sdkUpdates,
-  );
+
+  const result = await ctx.agent.com.atproto.repo.putRecord({
+    repo: ctx.activeDid,
+    collection: parsed.collection || "org.hypercerts.claim.measurement",
+    rkey: parsed.rkey,
+    record,
+  });
+
+  return { uri: result.data.uri, cid: result.data.cid };
 };
 
 export const deleteRecord = async (params: { recordUri: string }) => {
