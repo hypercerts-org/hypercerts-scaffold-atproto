@@ -1,4 +1,4 @@
-import sdk from "@/lib/hypercerts-sdk";
+import oauthClient from "@/lib/hypercerts-sdk";
 import { config } from "@/lib/config";
 import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
@@ -27,10 +27,11 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    const [session, cookieStore] = await Promise.all([
-      sdk.callback(searchParams),
+    const [result, cookieStore] = await Promise.all([
+      oauthClient.callback(searchParams),
       cookies(),
     ]);
+    const { session } = result;
     cookieStore.set("user-did", session.did, {
       httpOnly: true,
       secure: config.isProduction,
