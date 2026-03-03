@@ -9,9 +9,26 @@
  * @see https://datatracker.ietf.org/doc/html/rfc8252 (OAuth for Native Apps)
  */
 
-import { ATPROTO_SCOPE, HYPERCERT_COLLECTIONS } from "@hypercerts-org/sdk-core";
 import { OAuthClientMetadataInput } from "@atproto/oauth-client-node";
 import { generateBrandingCss } from "./atproto-branding";
+
+const ATPROTO_SCOPE = "atproto";
+
+export const HYPERCERT_COLLECTIONS = {
+  CLAIM: "org.hypercerts.claim.activity",
+  RIGHTS: "org.hypercerts.claim.rights",
+  LOCATION: "app.certified.location",
+  CONTRIBUTION_DETAILS: "org.hypercerts.claim.contributionDetails",
+  CONTRIBUTOR_INFORMATION: "org.hypercerts.claim.contributorInformation",
+  MEASUREMENT: "org.hypercerts.claim.measurement",
+  EVALUATION: "org.hypercerts.claim.evaluation",
+  ATTACHMENT: "org.hypercerts.claim.attachment",
+  COLLECTION: "org.hypercerts.claim.collection",
+  FUNDING_RECEIPT: "org.hypercerts.funding.receipt",
+  WORK_SCOPE_TAG: "org.hypercerts.helper.workScopeTag",
+  CERTIFIED_PROFILE: "app.certified.actor.profile",
+  BSKY_PROFILE: "app.bsky.actor.profile",
+} as const;
 
 // Granular repo scope — collections with full CRUD access
 const REPO_COLLECTIONS = [
