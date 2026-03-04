@@ -112,11 +112,15 @@ export async function POST(req: Request) {
       if (pronouns) record.pronouns = pronouns;
       if (website) record.website = website;
       if (avatarBlob)
-        record.avatar =
-          avatarBlob.original as AppCertifiedActorProfile.Record["avatar"];
+        record.avatar = {
+          $type: "org.hypercerts.defs#smallImage" as const,
+          image: avatarBlob,
+        };
       if (bannerBlob)
-        record.banner =
-          bannerBlob.original as AppCertifiedActorProfile.Record["banner"];
+        record.banner = {
+          $type: "org.hypercerts.defs#largeImage" as const,
+          image: bannerBlob,
+        };
 
       try {
         assertValidRecord(
@@ -177,11 +181,15 @@ export async function POST(req: Request) {
 
       // Handle blobs: new File = upload and set
       if (avatarBlob)
-        updateRecord.avatar =
-          avatarBlob.original as AppCertifiedActorProfile.Record["avatar"];
+        updateRecord.avatar = {
+          $type: "org.hypercerts.defs#smallImage" as const,
+          image: avatarBlob,
+        };
       if (bannerBlob)
-        updateRecord.banner =
-          bannerBlob.original as AppCertifiedActorProfile.Record["banner"];
+        updateRecord.banner = {
+          $type: "org.hypercerts.defs#largeImage" as const,
+          image: bannerBlob,
+        };
 
       try {
         assertValidRecord(
