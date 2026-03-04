@@ -8,7 +8,7 @@ import {
 import { getStringField, parseAtUri } from "@/lib/utils";
 import { NextRequest, NextResponse } from "next/server";
 import {
-  OrgHypercertsClaimAttachment,
+  OrgHypercertsContextAttachment as OrgHypercertsClaimAttachment,
   OrgHypercertsDefs,
 } from "@hypercerts-org/lexicon";
 import { assertValidRecord } from "@/lib/record-validation";

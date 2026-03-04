@@ -12,9 +12,9 @@ import {
 import { URILink } from "./uri-link";
 import { Badge } from "./ui/badge";
 import { Link as LinkIcon } from "lucide-react";
-import { OrgHypercertsClaimAttachment } from "@hypercerts-org/lexicon";
+import { OrgHypercertsContextAttachment } from "@hypercerts-org/lexicon";
 
-type Attachment = OrgHypercertsClaimAttachment.Main;
+type Attachment = OrgHypercertsContextAttachment.Main;
 
 export default function HypercertEvidenceView({
   evidence,

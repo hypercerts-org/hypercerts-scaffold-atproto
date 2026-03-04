@@ -9,10 +9,10 @@ import {
 } from "./atproto-writes";
 import type { CertifiedActorProfile } from "@/lib/types";
 import {
-  OrgHypercertsClaimContributionDetails,
+  OrgHypercertsClaimContribution as OrgHypercertsClaimContributionDetails,
   OrgHypercertsClaimContributorInformation,
-  OrgHypercertsClaimEvaluation,
-  OrgHypercertsClaimMeasurement,
+  OrgHypercertsContextEvaluation as OrgHypercertsClaimEvaluation,
+  OrgHypercertsContextMeasurement as OrgHypercertsClaimMeasurement,
   OrgHypercertsClaimActivity,
 } from "@hypercerts-org/lexicon";
 import { assertValidRecord } from "@/lib/record-validation";

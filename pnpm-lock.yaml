@@ -21,8 +21,8 @@ importers:
         specifier: ^0.3.14
         version: 0.3.15
       '@hypercerts-org/lexicon':
-        specifier: 0.10.0-beta.14
-        version: 0.10.0-beta.14(@atproto/xrpc@0.7.7)
+        specifier: 0.10.0
+        version: 0.10.0(@atproto/xrpc@0.7.7)
       '@radix-ui/react-accordion':
         specifier: ^1.2.12
         version: 1.2.12(@types/react-dom@19.2.3(@types/react@19.2.7))(@types/react@19.2.7)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
@@ -528,8 +528,8 @@ packages:
     resolution: {integrity: sha512-bV0Tgo9K4hfPCek+aMAn81RppFKv2ySDQeMoSZuvTASywNTnVJCArCZE2FWqpvIatKu7VMRLWlR1EazvVhDyhQ==}
     engines: {node: '>=18.18'}
 
-  '@hypercerts-org/lexicon@0.10.0-beta.14':
-    resolution: {integrity: sha512-/IsVvqVScjuwRMtu/4S4FarcjHd8BkEchbMOKWOmCH1DNp0XSwh+O9h2HSnBcaMr5lMtUtghLyWSd70YsQ0N4Q==}
+  '@hypercerts-org/lexicon@0.10.0':
+    resolution: {integrity: sha512-OxCd/6FJ287e6/xKwZxYNdqELHwLlsl0bOyUGRuJ5cIeBjV/A2aQEVc2ymH+SoVDgSDa97aP/RZKJUp93ULvrQ==}
     peerDependencies:
       '@atproto/xrpc': '*'
 
@@ -4328,7 +4328,7 @@ snapshots:
 
   '@humanwhocodes/retry@0.4.3': {}
 
-  '@hypercerts-org/lexicon@0.10.0-beta.14(@atproto/xrpc@0.7.7)':
+  '@hypercerts-org/lexicon@0.10.0(@atproto/xrpc@0.7.7)':
     dependencies:
       '@atcute/bluesky': 3.2.15
       '@atcute/leaflet': 1.0.15

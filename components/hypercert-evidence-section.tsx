@@ -9,14 +9,14 @@ import {
   useDeleteRecordMutation,
 } from "@/queries/hypercerts";
 import { FileCheck, Plus } from "lucide-react";
-import { OrgHypercertsClaimAttachment } from "@hypercerts-org/lexicon";
+import { OrgHypercertsContextAttachment } from "@hypercerts-org/lexicon";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { DeleteConfirmDialog } from "@/components/delete-confirm-dialog";
 import { useQueryClient } from "@tanstack/react-query";
 import { queryKeys } from "@/lib/api/query-keys";
 
-type Attachment = OrgHypercertsClaimAttachment.Main;
+type Attachment = OrgHypercertsContextAttachment.Main;
 
 interface EvidenceWithUri {
   evidence: Attachment;
