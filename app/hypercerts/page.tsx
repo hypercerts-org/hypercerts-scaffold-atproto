@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Loader from "@/components/loader";
 import {
   Card,
   CardDescription,
@@ -15,7 +14,10 @@ import Image from "next/image";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Award, Calendar, Plus, FileText } from "lucide-react";
-import { OrgHypercertsDefs } from "@hypercerts-org/sdk-core";
+import {
+  OrgHypercertsDefs,
+  OrgHypercertsClaimActivity,
+} from "@hypercerts-org/lexicon";
 
 export const metadata: Metadata = {
   title: "Hypercerts",
@@ -32,15 +34,21 @@ export default async function MyHypercertsPage() {
   if (!ctx || !session) redirect("/");
 
   const [hypercertsResult, pdsUrl] = await Promise.all([
-    // @ts-expect-error -- Phase 2-4 migration: ctx.scopedRepo no longer exists, migrating to native atproto in Phase 2-4
-    ctx.scopedRepo.hypercerts.list({ limit: 100 }),
+    ctx.agent.com.atproto.repo.listRecords({
+      repo: ctx.activeDid,
+      collection: "org.hypercerts.claim.activity",
+      limit: 100,
+    }),
     resolveSessionPds(session),
   ]);
-  // Phase 2-4 migration: hypercertsResult is untyped until scopedRepo is replaced
-  const { records } = hypercertsResult as {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    records: Array<{ record: any; uri: string }>;
-  };
+
+  // listRecords returns { data: { records: Array<{ uri, cid, value }> } }
+  const records = hypercertsResult.data.records
+    .filter((r) => OrgHypercertsClaimActivity.isRecord(r.value))
+    .map((r) => ({
+      uri: r.uri,
+      record: r.value as OrgHypercertsClaimActivity.Record,
+    }));
 
   return (
     <main className="noise-bg relative min-h-screen">
@@ -60,13 +68,7 @@ export default async function MyHypercertsPage() {
         </div>
 
         {/* Content */}
-        {!records ? (
-          <div className="animate-fade-in-up [animation-delay:100ms]">
-            <div className="glass-panel mx-auto max-w-md rounded-2xl p-12">
-              <Loader />
-            </div>
-          </div>
-        ) : records.length === 0 ? (
+        {records.length === 0 ? (
           <div className="animate-fade-in-up [animation-delay:100ms]">
             <div className="glass-panel mx-auto max-w-md space-y-4 rounded-2xl p-12 text-center">
               <div className="bg-create-accent/10 mx-auto flex size-16 items-center justify-center rounded-full">
@@ -122,6 +124,7 @@ export default async function MyHypercertsPage() {
                         {imageUrl ? (
                           <Image
                             fill
+                            unoptimized
                             alt={cert.title || "Hypercert cover"}
                             src={imageUrl}
                             className="object-cover transition-transform duration-300 group-hover:scale-105"

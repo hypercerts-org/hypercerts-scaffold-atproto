@@ -6,7 +6,7 @@ import dynamic from "next/dynamic";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import type { CreateHypercertResult } from "@hypercerts-org/sdk-core";
+import type { CreateHypercertResult } from "@/lib/types";
 import {
   MeasurementFormSkeleton,
   EvaluationFormSkeleton,

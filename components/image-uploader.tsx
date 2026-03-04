@@ -65,6 +65,7 @@ export default function ImageUploader({
                 src={imageUrl}
                 alt="Uploaded image"
                 fill
+                unoptimized
                 className={cn(
                   "object-cover",
                   isBanner ? "rounded-none" : "rounded-full",

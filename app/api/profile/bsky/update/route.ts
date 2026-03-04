@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { getAgent } from "@/lib/atproto-session";
 import { revalidatePath } from "next/cache";
-import { convertBlobUrlToCdn } from "@/lib/utils";
+import { AppBskyActorProfile } from "@atproto/api";
+import { assertValidRecord } from "@/lib/record-validation";
 
 export async function POST(req: Request) {
   try {
@@ -32,76 +33,127 @@ export async function POST(req: Request) {
     }
 
     // Check if profile exists by fetching it first
-    let existingProfile;
-    try {
-      // @ts-expect-error -- Phase 2-4 migration: repo is Agent, not Repository
-      existingProfile = await repo.profile.getBskyProfile();
-    } catch (err: unknown) {
-      const isNotFound = err instanceof Error && /not found/i.test(err.message);
-      if (isNotFound) {
-        existingProfile = null;
-      } else {
-        throw err;
-      }
-    }
+    const existingResult = await repo.com.atproto.repo
+      .getRecord({
+        repo: repo.assertDid,
+        collection: "app.bsky.actor.profile",
+        rkey: "self",
+      })
+      .catch(() => null);
+    const existingProfile =
+      (existingResult?.data?.value as AppBskyActorProfile.Record | undefined) ??
+      null;
 
-    // If no displayName, assume no profile record exists yet
-    if (!existingProfile?.displayName) {
-      // For create: use undefined for empty fields (no null)
-      const createParams: {
-        displayName?: string;
-        description?: string;
-        avatar?: File;
-        banner?: File;
-      } = {};
-
-      if (displayName) createParams.displayName = displayName;
-      if (description) createParams.description = description;
-      if (avatar) createParams.avatar = avatar;
-      if (banner) createParams.banner = banner;
-
-      // @ts-expect-error -- Phase 2-4 migration: repo is Agent, not Repository
-      await repo.profile.createBskyProfile(createParams);
-    } else {
-      // For update: use null to remove fields, undefined to preserve
-      const updateParams: {
-        displayName?: string | null;
-        description?: string | null;
-        avatar?: File | null;
-        banner?: File | null;
-      } = {
-        displayName: displayName || null,
-        description: description || null,
-      };
-
-      // Only include avatar/banner if user uploaded new files
-      // Omitting them (undefined) tells SDK to preserve existing values
+    // If no profile record exists yet, create it; otherwise update
+    if (existingProfile === null) {
+      // Upload blobs if provided
+      let avatarBlob, bannerBlob;
       if (avatar) {
-        updateParams.avatar = avatar;
+        const avatarData = new Blob([avatar], { type: avatar.type });
+        const uploadResult = await repo.com.atproto.repo.uploadBlob(avatarData);
+        avatarBlob = uploadResult.data.blob;
       }
       if (banner) {
-        updateParams.banner = banner;
+        const bannerData = new Blob([banner], { type: banner.type });
+        const uploadResult = await repo.com.atproto.repo.uploadBlob(bannerData);
+        bannerBlob = uploadResult.data.blob;
       }
 
-      // @ts-expect-error -- Phase 2-4 migration: repo is Agent, not Repository
-      await repo.profile.updateBskyProfile(updateParams);
+      const record: AppBskyActorProfile.Record = {
+        $type: "app.bsky.actor.profile",
+      };
+      if (displayName) record.displayName = displayName;
+      if (description) record.description = description;
+      if (avatarBlob) record.avatar = avatarBlob;
+      if (bannerBlob) record.banner = bannerBlob;
+
+      try {
+        assertValidRecord(
+          "bskyProfile",
+          record,
+          AppBskyActorProfile.validateRecord,
+        );
+      } catch (e) {
+        return NextResponse.json(
+          { error: e instanceof Error ? e.message : "Validation failed" },
+          { status: 400 },
+        );
+      }
+
+      await repo.com.atproto.repo.createRecord({
+        repo: repo.assertDid,
+        collection: "app.bsky.actor.profile",
+        rkey: "self",
+        record,
+      });
+    } else {
+      // Upload blobs if provided
+      let avatarBlob, bannerBlob;
+      if (avatar) {
+        const avatarData = new Blob([avatar], { type: avatar.type });
+        const uploadResult = await repo.com.atproto.repo.uploadBlob(avatarData);
+        avatarBlob = uploadResult.data.blob;
+      }
+      if (banner) {
+        const bannerData = new Blob([banner], { type: banner.type });
+        const uploadResult = await repo.com.atproto.repo.uploadBlob(bannerData);
+        bannerBlob = uploadResult.data.blob;
+      }
+
+      // Merge with existing record: empty string removes field, non-empty sets it
+      const record: AppBskyActorProfile.Record = {
+        ...existingProfile,
+        $type: "app.bsky.actor.profile" as const,
+      };
+      if (displayName) {
+        record.displayName = displayName;
+      } else {
+        delete record.displayName;
+      }
+      if (description) {
+        record.description = description;
+      } else {
+        delete record.description;
+      }
+
+      // Only update avatar/banner if user uploaded new files
+      if (avatarBlob) record.avatar = avatarBlob;
+      if (bannerBlob) record.banner = bannerBlob;
+
+      try {
+        assertValidRecord(
+          "bskyProfile",
+          record,
+          AppBskyActorProfile.validateRecord,
+        );
+      } catch (e) {
+        return NextResponse.json(
+          { error: e instanceof Error ? e.message : "Validation failed" },
+          { status: 400 },
+        );
+      }
+
+      await repo.com.atproto.repo.putRecord({
+        repo: repo.assertDid,
+        collection: "app.bsky.actor.profile",
+        rkey: "self",
+        record,
+      });
     }
     revalidatePath("/bsky-profile");
 
-    // @ts-expect-error -- Phase 2-4 migration: repo is Agent, not Repository
-    const updated = await repo.profile.getBskyProfile();
-
-    // Convert blob URLs to CDN URLs so Next.js remotePatterns allow them
-    const avatarUrl = convertBlobUrlToCdn(updated.avatar) || "";
-    const bannerUrl = convertBlobUrlToCdn(updated.banner) || "";
+    const updatedResult = await repo
+      .getProfile({ actor: repo.assertDid })
+      .catch(() => null);
+    const updated = updatedResult?.data;
 
     return NextResponse.json({
       ok: true,
       profile: {
-        displayName: updated.displayName || "",
-        description: updated.description || "",
-        avatar: avatarUrl,
-        banner: bannerUrl,
+        displayName: updated?.displayName || "",
+        description: updated?.description || "",
+        avatar: updated?.avatar || "",
+        banner: updated?.banner || "",
       },
     });
   } catch (error) {

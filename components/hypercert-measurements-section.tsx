@@ -71,7 +71,7 @@ export default function HypercertMeasurementsSection({
       if (q.isSuccess && q.data && measurementLinks?.[idx]) {
         const link = measurementLinks[idx];
         items.push({
-          ...(q.data.value as Measurement),
+          ...(q.data.value as unknown as Measurement),
           _uri: `at://${link.did}/${link.collection}/${link.rkey}`,
         });
       }

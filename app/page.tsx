@@ -27,8 +27,14 @@ export default async function Home() {
   const [personalRepo, session] = await Promise.all([getAgent(), getSession()]);
 
   const profile = personalRepo
-    ? // @ts-expect-error -- Phase 2-4 migration: personalRepo is Agent, not Repository
-      await personalRepo.profile.getCertifiedProfile().catch(() => null)
+    ? await personalRepo.com.atproto.repo
+        .getRecord({
+          repo: personalRepo.assertDid,
+          collection: "app.certified.actor.profile",
+          rkey: "self",
+        })
+        .catch(() => null)
+        .then((r) => (r?.data?.value as Record<string, unknown> | null) ?? null)
     : null;
 
   return (
@@ -176,7 +182,9 @@ export default async function Home() {
                   <dt className="text-muted-foreground text-xs tracking-wider uppercase">
                     Display Name
                   </dt>
-                  <dd className="font-medium">{profile.displayName}</dd>
+                  <dd className="font-medium">
+                    {profile.displayName as string}
+                  </dd>
                 </div>
               ) : null}
               {profile?.handle ? (
@@ -184,7 +192,7 @@ export default async function Home() {
                   <dt className="text-muted-foreground text-xs tracking-wider uppercase">
                     Handle
                   </dt>
-                  <dd className="font-medium">@{profile.handle}</dd>
+                  <dd className="font-medium">@{profile.handle as string}</dd>
                 </div>
               ) : null}
             </dl>

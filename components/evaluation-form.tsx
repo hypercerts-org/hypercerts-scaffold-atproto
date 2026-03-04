@@ -23,7 +23,7 @@ import UserSelection from "./user-selection";
 import UserAvatar from "./user-avatar";
 import FormInfo from "./form-info";
 import FormFooter from "./form-footer";
-import type { CreateHypercertResult } from "@hypercerts-org/sdk-core";
+import type { CreateHypercertResult } from "@/lib/types";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { queryKeys } from "@/lib/api/query-keys";

@@ -17,6 +17,7 @@ export default function UserAvatar({
           width={32}
           height={32}
           alt="avatar"
+          unoptimized
           className="h-8 w-8 rounded-full"
         />
       )}

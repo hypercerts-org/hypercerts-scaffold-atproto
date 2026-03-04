@@ -1,9 +1,6 @@
 import { BlobRef } from "@atproto/lexicon";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
-import { OrgHypercertsClaimActivity as Hypercert } from "@hypercerts-org/sdk-core";
-import { OrgHypercertsClaimContributionDetails as Contribution } from "@hypercerts-org/sdk-core";
-import { OrgHypercertsClaimEvaluation as Evaluation } from "@hypercerts-org/sdk-core";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -15,15 +12,12 @@ export const getPDSlsURI = (uri?: string) => {
 };
 
 export function getBlobURL(
-  blobRef: BlobRef | string | { $type: string } | undefined,
+  blobRef: BlobRef | string | undefined,
   did?: string,
   pdsUrl?: string,
 ): string | undefined {
   if (typeof blobRef === "string") {
     return blobRef;
-  }
-  if (blobRef && "$type" in blobRef && blobRef.$type === "string") {
-    return blobRef.$type;
   }
   if (blobRef && "ref" in blobRef) {
     const cid = blobRef.ref ?? undefined;
@@ -90,39 +84,6 @@ export function convertBlobUrlToCdn(url: string | null | undefined): string {
   }
 }
 
-export const validateHypercert = (data: unknown) => {
-  if (!Hypercert.isRecord(data)) {
-    return { success: false, error: "Invalid Hypercert Record" };
-  }
-  const validation = Hypercert.validateRecord(data);
-  if (validation.success) {
-    return { success: true, error: null };
-  }
-  return { success: false, error: validation.error.message };
-};
-
-export const validateContribution = (data: unknown) => {
-  if (!Contribution.isRecord(data)) {
-    return { success: false, error: "Invalid Contribution Record" };
-  }
-  const validation = Contribution.validateRecord(data);
-  if (validation.success) {
-    return { success: true, error: null };
-  }
-  return { success: false, error: validation.error.message };
-};
-
-export const validateEvaluation = (data: unknown) => {
-  if (!Evaluation.isRecord(data)) {
-    return { success: false, error: "Invalid Evaluation Record" };
-  }
-  const validation = Evaluation.validateRecord(data);
-  if (validation.success) {
-    return { success: true, error: null };
-  }
-  return { success: false, error: validation.error.message };
-};
-
 export function parseAtUri(atUri?: string) {
   // at://did:plc:xyz/app.namespace.record/abc123
   if (!atUri) return;
@@ -136,6 +97,12 @@ export function extractDidFromAtUri(atUri: string): string | null {
   // Expected: at://<did>/<collection>/<rkey>
   const match = atUri.match(/^at:\/\/([^/]+)\/([^/]+)\/(.+)$/);
   return match ? match[1] : null;
+}
+
+/** Safely extract a string field from FormData, returning null if the value is a File */
+export function getStringField(data: FormData, key: string): string | null {
+  const value = data.get(key);
+  return typeof value === "string" ? value : null;
 }
 
 export function buildStrongRef(cid?: string, uri?: string) {

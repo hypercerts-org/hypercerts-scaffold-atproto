@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
-import { getAgent } from "@/lib/atproto-session";
+import { getAgent, getSession } from "@/lib/atproto-session";
 import ProfileForm from "@/components/profile-form";
-import { convertBlobUrlToCdn } from "@/lib/utils";
+import { getBlobURL, convertBlobUrlToCdn } from "@/lib/utils";
+import { resolveSessionPds } from "@/lib/server-utils";
 import { UserCircle } from "lucide-react";
+import type { CertifiedActorProfile } from "@/lib/types";
 
 export const metadata: Metadata = {
   title: "Profile",
@@ -18,11 +20,25 @@ export const metadata: Metadata = {
 export default async function ProfilePage() {
   const repo = await getAgent();
   if (!repo) redirect("/");
-  // @ts-expect-error -- Phase 2-4 migration: repo is Agent, not Repository
-  const profile = await repo.profile.getCertifiedProfile();
+  const profileResult = await repo.com.atproto.repo
+    .getRecord({
+      repo: repo.assertDid,
+      collection: "app.certified.actor.profile",
+      rkey: "self",
+    })
+    .catch(() => null);
+  const profile = profileResult?.data?.value as
+    | CertifiedActorProfile
+    | undefined;
 
-  const avatarUrl = convertBlobUrlToCdn(profile?.avatar);
-  const bannerUrl = convertBlobUrlToCdn(profile?.banner);
+  const session = await getSession();
+  const pdsUrl = session ? await resolveSessionPds(session) : undefined;
+  const avatarUrl =
+    convertBlobUrlToCdn(getBlobURL(profile?.avatar, repo.assertDid, pdsUrl)) ||
+    "";
+  const bannerUrl =
+    convertBlobUrlToCdn(getBlobURL(profile?.banner, repo.assertDid, pdsUrl)) ||
+    "";
 
   return (
     <div className="noise-bg relative min-h-screen">
