@@ -191,8 +191,14 @@ export const addContribution = async (params: {
 
   // Build new contributor entries
   const newContributors = contributorRefs.map((ref) => ({
-    contributorIdentity: ref,
-    contributionDetails: detailsRef,
+    contributorIdentity: {
+      $type: "com.atproto.repo.strongRef" as const,
+      ...ref,
+    },
+    contributionDetails: {
+      $type: "com.atproto.repo.strongRef" as const,
+      ...detailsRef,
+    },
   }));
 
   const existingContributors = (existingRecord.contributors as unknown[]) || [];
