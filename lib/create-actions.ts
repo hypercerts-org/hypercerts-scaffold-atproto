@@ -245,6 +245,28 @@ export const addEvaluation = async (params: {
     "org.hypercerts.claim.activity",
   );
 
+  // Resolve measurements AT-URIs to StrongRefs
+  const measurementRefs = evaluationData.measurements
+    ? await Promise.all(
+        evaluationData.measurements.map((uri) =>
+          resolveStrongRef(
+            ctx.agent,
+            uri,
+            "org.hypercerts.context.measurement",
+          ),
+        ),
+      )
+    : undefined;
+
+  // Resolve location AT-URI to StrongRef
+  const locationRef = evaluationData.location
+    ? await resolveStrongRef(
+        ctx.agent,
+        evaluationData.location,
+        "app.certified.location",
+      )
+    : undefined;
+
   const record: OrgHypercertsClaimEvaluation.Record = {
     $type: "org.hypercerts.context.evaluation",
     subject,
@@ -260,19 +282,8 @@ export const addEvaluation = async (params: {
           })),
         }
       : {}),
-    // measurements and location are passed as-is (AT-URIs); the index signature accepts them
-    ...(evaluationData.measurements
-      ? {
-          measurements:
-            evaluationData.measurements as unknown as OrgHypercertsClaimEvaluation.Record["measurements"],
-        }
-      : {}),
-    ...(evaluationData.location
-      ? {
-          location:
-            evaluationData.location as unknown as OrgHypercertsClaimEvaluation.Record["location"],
-        }
-      : {}),
+    ...(measurementRefs ? { measurements: measurementRefs } : {}),
+    ...(locationRef ? { location: locationRef } : {}),
   };
 
   assertValidRecord(
