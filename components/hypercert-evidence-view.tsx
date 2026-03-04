@@ -14,6 +14,10 @@ import { Badge } from "./ui/badge";
 import { Link as LinkIcon } from "lucide-react";
 import { OrgHypercertsContextAttachment } from "@hypercerts-org/lexicon";
 
+type ContentItem = NonNullable<
+  OrgHypercertsContextAttachment.Main["content"]
+>[number];
+
 type Attachment = OrgHypercertsContextAttachment.Main;
 
 export default function HypercertEvidenceView({
@@ -33,9 +37,7 @@ export default function HypercertEvidenceView({
   };
 
   // Helper to extract URL from content item
-  const getContentUrl = (
-    contentItem: Attachment["content"][number],
-  ): string => {
+  const getContentUrl = (contentItem: ContentItem): string => {
     // Check if it's a Uri type
     if ("uri" in contentItem && contentItem.uri) {
       return contentItem.uri;
@@ -81,7 +83,9 @@ export default function HypercertEvidenceView({
           </p>
           {evidence.description ? (
             <p className="text-muted-foreground font-[family-name:var(--font-outfit)] text-sm leading-relaxed whitespace-pre-wrap">
-              {evidence.description}
+              {typeof evidence.description === "string"
+                ? evidence.description
+                : null}
             </p>
           ) : null}
         </div>
@@ -95,7 +99,7 @@ export default function HypercertEvidenceView({
                   <LinkIcon className="text-create-accent mt-0.5 size-4 shrink-0" />
                   <div className="min-w-0 flex-1 space-y-1">
                     <dt className="text-muted-foreground font-[family-name:var(--font-outfit)] text-xs tracking-wider uppercase">
-                      {evidence.content.length > 1
+                      {evidence.content!.length > 1
                         ? `Evidence Source ${index + 1}`
                         : "Evidence Source"}
                     </dt>
