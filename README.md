@@ -1,6 +1,6 @@
 # Hypercerts Scaffold
 
-A Next.js scaffold for building applications on ATProto using the Hypercerts SDK. This project demonstrates authentication, profile management, and hypercert creation on the ATProto network.
+A Next.js scaffold for building applications on ATProto using native ATProto. This project demonstrates authentication, profile management, and hypercert creation on the ATProto network.
 
 ## Prerequisites
 
@@ -10,8 +10,6 @@ A Next.js scaffold for building applications on ATProto using the Hypercerts SDK
   - **Local development:** `docker run -d -p 6379:6379 redis:alpine`
   - **Cloud Redis:** Upstash, Redis Labs, Railway, etc. (see [Environment Configuration](#environment-configuration))
 - **A PDS account** for testing (e.g., on https://pds-eu-west4.test.certified.app)
-
-> **Note:** This project uses an unreleased, packed SDK version. See [DEVELOPMENT.md](./DEVELOPMENT.md) for details and important warnings.
 
 ## Quick Start
 
@@ -45,17 +43,9 @@ Open [http://127.0.0.1:3000](http://127.0.0.1:3000) to see the application.
 > The app automatically redirects `localhost` to `127.0.0.1` for RFC 8252 OAuth compliance.  
 > See [Localhost Redirect](#localhost-redirect) for details.
 
-## ⚠️ Important: SDK Version & Breaking Changes
+## Architecture Note
 
-This scaffold uses an **unreleased, pre-packaged version** of `@hypercerts-org/sdk-core`:
-
-- **Version:** `0.10.0-beta.8` (from `vendor/hypercerts-org-sdk-core-0.10.0-beta.8.tgz`)
-- **Source:** Built directly from the [Hypercerts SDK repository](https://github.com/hypercerts-org/hypercerts-sdk) (not from npm)
-- **Why:** This allows us to dogfood the latest SDK features before official npm release
-- **⚠️ Contains unreleased changes:** Some features may not be merged or may change before the next npm release
-- **⚠️ Breaking changes expected:** As the SDK evolves toward 1.0, expect API changes
-
-**Installing the latest SDK version may break this scaffold.** See [DEVELOPMENT.md](./DEVELOPMENT.md) for details on working with the packed SDK, update instructions, and important warnings.
+This scaffold uses **native ATProto** — all record operations go through `@atproto/api` directly, with `@hypercerts-org/lexicon` for type definitions and record validation. There is no SDK wrapper layer.
 
 **Issues & Support:** Found a bug or have questions? [Create an issue](https://github.com/hypercerts-org/hypercerts-scaffold-atproto/issues) and [@kzoeps](https://github.com/kzoeps) will respond!
 
@@ -142,27 +132,32 @@ The script outputs the complete environment variable line. You can either copy i
     ┌──────────▼──────────┐    ┌──────────▼──────────┐
     │  /api/oauth/*       │    │  /api/oauth/epds/*   │
     │  (Standard ATProto) │    │  (ePDS Email Login)  │
-    │  SDK-managed OAuth  │    │  Manual DPoP + PKCE  │
+    │  NodeOAuthClient    │    │  Manual DPoP + PKCE  │
     └──────────┬──────────┘    └──────────┬───────────┘
                │                          │
                ▼                          ▼
     ┌─────────────────────────────────────────────────┐
-    │           Hypercerts SDK (sdk-core)              │
-    │  Session Restore  │  Repository Ops  │  CRUD    │
+    │         Native ATProto (Agent from @atproto/api) │
+    │  Session Restore  │  @hypercerts-org/lexicon     │
+    │  Validation       │  CRUD (getRecord, putRecord) │
     └──────────┬──────────────────────┬───────────────┘
                │                      │
         ┌──────▼──────┐        ┌──────▼──────────┐
         │    Redis    │        │   PDS / ePDS    │
-        │  Sessions   │        │   User Data     │
-        │ OAuth State │        │                 │
-        └─────────────┘        └─────────────────┘
+        │  Sessions   │        │  XRPC calls:    │
+        │ OAuth State │        │  getRecord      │
+        └─────────────┘        │  createRecord   │
+                               │  putRecord      │
+                               │  deleteRecord   │
+                               │  uploadBlob     │
+                               └─────────────────┘
 ```
 
 Also served: `/client-metadata.json` and `/jwks.json` (OAuth metadata endpoints, no auth required).
 
 ### Personal Data Server (PDS)
 
-- **PDS (Personal Data Server)** stores user data (profiles, hypercerts). Standard ATProto login authenticates against the user's PDS using handle-based OAuth managed by the Hypercerts SDK.
+- **PDS (Personal Data Server)** stores user data (profiles, hypercerts). Standard ATProto login authenticates against the user's PDS using handle-based OAuth managed by NodeOAuthClient.
 - **ePDS (Email PDS)** is a Certified Auth PDS that supports email-based login with OTP verification. It serves the same role as a standard PDS but uses an email address instead of a handle for authentication. The ePDS flow is enabled when `NEXT_PUBLIC_EPDS_URL` is set.
 
 ## Localhost Redirect
@@ -210,7 +205,7 @@ This application automatically redirects requests from `localhost` to `127.0.0.1
 
 ### Flow 1: Handle Login (Standard ATProto)
 
-This scaffold uses OAuth 2.0 with DPoP (Demonstrating Proof of Possession) for authentication, implemented via the Hypercerts SDK.
+This scaffold uses OAuth 2.0 with DPoP (Demonstrating Proof of Possession) for authentication, implemented via @atproto/oauth-client-node.
 
 **Flow:**
 
@@ -218,7 +213,7 @@ This scaffold uses OAuth 2.0 with DPoP (Demonstrating Proof of Possession) for a
 2. Application redirects to the ATProto authorization server
 3. User approves the application
 4. OAuth callback receives the authorization code
-5. SDK exchanges code for session credentials (stored in Redis)
+5. NodeOAuthClient exchanges code for session credentials (stored in Redis)
 6. A `user-did` cookie tracks the authenticated user for subsequent requests
 
 ### Flow 2: Email Login (ePDS)
@@ -250,52 +245,48 @@ This scaffold uses OAuth 2.0 with DPoP (Demonstrating Proof of Possession) for a
 
 ### Server-Side Authentication
 
-Use `getRepoContext()` to get an authenticated repository in server components or API routes:
+Use `getRepoContext()` to get an authenticated agent in server components or API routes:
 
 ```typescript
 import { getRepoContext } from "@/lib/repo-context";
 
 export async function GET() {
-  // Get authenticated repository context
   const ctx = await getRepoContext();
-
   if (!ctx) {
     return Response.json({ error: "Not authenticated" }, { status: 401 });
   }
-
-  // Available context properties:
   // ctx.userDid - the authenticated user's DID
   // ctx.activeDid - currently active profile DID
   // ctx.targetDid - the DID this operation targets
-  // ctx.repository - repository routed to PDS
-  // ctx.scopedRepo - repository scoped to targetDid
+  // ctx.agent - Agent instance bound to the OAuth session
 
-  // Use scopedRepo for most operations
-  const profile = await ctx.scopedRepo.profile.getCertifiedProfile();
-  return Response.json(profile);
+  // Use agent for direct ATProto calls
+  const result = await ctx.agent.com.atproto.repo.getRecord({
+    repo: ctx.activeDid,
+    collection: "app.certified.actor.profile",
+    rkey: "self",
+  });
+  return Response.json(result.data.value);
 }
 ```
 
-**Simpler alternative** using `getAuthenticatedRepo()`:
+**Alternative** using `getAgent()`:
 
 ```typescript
-import { getAuthenticatedRepo } from "@/lib/atproto-session";
+import { getAgent } from "@/lib/atproto-session";
 
 export async function GET() {
-  const repo = await getAuthenticatedRepo();
-
-  if (!repo) {
+  const agent = await getAgent();
+  if (!agent) {
     return Response.json({ error: "Not authenticated" }, { status: 401 });
   }
-
-  const profile = await repo.profile.getCertifiedProfile();
-  return Response.json(profile);
+  // agent is an @atproto/api Agent bound to the OAuth session
 }
 ```
 
 ## Working with Repository Context
 
-The repository context provides access to the authenticated user's repository and profile data.
+The repository context provides access to the authenticated user's agent and DID information.
 
 ```typescript
 import { getRepoContext } from "@/lib/repo-context";
@@ -308,19 +299,33 @@ export async function GET() {
   }
 
   // Access user profile
-  const profile = await ctx.scopedRepo.profile.getCertifiedProfile();
+  const profile = await ctx.agent.com.atproto.repo.getRecord({
+    repo: ctx.activeDid,
+    collection: "app.certified.actor.profile",
+    rkey: "self",
+  });
 
   // Create a hypercert
-  await ctx.scopedRepo.hypercert.create({
-    title: "My Hypercert",
-    description: "A certificate of impact",
-    // ... other fields
+  await ctx.agent.com.atproto.repo.createRecord({
+    repo: ctx.activeDid,
+    collection: "app.certified.hypercert",
+    record: {
+      title: "My Hypercert",
+      description: "A certificate of impact",
+      // ... other fields
+    },
   });
 
   // List hypercerts
-  const hypercerts = await ctx.scopedRepo.hypercert.list();
+  const hypercerts = await ctx.agent.com.atproto.repo.listRecords({
+    repo: ctx.activeDid,
+    collection: "app.certified.hypercert",
+  });
 
-  return Response.json({ profile, hypercerts });
+  return Response.json({
+    profile: profile.data.value,
+    hypercerts: hypercerts.data.records,
+  });
 }
 ```
 
@@ -343,11 +348,15 @@ export async function GET() {
 ├── lib/
 │   ├── api/                   # Client-side API functions and types
 │   ├── config.ts              # Centralized app configuration
-│   ├── hypercerts-sdk.ts      # SDK initialization and singleton
+│   ├── hypercerts-sdk.ts      # OAuth client initialization (NodeOAuthClient)
 │   ├── redis.ts               # Redis client setup
 │   ├── redis-state-store.ts   # Redis stores (sessions, OAuth state, ePDS state)
 │   ├── atproto-session.ts     # Server-side session helpers
-│   ├── repo-context.ts        # Repository context helper
+│   ├── atproto-writes.ts      # Shared write utilities (StrongRef resolution, location creation, blob upload)
+│   ├── record-validation.ts   # Generic lexicon record validation assertion
+│   ├── repo-context.ts        # Helper to get authenticated Agent + DID context
+│   ├── types.ts               # TypeScript types, Collections enum, type guards
+│   ├── blob-utils.ts          # Blob reference to URL resolution for rendering
 │   ├── create-actions.ts      # Server actions for CRUD operations
 │   ├── epds-config.ts         # ePDS OAuth endpoint configuration
 │   ├── epds-helpers.ts        # ePDS PKCE + DPoP utilities
@@ -356,7 +365,7 @@ export async function GET() {
 ├── queries/                   # TanStack Query hooks (auth, hypercerts, profile)
 ├── public/                    # Static assets (logos, email template)
 ├── scripts/                   # Utility scripts (JWK generation)
-├── vendor/                    # Packed SDK tarballs (unreleased)
+├── vendor/                    # Packed lexicon package (type definitions)
 └── lexicons/                  # ATProto lexicon definitions
 ```
 
@@ -365,9 +374,13 @@ export async function GET() {
 | File                                | Purpose                                                                        |
 | ----------------------------------- | ------------------------------------------------------------------------------ |
 | `lib/config.ts`                     | Centralized configuration — base URLs, OAuth client IDs, redirect URIs, scopes |
-| `lib/hypercerts-sdk.ts`             | SDK initialization with OAuth config, Redis storage, handle resolver           |
+| `lib/hypercerts-sdk.ts`             | OAuth client initialization with NodeOAuthClient, Redis stores                 |
 | `lib/redis-state-store.ts`          | Three Redis-backed stores: sessions, standard OAuth state, ePDS OAuth state    |
-| `lib/repo-context.ts`               | Helper to get authenticated repository context in server components            |
+| `lib/repo-context.ts`               | Helper to get authenticated Agent + DID context                                |
+| `lib/atproto-writes.ts`             | Shared write utilities (StrongRef resolution, location creation, blob upload)  |
+| `lib/record-validation.ts`          | Generic lexicon record validation assertion                                    |
+| `lib/types.ts`                      | TypeScript types, Collections enum, type guards                                |
+| `lib/blob-utils.ts`                 | Blob reference to URL resolution for rendering                                 |
 | `lib/epds-config.ts`                | Derives ePDS OAuth endpoints (PAR, auth, token) from `NEXT_PUBLIC_EPDS_URL`    |
 | `lib/epds-helpers.ts`               | PKCE code verifier/challenge, DPoP key generation and proof creation           |
 | `components/login-dialog.tsx`       | Dual-mode login UI with Handle/Email pill toggle                               |
@@ -377,14 +390,13 @@ export async function GET() {
 
 ### Scaffold Documentation
 
-- [DEVELOPMENT.md](./DEVELOPMENT.md) - Development guide, SDK version details, contributing guidelines
+- [DEVELOPMENT.md](./DEVELOPMENT.md) - Development guide, contributing guidelines
 
 ### External Documentation
 
 - [ATProto Documentation](https://atproto.com/docs)
 - [Hypercerts Documentation](https://hypercerts.org/docs)
 - [Next.js Documentation](https://nextjs.org/docs)
-- [Hypercerts SDK](https://github.com/hypercerts-org/hypercerts-sdk)
 
 ### This Project
 
