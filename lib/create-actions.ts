@@ -335,7 +335,7 @@ export const addMeasurement = async (params: {
 
   const record: OrgHypercertsClaimMeasurement.Record = {
     $type: "org.hypercerts.context.measurement",
-    subject,
+    subjects: [subject],
     metric: params.metric,
     value: params.value,
     unit: params.unit,
@@ -531,12 +531,23 @@ export const updateMeasurement = async (params: {
     rkey: parsed.rkey,
   });
   const existing = existingResult.data
-    .value as OrgHypercertsClaimMeasurement.Record;
+    .value as OrgHypercertsClaimMeasurement.Record & {
+    subject?: OrgHypercertsClaimMeasurement.Record["subjects"] extends
+      | (infer T)[]
+      | undefined
+      ? T
+      : never;
+  };
+
+  // Preserve existing subjects, or migrate from old singular subject field
+  const existingSubjects =
+    existing.subjects ?? (existing.subject ? [existing.subject] : undefined);
 
   // Merge updates, preserving immutable fields
   const record: OrgHypercertsClaimMeasurement.Record = {
     ...existing,
     $type: "org.hypercerts.context.measurement",
+    ...(existingSubjects !== undefined ? { subjects: existingSubjects } : {}),
   };
 
   // Apply individual updates
