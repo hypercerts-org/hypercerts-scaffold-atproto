@@ -59,6 +59,6 @@ export async function getMeasurementLinks(
 ): Promise<BacklinksResponse["records"]> {
   return getBacklinks(
     hypercertUri,
-    "org.hypercerts.context.measurement:subject.uri",
+    "org.hypercerts.context.measurement:subjects[com.atproto.repo.strongRef].uri",
   );
 }
