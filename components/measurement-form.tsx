@@ -8,7 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { queryKeys } from "@/lib/api/query-keys";
 import { addMeasurement, MeasurementLocationParam } from "@/lib/create-actions";
 import type { ProfileView } from "@atproto/api/dist/client/types/app/bsky/actor/defs";
-import type { CreateHypercertResult } from "@hypercerts-org/sdk-core";
+import type { CreateHypercertResult } from "@/lib/types";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   Calendar,

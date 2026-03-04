@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server";
 import { getAgent } from "@/lib/atproto-session";
 import { revalidatePath } from "next/cache";
-import { convertBlobUrlToCdn } from "@/lib/utils";
+import { getBlobURL, convertBlobUrlToCdn } from "@/lib/utils";
+import { getSession } from "@/lib/atproto-session";
+import { resolveSessionPds } from "@/lib/server-utils";
 
 export async function POST(req: Request) {
   try {
@@ -142,11 +144,25 @@ export async function POST(req: Request) {
     const updated =
       (updatedResult?.data?.value as Record<string, unknown> | null) ?? null;
 
-    // Convert blob URLs to CDN URLs so Next.js remotePatterns allow them
+    // Convert BlobRef objects to URLs, then to CDN URLs
+    const session = await getSession();
+    const pdsUrl = session ? await resolveSessionPds(session) : undefined;
     const avatarUrl =
-      convertBlobUrlToCdn(updated?.avatar as string | null | undefined) || "";
+      convertBlobUrlToCdn(
+        getBlobURL(
+          updated?.avatar as Parameters<typeof getBlobURL>[0],
+          repo.assertDid,
+          pdsUrl,
+        ),
+      ) || "";
     const bannerUrl =
-      convertBlobUrlToCdn(updated?.banner as string | null | undefined) || "";
+      convertBlobUrlToCdn(
+        getBlobURL(
+          updated?.banner as Parameters<typeof getBlobURL>[0],
+          repo.assertDid,
+          pdsUrl,
+        ),
+      ) || "";
 
     return NextResponse.json({
       ok: true,

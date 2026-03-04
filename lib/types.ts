@@ -1,10 +1,9 @@
-import type { OrgHypercertsClaimActivity as HypercertRecord } from "@hypercerts-org/sdk-core";
-import type { OrgHypercertsClaimContributionDetails as HypercertContribution } from "@hypercerts-org/sdk-core";
-import type { OrgHypercertsClaimAttachment as HypercertEvidence } from "@hypercerts-org/sdk-core";
-import type { OrgHypercertsClaimRights as HypercertRights } from "@hypercerts-org/sdk-core";
-import type { AppCertifiedLocation as HypercertLocation } from "@hypercerts-org/sdk-core";
+import type { OrgHypercertsClaimActivity as HypercertRecord } from "@hypercerts-org/lexicon";
+import type { OrgHypercertsClaimContributionDetails as HypercertContribution } from "@hypercerts-org/lexicon";
+import type { OrgHypercertsClaimAttachment as HypercertEvidence } from "@hypercerts-org/lexicon";
+import type { OrgHypercertsClaimRights as HypercertRights } from "@hypercerts-org/lexicon";
+import type { AppCertifiedLocation as HypercertLocation } from "@hypercerts-org/lexicon";
 import type { ComAtprotoRepoGetRecord } from "@atproto/api";
-import type { CreateHypercertResult } from "@hypercerts-org/sdk-core";
 
 export type HypercertEvidenceData = Omit<
   ComAtprotoRepoGetRecord.OutputSchema,
@@ -39,6 +38,52 @@ export type HypercertContributionData = Omit<
 > & {
   value: HypercertContribution.Record;
 };
+
+export interface UpdateResult {
+  uri: string;
+  cid: string;
+}
+
+export interface CreateHypercertResult {
+  hypercertUri: string;
+  rightsUri: string;
+  hypercertCid: string;
+  rightsCid: string;
+  locationUris?: string[];
+}
+
+export interface CreateHypercertParams {
+  title: string;
+  description: string;
+  shortDescription: string;
+  startDate: string;
+  endDate: string;
+  rights: {
+    name: string;
+    type: string;
+    description: string;
+  };
+  workScope?: string | { uri: string; cid: string };
+  image?: Blob;
+  contributions?: Array<{
+    contributors: Array<
+      string | { identity: string } | { uri: string; cid: string }
+    >;
+    contributionDetails:
+      | string
+      | {
+          role: string;
+          contributionDescription?: string;
+          startDate?: string;
+          endDate?: string;
+        }
+      | { uri: string; cid: string };
+    weight?: string;
+  }>;
+  locations?: Array<string | Record<string, unknown>>;
+  shortDescriptionFacets?: unknown[];
+  descriptionFacets?: unknown[];
+}
 
 export interface BaseHypercertFormProps {
   hypercertInfo?: CreateHypercertResult;

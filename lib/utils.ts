@@ -1,9 +1,9 @@
 import { BlobRef } from "@atproto/lexicon";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
-import { OrgHypercertsClaimActivity as Hypercert } from "@hypercerts-org/sdk-core";
-import { OrgHypercertsClaimContributionDetails as Contribution } from "@hypercerts-org/sdk-core";
-import { OrgHypercertsClaimEvaluation as Evaluation } from "@hypercerts-org/sdk-core";
+import { OrgHypercertsClaimActivity as Hypercert } from "@hypercerts-org/lexicon";
+import { OrgHypercertsClaimContributionDetails as Contribution } from "@hypercerts-org/lexicon";
+import { OrgHypercertsClaimEvaluation as Evaluation } from "@hypercerts-org/lexicon";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));

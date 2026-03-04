@@ -1,7 +1,8 @@
 import LoginDialog from "@/components/login-dialog";
 import Navbar from "@/components/navbar";
 import { getSession, getAgent } from "@/lib/atproto-session";
-import { convertBlobUrlToCdn } from "@/lib/utils";
+import { getBlobURL, convertBlobUrlToCdn } from "@/lib/utils";
+import { resolveSessionPds } from "@/lib/server-utils";
 import { Suspense } from "react";
 import { AuthErrorToast } from "./AuthErrorToast";
 
@@ -28,8 +29,13 @@ export async function SignedInProvider({
       const profile =
         (profileResult?.data?.value as Record<string, unknown> | null) ?? null;
 
-      avatarUrl =
-        convertBlobUrlToCdn(profile?.avatar as string | undefined) || "";
+      const pdsUrl = await resolveSessionPds(session);
+      const rawAvatarUrl = getBlobURL(
+        profile?.avatar as Parameters<typeof getBlobURL>[0],
+        agent.assertDid,
+        pdsUrl,
+      );
+      avatarUrl = convertBlobUrlToCdn(rawAvatarUrl) || "";
       handle = (profile?.handle as string | undefined) || "";
     }
   }

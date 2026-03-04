@@ -1,7 +1,4 @@
-import type {
-  CreateHypercertParams,
-  CreateHypercertResult,
-} from "@hypercerts-org/sdk-core";
+import type { CreateHypercertParams, CreateHypercertResult } from "@/lib/types";
 import FormInfo from "./form-info";
 import HypercertsBaseForm from "./hypercerts-base-form";
 import { useCreateHypercertMutation } from "@/queries/hypercerts";

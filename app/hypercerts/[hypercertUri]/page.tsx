@@ -9,8 +9,9 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import {
   OrgHypercertsDefs,
-  type HypercertClaim,
-} from "@hypercerts-org/sdk-core";
+  OrgHypercertsClaimActivity,
+} from "@hypercerts-org/lexicon";
+type HypercertClaim = OrgHypercertsClaimActivity.Main;
 
 export async function generateMetadata({
   params,

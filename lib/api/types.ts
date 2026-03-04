@@ -2,10 +2,7 @@
  * Shared API types for the application
  */
 
-import type {
-  CreateHypercertResult,
-  UpdateResult,
-} from "@hypercerts-org/sdk-core";
+import type { CreateHypercertResult, UpdateResult } from "@/lib/types";
 
 // Auth types
 export interface LoginRequest {

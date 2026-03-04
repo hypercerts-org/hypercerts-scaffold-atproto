@@ -6,7 +6,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { toast } from "sonner";
 import { useUpdateHypercertMutation } from "@/queries/hypercerts";
-import type { HypercertClaim } from "@hypercerts-org/sdk-core";
+import type { OrgHypercertsClaimActivity as HypercertClaim } from "@hypercerts-org/lexicon";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -17,7 +17,7 @@ import { Upload, Tag, Calendar, X } from "lucide-react";
 
 interface HypercertsEditFormProps {
   hypercertUri: string;
-  record: HypercertClaim;
+  record: HypercertClaim.Record;
   imageUri?: string;
 }
 
@@ -262,6 +262,7 @@ export default function HypercertsEditForm({
                   src={imagePreview}
                   alt="Preview"
                   fill
+                  unoptimized
                   className="object-cover opacity-60 transition-opacity group-hover:opacity-40"
                 />
                 <div className="relative z-10 flex flex-col items-center gap-1">

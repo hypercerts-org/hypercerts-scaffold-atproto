@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
-import { getAgent } from "@/lib/atproto-session";
+import { getAgent, getSession } from "@/lib/atproto-session";
 import ProfileForm from "@/components/profile-form";
-import { convertBlobUrlToCdn } from "@/lib/utils";
+import { getBlobURL, convertBlobUrlToCdn } from "@/lib/utils";
+import { resolveSessionPds } from "@/lib/server-utils";
 import { UserCircle } from "lucide-react";
 
 export const metadata: Metadata = {
@@ -28,8 +29,24 @@ export default async function ProfilePage() {
   const profile =
     (profileResult?.data?.value as Record<string, unknown> | null) ?? null;
 
-  const avatarUrl = convertBlobUrlToCdn(profile?.avatar as string | undefined);
-  const bannerUrl = convertBlobUrlToCdn(profile?.banner as string | undefined);
+  const session = await getSession();
+  const pdsUrl = session ? await resolveSessionPds(session) : undefined;
+  const avatarUrl =
+    convertBlobUrlToCdn(
+      getBlobURL(
+        profile?.avatar as Parameters<typeof getBlobURL>[0],
+        repo.assertDid,
+        pdsUrl,
+      ),
+    ) || "";
+  const bannerUrl =
+    convertBlobUrlToCdn(
+      getBlobURL(
+        profile?.banner as Parameters<typeof getBlobURL>[0],
+        repo.assertDid,
+        pdsUrl,
+      ),
+    ) || "";
 
   return (
     <div className="noise-bg relative min-h-screen">
