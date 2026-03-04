@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Loader from "@/components/loader";
 import {
   Card,
   CardDescription,
@@ -69,13 +68,7 @@ export default async function MyHypercertsPage() {
         </div>
 
         {/* Content */}
-        {!records ? (
-          <div className="animate-fade-in-up [animation-delay:100ms]">
-            <div className="glass-panel mx-auto max-w-md rounded-2xl p-12">
-              <Loader />
-            </div>
-          </div>
-        ) : records.length === 0 ? (
+        {records.length === 0 ? (
           <div className="animate-fade-in-up [animation-delay:100ms]">
             <div className="glass-panel mx-auto max-w-md space-y-4 rounded-2xl p-12 text-center">
               <div className="bg-create-accent/10 mx-auto flex size-16 items-center justify-center rounded-full">

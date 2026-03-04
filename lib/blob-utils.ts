@@ -5,6 +5,13 @@ import { getBlobURL } from "./utils";
 import { resolveSessionPds } from "./server-utils";
 import { BlobRef } from "@atproto/lexicon";
 
+function isBlobRefLike(v: Record<string, unknown>): boolean {
+  if (v.$type !== "blob") return false;
+  if (typeof v.mimeType !== "string") return false;
+  const ref = v.ref as Record<string, unknown> | undefined;
+  return !!ref && typeof ref.$link === "string";
+}
+
 export async function resolveBlobToUrl(
   blob: BlobRef | string | undefined,
   ownerDid: string,
@@ -40,8 +47,8 @@ export async function resolveRecordBlobs(
 
   const obj = value as Record<string, unknown>;
 
-  // Check if this object is a BlobRef (has $type: 'blob' or 'ref' property from atproto returns)
-  if (obj.$type === "blob" || (obj.ref && obj.mimeType)) {
+  // Check if this object is a BlobRef (has $type: 'blob', string mimeType, and ref.$link string)
+  if (isBlobRefLike(obj)) {
     return await resolveBlobToUrl(obj as unknown as BlobRef, ownerDid);
   }
 

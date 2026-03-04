@@ -4,8 +4,40 @@ import { revalidatePath } from "next/cache";
 import { getBlobURL, convertBlobUrlToCdn } from "@/lib/utils";
 import { getSession } from "@/lib/atproto-session";
 import { resolveSessionPds } from "@/lib/server-utils";
-import { AppCertifiedActorProfile } from "@hypercerts-org/lexicon";
+import {
+  AppCertifiedActorProfile,
+  OrgHypercertsDefs,
+} from "@hypercerts-org/lexicon";
 import { assertValidRecord } from "@/lib/record-validation";
+
+/**
+ * Safely extracts a URL from a certified profile avatar/banner union type.
+ *
+ * The union is: $Typed<Uri> | $Typed<SmallImage> | $Typed<LargeImage> | { $type: string }
+ * - Uri ($type 'org.hypercerts.defs#uri'): has a `uri` string — return it directly
+ * - SmallImage ($type 'org.hypercerts.defs#smallImage'): has an `image` BlobRef — pass to getBlobURL
+ * - LargeImage ($type 'org.hypercerts.defs#largeImage'): has an `image` BlobRef — pass to getBlobURL
+ * - Unknown $type: return undefined
+ */
+function getCertifiedProfileImageURL(
+  field:
+    | AppCertifiedActorProfile.Record["avatar"]
+    | AppCertifiedActorProfile.Record["banner"],
+  did: string,
+  pdsUrl: string | undefined,
+): string | undefined {
+  if (!field) return undefined;
+  if (OrgHypercertsDefs.isUri(field)) {
+    return field.uri;
+  }
+  if (OrgHypercertsDefs.isSmallImage(field)) {
+    return getBlobURL(field.image, did, pdsUrl);
+  }
+  if (OrgHypercertsDefs.isLargeImage(field)) {
+    return getBlobURL(field.image, did, pdsUrl);
+  }
+  return undefined;
+}
 
 export async function POST(req: Request) {
   try {
@@ -80,10 +112,10 @@ export async function POST(req: Request) {
       if (website) record.website = website;
       if (avatarBlob)
         record.avatar =
-          avatarBlob as unknown as AppCertifiedActorProfile.Record["avatar"];
+          avatarBlob.original as AppCertifiedActorProfile.Record["avatar"];
       if (bannerBlob)
         record.banner =
-          bannerBlob as unknown as AppCertifiedActorProfile.Record["banner"];
+          bannerBlob.original as AppCertifiedActorProfile.Record["banner"];
 
       try {
         assertValidRecord(
@@ -145,10 +177,10 @@ export async function POST(req: Request) {
       // Handle blobs: new File = upload and set
       if (avatarBlob)
         updateRecord.avatar =
-          avatarBlob as unknown as AppCertifiedActorProfile.Record["avatar"];
+          avatarBlob.original as AppCertifiedActorProfile.Record["avatar"];
       if (bannerBlob)
         updateRecord.banner =
-          bannerBlob as unknown as AppCertifiedActorProfile.Record["banner"];
+          bannerBlob.original as AppCertifiedActorProfile.Record["banner"];
 
       try {
         assertValidRecord(
@@ -188,19 +220,11 @@ export async function POST(req: Request) {
     const pdsUrl = session ? await resolveSessionPds(session) : undefined;
     const avatarUrl =
       convertBlobUrlToCdn(
-        getBlobURL(
-          updated?.avatar as unknown as Parameters<typeof getBlobURL>[0],
-          repo.assertDid,
-          pdsUrl,
-        ),
+        getCertifiedProfileImageURL(updated?.avatar, repo.assertDid, pdsUrl),
       ) || "";
     const bannerUrl =
       convertBlobUrlToCdn(
-        getBlobURL(
-          updated?.banner as unknown as Parameters<typeof getBlobURL>[0],
-          repo.assertDid,
-          pdsUrl,
-        ),
+        getCertifiedProfileImageURL(updated?.banner, repo.assertDid, pdsUrl),
       ) || "";
 
     return NextResponse.json({

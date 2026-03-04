@@ -22,6 +22,16 @@ interface EvaluationWithUri {
   recordUri: string;
 }
 
+function isEvaluation(value: unknown): value is Evaluation {
+  if (!value || typeof value !== "object") return false;
+  const v = value as Record<string, unknown>;
+  return (
+    typeof v.summary === "string" &&
+    typeof v.createdAt === "string" &&
+    Array.isArray(v.evaluators)
+  );
+}
+
 const EvaluationSkeleton = () => (
   <div className="glass-panel border-border/50 space-y-4 rounded-xl border p-6">
     <Skeleton className="h-6 w-1/4" />
@@ -59,10 +69,12 @@ export default function HypercertEvaluationsSection({
         if (q.isSuccess && q.data && evaluationLinks?.[i]) {
           const link = evaluationLinks[i];
           const recordUri = `at://${link.did}/${link.collection}/${link.rkey}`;
-          items.push({
-            evaluation: q.data.value as unknown as Evaluation,
-            recordUri,
-          });
+          if (isEvaluation(q.data.value)) {
+            items.push({
+              evaluation: q.data.value,
+              recordUri,
+            });
+          }
         }
       }
       return {

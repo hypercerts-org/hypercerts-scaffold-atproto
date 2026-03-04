@@ -149,25 +149,36 @@ export async function POST(req: NextRequest) {
         claimRecord,
         OrgHypercertsClaimActivity.validateRecord,
       );
+      const claimResult = await ctx.agent.com.atproto.repo.createRecord({
+        repo: ctx.activeDid,
+        collection: "org.hypercerts.claim.activity",
+        record: claimRecord,
+      });
+      const data = {
+        hypercertUri: claimResult.data.uri,
+        hypercertCid: claimResult.data.cid,
+        rightsUri: rightsResult.data.uri,
+        rightsCid: rightsResult.data.cid,
+      };
+      return NextResponse.json(data);
     } catch (e) {
-      return NextResponse.json(
-        { error: e instanceof Error ? e.message : "Validation failed" },
-        { status: 400 },
-      );
+      // Compensating delete of orphaned rights record
+      const parsedRights = parseAtUri(rightsResult.data.uri);
+      if (parsedRights) {
+        await ctx.agent.com.atproto.repo
+          .deleteRecord({
+            repo: ctx.activeDid,
+            collection:
+              parsedRights.collection || "org.hypercerts.claim.rights",
+            rkey: parsedRights.rkey,
+          })
+          .catch(() => undefined); // best-effort cleanup
+      }
+      if (e instanceof Error && e.message.startsWith("Invalid")) {
+        return NextResponse.json({ error: e.message }, { status: 400 });
+      }
+      throw e;
     }
-    const claimResult = await ctx.agent.com.atproto.repo.createRecord({
-      repo: ctx.activeDid,
-      collection: "org.hypercerts.claim.activity",
-      record: claimRecord,
-    });
-
-    const data = {
-      hypercertUri: claimResult.data.uri,
-      hypercertCid: claimResult.data.cid,
-      rightsUri: rightsResult.data.uri,
-      rightsCid: rightsResult.data.cid,
-    };
-    return NextResponse.json(data);
   } catch (e) {
     if (e instanceof Error && e.message.startsWith("INVALID_JSON:")) {
       const field = e.message.split(":")[1];
@@ -228,10 +239,9 @@ export async function PUT(req: NextRequest) {
     if (title !== null) updates.title = title;
     if (shortDescription !== null) updates.shortDescription = shortDescription;
     if (description !== null) updates.description = description;
-    if (startDate === "null") updates.startDate = null;
-    else if (startDate !== null) updates.startDate = startDate;
-    if (endDate === "null") updates.endDate = null;
-    else if (endDate !== null) updates.endDate = endDate;
+    if (startDate !== null && startDate !== "null")
+      updates.startDate = startDate;
+    if (endDate !== null && endDate !== "null") updates.endDate = endDate;
 
     // Handle image: File = new image, string "null" = remove, absent = no change
     let image: Blob | null | undefined;
@@ -258,6 +268,10 @@ export async function PUT(req: NextRequest) {
       createdAt: existing.createdAt, // immutable
       rights: existing.rights, // immutable
     };
+
+    // Remove optional fields that were explicitly cleared (lexicon rejects null for non-nullable string fields)
+    if (startDate === "null") delete record.startDate;
+    if (endDate === "null") delete record.endDate;
 
     // Handle image
     if (image === null) {

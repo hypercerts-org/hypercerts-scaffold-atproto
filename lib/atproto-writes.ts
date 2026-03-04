@@ -31,9 +31,15 @@ export async function resolveStrongRef(
   const parsed = parseAtUri(uri);
   if (!parsed) throw new Error(`Invalid AT-URI: ${uri}`);
 
+  const collection = parsed.collection || fallbackCollection;
+  if (!collection) {
+    throw new Error(
+      `Missing collection in AT-URI and no fallback provided: ${uri}`,
+    );
+  }
   const result = await agent.com.atproto.repo.getRecord({
     repo: parsed.did,
-    collection: parsed.collection || fallbackCollection || "",
+    collection,
     rkey: parsed.rkey,
   });
 
