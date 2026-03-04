@@ -2,7 +2,7 @@
 
 import ActiveProfileInfoBox from "@/components/active-profile-info-box";
 import { StepperHeader } from "@/components/edit-cert-stepper";
-import type { CreateHypercertResult } from "@hypercerts-org/sdk-core";
+import type { CreateHypercertResult } from "@/lib/types";
 import dynamic from "next/dynamic";
 import { useState } from "react";
 import {

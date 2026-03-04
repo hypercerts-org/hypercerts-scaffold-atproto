@@ -1,9 +1,11 @@
 import LoginDialog from "@/components/login-dialog";
 import Navbar from "@/components/navbar";
 import { getSession, getAgent } from "@/lib/atproto-session";
-import { convertBlobUrlToCdn } from "@/lib/utils";
+import { getBlobURL, convertBlobUrlToCdn } from "@/lib/utils";
+import { resolveSessionPds } from "@/lib/server-utils";
 import { Suspense } from "react";
 import { AuthErrorToast } from "./AuthErrorToast";
+import type { CertifiedActorProfile } from "@/lib/types";
 
 export async function SignedInProvider({
   children,
@@ -16,14 +18,22 @@ export async function SignedInProvider({
   let handle: string | undefined = undefined;
 
   if (session) {
-    const repo = await getAgent();
-    if (repo) {
-      // @ts-expect-error -- Phase 2-4 migration: repo is Agent, not Repository
-      const profile = await repo.profile
-        .getCertifiedProfile()
+    const agent = await getAgent();
+    if (agent) {
+      const profileResult = await agent.com.atproto.repo
+        .getRecord({
+          repo: agent.assertDid,
+          collection: "app.certified.actor.profile",
+          rkey: "self",
+        })
         .catch(() => null);
+      const profile = profileResult?.data?.value as
+        | CertifiedActorProfile
+        | undefined;
 
-      avatarUrl = convertBlobUrlToCdn(profile?.avatar) || "";
+      const pdsUrl = await resolveSessionPds(session);
+      const rawAvatarUrl = getBlobURL(profile?.avatar, agent.assertDid, pdsUrl);
+      avatarUrl = convertBlobUrlToCdn(rawAvatarUrl) || "";
       handle = profile?.handle || "";
     }
   }

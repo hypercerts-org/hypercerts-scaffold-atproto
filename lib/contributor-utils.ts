@@ -1,7 +1,7 @@
 import type {
   OrgHypercertsClaimActivity,
   ComAtprotoRepoStrongRef,
-} from "@hypercerts-org/sdk-core";
+} from "@hypercerts-org/lexicon";
 
 type Contributor = OrgHypercertsClaimActivity.Contributor;
 type ContributorIdentity = OrgHypercertsClaimActivity.ContributorIdentity;

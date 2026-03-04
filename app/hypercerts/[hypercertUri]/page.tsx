@@ -2,12 +2,15 @@ import type { Metadata } from "next";
 import HypercertDetailsView from "@/components/hypercert-detail-view";
 import { getSession } from "@/lib/atproto-session";
 import { getRepoContext } from "@/lib/repo-context";
-import { getBlobURL, extractDidFromAtUri } from "@/lib/utils";
+import { getBlobURL, extractDidFromAtUri, parseAtUri } from "@/lib/utils";
 import { resolveSessionPds } from "@/lib/server-utils";
 import { ArrowLeft, AlertCircle, LogIn } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { OrgHypercertsDefs } from "@hypercerts-org/sdk-core";
+import {
+  OrgHypercertsDefs,
+  OrgHypercertsClaimActivity,
+} from "@hypercerts-org/lexicon";
 
 export async function generateMetadata({
   params,
@@ -28,15 +31,25 @@ export async function generateMetadata({
       return { title: "Hypercert" };
     }
 
-    // @ts-expect-error -- Phase 2-4 migration: ctx.scopedRepo no longer exists, migrating to native atproto in Phase 2-4
-    const cert = await viewCtx.scopedRepo.hypercerts.get(decodedUri);
-    if (!cert?.record) {
+    const parsed = parseAtUri(decodedUri);
+    const certResult = parsed
+      ? await viewCtx.agent.com.atproto.repo
+          .getRecord({
+            repo: parsed.did,
+            collection: parsed.collection || "org.hypercerts.claim.activity",
+            rkey: parsed.rkey,
+          })
+          .catch(() => null)
+      : null;
+    const rawValue = certResult?.data.value;
+    if (!OrgHypercertsClaimActivity.isRecord(rawValue)) {
       return { title: "Hypercert Not Found" };
     }
+    const certRecord = rawValue as OrgHypercertsClaimActivity.Record;
 
-    const title = cert.record.title || "Hypercert";
+    const title = certRecord.title || "Hypercert";
     const description =
-      cert.record.shortDescription || "View this hypercert impact claim.";
+      certRecord.shortDescription || "View this hypercert impact claim.";
 
     return {
       title,
@@ -124,9 +137,18 @@ export default async function HypercertViewPage({
       </main>
     );
 
-  // @ts-expect-error -- Phase 2-4 migration: ctx.scopedRepo no longer exists, migrating to native atproto in Phase 2-4
-  const cert = await viewCtx.scopedRepo.hypercerts.get(decodedUri);
-  if (!cert?.record)
+  const parsed = parseAtUri(decodedUri);
+  const certResult = parsed
+    ? await viewCtx.agent.com.atproto.repo
+        .getRecord({
+          repo: parsed.did,
+          collection: parsed.collection || "org.hypercerts.claim.activity",
+          rkey: parsed.rkey,
+        })
+        .catch(() => null)
+    : null;
+  const rawValue = certResult?.data.value;
+  if (!OrgHypercertsClaimActivity.isRecord(rawValue))
     return (
       <main className="noise-bg relative min-h-screen">
         <div className="gradient-mesh absolute inset-0 -z-10" />
@@ -156,19 +178,19 @@ export default async function HypercertViewPage({
       </main>
     );
 
+  const certRecord = rawValue as OrgHypercertsClaimActivity.Record;
   let imageUri: string | undefined;
-  const { image, ...certWithoutImage } = cert.record;
+  const { image, ...certWithoutImage } = certRecord;
 
   if (image && session) {
     const pdsUrl = await resolveSessionPds(session);
 
-    // TODO: check for uri and image types. for now we will assume its a small iamge
+    // TODO: check for uri and image types. for now we will assume its a small image
     imageUri = getBlobURL(
       (image as OrgHypercertsDefs.SmallImage).image,
       ownerDid,
       pdsUrl,
     );
-    console.log(imageUri);
   }
 
   const isOwner = Boolean(session?.did && ownerDid && session.did === ownerDid);

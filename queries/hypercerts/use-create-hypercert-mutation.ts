@@ -3,7 +3,7 @@
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { createHypercertFromParams } from "@/lib/api/hypercerts";
-import type { CreateHypercertParams } from "@hypercerts-org/sdk-core";
+import type { CreateHypercertParams } from "@/lib/types";
 
 interface UseCreateHypercertMutationOptions {
   onSuccess?: (

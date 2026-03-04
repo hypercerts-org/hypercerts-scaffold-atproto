@@ -1,7 +1,43 @@
 import { NextResponse } from "next/server";
 import { getAgent } from "@/lib/atproto-session";
 import { revalidatePath } from "next/cache";
-import { convertBlobUrlToCdn } from "@/lib/utils";
+import { getBlobURL, convertBlobUrlToCdn } from "@/lib/utils";
+import { getSession } from "@/lib/atproto-session";
+import { resolveSessionPds } from "@/lib/server-utils";
+import {
+  AppCertifiedActorProfile,
+  OrgHypercertsDefs,
+} from "@hypercerts-org/lexicon";
+import { assertValidRecord } from "@/lib/record-validation";
+
+/**
+ * Safely extracts a URL from a certified profile avatar/banner union type.
+ *
+ * The union is: $Typed<Uri> | $Typed<SmallImage> | $Typed<LargeImage> | { $type: string }
+ * - Uri ($type 'org.hypercerts.defs#uri'): has a `uri` string — return it directly
+ * - SmallImage ($type 'org.hypercerts.defs#smallImage'): has an `image` BlobRef — pass to getBlobURL
+ * - LargeImage ($type 'org.hypercerts.defs#largeImage'): has an `image` BlobRef — pass to getBlobURL
+ * - Unknown $type: return undefined
+ */
+function getCertifiedProfileImageURL(
+  field:
+    | AppCertifiedActorProfile.Record["avatar"]
+    | AppCertifiedActorProfile.Record["banner"],
+  did: string,
+  pdsUrl: string | undefined,
+): string | undefined {
+  if (!field) return undefined;
+  if (OrgHypercertsDefs.isUri(field)) {
+    return field.uri;
+  }
+  if (OrgHypercertsDefs.isSmallImage(field)) {
+    return getBlobURL(field.image, did, pdsUrl);
+  }
+  if (OrgHypercertsDefs.isLargeImage(field)) {
+    return getBlobURL(field.image, did, pdsUrl);
+  }
+  return undefined;
+}
 
 export async function POST(req: Request) {
   try {
@@ -40,76 +76,156 @@ export async function POST(req: Request) {
     }
 
     // Check if profile exists by fetching it first
-    let existingProfile;
-    try {
-      // @ts-expect-error -- Phase 2-4 migration: repo is Agent, not Repository
-      existingProfile = await repo.profile.getCertifiedProfile();
-    } catch (err: unknown) {
-      const isNotFound = err instanceof Error && /not found/i.test(err.message);
-      if (isNotFound) {
-        existingProfile = null;
-      } else {
-        throw err;
-      }
-    }
+    const existingResult = await repo.com.atproto.repo
+      .getRecord({
+        repo: repo.assertDid,
+        collection: "app.certified.actor.profile",
+        rkey: "self",
+      })
+      .catch(() => null);
+    const existingProfile =
+      (existingResult?.data?.value as
+        | AppCertifiedActorProfile.Record
+        | undefined) ?? null;
 
-    // If no displayName, assume no profile record exists yet
-    if (!existingProfile?.displayName) {
-      // For create: use undefined for empty fields (no null)
-      const createParams: {
-        displayName?: string;
-        description?: string;
-        pronouns?: string;
-        website?: string;
-        avatar?: File;
-        banner?: File;
-      } = {};
-
-      if (displayName) createParams.displayName = displayName;
-      if (description) createParams.description = description;
-      if (pronouns) createParams.pronouns = pronouns;
-      if (website) createParams.website = website;
-      if (avatar) createParams.avatar = avatar;
-      if (banner) createParams.banner = banner;
-
-      // @ts-expect-error -- Phase 2-4 migration: repo is Agent, not Repository
-      await repo.profile.createCertifiedProfile(createParams);
-    } else {
-      // For update: use null to remove fields, undefined to preserve
-      const updateParams: {
-        displayName?: string | null;
-        description?: string | null;
-        pronouns?: string | null;
-        website?: string | null;
-        avatar?: File | null;
-        banner?: File | null;
-      } = {
-        displayName: displayName || null,
-        description: description || null,
-        pronouns: pronouns || null,
-        website: website || null,
-      };
-
-      // Only include avatar/banner if user uploaded new files
-      // Omitting them (undefined) tells SDK to preserve existing values
+    // If no profile record exists yet, create it; otherwise update
+    if (existingProfile === null) {
+      // Upload blobs if provided
+      let avatarBlob, bannerBlob;
       if (avatar) {
-        updateParams.avatar = avatar;
+        const avatarData = new Blob([avatar], { type: avatar.type });
+        const uploadResult = await repo.com.atproto.repo.uploadBlob(avatarData);
+        avatarBlob = uploadResult.data.blob;
       }
       if (banner) {
-        updateParams.banner = banner;
+        const bannerData = new Blob([banner], { type: banner.type });
+        const uploadResult = await repo.com.atproto.repo.uploadBlob(bannerData);
+        bannerBlob = uploadResult.data.blob;
       }
 
-      // @ts-expect-error -- Phase 2-4 migration: repo is Agent, not Repository
-      await repo.profile.updateCertifiedProfile(updateParams);
+      const record: AppCertifiedActorProfile.Record = {
+        $type: "app.certified.actor.profile",
+      };
+      if (displayName) record.displayName = displayName;
+      if (description) record.description = description;
+      if (pronouns) record.pronouns = pronouns;
+      if (website) record.website = website;
+      if (avatarBlob)
+        record.avatar =
+          avatarBlob.original as AppCertifiedActorProfile.Record["avatar"];
+      if (bannerBlob)
+        record.banner =
+          bannerBlob.original as AppCertifiedActorProfile.Record["banner"];
+
+      try {
+        assertValidRecord(
+          "certifiedProfile",
+          record,
+          AppCertifiedActorProfile.validateRecord,
+        );
+      } catch (e) {
+        return NextResponse.json(
+          { error: e instanceof Error ? e.message : "Validation failed" },
+          { status: 400 },
+        );
+      }
+
+      await repo.com.atproto.repo.createRecord({
+        repo: repo.assertDid,
+        collection: "app.certified.actor.profile",
+        rkey: "self",
+        record,
+      });
+    } else {
+      // Upload new blobs if provided
+      let avatarBlob, bannerBlob;
+      if (avatar) {
+        const avatarData = new Blob([avatar], { type: avatar.type });
+        const uploadResult = await repo.com.atproto.repo.uploadBlob(avatarData);
+        avatarBlob = uploadResult.data.blob;
+      }
+      if (banner) {
+        const bannerData = new Blob([banner], { type: banner.type });
+        const uploadResult = await repo.com.atproto.repo.uploadBlob(bannerData);
+        bannerBlob = uploadResult.data.blob;
+      }
+
+      // Merge: null = remove, undefined = preserve existing, value = set
+      const updateRecord: AppCertifiedActorProfile.Record = {
+        ...existingProfile,
+        $type: "app.certified.actor.profile",
+      };
+
+      // Handle string fields: null removes, truthy sets, falsy (empty string) removes
+      if (displayName !== undefined) {
+        if (displayName) updateRecord.displayName = displayName;
+        else delete updateRecord.displayName;
+      }
+      if (description !== undefined) {
+        if (description) updateRecord.description = description;
+        else delete updateRecord.description;
+      }
+      if (pronouns !== undefined) {
+        if (pronouns) updateRecord.pronouns = pronouns;
+        else delete updateRecord.pronouns;
+      }
+      if (website !== undefined) {
+        if (website) updateRecord.website = website;
+        else delete updateRecord.website;
+      }
+
+      // Handle blobs: new File = upload and set
+      if (avatarBlob)
+        updateRecord.avatar =
+          avatarBlob.original as AppCertifiedActorProfile.Record["avatar"];
+      if (bannerBlob)
+        updateRecord.banner =
+          bannerBlob.original as AppCertifiedActorProfile.Record["banner"];
+
+      try {
+        assertValidRecord(
+          "certifiedProfile",
+          updateRecord,
+          AppCertifiedActorProfile.validateRecord,
+        );
+      } catch (e) {
+        return NextResponse.json(
+          { error: e instanceof Error ? e.message : "Validation failed" },
+          { status: 400 },
+        );
+      }
+
+      await repo.com.atproto.repo.putRecord({
+        repo: repo.assertDid,
+        collection: "app.certified.actor.profile",
+        rkey: "self",
+        record: updateRecord,
+      });
     }
     revalidatePath("/profile");
 
-    // @ts-expect-error -- Phase 2-4 migration: repo is Agent, not Repository
-    const updated = await repo.profile.getCertifiedProfile();
+    const updatedResult = await repo.com.atproto.repo
+      .getRecord({
+        repo: repo.assertDid,
+        collection: "app.certified.actor.profile",
+        rkey: "self",
+      })
+      .catch(() => null);
+    const updated = updatedResult?.data?.value as
+      | AppCertifiedActorProfile.Record
+      | undefined;
 
-    // Convert blob URLs to CDN URLs so Next.js remotePatterns allow them
-    const avatarUrl = convertBlobUrlToCdn(updated?.avatar) || "";
-    const bannerUrl = convertBlobUrlToCdn(updated?.banner) || "";
+    // Convert BlobRef objects to URLs, then to CDN URLs
+    const session = await getSession();
+    const pdsUrl = session ? await resolveSessionPds(session) : undefined;
+    const avatarUrl =
+      convertBlobUrlToCdn(
+        getCertifiedProfileImageURL(updated?.avatar, repo.assertDid, pdsUrl),
+      ) || "";
+    const bannerUrl =
+      convertBlobUrlToCdn(
+        getCertifiedProfileImageURL(updated?.banner, repo.assertDid, pdsUrl),
+      ) || "";
 
     return NextResponse.json({
       ok: true,

@@ -2,6 +2,20 @@
 import { getRepoContext } from "@/lib/repo-context";
 import { resolveRecordBlobs } from "./blob-utils";
 import { parseAtUri } from "@/lib/utils";
+import {
+  resolveStrongRef,
+  processLocations,
+  type StrongRef,
+} from "./atproto-writes";
+import type { CertifiedActorProfile } from "@/lib/types";
+import {
+  OrgHypercertsClaimContributionDetails,
+  OrgHypercertsClaimContributorInformation,
+  OrgHypercertsClaimEvaluation,
+  OrgHypercertsClaimMeasurement,
+  OrgHypercertsClaimActivity,
+} from "@hypercerts-org/lexicon";
+import { assertValidRecord } from "@/lib/record-validation";
 
 export type RepositoryRole = "admin" | "writer" | "reader";
 import { cookies } from "next/headers";
@@ -13,22 +27,42 @@ export interface GrantAccessParams {
   userDid: string;
   role: RepositoryRole;
 }
-export const getActiveProfileInfo = async () => {
-  const ctx = await getRepoContext();
-  if (!ctx) return null;
 
-  // @ts-expect-error -- Phase 2-4 migration: ctx.scopedRepo no longer exists, migrating to native atproto in Phase 2-4
-  const profile = await ctx.scopedRepo.profile
-    .getCertifiedProfile()
-    .catch(() => null);
-  if (!profile) return null;
-  return {
-    name: profile.displayName || profile.handle,
-    handle: profile.handle,
-    isOrganization: false,
+export interface ActiveProfileInfo {
+  name: string | undefined;
+  handle: string | undefined;
+  isOrganization: boolean;
+}
+
+export interface SerializedRecord {
+  uri: string;
+  cid: string;
+  value: Record<string, unknown>;
+}
+
+export const getActiveProfileInfo =
+  async (): Promise<ActiveProfileInfo | null> => {
+    const ctx = await getRepoContext();
+    if (!ctx) return null;
+
+    const profileResult = await ctx.agent.com.atproto.repo
+      .getRecord({
+        repo: ctx.targetDid,
+        collection: "app.certified.actor.profile",
+        rkey: "self",
+      })
+      .catch(() => null);
+    const profile = profileResult?.data?.value as
+      | CertifiedActorProfile
+      | undefined;
+    if (!profile) return null;
+    return {
+      name: profile.displayName || profile.handle,
+      handle: profile.handle,
+      isOrganization: false,
+    };
   };
-};
-export const switchActiveProfile = async (did: string) => {
+export const switchActiveProfile = async (did: string): Promise<void> => {
   const cookiePromise = cookies();
   const session = await getSession();
   if (!session) {
@@ -46,7 +80,7 @@ export const switchActiveProfile = async (did: string) => {
   });
 };
 
-export const logout = async () => {
+export const logout = async (): Promise<void> => {
   const session = await getSession();
   if (!session) {
     return;
@@ -63,7 +97,7 @@ export const addContribution = async (params: {
     startDate?: string;
     endDate?: string;
   };
-}) => {
+}): Promise<{ uri: string; cid: string }> => {
   const ctx = await getRepoContext();
   if (!ctx) {
     throw new Error(
@@ -71,12 +105,113 @@ export const addContribution = async (params: {
     );
   }
 
-  // @ts-expect-error -- Phase 2-4 migration: ctx.scopedRepo no longer exists, migrating to native atproto in Phase 2-4
-  return ctx.scopedRepo.hypercerts.addContribution({
-    hypercertUri: params.hypercertUri,
-    contributors: params.contributors,
-    contributionDetails: params.contributionDetails,
+  // 1. Parse and validate the hypercertUri before any writes
+  const hypercertParsed = parseAtUri(params.hypercertUri);
+  if (
+    !hypercertParsed ||
+    !hypercertParsed.collection ||
+    !hypercertParsed.rkey
+  ) {
+    throw new Error("addContribution failed: invalid hypercertUri.");
+  }
+
+  // 2. Ownership check — must happen before any child record writes
+  if (hypercertParsed.did !== ctx.activeDid) {
+    throw new Error(
+      "addContribution failed: cannot modify another user's hypercert.",
+    );
+  }
+
+  // 3. Fetch the existing hypercert record before creating child records
+  const existingHypercertResult = await ctx.agent.com.atproto.repo.getRecord({
+    repo: hypercertParsed.did,
+    collection: hypercertParsed.collection,
+    rkey: hypercertParsed.rkey,
   });
+  const existingRecord = existingHypercertResult.data.value as Record<
+    string,
+    unknown
+  >;
+
+  // 4. Create contributionDetails record
+  const detailsRecord: OrgHypercertsClaimContributionDetails.Record = {
+    $type: "org.hypercerts.claim.contributionDetails",
+    role: params.contributionDetails.role,
+    createdAt: new Date().toISOString(),
+    ...(params.contributionDetails.contributionDescription
+      ? {
+          contributionDescription:
+            params.contributionDetails.contributionDescription,
+        }
+      : {}),
+    ...(params.contributionDetails.startDate
+      ? { startDate: params.contributionDetails.startDate }
+      : {}),
+    ...(params.contributionDetails.endDate
+      ? { endDate: params.contributionDetails.endDate }
+      : {}),
+  };
+
+  assertValidRecord(
+    "contributionDetails",
+    detailsRecord,
+    OrgHypercertsClaimContributionDetails.validateRecord,
+  );
+  const detailsResult = await ctx.agent.com.atproto.repo.createRecord({
+    repo: ctx.activeDid,
+    collection: "org.hypercerts.claim.contributionDetails",
+    record: detailsRecord,
+  });
+  const detailsRef = {
+    uri: detailsResult.data.uri,
+    cid: detailsResult.data.cid,
+  };
+
+  // 5. Create contributorInformation records for each contributor
+  const contributorRefs = await Promise.all(
+    params.contributors.map(async (identifier) => {
+      const infoRecord: OrgHypercertsClaimContributorInformation.Record = {
+        $type: "org.hypercerts.claim.contributorInformation",
+        identifier,
+        createdAt: new Date().toISOString(),
+      };
+      assertValidRecord(
+        "contributorInformation",
+        infoRecord,
+        OrgHypercertsClaimContributorInformation.validateRecord,
+      );
+      const infoResult = await ctx.agent.com.atproto.repo.createRecord({
+        repo: ctx.activeDid,
+        collection: "org.hypercerts.claim.contributorInformation",
+        record: infoRecord,
+      });
+      return { uri: infoResult.data.uri, cid: infoResult.data.cid };
+    }),
+  );
+
+  // Build new contributor entries
+  const newContributors = contributorRefs.map((ref) => ({
+    contributorIdentity: ref,
+    contributionDetails: detailsRef,
+  }));
+
+  const existingContributors = (existingRecord.contributors as unknown[]) || [];
+  existingRecord.contributors = [...existingContributors, ...newContributors];
+
+  // 6. Update hypercert with appended contributors
+  assertValidRecord(
+    "activity",
+    existingRecord,
+    OrgHypercertsClaimActivity.validateRecord,
+  );
+  const updateResult = await ctx.agent.com.atproto.repo.putRecord({
+    repo: ctx.activeDid,
+    collection: hypercertParsed.collection,
+    rkey: hypercertParsed.rkey,
+    record: existingRecord,
+  });
+
+  return { uri: updateResult.data.uri, cid: updateResult.data.cid };
 };
 
 export const addEvaluation = async (params: {
@@ -87,7 +222,7 @@ export const addEvaluation = async (params: {
   content?: string[];
   measurements?: string[];
   location?: string;
-}) => {
+}): Promise<{ uri: string; cid: string }> => {
   const ctx = await getRepoContext();
   if (!ctx) {
     throw new Error(
@@ -97,11 +232,55 @@ export const addEvaluation = async (params: {
 
   const { hypercertUri, ...evaluationData } = params;
 
-  // @ts-expect-error -- Phase 2-4 migration: ctx.scopedRepo no longer exists, migrating to native atproto in Phase 2-4
-  return ctx.scopedRepo.hypercerts.addEvaluation({
-    ...evaluationData,
-    subjectUri: hypercertUri,
+  // Resolve subject hypercert to StrongRef
+  const subject = await resolveStrongRef(
+    ctx.agent,
+    hypercertUri,
+    "org.hypercerts.claim.activity",
+  );
+
+  const record: OrgHypercertsClaimEvaluation.Record = {
+    $type: "org.hypercerts.claim.evaluation",
+    subject,
+    evaluators: evaluationData.evaluators.map((did) => ({ did })),
+    summary: evaluationData.summary,
+    createdAt: new Date().toISOString(),
+    ...(evaluationData.score ? { score: evaluationData.score } : {}),
+    ...(evaluationData.content
+      ? {
+          content: evaluationData.content.map((uri) => ({
+            $type: "org.hypercerts.defs#uri" as const,
+            uri,
+          })),
+        }
+      : {}),
+    // measurements and location are passed as-is (AT-URIs); the index signature accepts them
+    ...(evaluationData.measurements
+      ? {
+          measurements:
+            evaluationData.measurements as unknown as OrgHypercertsClaimEvaluation.Record["measurements"],
+        }
+      : {}),
+    ...(evaluationData.location
+      ? {
+          location:
+            evaluationData.location as unknown as OrgHypercertsClaimEvaluation.Record["location"],
+        }
+      : {}),
+  };
+
+  assertValidRecord(
+    "evaluation",
+    record,
+    OrgHypercertsClaimEvaluation.validateRecord,
+  );
+  const result = await ctx.agent.com.atproto.repo.createRecord({
+    repo: ctx.activeDid,
+    collection: "org.hypercerts.claim.evaluation",
+    record,
   });
+
+  return { uri: result.data.uri, cid: result.data.cid };
 };
 
 // Location parameter for measurements - can be a string (AT-URI) or full location creation params
@@ -129,7 +308,7 @@ export const addMeasurement = async (params: {
   evidenceURI?: string[];
   locations?: MeasurementLocationParam[];
   comment?: string;
-}) => {
+}): Promise<{ uri: string; cid: string }> => {
   const ctx = await getRepoContext();
   if (!ctx) {
     throw new Error(
@@ -137,20 +316,61 @@ export const addMeasurement = async (params: {
     );
   }
 
-  // @ts-expect-error -- Phase 2-4 migration: ctx.scopedRepo no longer exists, migrating to native atproto in Phase 2-4
-  return ctx.scopedRepo.hypercerts.addMeasurement({
-    ...params,
-    measurers: (params.measurers || []).map((measurer) => {
-      return { did: measurer };
-    }),
+  // Resolve subject to StrongRef
+  const subject = await resolveStrongRef(
+    ctx.agent,
+    params.subject,
+    "org.hypercerts.claim.activity",
+  );
+
+  // Process locations if provided
+  let locationRefs: StrongRef[] | undefined;
+  if (params.locations && params.locations.length > 0) {
+    locationRefs = await processLocations(
+      ctx.agent,
+      ctx.activeDid,
+      params.locations,
+    );
+  }
+
+  const record: OrgHypercertsClaimMeasurement.Record = {
+    $type: "org.hypercerts.claim.measurement",
+    subject,
+    metric: params.metric,
+    value: params.value,
+    unit: params.unit,
+    createdAt: new Date().toISOString(),
+    ...(params.measurers?.length
+      ? { measurers: params.measurers.map((did) => ({ did })) }
+      : {}),
+    ...(params.startDate ? { startDate: params.startDate } : {}),
+    ...(params.endDate ? { endDate: params.endDate } : {}),
+    ...(params.methodType ? { methodType: params.methodType } : {}),
+    ...(params.methodURI ? { methodURI: params.methodURI } : {}),
+    ...(params.evidenceURI?.length ? { evidenceURI: params.evidenceURI } : {}),
+    ...(params.comment ? { comment: params.comment } : {}),
+    ...(locationRefs?.length ? { locations: locationRefs } : {}),
+  };
+
+  assertValidRecord(
+    "measurement",
+    record,
+    OrgHypercertsClaimMeasurement.validateRecord,
+  );
+  const result = await ctx.agent.com.atproto.repo.createRecord({
+    repo: ctx.activeDid,
+    collection: "org.hypercerts.claim.measurement",
+    record,
   });
+
+  return { uri: result.data.uri, cid: result.data.cid };
 };
 
 export const getMeasurementRecord = async (params: {
   did: string;
   collection: string;
   rkey: string;
-}) => {
+}): Promise<SerializedRecord> => {
   const { did, collection, rkey } = params;
   const ctx = await getRepoContext({ targetDid: did });
   if (!ctx) {
@@ -159,19 +379,23 @@ export const getMeasurementRecord = async (params: {
     );
   }
 
-  // @ts-expect-error -- Phase 2-4 migration: ctx.scopedRepo no longer exists, migrating to native atproto in Phase 2-4
-  const data = await ctx.scopedRepo.records.get({ collection, rkey });
+  const result = await ctx.agent.com.atproto.repo.getRecord({
+    repo: did,
+    collection,
+    rkey,
+  });
+  const data: Record<string, unknown> = { ...result.data };
   if (data?.value) {
     data.value = await resolveRecordBlobs(data.value, did);
   }
-  return JSON.parse(JSON.stringify(data));
+  return JSON.parse(JSON.stringify(data)) as SerializedRecord;
 };
 
 export const getEvaluationRecord = async (params: {
   did: string;
   collection: string;
   rkey: string;
-}) => {
+}): Promise<SerializedRecord> => {
   const { did, collection, rkey } = params;
   const ctx = await getRepoContext({ targetDid: did });
   if (!ctx) {
@@ -180,19 +404,23 @@ export const getEvaluationRecord = async (params: {
     );
   }
 
-  // @ts-expect-error -- Phase 2-4 migration: ctx.scopedRepo no longer exists, migrating to native atproto in Phase 2-4
-  const data = await ctx.scopedRepo.records.get({ collection, rkey });
+  const result = await ctx.agent.com.atproto.repo.getRecord({
+    repo: did,
+    collection,
+    rkey,
+  });
+  const data: Record<string, unknown> = { ...result.data };
   if (data?.value) {
     data.value = await resolveRecordBlobs(data.value, did);
   }
-  return JSON.parse(JSON.stringify(data));
+  return JSON.parse(JSON.stringify(data)) as SerializedRecord;
 };
 
 export const getEvidenceRecord = async (params: {
   did: string;
   collection: string;
   rkey: string;
-}) => {
+}): Promise<SerializedRecord> => {
   const { did, collection, rkey } = params;
   const ctx = await getRepoContext({ targetDid: did });
   if (!ctx) {
@@ -201,19 +429,23 @@ export const getEvidenceRecord = async (params: {
     );
   }
 
-  // @ts-expect-error -- Phase 2-4 migration: ctx.scopedRepo no longer exists, migrating to native atproto in Phase 2-4
-  const data = await ctx.scopedRepo.records.get({ collection, rkey });
+  const result = await ctx.agent.com.atproto.repo.getRecord({
+    repo: did,
+    collection,
+    rkey,
+  });
+  const data: Record<string, unknown> = { ...result.data };
   if (data?.value) {
     data.value = await resolveRecordBlobs(data.value, did);
   }
-  return JSON.parse(JSON.stringify(data));
+  return JSON.parse(JSON.stringify(data)) as SerializedRecord;
 };
 
 export const getContributorInformationRecord = async (params: {
   did: string;
   collection: string;
   rkey: string;
-}) => {
+}): Promise<SerializedRecord> => {
   const { did, collection, rkey } = params;
   const ctx = await getRepoContext({ targetDid: did });
   if (!ctx) {
@@ -221,15 +453,21 @@ export const getContributorInformationRecord = async (params: {
       "getContributorInformationRecord failed: could not establish repository context. The user session may have expired or the target DID is unreachable.",
     );
   }
-  // @ts-expect-error -- Phase 2-4 migration: ctx.scopedRepo no longer exists, migrating to native atproto in Phase 2-4
-  const data = await ctx.scopedRepo.records.get({ collection, rkey });
+  const result = await ctx.agent.com.atproto.repo.getRecord({
+    repo: did,
+    collection,
+    rkey,
+  });
+  const data: Record<string, unknown> = { ...result.data };
   if (data?.value) {
     data.value = await resolveRecordBlobs(data.value, did);
   }
-  return JSON.parse(JSON.stringify(data));
+  return JSON.parse(JSON.stringify(data)) as SerializedRecord;
 };
 
-export const deleteHypercert = async (params: { hypercertUri: string }) => {
+export const deleteHypercert = async (params: {
+  hypercertUri: string;
+}): Promise<{ success: true }> => {
   const ctx = await getRepoContext();
   if (!ctx) {
     throw new Error(
@@ -245,8 +483,11 @@ export const deleteHypercert = async (params: { hypercertUri: string }) => {
       "deleteHypercert failed: Forbidden — URI DID does not match active session DID.",
     );
   }
-  // @ts-expect-error -- Phase 2-4 migration: ctx.scopedRepo no longer exists, migrating to native atproto in Phase 2-4
-  await ctx.scopedRepo.hypercerts.delete(params.hypercertUri);
+  await ctx.agent.com.atproto.repo.deleteRecord({
+    repo: ctx.activeDid,
+    collection: parsed.collection || "org.hypercerts.claim.activity",
+    rkey: parsed.rkey,
+  });
   return { success: true };
 };
 
@@ -264,7 +505,7 @@ export const updateMeasurement = async (params: {
     evidenceURI?: string[];
     comment?: string;
   };
-}) => {
+}): Promise<{ uri: string; cid: string }> => {
   const ctx = await getRepoContext();
   if (!ctx) {
     throw new Error(
@@ -283,19 +524,55 @@ export const updateMeasurement = async (params: {
       "updateMeasurement failed: Forbidden — URI DID does not match active session DID.",
     );
   }
-  // Map measurers to SDK format if provided
-  const sdkUpdates = { ...params.updates } as Record<string, unknown>;
-  if (params.updates.measurers) {
-    sdkUpdates.measurers = params.updates.measurers.map((did) => ({ did }));
+  // Fetch existing measurement
+  const existingResult = await ctx.agent.com.atproto.repo.getRecord({
+    repo: parsed.did,
+    collection: parsed.collection || "org.hypercerts.claim.measurement",
+    rkey: parsed.rkey,
+  });
+  const existing = existingResult.data
+    .value as OrgHypercertsClaimMeasurement.Record;
+
+  // Merge updates, preserving immutable fields
+  const record: OrgHypercertsClaimMeasurement.Record = {
+    ...existing,
+    $type: "org.hypercerts.claim.measurement",
+  };
+
+  // Apply individual updates
+  const updates = params.updates;
+  if (updates.metric !== undefined) record.metric = updates.metric;
+  if (updates.value !== undefined) record.value = updates.value;
+  if (updates.unit !== undefined) record.unit = updates.unit;
+  if (updates.startDate !== undefined) record.startDate = updates.startDate;
+  if (updates.endDate !== undefined) record.endDate = updates.endDate;
+  if (updates.methodType !== undefined) record.methodType = updates.methodType;
+  if (updates.methodURI !== undefined) record.methodURI = updates.methodURI;
+  if (updates.evidenceURI !== undefined)
+    record.evidenceURI = updates.evidenceURI;
+  if (updates.comment !== undefined) record.comment = updates.comment;
+  if (updates.measurers !== undefined) {
+    record.measurers = updates.measurers.map((did) => ({ did }));
   }
-  // @ts-expect-error -- Phase 2-4 migration: ctx.scopedRepo no longer exists, migrating to native atproto in Phase 2-4
-  return ctx.scopedRepo.hypercerts.updateMeasurement(
-    params.measurementUri,
-    sdkUpdates,
+
+  assertValidRecord(
+    "measurement",
+    record,
+    OrgHypercertsClaimMeasurement.validateRecord,
   );
+  const result = await ctx.agent.com.atproto.repo.putRecord({
+    repo: ctx.activeDid,
+    collection: parsed.collection || "org.hypercerts.claim.measurement",
+    rkey: parsed.rkey,
+    record,
+  });
+
+  return { uri: result.data.uri, cid: result.data.cid };
 };
 
-export const deleteRecord = async (params: { recordUri: string }) => {
+export const deleteRecord = async (params: {
+  recordUri: string;
+}): Promise<{ success: true }> => {
   const ctx = await getRepoContext();
   if (!ctx) {
     throw new Error(
@@ -311,8 +588,8 @@ export const deleteRecord = async (params: { recordUri: string }) => {
       "deleteRecord failed: Forbidden — URI DID does not match active session DID.",
     );
   }
-  // @ts-expect-error -- Phase 2-4 migration: ctx.scopedRepo no longer exists, migrating to native atproto in Phase 2-4
-  await ctx.scopedRepo.records.delete({
+  await ctx.agent.com.atproto.repo.deleteRecord({
+    repo: ctx.activeDid,
     collection: parsed.collection,
     rkey: parsed.rkey,
   });

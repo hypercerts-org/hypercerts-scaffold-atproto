@@ -17,11 +17,13 @@ export const metadata: Metadata = {
 export default async function BskyProfilePage() {
   const repo = await getAgent();
   if (!repo) redirect("/");
-  // @ts-expect-error -- Phase 2-4 migration: repo is Agent, not Repository
-  const profile = await repo.profile.getBskyProfile();
+  const profileResult = await repo
+    .getProfile({ actor: repo.assertDid })
+    .catch(() => null);
+  const profile = profileResult?.data;
 
-  const avatarUrl = profile.avatar || "";
-  const bannerUrl = profile.banner || "";
+  const avatarUrl = profile?.avatar ?? "";
+  const bannerUrl = profile?.banner ?? "";
 
   return (
     <div className="noise-bg relative min-h-screen">
@@ -50,8 +52,8 @@ export default async function BskyProfilePage() {
         <main className="animate-fade-in-up max-w-2xl">
           <BskyProfileForm
             initialProfile={{
-              displayName: profile.displayName || "",
-              description: profile.description || "",
+              displayName: profile?.displayName || "",
+              description: profile?.description || "",
               avatarUrl,
               bannerUrl,
             }}

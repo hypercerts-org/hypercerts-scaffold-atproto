@@ -1,6 +1,6 @@
 "use client";
 
-import type { OrgHypercertsClaimActivity } from "@hypercerts-org/sdk-core";
+import type { OrgHypercertsClaimActivity } from "@hypercerts-org/lexicon";
 import { Users } from "lucide-react";
 import { useMemo } from "react";
 import { parseContributors } from "@/lib/contributor-utils";

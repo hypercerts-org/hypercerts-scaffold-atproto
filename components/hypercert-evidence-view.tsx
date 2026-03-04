@@ -12,7 +12,7 @@ import {
 import { URILink } from "./uri-link";
 import { Badge } from "./ui/badge";
 import { Link as LinkIcon } from "lucide-react";
-import { OrgHypercertsClaimAttachment } from "@hypercerts-org/sdk-core";
+import { OrgHypercertsClaimAttachment } from "@hypercerts-org/lexicon";
 
 type Attachment = OrgHypercertsClaimAttachment.Main;
 
