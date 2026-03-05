@@ -16,8 +16,11 @@ export async function POST(req: Request) {
     const displayName = formData.get("displayName")?.toString() || "";
     const description = formData.get("description")?.toString() || "";
 
-    const avatar = formData.get("avatar") as File | null;
-    const banner = formData.get("banner") as File | null;
+    const avatarRaw = formData.get("avatar") as File | null;
+    const bannerRaw = formData.get("banner") as File | null;
+    // Treat empty/zero-size files as "no upload"
+    const avatar = avatarRaw && avatarRaw.size > 0 ? avatarRaw : null;
+    const banner = bannerRaw && bannerRaw.size > 0 ? bannerRaw : null;
 
     if (avatar && avatar.size > 1_000_000) {
       return NextResponse.json(
