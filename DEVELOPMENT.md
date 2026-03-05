@@ -88,6 +88,16 @@ REDIS_PASSWORD=your_password
 
 # PDS server URL
 NEXT_PUBLIC_PDS_URL=https://pds-eu-west4.test.certified.app
+
+# If enabling ePDS email login, also set:
+OAUTH_SESSION_SECRET=<paste the output from the command below>
+```
+
+To generate a session secret, run this command separately in your terminal and paste the output above:
+
+```bash
+# Generate a session secret (required for ePDS email login)
+openssl rand -hex 32
 ```
 
 **Important:**
@@ -120,6 +130,10 @@ pnpm run dev
 pnpm run lint
 ```
 
+### Test Environment
+
+If running Playwright tests, copy `tests/.env.test.example` to `tests/.env.test` and fill in test credentials. See the example file for details.
+
 ### Common Development Tasks
 
 **Check types:**
@@ -145,6 +159,30 @@ pnpm run build
 ```bash
 pnpm run start
 ```
+
+### Code Formatting
+
+This project uses Prettier for formatting and ESLint for linting, enforced via pre-commit hooks.
+
+**Format all files:**
+
+```bash
+pnpm run format
+```
+
+**Check formatting without writing:**
+
+```bash
+pnpm run format:check
+```
+
+**Pre-commit hooks (automatic):**
+A `lint-staged` hook runs automatically on every commit via Husky:
+
+- Prettier formats staged `.ts`, `.tsx`, and `.mjs` files
+- ESLint fixes staged `.ts` and `.tsx` files
+
+You don't need to run these manually — they run on `git commit`.
 
 ---
 
