@@ -21,8 +21,8 @@ importers:
         specifier: ^0.3.14
         version: 0.3.15
       '@hypercerts-org/lexicon':
-        specifier: 0.10.0
-        version: 0.10.0(@atproto/xrpc@0.7.7)
+        specifier: file:./vendor/hypercerts-org-lexicon-0.10.0.tgz
+        version: file:vendor/hypercerts-org-lexicon-0.10.0.tgz(@atproto/xrpc@0.7.7)
       '@radix-ui/react-accordion':
         specifier: ^1.2.12
         version: 1.2.12(@types/react-dom@19.2.3(@types/react@19.2.7))(@types/react@19.2.7)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
@@ -172,20 +172,20 @@ packages:
   '@atcute/atproto@3.1.10':
     resolution: {integrity: sha512-+GKZpOc0PJcdWMQEkTfg/rSNDAAHxmAUGBl60g2az15etqJn5WaUPNGFE2sB7hKpwi5Ue2h/L0OacINcE/JDDQ==}
 
-  '@atcute/bluesky@3.2.15':
-    resolution: {integrity: sha512-H4RW3WffjfdKvOZ9issEUQnuSR4KfuAwwJnYu0fclA9VDa99JTJ+pa8tTl9lFeBV9DINtWJAx7rdIbICoVCstQ==}
+  '@atcute/bluesky@3.2.20':
+    resolution: {integrity: sha512-N+o7K31ptnHSFoYKOHfQYJHFqU7CgGbCX8lDeWvpQuwkEMTEPojrQXIQD/+FL+FVEvRV/84LNi9cEnhPKShE5w==}
 
-  '@atcute/leaflet@1.0.15':
-    resolution: {integrity: sha512-soA4jGsY0UxTar8rhtfQNYFXPI+qoQGgjpeMKJaO8ZCBBMRoo4OU9gsFJpUm/BYSocOBvvWSq2GV9pYEgUehTw==}
+  '@atcute/leaflet@1.0.20':
+    resolution: {integrity: sha512-Ql7I/CM0MafrJ7vSAbza2gLUIufJGZJx/exKX5Kb7nNG3U/n1HQxhZchATUfu4PL5iINRFE/swWbHITm1juj2Q==}
 
-  '@atcute/lexicons@1.2.6':
-    resolution: {integrity: sha512-s76UQd8D+XmHIzrjD9CJ9SOOeeLPHc+sMmcj7UFakAW/dDFXc579fcRdRfuUKvXBL5v1Gs2VgDdlh/IvvQZAwA==}
+  '@atcute/lexicons@1.2.9':
+    resolution: {integrity: sha512-/RRHm2Cw9o8Mcsrq0eo8fjS9okKYLGfuFwrQ0YoP/6sdSDsXshaTLJsvLlcUcaDaSJ1YFOuHIo3zr2Om2F/16g==}
 
-  '@atcute/uint8array@1.0.6':
-    resolution: {integrity: sha512-ucfRBQc7BFT8n9eCyGOzDHEMKF/nZwhS2pPao4Xtab1ML3HdFYcX2DM1tadCzas85QTGxHe5urnUAAcNKGRi9A==}
+  '@atcute/uint8array@1.1.1':
+    resolution: {integrity: sha512-3LsC8XB8TKe9q/5hOA5sFuzGaIFdJZJNewC5OKa3o/eU6+K7JR6see9Zy2JbQERNVnRl11EzbNov1efgLMAs4g==}
 
-  '@atcute/util-text@0.0.1':
-    resolution: {integrity: sha512-t1KZqvn0AYy+h2KcJyHnKF9aEqfRfMUmyY8j1ELtAEIgqN9CxINAjxnoRCJIFUlvWzb+oY3uElQL/Vyk3yss0g==}
+  '@atcute/util-text@1.1.1':
+    resolution: {integrity: sha512-JH0SxzUQJAmbOBTYyhxQbkkI6M33YpjlVLEcbP5GYt43xgFArzV0FJVmEpvIj0kjsmphHB45b6IitdvxPdec9w==}
 
   '@atproto-labs/did-resolver@0.2.5':
     resolution: {integrity: sha512-he7EC6OMSifNs01a4RT9mta/yYitoKDzlK9ty2TFV5Uj/+HpB4vYMRdIDFrRW0Hcsehy90E2t/dw0t7361MEKQ==}
@@ -528,8 +528,9 @@ packages:
     resolution: {integrity: sha512-bV0Tgo9K4hfPCek+aMAn81RppFKv2ySDQeMoSZuvTASywNTnVJCArCZE2FWqpvIatKu7VMRLWlR1EazvVhDyhQ==}
     engines: {node: '>=18.18'}
 
-  '@hypercerts-org/lexicon@0.10.0':
-    resolution: {integrity: sha512-OxCd/6FJ287e6/xKwZxYNdqELHwLlsl0bOyUGRuJ5cIeBjV/A2aQEVc2ymH+SoVDgSDa97aP/RZKJUp93ULvrQ==}
+  '@hypercerts-org/lexicon@file:vendor/hypercerts-org-lexicon-0.10.0.tgz':
+    resolution: {integrity: sha512-L+/FQOktgj0wPfQ68kuQDYVkb+R1nJr8HZcVCiPxq3wWfNdcUmMbOCsMNsZhB8cCboW+aYo+quwyRXi9Q8h7lQ==, tarball: file:vendor/hypercerts-org-lexicon-0.10.0.tgz}
+    version: 0.10.0
     peerDependencies:
       '@atproto/xrpc': '*'
 
@@ -3778,28 +3779,28 @@ snapshots:
 
   '@atcute/atproto@3.1.10':
     dependencies:
-      '@atcute/lexicons': 1.2.6
+      '@atcute/lexicons': 1.2.9
 
-  '@atcute/bluesky@3.2.15':
+  '@atcute/bluesky@3.2.20':
     dependencies:
       '@atcute/atproto': 3.1.10
-      '@atcute/lexicons': 1.2.6
+      '@atcute/lexicons': 1.2.9
 
-  '@atcute/leaflet@1.0.15':
+  '@atcute/leaflet@1.0.20':
     dependencies:
       '@atcute/atproto': 3.1.10
-      '@atcute/lexicons': 1.2.6
+      '@atcute/lexicons': 1.2.9
 
-  '@atcute/lexicons@1.2.6':
+  '@atcute/lexicons@1.2.9':
     dependencies:
-      '@atcute/uint8array': 1.0.6
-      '@atcute/util-text': 0.0.1
+      '@atcute/uint8array': 1.1.1
+      '@atcute/util-text': 1.1.1
       '@standard-schema/spec': 1.1.0
       esm-env: 1.2.2
 
-  '@atcute/uint8array@1.0.6': {}
+  '@atcute/uint8array@1.1.1': {}
 
-  '@atcute/util-text@0.0.1':
+  '@atcute/util-text@1.1.1':
     dependencies:
       unicode-segmenter: 0.14.5
 
@@ -4328,10 +4329,10 @@ snapshots:
 
   '@humanwhocodes/retry@0.4.3': {}
 
-  '@hypercerts-org/lexicon@0.10.0(@atproto/xrpc@0.7.7)':
+  '@hypercerts-org/lexicon@file:vendor/hypercerts-org-lexicon-0.10.0.tgz(@atproto/xrpc@0.7.7)':
     dependencies:
-      '@atcute/bluesky': 3.2.15
-      '@atcute/leaflet': 1.0.15
+      '@atcute/bluesky': 3.2.20
+      '@atcute/leaflet': 1.0.20
       '@atproto/lexicon': 0.6.0
       '@atproto/xrpc': 0.7.7
       multiformats: 13.4.2
