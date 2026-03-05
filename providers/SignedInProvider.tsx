@@ -1,6 +1,6 @@
 import LoginDialog from "@/components/login-dialog";
 import Navbar from "@/components/navbar";
-import { getSession, getAgent } from "@/lib/atproto-session";
+import { getSession, getAgent, resolveHandle } from "@/lib/atproto-session";
 import { convertBlobUrlToCdn } from "@/lib/utils";
 import { resolveSessionPds } from "@/lib/server-utils";
 import { Suspense } from "react";
@@ -39,10 +39,7 @@ export async function SignedInProvider({
         pdsUrl,
       );
       avatarUrl = convertBlobUrlToCdn(rawAvatarUrl) || "";
-      handle = (profile as Record<string, unknown>)?.handle as
-        | string
-        | undefined;
-      handle = handle || "";
+      handle = (await resolveHandle(agent, agent.assertDid)) || "";
     }
   }
 
