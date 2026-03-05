@@ -1,11 +1,12 @@
 import LoginDialog from "@/components/login-dialog";
 import Navbar from "@/components/navbar";
 import { getSession, getAgent } from "@/lib/atproto-session";
-import { getBlobURL, convertBlobUrlToCdn } from "@/lib/utils";
+import { convertBlobUrlToCdn } from "@/lib/utils";
 import { resolveSessionPds } from "@/lib/server-utils";
 import { Suspense } from "react";
 import { AuthErrorToast } from "./AuthErrorToast";
-import type { CertifiedActorProfile } from "@/lib/types";
+import { AppCertifiedActorProfile } from "@hypercerts-org/lexicon";
+import { getCertifiedProfileImageURL } from "@/lib/profile-utils";
 
 export async function SignedInProvider({
   children,
@@ -28,13 +29,20 @@ export async function SignedInProvider({
         })
         .catch(() => null);
       const profile = profileResult?.data?.value as
-        | CertifiedActorProfile
+        | AppCertifiedActorProfile.Record
         | undefined;
 
       const pdsUrl = await resolveSessionPds(session);
-      const rawAvatarUrl = getBlobURL(profile?.avatar, agent.assertDid, pdsUrl);
+      const rawAvatarUrl = getCertifiedProfileImageURL(
+        profile?.avatar,
+        agent.assertDid,
+        pdsUrl,
+      );
       avatarUrl = convertBlobUrlToCdn(rawAvatarUrl) || "";
-      handle = profile?.handle || "";
+      handle = (profile as Record<string, unknown>)?.handle as
+        | string
+        | undefined;
+      handle = handle || "";
     }
   }
 
