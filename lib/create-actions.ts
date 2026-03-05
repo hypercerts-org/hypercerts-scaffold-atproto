@@ -17,7 +17,7 @@ import { processContributions } from "@/lib/contribution-helpers";
 
 export type RepositoryRole = "admin" | "writer" | "reader";
 import { cookies } from "next/headers";
-import { getSession } from "./atproto-session";
+import { getSession, resolveHandle } from "./atproto-session";
 import oauthClient from "./hypercerts-sdk";
 
 export interface GrantAccessParams {
@@ -54,9 +54,7 @@ export const getActiveProfileInfo =
       | AppCertifiedActorProfile.Record
       | undefined;
     if (!profile) return null;
-    const handle = (profile as Record<string, unknown>).handle as
-      | string
-      | undefined;
+    const handle = await resolveHandle(ctx.agent, ctx.targetDid);
     return {
       name: profile.displayName || handle,
       handle,
