@@ -1,7 +1,7 @@
 "use client";
 
 import type { OrgHypercertsClaimActivity } from "@hypercerts-org/lexicon";
-import { PlusCircle, Users } from "lucide-react";
+import { Plus, Users } from "lucide-react";
 import { useMemo } from "react";
 import Link from "next/link";
 import { parseContributors } from "@/lib/contributor-utils";
@@ -138,7 +138,7 @@ export default function HypercertContributorsSection({
             <Link
               href={`/hypercerts/${encodeURIComponent(hypercertUri)}/add/contribution`}
             >
-              <PlusCircle className="h-4 w-4" /> Add Contributor
+              <Plus className="h-4 w-4" /> Add Contributor
             </Link>
           </Button>
         </div>
