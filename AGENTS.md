@@ -32,19 +32,19 @@ Next.js 16 App Router with native ATProto. No SDK wrapper — all record operati
 
 ### Key Layers (dependency order)
 
-| File | Purpose | Environment |
-|---|---|---|
-| `lib/config.ts` | Env vars, OAuth scope, client metadata | Server |
-| `lib/hypercerts-sdk.ts` | `NodeOAuthClient` singleton + Redis stores | Server |
-| `lib/atproto-session.ts` | `getSession()`, `getAgent()` — low-level session access | Server |
-| `lib/repo-context.ts` | `getRepoContext()` → `{ userDid, activeDid, targetDid, agent }` | Server |
-| `lib/record-validation.ts` | `assertValidRecord()` — generic lexicon validation | Shared |
-| `lib/atproto-writes.ts` | `resolveStrongRef`, `createLocationRecord`, `uploadContentBlob` | Server |
-| `lib/blob-utils.ts` | `resolveBlobToUrl`, `resolveRecordBlobs` — BlobRef→URL | Server |
-| `lib/queries.ts` | Stateless read/write wrappers (take `Agent` as param) | Shared |
-| `lib/create-actions.ts` | `"use server"` actions — session-aware CRUD | Server |
-| `lib/types.ts` | All TypeScript types, `Collections` enum, type guards | Shared |
-| `lib/utils.ts` | AT-URI parsing, blob URLs, `cn()`, `getStringField` | Shared |
+| File                       | Purpose                                                         | Environment |
+| -------------------------- | --------------------------------------------------------------- | ----------- |
+| `lib/config.ts`            | Env vars, OAuth scope, client metadata                          | Server      |
+| `lib/hypercerts-sdk.ts`    | `NodeOAuthClient` singleton + Redis stores                      | Server      |
+| `lib/atproto-session.ts`   | `getSession()`, `getAgent()` — low-level session access         | Server      |
+| `lib/repo-context.ts`      | `getRepoContext()` → `{ userDid, activeDid, targetDid, agent }` | Server      |
+| `lib/record-validation.ts` | `assertValidRecord()` — generic lexicon validation              | Shared      |
+| `lib/atproto-writes.ts`    | `resolveStrongRef`, `createLocationRecord`, `uploadContentBlob` | Server      |
+| `lib/blob-utils.ts`        | `resolveBlobToUrl`, `resolveRecordBlobs` — BlobRef→URL          | Server      |
+| `lib/queries.ts`           | Stateless read/write wrappers (take `Agent` as param)           | Shared      |
+| `lib/create-actions.ts`    | `"use server"` actions — session-aware CRUD                     | Server      |
+| `lib/types.ts`             | All TypeScript types, `Collections` enum, type guards           | Shared      |
+| `lib/utils.ts`             | AT-URI parsing, blob URLs, `cn()`, `getStringField`             | Shared      |
 
 Server-only files use `import "server-only"` or `"use server"` directive.
 
@@ -97,7 +97,7 @@ Server-only files use `import "server-only"` or `"use server"` directive.
 
 ### Error Handling
 
-- API routes: wrap entire handler in `try/catch`, return `NextResponse.json({ error }, { status })` 
+- API routes: wrap entire handler in `try/catch`, return `NextResponse.json({ error }, { status })`
 - Validate inputs early, return 400 with specific error messages
 - Check ownership (DID match) before mutations, return 403
 - Use `.catch(() => null)` for optional fetches that may 404
