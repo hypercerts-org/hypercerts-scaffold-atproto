@@ -2,10 +2,11 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { getAgent, getSession } from "@/lib/atproto-session";
 import ProfileForm from "@/components/profile-form";
-import { getBlobURL, convertBlobUrlToCdn } from "@/lib/utils";
+import { convertBlobUrlToCdn } from "@/lib/utils";
 import { resolveSessionPds } from "@/lib/server-utils";
 import { UserCircle } from "lucide-react";
-import type { CertifiedActorProfile } from "@/lib/types";
+import { AppCertifiedActorProfile } from "@hypercerts-org/lexicon";
+import { getCertifiedProfileImageURL } from "@/lib/profile-utils";
 
 export const metadata: Metadata = {
   title: "Profile",
@@ -28,17 +29,19 @@ export default async function ProfilePage() {
     })
     .catch(() => null);
   const profile = profileResult?.data?.value as
-    | CertifiedActorProfile
+    | AppCertifiedActorProfile.Record
     | undefined;
 
   const session = await getSession();
   const pdsUrl = session ? await resolveSessionPds(session) : undefined;
   const avatarUrl =
-    convertBlobUrlToCdn(getBlobURL(profile?.avatar, repo.assertDid, pdsUrl)) ||
-    "";
+    convertBlobUrlToCdn(
+      getCertifiedProfileImageURL(profile?.avatar, repo.assertDid, pdsUrl),
+    ) || "";
   const bannerUrl =
-    convertBlobUrlToCdn(getBlobURL(profile?.banner, repo.assertDid, pdsUrl)) ||
-    "";
+    convertBlobUrlToCdn(
+      getCertifiedProfileImageURL(profile?.banner, repo.assertDid, pdsUrl),
+    ) || "";
 
   return (
     <div className="noise-bg relative min-h-screen">
