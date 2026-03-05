@@ -6,10 +6,18 @@ import { resolveSessionPds } from "./server-utils";
 import { BlobRef } from "@atproto/lexicon";
 
 function isBlobRefLike(v: Record<string, unknown>): boolean {
-  if (v.$type !== "blob") return false;
-  if (typeof v.mimeType !== "string") return false;
-  const ref = v.ref as Record<string, unknown> | undefined;
-  return !!ref && typeof ref.$link === "string";
+  // Plain serialized blob: { $type: "blob", mimeType, ref: { $link } }
+  if (v.$type === "blob" && typeof v.mimeType === "string") {
+    const ref = v.ref as Record<string, unknown> | undefined;
+    if (ref && typeof ref.$link === "string") return true;
+  }
+  // BlobRef class instance: { mimeType, size, ref: CID, original: { $type: "blob", ref: { $link } } }
+  // The class instance has no top-level $type but has an `original` with one.
+  if (typeof v.mimeType === "string" && typeof v.size === "number") {
+    const original = v.original as Record<string, unknown> | undefined;
+    if (original?.$type === "blob") return true;
+  }
+  return false;
 }
 
 export async function resolveBlobToUrl(
@@ -19,15 +27,22 @@ export async function resolveBlobToUrl(
   if (!blob) return undefined;
   if (typeof blob === "string") return blob;
 
+  // Try to resolve via authenticated session first (gives correct PDS URL)
   const [session, viewCtx] = await Promise.all([
     getSession(),
     getRepoContext({ targetDid: ownerDid }),
   ]);
-  if (!session || !viewCtx) return undefined;
+  if (session && viewCtx) {
+    const pdsUrl = await resolveSessionPds(session);
+    return getBlobURL(blob, ownerDid, pdsUrl);
+  }
 
-  const pdsUrl = await resolveSessionPds(session);
-
-  return getBlobURL(blob, ownerDid, pdsUrl);
+  // Unauthenticated fallback: build URL from NEXT_PUBLIC_PDS_URL
+  // Works for public blobs on the known PDS without requiring a session.
+  console.warn(
+    "[resolveBlobToUrl] No session — falling back to NEXT_PUBLIC_PDS_URL for blob resolution",
+  );
+  return getBlobURL(blob, ownerDid, process.env.NEXT_PUBLIC_PDS_URL);
 }
 
 /**

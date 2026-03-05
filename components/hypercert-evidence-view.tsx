@@ -31,6 +31,9 @@ export default function HypercertEvidenceView({
     return null;
   }
 
+  console.log("[EvidenceView] evidence:", evidence);
+  console.log("[EvidenceView] evidence.content:", evidence.content);
+
   const getContentTypeColor = () => {
     // All content types use the same color
     return "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-100";
@@ -38,12 +41,14 @@ export default function HypercertEvidenceView({
 
   // Helper to extract URL from content item
   const getContentUrl = (contentItem: ContentItem): string => {
+    console.log("[EvidenceView] contentItem:", contentItem);
     // Check if it's a Uri type
     if ("uri" in contentItem && contentItem.uri) {
       return contentItem.uri;
     }
     // Check if it's a SmallBlob type (BlobRef will be stringified)
     if ("blob" in contentItem && contentItem.blob) {
+      console.log("[EvidenceView] blob field:", contentItem.blob);
       return String(contentItem.blob);
     }
     return "";

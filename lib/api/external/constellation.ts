@@ -35,7 +35,7 @@ export async function getEvidenceLinks(
 ): Promise<BacklinksResponse["records"]> {
   return getBacklinks(
     hypercertUri,
-    "org.hypercerts.context.attachment:subjects[com.atproto.repo.strongRef].uri",
+    "org.hypercerts.context.attachment:subjects[].uri",
   );
 }
 
@@ -59,6 +59,6 @@ export async function getMeasurementLinks(
 ): Promise<BacklinksResponse["records"]> {
   return getBacklinks(
     hypercertUri,
-    "org.hypercerts.context.measurement:subjects[com.atproto.repo.strongRef].uri",
+    "org.hypercerts.context.measurement:subjects[].uri",
   );
 }
