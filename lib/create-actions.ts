@@ -7,8 +7,8 @@ import {
   processLocations,
   type StrongRef,
 } from "./atproto-writes";
-import type { CertifiedActorProfile } from "@/lib/types";
 import {
+  AppCertifiedActorProfile,
   OrgHypercertsContextEvaluation as OrgHypercertsClaimEvaluation,
   OrgHypercertsContextMeasurement as OrgHypercertsClaimMeasurement,
 } from "@hypercerts-org/lexicon";
@@ -51,12 +51,15 @@ export const getActiveProfileInfo =
       })
       .catch(() => null);
     const profile = profileResult?.data?.value as
-      | CertifiedActorProfile
+      | AppCertifiedActorProfile.Record
       | undefined;
     if (!profile) return null;
+    const handle = (profile as Record<string, unknown>).handle as
+      | string
+      | undefined;
     return {
-      name: profile.displayName || profile.handle,
-      handle: profile.handle,
+      name: profile.displayName || handle,
+      handle,
       isOrganization: false,
     };
   };
