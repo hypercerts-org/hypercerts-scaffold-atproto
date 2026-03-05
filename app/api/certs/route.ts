@@ -31,7 +31,7 @@ interface HypercertParams {
   endDate: string;
   rights?: HypercertRights;
   image?: File;
-  contributions?: Record<string, unknown>[];
+  contributions?: ContributionEntry[];
   workScope?: string[];
 }
 
