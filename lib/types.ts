@@ -4,7 +4,6 @@ import type { OrgHypercertsContextAttachment as HypercertEvidence } from "@hyper
 import type { OrgHypercertsClaimRights as HypercertRights } from "@hypercerts-org/lexicon";
 import type { AppCertifiedLocation as HypercertLocation } from "@hypercerts-org/lexicon";
 import type { ComAtprotoRepoGetRecord } from "@atproto/api";
-import type { BlobRef } from "@atproto/lexicon";
 
 export type HypercertEvidenceData = Omit<
   ComAtprotoRepoGetRecord.OutputSchema,
@@ -97,18 +96,6 @@ export enum Collections {
   location = "app.certified.location",
   rights = "org.hypercerts.claim.rights",
   evaluation = "org.hypercerts.context.evaluation",
-}
-
-/** Shape of app.certified.actor.profile record value from getRecord() */
-export interface CertifiedActorProfile {
-  displayName?: string;
-  description?: string;
-  pronouns?: string;
-  website?: string;
-  handle?: string;
-  avatar?: BlobRef;
-  banner?: BlobRef;
-  [k: string]: unknown;
 }
 
 export function isRecordObject(v: unknown): v is Record<string, unknown> {
