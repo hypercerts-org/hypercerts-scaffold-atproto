@@ -6,6 +6,10 @@ import {
   stringToLinearDocument,
 } from "@/lib/utils";
 import { assertValidRecord } from "@/lib/record-validation";
+import {
+  processContributions,
+  type ContributionEntry,
+} from "@/lib/create-actions";
 import { NextRequest, NextResponse } from "next/server";
 import {
   OrgHypercertsClaimRights,
@@ -66,8 +70,7 @@ export async function POST(req: NextRequest) {
     };
 
     const rights = parseOptionalJson<HypercertRights>(rightsRaw, "rights");
-    // TODO: process contributions after creation via addContribution
-    parseOptionalJson<Record<string, unknown>[]>(
+    const contributions = parseOptionalJson<ContributionEntry[]>(
       contributionsRaw,
       "contributions",
     );
@@ -171,6 +174,18 @@ export async function POST(req: NextRequest) {
         collection: "org.hypercerts.claim.activity",
         record: claimRecord,
       });
+
+      // Process contributions best-effort — failure must not block the response
+      if (contributions && contributions.length > 0) {
+        await processContributions(
+          ctx,
+          claimResult.data.uri,
+          contributions,
+        ).catch((err: unknown) => {
+          console.error("processContributions failed (non-fatal):", err);
+        });
+      }
+
       const data = {
         hypercertUri: claimResult.data.uri,
         hypercertCid: claimResult.data.cid,
