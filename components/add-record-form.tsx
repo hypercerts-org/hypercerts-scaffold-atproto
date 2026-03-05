@@ -11,6 +11,7 @@ import {
   MeasurementFormSkeleton,
   EvaluationFormSkeleton,
   EvidenceFormSkeleton,
+  ContributionFormSkeleton,
 } from "@/components/form-skeletons";
 
 const MeasurementForm = dynamic(() => import("@/components/measurement-form"), {
@@ -25,7 +26,13 @@ const HypercertEvidenceForm = dynamic(
     loading: () => <EvidenceFormSkeleton />,
   },
 );
-// ContributionsForm is currently disabled, so use a simple placeholder for now
+const ContributionsForm = dynamic(
+  () => import("@/components/contributions-form"),
+  {
+    loading: () => <ContributionFormSkeleton />,
+  },
+);
+// ContributionsForm is now enabled
 
 const TYPE_LABELS: Record<string, string> = {
   measurement: "Measurement",
@@ -89,9 +96,11 @@ export default function AddRecordForm({
         );
       case "contribution":
         return (
-          <div className="glass-panel text-muted-foreground rounded-2xl p-8 text-center font-[family-name:var(--font-outfit)]">
-            Contribution form coming soon
-          </div>
+          <ContributionsForm
+            hypercertInfo={hypercertInfo}
+            onNext={goBack}
+            onBack={goBack}
+          />
         );
       default:
         return (
