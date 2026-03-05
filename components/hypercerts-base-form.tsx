@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
 import { Textarea } from "@/components/ui/textarea";
-import { OrgHypercertsClaimActivity as Hypercert } from "@hypercerts-org/lexicon";
+import { OrgHypercertsClaimActivity } from "@hypercerts-org/lexicon";
 import type { CreateHypercertParams } from "@/lib/types";
 import { Label } from "@radix-ui/react-label";
 import {
@@ -35,7 +35,7 @@ export interface HypercertsBaseFormProps {
   saveDisabled: boolean;
   onSave?: (record: CreateHypercertParams, advance?: boolean) => void;
   updateActions?: boolean;
-  certInfo?: Hypercert.Main;
+  certInfo?: OrgHypercertsClaimActivity.Main;
   hypercertUri?: string;
   nextStepper: () => void;
 }
@@ -61,7 +61,8 @@ export default function HypercertsBaseForm({
   nextStepper,
 }: HypercertsBaseFormProps) {
   const initialWorkScope =
-    certInfo?.workScope && Hypercert.isWorkScopeString(certInfo.workScope)
+    certInfo?.workScope &&
+    OrgHypercertsClaimActivity.isWorkScopeString(certInfo.workScope)
       ? certInfo.workScope.scope.split(",").map((scope: string) => scope.trim())
       : undefined;
   const [title, setTitle] = useState(certInfo?.title || "");

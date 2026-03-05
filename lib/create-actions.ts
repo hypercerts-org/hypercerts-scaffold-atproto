@@ -9,8 +9,8 @@ import {
 } from "./atproto-writes";
 import {
   AppCertifiedActorProfile,
-  OrgHypercertsContextEvaluation as OrgHypercertsClaimEvaluation,
-  OrgHypercertsContextMeasurement as OrgHypercertsClaimMeasurement,
+  OrgHypercertsContextEvaluation,
+  OrgHypercertsContextMeasurement,
 } from "@hypercerts-org/lexicon";
 import { assertValidRecord } from "@/lib/record-validation";
 import { processContributions } from "@/lib/contribution-helpers";
@@ -165,7 +165,7 @@ export const addEvaluation = async (params: {
       )
     : undefined;
 
-  const record: OrgHypercertsClaimEvaluation.Record = {
+  const record: OrgHypercertsContextEvaluation.Record = {
     $type: "org.hypercerts.context.evaluation",
     subject,
     evaluators: evaluationData.evaluators.map((did) => ({ did })),
@@ -187,7 +187,7 @@ export const addEvaluation = async (params: {
   assertValidRecord(
     "evaluation",
     record,
-    OrgHypercertsClaimEvaluation.validateRecord,
+    OrgHypercertsContextEvaluation.validateRecord,
   );
   const result = await ctx.agent.com.atproto.repo.createRecord({
     repo: ctx.activeDid,
@@ -248,7 +248,7 @@ export const addMeasurement = async (params: {
     );
   }
 
-  const record: OrgHypercertsClaimMeasurement.Record = {
+  const record: OrgHypercertsContextMeasurement.Record = {
     $type: "org.hypercerts.context.measurement",
     subjects: [subject],
     metric: params.metric,
@@ -270,7 +270,7 @@ export const addMeasurement = async (params: {
   assertValidRecord(
     "measurement",
     record,
-    OrgHypercertsClaimMeasurement.validateRecord,
+    OrgHypercertsContextMeasurement.validateRecord,
   );
   const result = await ctx.agent.com.atproto.repo.createRecord({
     repo: ctx.activeDid,
@@ -446,8 +446,8 @@ export const updateMeasurement = async (params: {
     rkey: parsed.rkey,
   });
   const existing = existingResult.data
-    .value as OrgHypercertsClaimMeasurement.Record & {
-    subject?: OrgHypercertsClaimMeasurement.Record["subjects"] extends
+    .value as OrgHypercertsContextMeasurement.Record & {
+    subject?: OrgHypercertsContextMeasurement.Record["subjects"] extends
       | (infer T)[]
       | undefined
       ? T
@@ -459,7 +459,7 @@ export const updateMeasurement = async (params: {
     existing.subjects ?? (existing.subject ? [existing.subject] : undefined);
 
   // Merge updates, preserving immutable fields
-  const record: OrgHypercertsClaimMeasurement.Record = {
+  const record: OrgHypercertsContextMeasurement.Record = {
     ...existing,
     $type: "org.hypercerts.context.measurement",
     ...(existingSubjects !== undefined ? { subjects: existingSubjects } : {}),
@@ -484,7 +484,7 @@ export const updateMeasurement = async (params: {
   assertValidRecord(
     "measurement",
     record,
-    OrgHypercertsClaimMeasurement.validateRecord,
+    OrgHypercertsContextMeasurement.validateRecord,
   );
   const result = await ctx.agent.com.atproto.repo.putRecord({
     repo: ctx.activeDid,

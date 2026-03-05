@@ -3,7 +3,7 @@ import { parseAtUri } from "@/lib/utils";
 import type { RepoContext } from "@/lib/repo-context";
 import { assertValidRecord } from "@/lib/record-validation";
 import {
-  OrgHypercertsClaimContribution as OrgHypercertsClaimContributionDetails,
+  OrgHypercertsClaimContribution,
   OrgHypercertsClaimContributorInformation,
   OrgHypercertsClaimActivity,
 } from "@hypercerts-org/lexicon";
@@ -64,7 +64,7 @@ export const processContributions = async (
 
   for (const contribution of contributions) {
     // 4. Create contributionDetails record
-    const detailsRecord: OrgHypercertsClaimContributionDetails.Record = {
+    const detailsRecord: OrgHypercertsClaimContribution.Record = {
       $type: "org.hypercerts.claim.contribution",
       role: contribution.role,
       createdAt: new Date().toISOString(),
@@ -78,7 +78,7 @@ export const processContributions = async (
     assertValidRecord(
       "contributionDetails",
       detailsRecord,
-      OrgHypercertsClaimContributionDetails.validateRecord,
+      OrgHypercertsClaimContribution.validateRecord,
     );
     const detailsResult = await ctx.agent.com.atproto.repo.createRecord({
       repo: ctx.activeDid,
