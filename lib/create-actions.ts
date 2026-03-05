@@ -1,5 +1,5 @@
 "use server";
-import { getRepoContext, type RepoContext } from "@/lib/repo-context";
+import { getRepoContext } from "@/lib/repo-context";
 import { resolveRecordBlobs } from "./blob-utils";
 import { parseAtUri } from "@/lib/utils";
 import {
@@ -9,13 +9,11 @@ import {
 } from "./atproto-writes";
 import type { CertifiedActorProfile } from "@/lib/types";
 import {
-  OrgHypercertsClaimContribution as OrgHypercertsClaimContributionDetails,
-  OrgHypercertsClaimContributorInformation,
   OrgHypercertsContextEvaluation as OrgHypercertsClaimEvaluation,
   OrgHypercertsContextMeasurement as OrgHypercertsClaimMeasurement,
-  OrgHypercertsClaimActivity,
 } from "@hypercerts-org/lexicon";
 import { assertValidRecord } from "@/lib/record-validation";
+import { processContributions } from "@/lib/contribution-helpers";
 
 export type RepositoryRole = "admin" | "writer" | "reader";
 import { cookies } from "next/headers";
@@ -88,141 +86,6 @@ export const logout = async (): Promise<void> => {
   oauthClient.revoke(session.sub);
 };
 
-export interface ContributionEntry {
-  contributors: string[];
-  role: string;
-  contributionDescription?: string;
-  startDate?: string;
-  endDate?: string;
-}
-
-/**
- * Core contribution processing logic. Takes an already-resolved RepoContext
- * so it can be called from both the "use server" addContribution action and
- * directly from API routes that already have ctx.
- */
-export const processContributions = async (
-  ctx: RepoContext,
-  hypercertUri: string,
-  contributions: ContributionEntry[],
-): Promise<void> => {
-  if (!contributions || contributions.length === 0) return;
-
-  // 1. Parse and validate the hypercertUri before any writes
-  const hypercertParsed = parseAtUri(hypercertUri);
-  if (
-    !hypercertParsed ||
-    !hypercertParsed.collection ||
-    !hypercertParsed.rkey
-  ) {
-    throw new Error("processContributions failed: invalid hypercertUri.");
-  }
-
-  // 2. Ownership check — must happen before any child record writes
-  if (hypercertParsed.did !== ctx.activeDid) {
-    throw new Error(
-      "processContributions failed: cannot modify another user's hypercert.",
-    );
-  }
-
-  // 3. Fetch the existing hypercert record before creating child records
-  const existingHypercertResult = await ctx.agent.com.atproto.repo.getRecord({
-    repo: hypercertParsed.did,
-    collection: hypercertParsed.collection,
-    rkey: hypercertParsed.rkey,
-  });
-  const existingRecord = existingHypercertResult.data.value as Record<
-    string,
-    unknown
-  >;
-
-  const allNewContributors: unknown[] = [];
-
-  for (const contribution of contributions) {
-    // 4. Create contributionDetails record
-    const detailsRecord: OrgHypercertsClaimContributionDetails.Record = {
-      $type: "org.hypercerts.claim.contribution",
-      role: contribution.role,
-      createdAt: new Date().toISOString(),
-      ...(contribution.contributionDescription
-        ? { contributionDescription: contribution.contributionDescription }
-        : {}),
-      ...(contribution.startDate ? { startDate: contribution.startDate } : {}),
-      ...(contribution.endDate ? { endDate: contribution.endDate } : {}),
-    };
-
-    assertValidRecord(
-      "contributionDetails",
-      detailsRecord,
-      OrgHypercertsClaimContributionDetails.validateRecord,
-    );
-    const detailsResult = await ctx.agent.com.atproto.repo.createRecord({
-      repo: ctx.activeDid,
-      collection: "org.hypercerts.claim.contribution",
-      record: detailsRecord,
-    });
-    const detailsRef = {
-      uri: detailsResult.data.uri,
-      cid: detailsResult.data.cid,
-    };
-
-    // 5. Create contributorInformation records for each contributor
-    const contributorRefs = await Promise.all(
-      contribution.contributors.map(async (identifier) => {
-        const infoRecord: OrgHypercertsClaimContributorInformation.Record = {
-          $type: "org.hypercerts.claim.contributorInformation",
-          identifier,
-          createdAt: new Date().toISOString(),
-        };
-        assertValidRecord(
-          "contributorInformation",
-          infoRecord,
-          OrgHypercertsClaimContributorInformation.validateRecord,
-        );
-        const infoResult = await ctx.agent.com.atproto.repo.createRecord({
-          repo: ctx.activeDid,
-          collection: "org.hypercerts.claim.contributorInformation",
-          record: infoRecord,
-        });
-        return { uri: infoResult.data.uri, cid: infoResult.data.cid };
-      }),
-    );
-
-    // Build new contributor entries for this contribution
-    const newContributors = contributorRefs.map((ref) => ({
-      contributorIdentity: {
-        $type: "com.atproto.repo.strongRef" as const,
-        ...ref,
-      },
-      contributionDetails: {
-        $type: "com.atproto.repo.strongRef" as const,
-        ...detailsRef,
-      },
-    }));
-
-    allNewContributors.push(...newContributors);
-  }
-
-  const existingContributors = (existingRecord.contributors as unknown[]) || [];
-  existingRecord.contributors = [
-    ...existingContributors,
-    ...allNewContributors,
-  ];
-
-  // 6. Update hypercert with appended contributors
-  assertValidRecord(
-    "activity",
-    existingRecord,
-    OrgHypercertsClaimActivity.validateRecord,
-  );
-  await ctx.agent.com.atproto.repo.putRecord({
-    repo: ctx.activeDid,
-    collection: hypercertParsed.collection,
-    rkey: hypercertParsed.rkey,
-    record: existingRecord,
-  });
-};
-
 export const addContribution = async (params: {
   hypercertUri: string;
   contributors: string[];
@@ -240,7 +103,7 @@ export const addContribution = async (params: {
     );
   }
 
-  await processContributions(ctx, params.hypercertUri, [
+  const result = await processContributions(ctx, params.hypercertUri, [
     {
       contributors: params.contributors,
       role: params.contributionDetails.role,
@@ -251,18 +114,7 @@ export const addContribution = async (params: {
     },
   ]);
 
-  // Re-fetch the updated record to return its URI/CID
-  const hypercertParsed = parseAtUri(params.hypercertUri);
-  const updatedResult = await ctx.agent.com.atproto.repo.getRecord({
-    repo: hypercertParsed!.did,
-    collection: hypercertParsed!.collection!,
-    rkey: hypercertParsed!.rkey,
-  });
-
-  return {
-    uri: updatedResult.data.uri,
-    cid: updatedResult.data.cid ?? "",
-  };
+  return result;
 };
 
 export const addEvaluation = async (params: {

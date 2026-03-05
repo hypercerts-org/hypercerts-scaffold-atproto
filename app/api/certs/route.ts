@@ -9,7 +9,7 @@ import { assertValidRecord } from "@/lib/record-validation";
 import {
   processContributions,
   type ContributionEntry,
-} from "@/lib/create-actions";
+} from "@/lib/contribution-helpers";
 import { NextRequest, NextResponse } from "next/server";
 import {
   OrgHypercertsClaimRights,
