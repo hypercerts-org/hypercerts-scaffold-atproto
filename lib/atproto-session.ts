@@ -27,3 +27,16 @@ export const getAgent = cache(async function getAgent(): Promise<Agent | null> {
   if (!session) return null;
   return new Agent(session);
 });
+
+export const resolveHandle = cache(async function resolveHandle(
+  agent: Agent,
+  did: string,
+): Promise<string | undefined> {
+  try {
+    const result = await agent.com.atproto.repo.describeRepo({ repo: did });
+    return result.data.handle;
+  } catch (error) {
+    console.error(`Failed to resolve handle for DID ${did}:`, error);
+    return undefined;
+  }
+});
