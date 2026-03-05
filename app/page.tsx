@@ -11,7 +11,7 @@ import {
   Zap,
   CheckCircle2,
 } from "lucide-react";
-import { getAgent, getSession } from "@/lib/atproto-session";
+import { getAgent, getSession, resolveHandle } from "@/lib/atproto-session";
 
 export const metadata: Metadata = {
   description:
@@ -25,6 +25,10 @@ export const metadata: Metadata = {
 
 export default async function Home() {
   const [personalRepo, session] = await Promise.all([getAgent(), getSession()]);
+
+  const userHandle = personalRepo
+    ? await resolveHandle(personalRepo, personalRepo.assertDid)
+    : undefined;
 
   const profile = personalRepo
     ? await personalRepo.com.atproto.repo
@@ -187,12 +191,12 @@ export default async function Home() {
                   </dd>
                 </div>
               ) : null}
-              {profile?.handle ? (
+              {userHandle ? (
                 <div className="space-y-1">
                   <dt className="text-muted-foreground text-xs tracking-wider uppercase">
                     Handle
                   </dt>
-                  <dd className="font-medium">@{profile.handle as string}</dd>
+                  <dd className="font-medium">@{userHandle}</dd>
                 </div>
               ) : null}
             </dl>
