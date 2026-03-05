@@ -69,11 +69,36 @@ export async function POST(req: NextRequest) {
       }
     };
 
+    type IncomingContribution = {
+      contributors: string[];
+      role?: string;
+      contributionDescription?: string;
+      startDate?: string;
+      endDate?: string;
+      contributionDetails?: {
+        role?: string;
+        contributionDescription?: string;
+        startDate?: string;
+        endDate?: string;
+      };
+    };
+
     const rights = parseOptionalJson<HypercertRights>(rightsRaw, "rights");
-    const contributions = parseOptionalJson<ContributionEntry[]>(
+    const rawContributions = parseOptionalJson<IncomingContribution[]>(
       contributionsRaw,
       "contributions",
     );
+
+    const contributions: ContributionEntry[] | undefined =
+      rawContributions?.map((c) => ({
+        contributors: c.contributors,
+        role: c.role ?? c.contributionDetails?.role ?? "",
+        contributionDescription:
+          c.contributionDescription ??
+          c.contributionDetails?.contributionDescription,
+        startDate: c.startDate ?? c.contributionDetails?.startDate,
+        endDate: c.endDate ?? c.contributionDetails?.endDate,
+      }));
 
     const workScopeTags: string[] = workScopeRaw
       ? JSON.parse(workScopeRaw)
@@ -177,7 +202,7 @@ export async function POST(req: NextRequest) {
 
       // Process contributions best-effort — failure must not block the response
       if (contributions && contributions.length > 0) {
-        await processContributions(
+        void processContributions(
           ctx,
           claimResult.data.uri,
           contributions,

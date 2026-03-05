@@ -116,7 +116,6 @@ export default function HypercertEvaluationView({
                 <dd className="space-y-1">
                   {evaluation.content.map((item, index) => {
                     const uri = item.uri;
-                    console.log("[EvaluationView] content item:", item);
                     return (
                       <div
                         key={index}
@@ -145,7 +144,6 @@ export default function HypercertEvaluationView({
                 <dd className="space-y-1">
                   {evaluation.measurements.map((item, index) => {
                     const uri = item.uri;
-                    console.log("[EvaluationView] measurement item:", item);
                     return (
                       <div
                         key={index}
@@ -174,10 +172,6 @@ export default function HypercertEvaluationView({
                 <dd className="font-[family-name:var(--font-outfit)] text-sm break-all">
                   {(() => {
                     const uri = evaluation.location.uri;
-                    console.log(
-                      "[EvaluationView] location:",
-                      evaluation.location,
-                    );
                     return (
                       <URILink
                         label={uri}
