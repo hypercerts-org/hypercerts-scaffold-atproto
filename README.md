@@ -1,3 +1,5 @@
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/hypercerts-org/hypercerts-scaffold-atproto)
+
 # Hypercerts Scaffold
 
 A Next.js scaffold for building applications on ATProto using native ATProto. This project demonstrates authentication, profile management, and hypercert creation on the ATProto network.
