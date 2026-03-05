@@ -1,14 +1,16 @@
 "use client";
 
 import type { OrgHypercertsClaimActivity } from "@hypercerts-org/lexicon";
-import { Users } from "lucide-react";
+import { PlusCircle, Users } from "lucide-react";
 import { useMemo } from "react";
+import Link from "next/link";
 import { parseContributors } from "@/lib/contributor-utils";
 import {
   useContributorProfilesQuery,
   useResolveContributorIdentities,
 } from "@/queries/hypercerts";
 import HypercertContributorView from "./hypercert-contributor-view";
+import { Button } from "@/components/ui/button";
 import { Skeleton } from "./ui/skeleton";
 
 type Contributor = OrgHypercertsClaimActivity.Contributor;
@@ -31,6 +33,8 @@ const ContributorSkeleton = () => (
 
 export default function HypercertContributorsSection({
   contributors,
+  hypercertUri,
+  isOwner,
 }: HypercertContributorsSectionProps) {
   const displayContributors = parseContributors(contributors);
 
@@ -123,7 +127,22 @@ export default function HypercertContributorsSection({
         </>
       )}
 
-      {/* Add Contributor button is intentionally hidden until the contribution form is implemented */}
+      {isOwner && hypercertUri && (
+        <div className="pt-4">
+          <Button
+            asChild
+            variant="outline"
+            size="sm"
+            className="gap-2 font-[family-name:var(--font-outfit)]"
+          >
+            <Link
+              href={`/hypercerts/${encodeURIComponent(hypercertUri)}/add/contribution`}
+            >
+              <PlusCircle className="h-4 w-4" /> Add Contributor
+            </Link>
+          </Button>
+        </div>
+      )}
     </div>
   );
 }
