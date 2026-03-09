@@ -2,12 +2,11 @@ import type { Metadata } from "next";
 import HypercertDetailsView from "@/components/hypercert-detail-view";
 import { getSession } from "@/lib/atproto-session";
 import { getRepoContext } from "@/lib/repo-context";
-import { getBlobURL } from "@/lib/utils";
+import { resolveHypercertImageUrl } from "@/lib/utils";
 import { resolveSessionPds } from "@/lib/server-utils";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { OrgHypercertsDefs } from "@hypercerts-org/sdk-core";
 
 function extractDidFromAtUri(atUri: string): string | null {
   // Expected: at://<did>/<collection>/<rkey>
@@ -81,14 +80,7 @@ export default async function HypercertViewPage({
 
   if (image && session) {
     const pdsUrl = await resolveSessionPds(session);
-
-    // TODO: check for uri and image types. for now we will assume its a small iamge
-    imageUri = getBlobURL(
-      (image as OrgHypercertsDefs.SmallImage).image,
-      ownerDid,
-      pdsUrl,
-    );
-    console.log(imageUri);
+    imageUri = resolveHypercertImageUrl(image, ownerDid, pdsUrl);
   }
 
   return (

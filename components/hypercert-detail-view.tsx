@@ -9,7 +9,7 @@ import type { HypercertClaim } from "@hypercerts-org/sdk-core";
 import HypercertEvaluationsSection from "./hypercert-evaluations-section";
 import HypercertEvidenceSection from "./hypercert-evidence-section";
 import { Calendar, Clock, Link as LinkIcon, Award } from "lucide-react";
-import Image from "next/image";
+import HypercertImage from "@/components/hypercert-image";
 
 export default function HypercertDetailsView({
   hypercertUri,
@@ -29,12 +29,11 @@ export default function HypercertDetailsView({
         {/* Hero Image */}
         {imageUri && (
           <div className="relative aspect-[16/7] rounded-xl overflow-hidden glass-panel border border-border/50">
-            <Image
-              fill
-              alt={record.title || "Hypercert cover"}
+            <HypercertImage
               src={imageUri}
-              className="object-cover"
+              alt={record.title || "Hypercert cover"}
               priority
+              fallback={null}
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
           </div>
