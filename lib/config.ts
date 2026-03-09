@@ -95,12 +95,16 @@ function isLoopback(url: string): boolean {
  * Get the base URL for the application
  * Priority:
  * 1. NEXT_PUBLIC_BASE_URL (explicit configuration)
- * 2. VERCEL_URL (auto-detect Vercel deployments)
- * 3. Fallback to 127.0.0.1:3000 (local development)
+ * 2. VERCEL_BRANCH_URL (stable per-branch Vercel URL)
+ * 3. VERCEL_URL (per-commit Vercel URL fallback)
+ * 4. Fallback to 127.0.0.1:3000 (local development)
  */
 function getBaseUrl(): string {
   if (process.env.NEXT_PUBLIC_BASE_URL) {
     return process.env.NEXT_PUBLIC_BASE_URL;
+  }
+  if (process.env.VERCEL_BRANCH_URL) {
+    return `https://${process.env.VERCEL_BRANCH_URL}`;
   }
   if (process.env.VERCEL_URL) {
     return `https://${process.env.VERCEL_URL}`;
