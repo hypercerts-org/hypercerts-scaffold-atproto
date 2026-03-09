@@ -61,16 +61,17 @@ This scaffold uses **native ATProto** — all record operations go through `@atp
 | `ATPROTO_JWK_PRIVATE`  | Private JWK (JWKS format) for OAuth client assertion. Generate with `pnpm run generate-jwk`.   |
 | `REDIS_HOST`           | Redis server hostname (e.g., `localhost` for Docker, or cloud Redis host)                      |
 | `REDIS_PORT`           | Redis server port (default: `6379`)                                                            |
-| `REDIS_PASSWORD`       | Redis password (empty string for local Docker)                                                 |
+| `REDIS_PASSWORD`       | Redis password. Leave empty for local Docker (no auth).                                        |
 | `NEXT_PUBLIC_PDS_URL`  | Personal Data Server URL (e.g., `https://pds-eu-west4.test.certified.app`)                     |
 
 ### Optional Variables
 
-| Variable                      | Description                                                                                                                  |
-| ----------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
-| `NEXT_PUBLIC_EPDS_URL`        | ePDS URL for email-based login. When set, enables the Email login tab in the UI. Example: `https://epds1.test.certified.app` |
-| `REDIS_USERNAME`              | Redis username. Defaults to `default` when `REDIS_PASSWORD` is set.                                                          |
-| `NEXT_PUBLIC_HANDLE_RESOLVER` | Handle resolver URL. Defaults to `https://bsky.social`.                                                                      |
+| Variable                      | Description                                                                                                                                                  |
+| ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `NEXT_PUBLIC_EPDS_URL`        | ePDS URL for email-based login. When set, enables the Email login tab in the UI. Example: `https://epds1.test.certified.app`                                 |
+| `OAUTH_SESSION_SECRET`        | Server-only HMAC secret for ePDS OAuth session cookie. Required when `NEXT_PUBLIC_EPDS_URL` is set. Must be 32+ chars. Generate with: `openssl rand -hex 32` |
+| `REDIS_USERNAME`              | Redis username. Defaults to `default` when `REDIS_PASSWORD` is set.                                                                                          |
+| `NEXT_PUBLIC_HANDLE_RESOLVER` | Handle resolver URL. Defaults to `https://bsky.social`.                                                                                                      |
 
 ### Local Development
 
@@ -367,8 +368,7 @@ export async function GET() {
 ├── queries/                   # TanStack Query hooks (auth, hypercerts, profile)
 ├── public/                    # Static assets (logos, email template)
 ├── scripts/                   # Utility scripts (JWK generation)
-├── vendor/                    # Packed lexicon package (type definitions)
-└── lexicons/                  # ATProto lexicon definitions
+└── vendor/                    # Packed @hypercerts-org/lexicon tarball (types + validators)
 ```
 
 ### Key Files
