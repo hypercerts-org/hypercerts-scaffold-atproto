@@ -70,6 +70,265 @@ export function generateBrandingCss(baseUrl: string): string {
   // Construct signin light SVG URL (light variant: dark navy text, for light backgrounds)
   const signinLightUrl = `${baseUrl}/certified-signin-light.svg`;
   const sanitizedSigninLightUrl = sanitizeUrlForCss(signinLightUrl);
+  return `
+  /* ===== DESIGN TOKENS ===== */
+:root {
+  /* Colors */
+  --color-bg: #f8f8fa;
+  --color-surface: transparent;
+  --color-primary: #1c1e21;
+  --color-primary-hover: rgba(28, 30, 33, 0.88);
+  --color-text-heading: #1A130F;
+  --color-text-body: #555;
+  --color-text-muted: #888;
+  --color-text-label: #333;
+  --color-text-inverse: #ffffff;
+  --color-border: #ddd;
+  --color-border-focus: #1c1e21;
+  --color-input-bg: #ffffff;
+  --color-error-text: #dc3545;
+  --color-error-bg: #fdf0f0;
+  --color-divider: #ddd;
+
+  /* Typography */
+  --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'SF Mono', Menlo, Consolas, monospace;
+  --font-size-xs: 13px;
+  --font-size-sm: 14px;
+  --font-size-base: 15px;
+  --font-size-md: 16px;
+  --font-size-lg: 24px;
+  --font-size-otp: 28px;
+
+  /* Spacing */
+  --space-1: 6px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 40px;
+
+  /* Radii */
+  --radius-sm: 8px;
+  --radius-md: 8px;
+
+  /* Sizes */
+  --container-max: 420px;
+  --logo-height: 80px;
+  --input-padding: 10px 12px;
+  --btn-padding: 12px;
+  --otp-letter-spacing: 8px;
+  --otp-padding: 14px;
+}
+
+/* ===== RESET ===== */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* ===== LAYOUT ===== */
+body {
+  font-family: var(--font-sans);
+  background: var(--color-bg);
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.container {
+  background: var(--color-surface);
+  padding: var(--space-6);
+  max-width: var(--container-max);
+  width: 100%;
+  text-align: center;
+}
+
+/* ===== LOGO ===== */
+.client-logo {
+  height: var(--logo-height);
+  margin-bottom: var(--space-5);
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* ===== TYPOGRAPHY ===== */
+h1 {
+  font-size: var(--font-size-lg);
+  margin-bottom: var(--space-2);
+  color: var(--color-text-heading);
+}
+
+.subtitle {
+  color: var(--color-text-body);
+  margin-bottom: var(--space-5);
+  font-size: var(--font-size-base);
+  line-height: 1.5;
+}
+
+/* ===== FORM FIELDS ===== */
+.field {
+  margin-bottom: var(--space-4);
+  text-align: left;
+}
+
+.field label {
+  display: block;
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  color: var(--color-text-label);
+  margin-bottom: var(--space-1);
+}
+
+.field input {
+  width: 100%;
+  padding: var(--input-padding);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-md);
+  outline: none;
+  background: var(--color-input-bg);
+  transition: border-color 0.15s ease;
+}
+
+.field input:focus {
+  border-color: var(--color-border-focus);
+}
+
+/* OTP input */
+.otp-input {
+  font-size: var(--font-size-otp) !important;
+  text-align: center;
+  letter-spacing: var(--otp-letter-spacing);
+  font-family: var(--font-mono) !important;
+  padding: var(--otp-padding) !important;
+}
+
+.otp-input:focus {
+  border-color: var(--color-border-focus) !important;
+}
+
+/* ===== BUTTONS ===== */
+.btn-primary {
+  width: 100%;
+  padding: var(--btn-padding);
+  background: var(--color-primary);
+  color: var(--color-text-inverse);
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-md);
+  font-weight: 500;
+  cursor: pointer;
+  transition: opacity 0.15s ease;
+}
+
+.btn-primary:hover {
+  opacity: 0.9;
+}
+
+.btn-primary:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.btn-secondary {
+  display: inline-block;
+  margin-top: var(--space-3);
+  color: var(--color-text-body);
+  background: none;
+  border: none;
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.btn-secondary:hover {
+  color: var(--color-text-label);
+}
+
+.btn-social {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  width: 100%;
+  padding: 10px var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-base);
+  font-weight: 500;
+  cursor: pointer;
+  text-decoration: none;
+  background: var(--color-input-bg);
+  color: var(--color-text-label);
+  margin-bottom: var(--space-2);
+  transition: background 0.15s ease;
+}
+
+.btn-social:hover {
+  background: #f5f5f5;
+}
+
+/* ===== DIVIDER ===== */
+.divider {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin: var(--space-4) 0;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-xs);
+}
+
+.divider::before,
+.divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--color-divider);
+}
+
+/* ===== FEEDBACK ===== */
+#error-msg,
+.error {
+  color: var(--color-error-text);
+  background: var(--color-error-bg);
+  padding: var(--space-3);
+  border-radius: var(--radius-sm);
+  margin: var(--space-3) 0;
+  font-size: var(--font-size-sm);
+}
+
+/* ===== STEP VISIBILITY ===== */
+.step-otp {
+  display: none;
+}
+
+.step-otp.active {
+  display: block;
+}
+
+.step-email.hidden {
+  display: none;
+}
+
+/* ===== RECOVERY LINK ===== */
+#recovery-link,
+.recovery-link {
+  display: block;
+  margin-top: var(--space-4);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-xs);
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+#recovery-link:hover,
+.recovery-link:hover {
+  color: var(--color-text-body);
+}`;
 
   return `/* Certified Custom Branding for PDS OAuth Pages */
 
