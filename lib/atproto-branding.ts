@@ -7,16 +7,8 @@
 
 /**
  * Sanitizes a URL for safe use in CSS url() values
- *
- * Validates the URL structure and protocol, then escapes characters that could
- * break out of CSS url('...') context or enable injection attacks.
- *
- * @param url - The URL to sanitize
- * @returns The sanitized URL href string
- * @throws Error if URL is invalid or uses non-http/https protocol
  */
 function sanitizeUrlForCss(url: string): string {
-  // Validate URL structure
   let parsed: URL;
   try {
     parsed = new URL(url);
@@ -24,20 +16,17 @@ function sanitizeUrlForCss(url: string): string {
     throw new Error(`Invalid URL provided for logo: ${url}`);
   }
 
-  // Only allow http and https protocols
   if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
     throw new Error(`Invalid URL protocol. Only http/https allowed: ${url}`);
   }
 
-  // Get the href and escape characters that could break out of CSS url('...')
-  // Dangerous characters: ', ", ), \, newlines
   const sanitized = parsed.href
-    .replace(/\\/g, "\\\\") // Escape backslashes first
-    .replace(/'/g, "\\'") // Escape single quotes
-    .replace(/"/g, '\\"') // Escape double quotes
-    .replace(/\)/g, "\\)") // Escape closing parentheses
-    .replace(/\n/g, "") // Remove newlines
-    .replace(/\r/g, ""); // Remove carriage returns
+    .replace(/\\/g, "\\\\")
+    .replace(/'/g, "\\'")
+    .replace(/"/g, '\\"')
+    .replace(/\)/g, "\\)")
+    .replace(/\n/g, "")
+    .replace(/\r/g, "");
 
   return sanitized;
 }
@@ -45,80 +34,76 @@ function sanitizeUrlForCss(url: string): string {
 /**
  * Generates custom CSS for PDS OAuth pages
  *
- * This CSS is injected into the PDS OAuth flow via the client metadata
- * branding.css field. It customizes the appearance of sign-in pages to
- * match the app's branding (logo, colors, text).
- *
  * @param baseUrl - The app base URL (e.g. https://hypercerts-scaffold.vercel.app)
  * @returns CSS string to inject into PDS OAuth pages
  */
-export function generateBrandingCss(baseUrl: string): string {
-  // Construct logo URL from base URL
-  const logoUrl = `${baseUrl}/certified-logo.svg`;
-
-  // Sanitize the logo URL to prevent CSS injection
-  const sanitizedLogoUrl = sanitizeUrlForCss(logoUrl);
-
-  // Construct horizontal logo URL (full wordmark, 1929x340px, ~5.67:1 aspect ratio)
-  const horizontalLogoUrl = `${baseUrl}/hypercerts_logo_horizontal.svg`;
-  const sanitizedHorizontalLogoUrl = sanitizeUrlForCss(horizontalLogoUrl);
-
-  // Construct signin SVG URL from base URL (dark variant: white text, for dark backgrounds)
-  const signinUrl = `${baseUrl}/certified-signin.svg`;
-  const sanitizedSigninUrl = sanitizeUrlForCss(signinUrl);
-
-  // Construct signin light SVG URL (light variant: dark navy text, for light backgrounds)
-  const signinLightUrl = `${baseUrl}/certified-signin-light.svg`;
-  const sanitizedSigninLightUrl = sanitizeUrlForCss(signinLightUrl);
+export function generateBrandingCss(): string {
   return `
-  /* ===== DESIGN TOKENS ===== */
+/* ===== FONTS ===== */
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap');
+
+/* ===== DESIGN TOKENS ===== */
 :root {
-  /* Colors */
-  --color-bg: #f8f8fa;
-  --color-surface: transparent;
-  --color-primary: #1c1e21;
-  --color-primary-hover: rgba(28, 30, 33, 0.88);
-  --color-text-heading: #1A130F;
-  --color-text-body: #555;
-  --color-text-muted: #888;
-  --color-text-label: #333;
-  --color-text-inverse: #ffffff;
-  --color-border: #ddd;
-  --color-border-focus: #1c1e21;
-  --color-input-bg: #ffffff;
-  --color-error-text: #dc3545;
-  --color-error-bg: #fdf0f0;
-  --color-divider: #ddd;
+  /* Earthy luxury palette */
+  --color-bg:            #F4EFE6;
+  --color-surface:       rgba(255, 252, 247, 0.72);
+  --color-surface-solid: #FFFCF7;
+  --color-primary:       #1F3322;
+  --color-primary-hover: #162618;
+  --color-accent:        #B07D3A;
+  --color-accent-soft:   rgba(176, 125, 58, 0.12);
+
+  --color-text-heading:  #1A1208;
+  --color-text-body:     #4A3F32;
+  --color-text-muted:    #9C8E7E;
+  --color-text-label:    #3A3028;
+  --color-text-inverse:  #F9F5EF;
+
+  --color-border:        rgba(176, 125, 58, 0.22);
+  --color-border-focus:  #B07D3A;
+  --color-input-bg:      rgba(255, 252, 247, 0.9);
+
+  --color-error-text:    #8B3A2A;
+  --color-error-bg:      rgba(139, 58, 42, 0.08);
+  --color-divider:       rgba(176, 125, 58, 0.18);
 
   /* Typography */
-  --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --font-mono: 'SF Mono', Menlo, Consolas, monospace;
-  --font-size-xs: 13px;
-  --font-size-sm: 14px;
+  --font-display: 'Cormorant Garamond', Georgia, serif;
+  --font-sans:    'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono:    'SF Mono', Menlo, Consolas, monospace;
+
+  --font-size-xs:   12px;
+  --font-size-sm:   13.5px;
   --font-size-base: 15px;
-  --font-size-md: 16px;
-  --font-size-lg: 24px;
-  --font-size-otp: 28px;
+  --font-size-md:   15.5px;
+  --font-size-lg:   32px;
+  --font-size-otp:  30px;
 
   /* Spacing */
   --space-1: 6px;
-  --space-2: 8px;
-  --space-3: 12px;
-  --space-4: 16px;
-  --space-5: 24px;
-  --space-6: 40px;
+  --space-2: 10px;
+  --space-3: 14px;
+  --space-4: 20px;
+  --space-5: 28px;
+  --space-6: 48px;
 
-  /* Radii */
-  --radius-sm: 8px;
-  --radius-md: 8px;
+  /* Shape */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-pill: 100px;
 
   /* Sizes */
-  --container-max: 420px;
-  --logo-height: 80px;
-  --input-padding: 10px 12px;
-  --btn-padding: 12px;
-  --otp-letter-spacing: 8px;
-  --otp-padding: 14px;
+  --container-max: 440px;
+  --logo-height:   72px;
+  --input-padding: 11px 14px;
+  --btn-padding:   13px 20px;
+  --otp-padding:   16px;
+  --otp-letter-spacing: 10px;
+
+  /* Elevation */
+  --shadow-card:  0 2px 24px rgba(30, 20, 10, 0.09), 0 1px 4px rgba(30, 20, 10, 0.06);
+  --shadow-focus: 0 0 0 3px rgba(176, 125, 58, 0.22);
+  --shadow-btn:   0 2px 12px rgba(31, 51, 34, 0.28);
 }
 
 /* ===== RESET ===== */
@@ -128,22 +113,75 @@ export function generateBrandingCss(baseUrl: string): string {
   padding: 0;
 }
 
+/* ===== GRAIN TEXTURE OVERLAY ===== */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.045'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.6;
+}
+
+/* ===== BACKGROUND GRADIENT BLOBS ===== */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 60% 50% at 15% 20%, rgba(176, 125, 58, 0.10) 0%, transparent 70%),
+    radial-gradient(ellipse 50% 60% at 85% 75%, rgba(31, 51, 34, 0.08) 0%, transparent 65%),
+    radial-gradient(ellipse 40% 40% at 50% 50%, rgba(244, 239, 230, 0.4) 0%, transparent 100%);
+  pointer-events: none;
+  z-index: 0;
+}
+
 /* ===== LAYOUT ===== */
 body {
   font-family: var(--font-sans);
-  background: var(--color-bg);
+  background-color: var(--color-bg);
   min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
+  position: relative;
+  overflow-x: hidden;
 }
 
 .container {
+  position: relative;
+  z-index: 1;
   background: var(--color-surface);
+  backdrop-filter: blur(16px) saturate(1.4);
+  -webkit-backdrop-filter: blur(16px) saturate(1.4);
+  border: 1px solid rgba(176, 125, 58, 0.16);
+  border-radius: 18px;
   padding: var(--space-6);
   max-width: var(--container-max);
   width: 100%;
   text-align: center;
+  box-shadow: var(--shadow-card);
+
+  /* Subtle top shimmer line */
+  background-image: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.55) 0px,
+    rgba(255, 255, 255, 0) 60px
+  );
+
+  animation: fadeSlideUp 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes fadeSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(18px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 /* ===== LOGO ===== */
@@ -153,100 +191,189 @@ body {
   display: block;
   margin-left: auto;
   margin-right: auto;
+  animation: fadeSlideUp 0.55s 0.08s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* ===== DECORATIVE RULE UNDER LOGO ===== */
+.client-logo + * {
+  position: relative;
 }
 
 /* ===== TYPOGRAPHY ===== */
 h1 {
+  font-family: var(--font-display);
+  font-weight: 400;
   font-size: var(--font-size-lg);
+  letter-spacing: -0.01em;
+  line-height: 1.15;
   margin-bottom: var(--space-2);
   color: var(--color-text-heading);
+  animation: fadeSlideUp 0.55s 0.12s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 .subtitle {
+  font-family: var(--font-sans);
+  font-weight: 300;
   color: var(--color-text-body);
   margin-bottom: var(--space-5);
   font-size: var(--font-size-base);
-  line-height: 1.5;
+  line-height: 1.6;
+  letter-spacing: 0.01em;
+  animation: fadeSlideUp 0.55s 0.16s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* Thin accent line between logo area and form */
+.container > *:nth-child(3) {
+  animation: fadeSlideUp 0.55s 0.2s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 /* ===== FORM FIELDS ===== */
 .field {
   margin-bottom: var(--space-4);
   text-align: left;
+  animation: fadeSlideUp 0.55s 0.22s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 .field label {
   display: block;
-  font-size: var(--font-size-sm);
+  font-family: var(--font-sans);
+  font-size: var(--font-size-xs);
   font-weight: 500;
-  color: var(--color-text-label);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
   margin-bottom: var(--space-1);
+  transition: color 0.2s ease;
+}
+
+.field:focus-within label {
+  color: var(--color-accent);
 }
 
 .field input {
   width: 100%;
   padding: var(--input-padding);
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-md);
+  font-family: var(--font-sans);
   font-size: var(--font-size-md);
+  font-weight: 300;
+  letter-spacing: 0.02em;
   outline: none;
   background: var(--color-input-bg);
-  transition: border-color 0.15s ease;
+  color: var(--color-text-heading);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+  -webkit-appearance: none;
+}
+
+.field input::placeholder {
+  color: var(--color-text-muted);
+  font-weight: 300;
 }
 
 .field input:focus {
   border-color: var(--color-border-focus);
+  box-shadow: var(--shadow-focus);
+  background: var(--color-surface-solid);
 }
 
 /* OTP input */
 .otp-input {
   font-size: var(--font-size-otp) !important;
-  text-align: center;
-  letter-spacing: var(--otp-letter-spacing);
   font-family: var(--font-mono) !important;
+  text-align: center !important;
+  letter-spacing: var(--otp-letter-spacing) !important;
   padding: var(--otp-padding) !important;
+  background: var(--color-surface-solid) !important;
 }
 
 .otp-input:focus {
   border-color: var(--color-border-focus) !important;
+  box-shadow: var(--shadow-focus) !important;
 }
 
 /* ===== BUTTONS ===== */
 .btn-primary {
+  position: relative;
   width: 100%;
   padding: var(--btn-padding);
   background: var(--color-primary);
   color: var(--color-text-inverse);
   border: none;
-  border-radius: var(--radius-sm);
-  font-size: var(--font-size-md);
+  border-radius: var(--radius-pill);
+  font-family: var(--font-sans);
+  font-size: var(--font-size-sm);
   font-weight: 500;
+  letter-spacing: 0.055em;
+  text-transform: uppercase;
   cursor: pointer;
-  transition: opacity 0.15s ease;
+  box-shadow: var(--shadow-btn);
+  transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1),
+              box-shadow 0.18s ease,
+              background 0.18s ease;
+  overflow: hidden;
+}
+
+/* Shimmer sweep on hover */
+.btn-primary::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 60%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.12) 50%,
+    transparent 100%
+  );
+  transition: left 0.5s ease;
+}
+
+.btn-primary:hover::before {
+  left: 160%;
 }
 
 .btn-primary:hover {
-  opacity: 0.9;
+  background: var(--color-primary-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 20px rgba(31, 51, 34, 0.38);
+}
+
+.btn-primary:active {
+  transform: translateY(0px);
+  box-shadow: var(--shadow-btn);
+  transition-duration: 0.08s;
 }
 
 .btn-primary:disabled {
-  opacity: 0.7;
+  opacity: 0.55;
   cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
 }
 
 .btn-secondary {
   display: inline-block;
   margin-top: var(--space-3);
-  color: var(--color-text-body);
+  color: var(--color-text-muted);
   background: none;
   border: none;
-  font-size: var(--font-size-sm);
+  font-family: var(--font-sans);
+  font-size: var(--font-size-xs);
+  font-weight: 400;
+  letter-spacing: 0.03em;
   cursor: pointer;
-  text-decoration: underline;
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: color 0.18s ease, border-color 0.18s ease;
+  padding-bottom: 1px;
 }
 
 .btn-secondary:hover {
-  color: var(--color-text-label);
+  color: var(--color-text-body);
+  border-bottom-color: var(--color-text-body);
 }
 
 .btn-social {
@@ -257,19 +384,23 @@ h1 {
   width: 100%;
   padding: 10px var(--space-4);
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
-  font-size: var(--font-size-base);
-  font-weight: 500;
+  border-radius: var(--radius-pill);
+  font-family: var(--font-sans);
+  font-size: var(--font-size-sm);
+  font-weight: 400;
+  letter-spacing: 0.03em;
   cursor: pointer;
   text-decoration: none;
   background: var(--color-input-bg);
   color: var(--color-text-label);
   margin-bottom: var(--space-2);
-  transition: background 0.15s ease;
+  transition: background 0.18s ease, border-color 0.18s ease, transform 0.18s ease;
 }
 
 .btn-social:hover {
-  background: #f5f5f5;
+  background: var(--color-surface-solid);
+  border-color: rgba(176, 125, 58, 0.35);
+  transform: translateY(-1px);
 }
 
 /* ===== DIVIDER ===== */
@@ -279,7 +410,10 @@ h1 {
   gap: var(--space-3);
   margin: var(--space-4) 0;
   color: var(--color-text-muted);
+  font-family: var(--font-sans);
   font-size: var(--font-size-xs);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
 }
 
 .divider::before,
@@ -287,7 +421,7 @@ h1 {
   content: '';
   flex: 1;
   height: 1px;
-  background: var(--color-divider);
+  background: linear-gradient(90deg, transparent, var(--color-divider), transparent);
 }
 
 /* ===== FEEDBACK ===== */
@@ -295,10 +429,22 @@ h1 {
 .error {
   color: var(--color-error-text);
   background: var(--color-error-bg);
-  padding: var(--space-3);
-  border-radius: var(--radius-sm);
+  border: 1px solid rgba(139, 58, 42, 0.18);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
   margin: var(--space-3) 0;
+  font-family: var(--font-sans);
   font-size: var(--font-size-sm);
+  font-weight: 400;
+  line-height: 1.5;
+  animation: shake 0.35s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+}
+
+@keyframes shake {
+  10%, 90%  { transform: translateX(-2px); }
+  20%, 80%  { transform: translateX(3px);  }
+  30%, 50%, 70% { transform: translateX(-3px); }
+  40%, 60%  { transform: translateX(3px);  }
 }
 
 /* ===== STEP VISIBILITY ===== */
@@ -308,6 +454,7 @@ h1 {
 
 .step-otp.active {
   display: block;
+  animation: fadeSlideUp 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 .step-email.hidden {
@@ -320,210 +467,30 @@ h1 {
   display: block;
   margin-top: var(--space-4);
   color: var(--color-text-muted);
+  font-family: var(--font-sans);
   font-size: var(--font-size-xs);
+  letter-spacing: 0.03em;
   text-decoration: none;
-  transition: color 0.15s ease;
+  border-bottom: 1px solid transparent;
+  display: inline-block;
+  transition: color 0.18s ease, border-color 0.18s ease;
+  padding-bottom: 1px;
 }
 
 #recovery-link:hover,
 .recovery-link:hover {
-  color: var(--color-text-body);
-}`;
-
-  return `/* Certified Custom Branding for PDS OAuth Pages */
-
-/* ===== BRANDING CSS VARIABLES ===== */
-:root {
-  --branding-color-primary: 15 37 68;
-  --branding-color-primary-contrast: 255 255 255;
-  --branding-color-primary-hue: 216;
+  color: var(--color-accent);
+  border-bottom-color: var(--color-accent);
 }
 
-/* ===== LOGO REPLACEMENT ===== */
-/* Replace default PDS logo with Hypercerts horizontal wordmark - Desktop: left aligned */
-img[alt="Hypercerts Logo"] {
-  width: 200px !important;
-  height: 40px !important;
-  object-fit: contain !important;
-  object-position: -9999px -9999px !important;
-  background-image: url('${sanitizedHorizontalLogoUrl}') !important;
-  background-size: contain !important;
-  background-repeat: no-repeat !important;
-  background-position: left center !important;
-}
-
-/* Mobile: left aligned with better spacing */
-@media (max-width: 767px) {
-  img[alt="Hypercerts Logo"] {
-    width: 150px !important;
-    height: 30px !important;
-    margin-top: 8px !important;
-    margin-bottom: 8px !important;
-  }
-}
-
-/* ===== H1 TEXT REPLACEMENT ===== */
-/* Replace "Sign in with Hypercerts" heading with Certified sign-in SVG image - only on sign-in page */
-/* The sign-in H1 is in a grid layout, error page H1 is in a flex main */
-.grid h1.text-primary {
-  font-size: 0 !important;
-  line-height: 0 !important;
-  color: transparent !important;
-  margin-top: 12px !important;
-}
-
-/* Light mode: use dark-text variant of certified-signin SVG */
-.grid h1.text-primary::after {
-  content: "" !important;
-  display: block !important;
-  width: 280px !important;
-  height: 98px !important;
-  max-width: 100% !important;
-  background-image: url('${sanitizedSigninLightUrl}') !important;
-  background-size: contain !important;
-  background-repeat: no-repeat !important;
-  background-position: left center !important;
-  margin-top: 8px !important;
-}
-
-/* Desktop: larger H1 image */
-@media (min-width: 768px) {
-  .grid h1.text-primary::after {
-    width: 334px !important;
-    height: 117px !important;
-  }
-}
-
-/* ===== AUTHENTICATE PAGE (New Session Landing) ===== */
-/* This page has H1 "Authenticate" with buttons below, no logo element */
-
-/* Add Hypercerts wordmark above the Authenticate H1 using ::before */
-/* Exclude error pages (which also use main.flex.flex-col.items-center) */
-main.flex.flex-col.items-center:not(:has([role="alert"])) > h1.text-primary::before {
-  content: "" !important;
-  display: block !important;
-  width: 200px !important;
-  height: 40px !important;
-  margin: 0 auto 24px auto !important;
-  background-image: url('${sanitizedHorizontalLogoUrl}') !important;
-  background-size: contain !important;
-  background-repeat: no-repeat !important;
-  background-position: center !important;
-}
-
-/* Mobile: smaller logo */
-@media (max-width: 767px) {
-  main.flex.flex-col.items-center:not(:has([role="alert"])) > h1.text-primary::before {
-    width: 150px !important;
-    height: 30px !important;
-    margin-bottom: 16px !important;
-  }
-}
-
-/* ===== BUTTON TEXT/ICON REPLACEMENT ===== */
-/* Button text/icon replacement — both sign-in page submit and Authenticate page button */
-button[type="submit"].bg-primary,
-main.flex.flex-col.items-center > button:nth-of-type(2) {
-  font-size: 0 !important;
-  line-height: 0 !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  gap: 8px !important;
-}
-
-button[type="submit"].bg-primary::before,
-main.flex.flex-col.items-center > button:nth-of-type(2)::before {
-  content: "" !important;
-  display: inline-block !important;
-  width: 20px !important;
-  height: 22px !important;
-  background-image: url('${sanitizedLogoUrl}') !important;
-  background-size: contain !important;
-  background-repeat: no-repeat !important;
-  background-position: center !important;
-  flex-shrink: 0 !important;
-}
-
-button[type="submit"].bg-primary::after,
-main.flex.flex-col.items-center > button:nth-of-type(2)::after {
-  content: "Sign in with Certified" !important;
-  font-size: 1rem !important;
-  line-height: 1.5rem !important;
-}
-
-/* ===== DESKTOP ALIGNMENT ===== */
-@media (min-width: 768px) {
-  /* Left align content in left panel on desktop */
-  .grid.grow.content-center {
-    justify-items: start !important;
-  }
-
-  /* Left align text */
-  .md\\:text-right {
-    text-align: left !important;
-  }
-}
-
-/* Left-alignment consistency on all viewports */
-.grid.grow.content-center {
-  justify-items: start !important;
-}
-
-/* ===== DARK MODE ===== */
-@media (prefers-color-scheme: dark) {
-  /* Logo: invert to white so it's visible on dark panel */
-  img[alt="Hypercerts Logo"] {
-    filter: invert(1) !important;
-  }
-
-  /* Authenticate page logo */
-  main.flex.flex-col.items-center:not(:has([role="alert"])) > h1.text-primary::before {
-    filter: invert(1) !important;
-  }
-
-  /* Sign-in H1: use white-text variant of certified-signin SVG */
-  .grid h1.text-primary::after {
-    background-image: url('${sanitizedSigninUrl}') !important;
-  }
-
-  /* Authenticate H1: white text */
-  main.flex.flex-col.items-center > h1.text-primary {
-    color: #ffffff !important;
-  }
-
-  /* Left panel: dark navy background */
-  /* In light mode, the PDS native slate-100 (#f1f5f9) takes over */
-  .md\\:bg-slate-100,
-  .md\\:dark\\:bg-slate-800 {
-    background-color: #0F2544 !important;
-  }
-
-  /* Light text for dark left panel */
-  .md\\:bg-slate-100 .text-primary,
-  .md\\:bg-slate-100 h1.text-primary {
-    color: #ffffff !important;
-  }
-
-  /* Subtitle text in dark left panel (e.g. 'Enter your password') */
-  .md\\:bg-slate-100 .text-slate-600,
-  .md\\:bg-slate-100 .text-slate-700,
-  .md\\:bg-slate-100 .text-slate-400,
-  .md\\:bg-slate-100 p {
-    color: rgba(255, 255, 255, 0.7) !important;
-  }
-
-  /* Button visibility: bg-primary (#0F2544) blends into dark panel — use bright blue instead */
-  button[type="submit"].bg-primary,
-  button.bg-primary,
-  [role="button"].bg-primary {
-    background-color: #3B82F6 !important;
-  }
-  button[type="submit"].bg-primary:hover,
-  button.bg-primary:hover,
-  [role="button"].bg-primary:hover {
-    background-color: #2563EB !important;
-  }
+/* ===== FOOTER WORDMARK ===== */
+.container::after {
+  content: '';
+  display: block;
+  margin-top: var(--space-5);
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--color-divider), transparent);
+  opacity: 0.7;
 }`;
 }
 

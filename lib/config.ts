@@ -324,7 +324,7 @@ export function buildClientMetadata(): OAuthClientMetadataInput &
     application_type: "web",
     dpop_bound_access_tokens: true,
     branding: {
-      css: generateBrandingCss(config.baseUrl),
+      css: generateBrandingCss(),
     },
   };
 }
