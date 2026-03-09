@@ -12,7 +12,7 @@ import {
 } from "@/lib/utils";
 import { NextRequest, NextResponse } from "next/server";
 import {
-  OrgHypercertsContextAttachment as OrgHypercertsClaimAttachment,
+  OrgHypercertsContextAttachment,
   OrgHypercertsDefs,
 } from "@hypercerts-org/lexicon";
 import { assertValidRecord } from "@/lib/record-validation";
@@ -179,7 +179,7 @@ export async function POST(req: NextRequest) {
     }
 
     // 4. Build attachment record
-    const record: OrgHypercertsClaimAttachment.Record = {
+    const record: OrgHypercertsContextAttachment.Record = {
       $type: "org.hypercerts.context.attachment",
       subjects: [subjectRef],
       content: [contentField],
@@ -197,7 +197,7 @@ export async function POST(req: NextRequest) {
       assertValidRecord(
         "attachment",
         record,
-        OrgHypercertsClaimAttachment.validateRecord,
+        OrgHypercertsContextAttachment.validateRecord,
       );
 
       const result = await ctx.agent.com.atproto.repo.createRecord({

@@ -130,6 +130,10 @@ pnpm run dev
 pnpm run lint
 ```
 
+### Test Environment
+
+If running Playwright tests, copy `tests/.env.test.example` to `tests/.env.test` and fill in test credentials. See the example file for details.
+
 ### Common Development Tasks
 
 **Check types:**
