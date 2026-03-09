@@ -6,6 +6,8 @@ import * as Contribution from "@/lexicons/types/org/hypercerts/claim/contributio
 import * as Evaluation from "@/lexicons/types/org/hypercerts/claim/evaluation";
 import sdk from "@/lib/hypercerts-sdk";
 import type { OAuthSession } from "@atproto/oauth-client-node";
+import * as OrgHypercertsDefs from '@/lexicons/types/org/hypercerts/defs';
+import type { $Typed } from '@/lexicons/util';
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -46,6 +48,43 @@ export function getBlobURL(
     return url;
   }
   return undefined;
+}
+
+export function resolveHypercertImageUrl(
+  image: $Typed<OrgHypercertsDefs.Uri> | $Typed<OrgHypercertsDefs.SmallImage> | { $type: string } | Record<string, unknown> | undefined,
+  did?: string,
+  pdsUrl?: string,
+): string | undefined {
+  try {
+    if (!image) {
+      return undefined;
+    }
+
+    // 1. Check via $type type guards (when PDS includes $type on union members)
+    if (OrgHypercertsDefs.isUri(image)) {
+      return (image as OrgHypercertsDefs.Uri).uri;
+    }
+
+    if (OrgHypercertsDefs.isSmallImage(image)) {
+      return getBlobURL((image as OrgHypercertsDefs.SmallImage).image, did, pdsUrl);
+    }
+
+    // 2. Structural fallback — PDS may omit $type on union members.
+    //    Check for Uri shape: { uri: string }
+    if ("uri" in image && typeof (image as Record<string, unknown>).uri === "string") {
+      return (image as unknown as OrgHypercertsDefs.Uri).uri;
+    }
+
+    //    Check for SmallImage shape: { image: <BlobRef-like with ref> }
+    if ("image" in image) {
+      return getBlobURL((image as unknown as OrgHypercertsDefs.SmallImage).image, did, pdsUrl);
+    }
+
+    return undefined;
+  } catch (e) {
+    console.error("resolveHypercertImageUrl failed:", e, { image, did, pdsUrl });
+    return undefined;
+  }
 }
 
 /**

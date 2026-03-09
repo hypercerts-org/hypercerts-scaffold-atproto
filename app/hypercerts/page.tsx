@@ -10,13 +10,12 @@ import {
 import { Button } from "@/components/ui/button";
 import { getRepoContext } from "@/lib/repo-context";
 import { getSession } from "@/lib/atproto-session";
-import { getBlobURL } from "@/lib/utils";
+import { resolveHypercertImageUrl } from "@/lib/utils";
 import { resolveSessionPds } from "@/lib/server-utils";
-import Image from "next/image";
+import HypercertImage from "@/components/hypercert-image";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Award, Calendar, Plus, FileText } from "lucide-react";
-import { OrgHypercertsDefs } from "@hypercerts-org/sdk-core";
 
 export const metadata: Metadata = {
   title: "Hypercerts",
@@ -93,7 +92,7 @@ export default async function MyHypercertsPage() {
               {records.map(({ record: cert, uri }) => {
                 const imageUrl =
                   ctx.activeDid && cert.image
-                    ? getBlobURL((cert.image as OrgHypercertsDefs.SmallImage).image, ctx.activeDid, pdsUrl)
+                    ? resolveHypercertImageUrl(cert.image, ctx.activeDid, pdsUrl)
                     : null;
 
                 const workScope = Array.isArray(cert.workScope) ? cert.workScope : [];
@@ -110,18 +109,11 @@ export default async function MyHypercertsPage() {
                     <Card className="glass-panel rounded-xl overflow-hidden border border-border/50 hover:border-create-accent/50 hover:shadow-lg transition-all duration-300 h-full flex flex-col">
                       {/* Image or Placeholder */}
                       <div className="relative aspect-[4/3] overflow-hidden bg-gradient-to-br from-create-accent/20 via-create-accent/10 to-transparent">
-                        {imageUrl ? (
-                          <Image
-                            fill
-                            alt={cert.title || "Hypercert cover"}
-                            src={imageUrl}
-                            className="object-cover group-hover:scale-105 transition-transform duration-300"
-                          />
-                        ) : (
-                          <div className="absolute inset-0 flex items-center justify-center">
-                            <Award className="size-16 text-create-accent/30" />
-                          </div>
-                        )}
+                        <HypercertImage
+                          src={imageUrl}
+                          alt={cert.title || 'Hypercert cover'}
+                          className="group-hover:scale-105 transition-transform duration-300"
+                        />
                       </div>
 
                       {/* Content */}
