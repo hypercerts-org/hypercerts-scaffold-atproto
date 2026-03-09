@@ -1,38 +1,76 @@
 "use server";
 import { getRepoContext } from "@/lib/repo-context";
 import { resolveRecordBlobs } from "./blob-utils";
+import { parseAtUri } from "@/lib/utils";
+import {
+  resolveStrongRef,
+  processLocations,
+  type StrongRef,
+} from "./atproto-writes";
+import {
+  AppCertifiedActorProfile,
+  OrgHypercertsContextEvaluation,
+  OrgHypercertsContextMeasurement,
+} from "@hypercerts-org/lexicon";
+import { assertValidRecord } from "@/lib/record-validation";
+import { processContributions } from "@/lib/contribution-helpers";
 
-import { RepositoryRole } from "@hypercerts-org/sdk-core";
-import { revalidatePath } from "next/cache";
+export type RepositoryRole = "admin" | "writer" | "reader";
 import { cookies } from "next/headers";
-import { after } from "next/server";
-import { getSession } from "./atproto-session";
-import sdk from "./hypercerts-sdk";
+import { getSession, resolveHandle } from "./atproto-session";
+import oauthClient from "./hypercerts-sdk";
 
 export interface GrantAccessParams {
   repoDid: string;
   userDid: string;
   role: RepositoryRole;
 }
-export const getActiveProfileInfo = async () => {
-  const ctx = await getRepoContext();
-  if (!ctx) return null;
 
-  const profile = await ctx.scopedRepo.profile.getCertifiedProfile().catch(() => null);
-  if (!profile) return null;
-  return {
-    name: profile.displayName || profile.handle,
-    handle: profile.handle,
-    isOrganization: false,
+export interface ActiveProfileInfo {
+  name: string | undefined;
+  handle: string | undefined;
+  isOrganization: boolean;
+}
+
+export interface SerializedRecord {
+  uri: string;
+  cid: string;
+  value: Record<string, unknown>;
+}
+
+export const getActiveProfileInfo =
+  async (): Promise<ActiveProfileInfo | null> => {
+    const ctx = await getRepoContext();
+    if (!ctx) return null;
+
+    const profileResult = await ctx.agent.com.atproto.repo
+      .getRecord({
+        repo: ctx.targetDid,
+        collection: "app.certified.actor.profile",
+        rkey: "self",
+      })
+      .catch(() => null);
+    const profile = profileResult?.data?.value as
+      | AppCertifiedActorProfile.Record
+      | undefined;
+    if (!profile) return null;
+    const handle = await resolveHandle(ctx.agent, ctx.targetDid);
+    return {
+      name: profile.displayName || handle,
+      handle,
+      isOrganization: false,
+    };
   };
-};
-export const switchActiveProfile = async (did: string) => {
+export const switchActiveProfile = async (did: string): Promise<void> => {
+  const cookiePromise = cookies();
   const session = await getSession();
   if (!session) {
-    throw new Error("Authentication required to switch profiles");
+    throw new Error(
+      "Cannot switch profiles: no active session found. Please log in first.",
+    );
   }
 
-  const cookieStore = await cookies();
+  const cookieStore = await cookiePromise;
   cookieStore.set("active-did", did, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
@@ -41,15 +79,14 @@ export const switchActiveProfile = async (did: string) => {
   });
 };
 
-export const logout = async () => {
+export const logout = async (): Promise<void> => {
   const session = await getSession();
   if (!session) {
     return;
   }
-  sdk.revokeSession(session.sub);
+  oauthClient.revoke(session.sub);
 };
 
-// TODO addContribution in SDK needs to be updated so for now contributions will directly be added through hypercert create
 export const addContribution = async (params: {
   hypercertUri: string;
   contributors: string[];
@@ -59,15 +96,26 @@ export const addContribution = async (params: {
     startDate?: string;
     endDate?: string;
   };
-}) => {
-  return true
-  // const ctx = await getRepoContext();
+}): Promise<{ uri: string; cid: string }> => {
+  const ctx = await getRepoContext();
+  if (!ctx) {
+    throw new Error(
+      "addContribution failed: could not establish repository context.",
+    );
+  }
 
-  // if (!ctx) {
-  //   throw new Error("Unable to get authenticated repository");
-  // }
+  const result = await processContributions(ctx, params.hypercertUri, [
+    {
+      contributors: params.contributors,
+      role: params.contributionDetails.role,
+      contributionDescription:
+        params.contributionDetails.contributionDescription,
+      startDate: params.contributionDetails.startDate,
+      endDate: params.contributionDetails.endDate,
+    },
+  ]);
 
-  // return ctx.scopedRepo.hypercerts.addContribution(params);
+  return result;
 };
 
 export const addEvaluation = async (params: {
@@ -78,18 +126,76 @@ export const addEvaluation = async (params: {
   content?: string[];
   measurements?: string[];
   location?: string;
-}) => {
+}): Promise<{ uri: string; cid: string }> => {
   const ctx = await getRepoContext();
   if (!ctx) {
-    throw new Error("Unable to get repository context");
+    throw new Error(
+      "addEvaluation failed: could not establish repository context. The user session may have expired or the target DID is unreachable.",
+    );
   }
 
   const { hypercertUri, ...evaluationData } = params;
 
-  return ctx.scopedRepo.hypercerts.addEvaluation({
-    ...evaluationData,
-    subjectUri: hypercertUri,
+  // Resolve subject hypercert to StrongRef
+  const subject = await resolveStrongRef(
+    ctx.agent,
+    hypercertUri,
+    "org.hypercerts.claim.activity",
+  );
+
+  // Resolve measurements AT-URIs to StrongRefs
+  const measurementRefs = evaluationData.measurements
+    ? await Promise.all(
+        evaluationData.measurements.map((uri) =>
+          resolveStrongRef(
+            ctx.agent,
+            uri,
+            "org.hypercerts.context.measurement",
+          ),
+        ),
+      )
+    : undefined;
+
+  // Resolve location AT-URI to StrongRef
+  const locationRef = evaluationData.location
+    ? await resolveStrongRef(
+        ctx.agent,
+        evaluationData.location,
+        "app.certified.location",
+      )
+    : undefined;
+
+  const record: OrgHypercertsContextEvaluation.Record = {
+    $type: "org.hypercerts.context.evaluation",
+    subject,
+    evaluators: evaluationData.evaluators.map((did) => ({ did })),
+    summary: evaluationData.summary,
+    createdAt: new Date().toISOString(),
+    ...(evaluationData.score ? { score: evaluationData.score } : {}),
+    ...(evaluationData.content
+      ? {
+          content: evaluationData.content.map((uri) => ({
+            $type: "org.hypercerts.defs#uri" as const,
+            uri,
+          })),
+        }
+      : {}),
+    ...(measurementRefs ? { measurements: measurementRefs } : {}),
+    ...(locationRef ? { location: locationRef } : {}),
+  };
+
+  assertValidRecord(
+    "evaluation",
+    record,
+    OrgHypercertsContextEvaluation.validateRecord,
+  );
+  const result = await ctx.agent.com.atproto.repo.createRecord({
+    repo: ctx.activeDid,
+    collection: "org.hypercerts.context.evaluation",
+    record,
   });
+
+  return { uri: result.data.uri, cid: result.data.cid };
 };
 
 // Location parameter for measurements - can be a string (AT-URI) or full location creation params
@@ -117,71 +223,301 @@ export const addMeasurement = async (params: {
   evidenceURI?: string[];
   locations?: MeasurementLocationParam[];
   comment?: string;
-}) => {
+}): Promise<{ uri: string; cid: string }> => {
   const ctx = await getRepoContext();
   if (!ctx) {
-    throw new Error("Unable to get repository context");
+    throw new Error(
+      "addMeasurement failed: could not establish repository context. The user session may have expired or the target DID is unreachable.",
+    );
   }
 
-  return ctx.scopedRepo.hypercerts.addMeasurement({
-    ...params,
-    measurers: (params.measurers || []).map((measurer) => {
-      return { did: measurer };
-    }),
+  // Resolve subject to StrongRef
+  const subject = await resolveStrongRef(
+    ctx.agent,
+    params.subject,
+    "org.hypercerts.claim.activity",
+  );
+
+  // Process locations if provided
+  let locationRefs: StrongRef[] | undefined;
+  if (params.locations && params.locations.length > 0) {
+    locationRefs = await processLocations(
+      ctx.agent,
+      ctx.activeDid,
+      params.locations,
+    );
+  }
+
+  const record: OrgHypercertsContextMeasurement.Record = {
+    $type: "org.hypercerts.context.measurement",
+    subjects: [subject],
+    metric: params.metric,
+    value: params.value,
+    unit: params.unit,
+    createdAt: new Date().toISOString(),
+    ...(params.measurers?.length
+      ? { measurers: params.measurers.map((did) => ({ did })) }
+      : {}),
+    ...(params.startDate ? { startDate: params.startDate } : {}),
+    ...(params.endDate ? { endDate: params.endDate } : {}),
+    ...(params.methodType ? { methodType: params.methodType } : {}),
+    ...(params.methodURI ? { methodURI: params.methodURI } : {}),
+    ...(params.evidenceURI?.length ? { evidenceURI: params.evidenceURI } : {}),
+    ...(params.comment ? { comment: params.comment } : {}),
+    ...(locationRefs?.length ? { locations: locationRefs } : {}),
+  };
+
+  assertValidRecord(
+    "measurement",
+    record,
+    OrgHypercertsContextMeasurement.validateRecord,
+  );
+  const result = await ctx.agent.com.atproto.repo.createRecord({
+    repo: ctx.activeDid,
+    collection: "org.hypercerts.context.measurement",
+    record,
   });
+
+  return { uri: result.data.uri, cid: result.data.cid };
 };
 
 export const getMeasurementRecord = async (params: {
   did: string;
   collection: string;
   rkey: string;
-}) => {
+}): Promise<SerializedRecord> => {
   const { did, collection, rkey } = params;
   const ctx = await getRepoContext({ targetDid: did });
   if (!ctx) {
-    throw new Error("Unable to get repository context");
+    throw new Error(
+      "getMeasurementRecord failed: could not establish repository context. The user session may have expired or the target DID is unreachable.",
+    );
   }
 
-  const data = await ctx.scopedRepo.records.get({ collection, rkey });
+  const result = await ctx.agent.com.atproto.repo.getRecord({
+    repo: did,
+    collection,
+    rkey,
+  });
+  const data: Record<string, unknown> = { ...result.data };
   if (data?.value) {
     data.value = await resolveRecordBlobs(data.value, did);
   }
-  return JSON.parse(JSON.stringify(data));
+  return JSON.parse(JSON.stringify(data)) as SerializedRecord;
 };
 
 export const getEvaluationRecord = async (params: {
   did: string;
   collection: string;
   rkey: string;
-}) => {
+}): Promise<SerializedRecord> => {
   const { did, collection, rkey } = params;
   const ctx = await getRepoContext({ targetDid: did });
   if (!ctx) {
-    throw new Error("Unable to get repository context");
+    throw new Error(
+      "getEvaluationRecord failed: could not establish repository context. The user session may have expired or the target DID is unreachable.",
+    );
   }
 
-  const data = await ctx.scopedRepo.records.get({ collection, rkey });
+  const result = await ctx.agent.com.atproto.repo.getRecord({
+    repo: did,
+    collection,
+    rkey,
+  });
+  const data: Record<string, unknown> = { ...result.data };
   if (data?.value) {
     data.value = await resolveRecordBlobs(data.value, did);
   }
-  return JSON.parse(JSON.stringify(data));
+  return JSON.parse(JSON.stringify(data)) as SerializedRecord;
 };
 
 export const getEvidenceRecord = async (params: {
   did: string;
   collection: string;
   rkey: string;
-}) => {
+}): Promise<SerializedRecord> => {
   const { did, collection, rkey } = params;
   const ctx = await getRepoContext({ targetDid: did });
   if (!ctx) {
-    throw new Error("Unable to get repository context");
+    throw new Error(
+      "getEvidenceRecord failed: could not establish repository context. The user session may have expired or the target DID is unreachable.",
+    );
   }
 
-  const data = await ctx.scopedRepo.records.get({ collection, rkey });
+  const result = await ctx.agent.com.atproto.repo.getRecord({
+    repo: did,
+    collection,
+    rkey,
+  });
+  const data: Record<string, unknown> = { ...result.data };
   if (data?.value) {
     data.value = await resolveRecordBlobs(data.value, did);
   }
-  return JSON.parse(JSON.stringify(data));
+  return JSON.parse(JSON.stringify(data)) as SerializedRecord;
 };
 
+export const getContributorInformationRecord = async (params: {
+  did: string;
+  collection: string;
+  rkey: string;
+}): Promise<SerializedRecord> => {
+  const { did, collection, rkey } = params;
+  const ctx = await getRepoContext({ targetDid: did });
+  if (!ctx) {
+    throw new Error(
+      "getContributorInformationRecord failed: could not establish repository context. The user session may have expired or the target DID is unreachable.",
+    );
+  }
+  const result = await ctx.agent.com.atproto.repo.getRecord({
+    repo: did,
+    collection,
+    rkey,
+  });
+  const data: Record<string, unknown> = { ...result.data };
+  if (data?.value) {
+    data.value = await resolveRecordBlobs(data.value, did);
+  }
+  return JSON.parse(JSON.stringify(data)) as SerializedRecord;
+};
+
+export const deleteHypercert = async (params: {
+  hypercertUri: string;
+}): Promise<{ success: true }> => {
+  const ctx = await getRepoContext();
+  if (!ctx) {
+    throw new Error(
+      "deleteHypercert failed: could not establish repository context. The user session may have expired or the target DID is unreachable.",
+    );
+  }
+  const parsed = parseAtUri(params.hypercertUri);
+  if (!parsed) {
+    throw new Error("deleteHypercert failed: invalid hypercertUri.");
+  }
+  if (parsed.did !== ctx.activeDid) {
+    throw new Error(
+      "deleteHypercert failed: Forbidden — URI DID does not match active session DID.",
+    );
+  }
+  await ctx.agent.com.atproto.repo.deleteRecord({
+    repo: ctx.activeDid,
+    collection: parsed.collection || "org.hypercerts.claim.activity",
+    rkey: parsed.rkey,
+  });
+  return { success: true };
+};
+
+export const updateMeasurement = async (params: {
+  measurementUri: string;
+  updates: {
+    metric?: string;
+    value?: string;
+    unit?: string;
+    measurers?: string[];
+    startDate?: string;
+    endDate?: string;
+    methodType?: string;
+    methodURI?: string;
+    evidenceURI?: string[];
+    comment?: string;
+  };
+}): Promise<{ uri: string; cid: string }> => {
+  const ctx = await getRepoContext();
+  if (!ctx) {
+    throw new Error(
+      "updateMeasurement failed: could not establish repository context.",
+    );
+  }
+  // Defense-in-depth: ATProto scoped repos already prevent cross-repo writes,
+  // but we validate the DID for consistency with deleteRecord/deleteHypercert
+  // and to surface clear errors on mismatched URIs.
+  const parsed = parseAtUri(params.measurementUri);
+  if (!parsed || !parsed.collection || !parsed.rkey) {
+    throw new Error("updateMeasurement failed: invalid AT-URI format");
+  }
+  if (parsed.did !== ctx.activeDid) {
+    throw new Error(
+      "updateMeasurement failed: Forbidden — URI DID does not match active session DID.",
+    );
+  }
+  // Fetch existing measurement
+  const existingResult = await ctx.agent.com.atproto.repo.getRecord({
+    repo: parsed.did,
+    collection: parsed.collection || "org.hypercerts.context.measurement",
+    rkey: parsed.rkey,
+  });
+  const existing = existingResult.data
+    .value as OrgHypercertsContextMeasurement.Record & {
+    subject?: OrgHypercertsContextMeasurement.Record["subjects"] extends
+      | (infer T)[]
+      | undefined
+      ? T
+      : never;
+  };
+
+  // Preserve existing subjects, or migrate from old singular subject field
+  const existingSubjects =
+    existing.subjects ?? (existing.subject ? [existing.subject] : undefined);
+
+  // Merge updates, preserving immutable fields
+  const record: OrgHypercertsContextMeasurement.Record = {
+    ...existing,
+    $type: "org.hypercerts.context.measurement",
+    ...(existingSubjects !== undefined ? { subjects: existingSubjects } : {}),
+  };
+
+  // Apply individual updates
+  const updates = params.updates;
+  if (updates.metric !== undefined) record.metric = updates.metric;
+  if (updates.value !== undefined) record.value = updates.value;
+  if (updates.unit !== undefined) record.unit = updates.unit;
+  if (updates.startDate !== undefined) record.startDate = updates.startDate;
+  if (updates.endDate !== undefined) record.endDate = updates.endDate;
+  if (updates.methodType !== undefined) record.methodType = updates.methodType;
+  if (updates.methodURI !== undefined) record.methodURI = updates.methodURI;
+  if (updates.evidenceURI !== undefined)
+    record.evidenceURI = updates.evidenceURI;
+  if (updates.comment !== undefined) record.comment = updates.comment;
+  if (updates.measurers !== undefined) {
+    record.measurers = updates.measurers.map((did) => ({ did }));
+  }
+
+  assertValidRecord(
+    "measurement",
+    record,
+    OrgHypercertsContextMeasurement.validateRecord,
+  );
+  const result = await ctx.agent.com.atproto.repo.putRecord({
+    repo: ctx.activeDid,
+    collection: parsed.collection || "org.hypercerts.context.measurement",
+    rkey: parsed.rkey,
+    record,
+  });
+
+  return { uri: result.data.uri, cid: result.data.cid };
+};
+
+export const deleteRecord = async (params: {
+  recordUri: string;
+}): Promise<{ success: true }> => {
+  const ctx = await getRepoContext();
+  if (!ctx) {
+    throw new Error(
+      "deleteRecord failed: could not establish repository context.",
+    );
+  }
+  const parsed = parseAtUri(params.recordUri);
+  if (!parsed || !parsed.collection || !parsed.rkey) {
+    throw new Error("deleteRecord failed: invalid AT-URI format");
+  }
+  if (parsed.did !== ctx.activeDid) {
+    throw new Error(
+      "deleteRecord failed: Forbidden — URI DID does not match active session DID.",
+    );
+  }
+  await ctx.agent.com.atproto.repo.deleteRecord({
+    repo: ctx.activeDid,
+    collection: parsed.collection,
+    rkey: parsed.rkey,
+  });
+  return { success: true };
+};

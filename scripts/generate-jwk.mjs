@@ -5,36 +5,37 @@
  * This script generates the ATPROTO_JWK_PRIVATE value needed in your .env.local file.
  */
 
-import { generateKeyPair, exportJWK } from 'jose';
-import { randomUUID } from 'crypto';
+import { generateKeyPair, exportJWK } from "jose";
+import { randomUUID } from "crypto";
 
 async function generateJWK() {
   // Check if stdout is redirected to a file
   const isRedirected = !process.stdout.isTTY;
 
-  console.error('🔐 Generating JWK private key for ATProto OAuth...\n');
+  console.error("🔐 Generating JWK private key for ATProto OAuth...\n");
 
   try {
-    const { privateKey } = await generateKeyPair('ES256');
+    const { privateKey } = await generateKeyPair("ES256");
     const jwk = await exportJWK(privateKey);
 
     jwk.kid = randomUUID();
-    jwk.alg = 'ES256';
+    jwk.alg = "ES256";
     // Remove 'use' property - it's deprecated in favor of 'key_ops'
     delete jwk.use;
 
     const jwkSet = { keys: [jwk] };
     const jwkString = JSON.stringify(jwkSet);
 
-    console.error('✅ JWK generated successfully!');
+    console.error("✅ JWK generated successfully!");
     if (!isRedirected) {
-      console.error('\nAdd this to your .env.local file:\n');
+      console.error("\nAdd this to your .env.local file:\n");
     }
     console.log(`ATPROTO_JWK_PRIVATE='${jwkString}'`);
-    console.error('\n⚠️  Important: Keep this key secure and never commit it to git!');
-
+    console.error(
+      "\n⚠️  Important: Keep this key secure and never commit it to git!",
+    );
   } catch (error) {
-    console.error('❌ Error generating JWK:', error.message);
+    console.error("❌ Error generating JWK:", error.message);
     process.exit(1);
   }
 }

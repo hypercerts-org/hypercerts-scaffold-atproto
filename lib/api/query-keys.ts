@@ -35,6 +35,15 @@ export const queryKeys = {
       [...queryKeys.hypercerts.all, uri, "measurements"] as const,
     measurementRecord: (did: string, rkey: string) =>
       [...queryKeys.hypercerts.all, "measurement-record", did, rkey] as const,
+    contributorProfile: (did: string) =>
+      [...queryKeys.hypercerts.all, "contributor-profile", did] as const,
+    contributorInformation: (did: string, rkey: string) =>
+      [
+        ...queryKeys.hypercerts.all,
+        "contributor-information",
+        did,
+        rkey,
+      ] as const,
   },
 
   // External APIs
@@ -49,7 +58,12 @@ export const queryKeys = {
     constellation: {
       all: ["external", "constellation"] as const,
       backlinks: (subject: string, source: string) =>
-        [...queryKeys.external.constellation.all, "backlinks", subject, source] as const,
+        [
+          ...queryKeys.external.constellation.all,
+          "backlinks",
+          subject,
+          source,
+        ] as const,
     },
   },
 } as const;

@@ -33,11 +33,11 @@ export default function ImageUploader({
 
   return (
     <div className={cn("space-y-2", className)}>
-      {label && (
-        <p className="text-xs uppercase tracking-wider font-[family-name:var(--font-outfit)] font-medium text-muted-foreground">
+      {label ? (
+        <p className="text-muted-foreground font-[family-name:var(--font-outfit)] text-xs font-medium tracking-wider uppercase">
           {label}
         </p>
-      )}
+      ) : null}
 
       <div className={cn(!isBanner && "relative inline-block")}>
         <div
@@ -45,8 +45,8 @@ export default function ImageUploader({
             "relative flex items-center justify-center overflow-hidden",
             containerStyles,
             isBanner
-              ? "bg-gradient-to-br from-create-accent/20 via-create-accent/10 to-muted"
-              : "bg-gradient-to-br from-create-accent/15 to-muted rounded-full"
+              ? "from-create-accent/20 via-create-accent/10 to-muted bg-gradient-to-br"
+              : "from-create-accent/15 to-muted rounded-full bg-gradient-to-br",
           )}
         >
           {/* Single hidden input — always rendered so inputRef is always valid */}
@@ -65,51 +65,55 @@ export default function ImageUploader({
                 src={imageUrl}
                 alt="Uploaded image"
                 fill
+                unoptimized
                 className={cn(
                   "object-cover",
-                  isBanner ? "rounded-none" : "rounded-full"
+                  isBanner ? "rounded-none" : "rounded-full",
                 )}
               />
 
               {/* Camera icon overlay — banner only (avatar button is outside overflow-hidden) */}
-              {isBanner && (
+              {isBanner ? (
                 <button
                   type="button"
+                  aria-label="Change image"
                   onClick={() => inputRef.current?.click()}
-                  className="absolute z-10 bg-black/40 backdrop-blur-sm p-2 rounded-full hover:bg-black/60 transition-all duration-200 hover:scale-110 bottom-2 right-2"
+                  className="absolute right-2 bottom-2 z-10 rounded-full bg-black/40 p-2 backdrop-blur-sm transition-all duration-200 hover:scale-110 hover:bg-black/60"
                 >
-                  <Camera className="w-4 h-4 text-white" />
+                  <Camera className="h-4 w-4 text-white" />
                 </button>
-              )}
+              ) : null}
             </>
           ) : (
             // If no image, show upload UI (label click triggers the shared input above)
-            <label
+            <button
+              type="button"
+              aria-label="Upload image"
               onClick={() => inputRef.current?.click()}
               className={cn(
-                "flex flex-col items-center justify-center w-full h-full cursor-pointer border-2 border-dashed border-create-accent/20 hover:border-create-accent/40 hover:bg-create-accent/5 transition-all duration-200",
-                isBanner ? "rounded-none" : "rounded-full"
+                "border-create-accent/20 hover:border-create-accent/40 hover:bg-create-accent/5 flex h-full w-full cursor-pointer flex-col items-center justify-center border-2 border-dashed transition-all duration-200",
+                isBanner ? "rounded-none" : "rounded-full",
               )}
             >
-              <Camera className="w-5 h-5 text-create-accent/50 mb-1" />
-              <span className="text-[10px] font-[family-name:var(--font-outfit)] font-medium text-muted-foreground">
+              <Camera className="text-create-accent/50 mb-1 h-5 w-5" />
+              <span className="text-muted-foreground font-[family-name:var(--font-outfit)] text-[10px] font-medium">
                 Upload
               </span>
-            </label>
+            </button>
           )}
-
         </div>
 
         {/* Avatar camera button — outside overflow-hidden so it is not clipped by the circle */}
-        {!isBanner && imageUrl && (
+        {!isBanner && imageUrl ? (
           <button
             type="button"
+            aria-label="Change image"
             onClick={() => inputRef.current?.click()}
-            className="absolute z-10 bg-black/40 backdrop-blur-sm p-2 rounded-full hover:bg-black/60 transition-all duration-200 hover:scale-110 bottom-0 right-0"
+            className="absolute right-0 bottom-0 z-10 rounded-full bg-black/40 p-2 backdrop-blur-sm transition-all duration-200 hover:scale-110 hover:bg-black/60"
           >
-            <Camera className="w-4 h-4 text-white" />
+            <Camera className="h-4 w-4 text-white" />
           </button>
-        )}
+        ) : null}
       </div>
     </div>
   );

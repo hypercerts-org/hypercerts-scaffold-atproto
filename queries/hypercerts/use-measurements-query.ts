@@ -13,7 +13,7 @@ export function useMeasurementLinksQuery(hypercertUri: string) {
 }
 
 export function useMeasurementRecordsQuery(
-  links: { did: string; collection: string; rkey: string }[] | undefined
+  links: { did: string; collection: string; rkey: string }[] | undefined,
 ) {
   return useQueries({
     queries: (links || []).map((link) => ({

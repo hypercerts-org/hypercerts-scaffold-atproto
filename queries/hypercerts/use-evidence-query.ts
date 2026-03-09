@@ -13,7 +13,7 @@ export function useEvidenceLinksQuery(hypercertUri: string) {
 }
 
 export function useEvidenceRecordsQuery(
-  links: { did: string; collection: string; rkey: string }[] | undefined
+  links: { did: string; collection: string; rkey: string }[] | undefined,
 ) {
   return useQueries({
     queries: (links || []).map((link) => ({

@@ -1,200 +1,36 @@
 # Development Guide
 
-## ⚠️ CRITICAL: Unreleased SDK Version
+## Architecture Overview
 
-This scaffold uses a **packed, unreleased version** of `@hypercerts-org/sdk-core`:
+This scaffold uses **native ATProto** for all record operations:
 
-- **Current version:** `0.10.0-beta.8`
-- **Location:** `vendor/hypercerts-org-sdk-core-0.10.0-beta.8.tgz`
-- **Source:** Built directly from https://github.com/hypercerts-org/hypercerts-sdk (not npm)
+- **`@atproto/api`** — `Agent` class for XRPC calls (`getRecord`, `createRecord`, `putRecord`, `deleteRecord`, `uploadBlob`)
+- **`@atproto/oauth-client-node`** — `NodeOAuthClient` for OAuth session management
+- **`@hypercerts-org/lexicon`** — TypeScript types and `validateRecord` functions for all Hypercerts collections
 
-### Why We Do This
-
-This allows us to **dogfood** the latest SDK changes before they're officially released:
-
-- Test new features in a real-world application
-- Catch bugs and issues early in development
-- Validate API design decisions with actual usage
-- Provide rapid feedback to SDK maintainers
-- Demonstrate cutting-edge capabilities to developers
-
-### ⚠️ Important Warnings
-
-1. **Contains unreleased changes** - Some features may not be merged to main yet
-2. **Breaking changes expected** - The SDK is evolving rapidly toward 1.0
-3. **Installing the latest SDK version may break this scaffold** - We test against specific packed versions
-4. **Not suitable for production** - This is a development/testing scaffold
-
-### What This Means For You
-
-- Code examples may use APIs not yet in the published npm package
-- Upgrading to newer SDK versions may require code changes in the scaffold
-- You may encounter bugs that don't exist in stable releases
-- Some features might change or be removed before official release
-- Documentation here may be ahead of the official SDK docs
+There is no SDK wrapper layer. The vendor directory contains a packed `@hypercerts-org/lexicon` tarball (type definitions and validators only).
 
 ---
 
-## What is a "Packed" Package?
+## Vendor Package
 
-A packed package is a `.tgz` file created by `npm pack` or `pnpm pack`. It's essentially a tarball of the package that would normally be published to npm.
-
-### Normal npm install:
-```json
-"@hypercerts-org/sdk-core": "^0.10.0"  // from npm registry
-```
-
-### Packed version (what we use):
-```json
-"@hypercerts-org/sdk-core": "file:vendor/hypercerts-org-sdk-core-0.10.0-beta.8.tgz"  // from local file
-```
-
-This gives us precise control over which version we're using and lets us test unreleased code directly from the SDK repository.
+The `vendor/` directory contains a packed `@hypercerts-org/lexicon` tarball. This provides TypeScript types and `validateRecord` functions for Hypercerts collections. It is installed as a local dependency in `package.json`.
 
 ---
 
-## Updating the Vendor SDK Package
+## Updating the Lexicon Package
 
-### ⚠️ WARNING
+The lexicon package provides TypeScript types and record validators. To update:
 
-**Installing a newer SDK version may break the scaffold.** The scaffold code is written against a specific SDK version. Breaking changes in newer SDK versions may require updates to:
+1. Clone/pull the [Hypercerts repository](https://github.com/hypercerts-org/hypercerts-sdk)
+2. Build: `pnpm install && pnpm build`
+3. Pack: `cd packages/lexicon && pnpm pack`
+4. Copy the `.tgz` to `vendor/`
+5. Update `package.json` to point to the new tarball
+6. Run `pnpm install`
+7. Check for type errors: `npx tsc --noEmit`
 
-- Type definitions
-- API calls
-- Authentication flows
-- Data structures
-- Error handling
-
-**Always test thoroughly** after updating the SDK!
-
-### Step-by-Step Instructions
-
-#### 1. Clone the Hypercerts SDK repository
-
-```bash
-cd .. # or wherever you keep your projects
-git clone https://github.com/hypercerts-org/hypercerts-sdk
-cd hypercerts-sdk
-```
-
-If you already have it cloned, make sure it's up to date:
-
-```bash
-cd /path/to/hypercerts-sdk
-git fetch origin
-```
-
-#### 2. Check out the specific commit/branch you want
-
-```bash
-git checkout main  # or a specific branch/commit
-git pull
-```
-
-To test a specific feature branch:
-
-```bash
-git checkout feature/new-feature
-git pull
-```
-
-#### 3. Install dependencies and build
-
-```bash
-pnpm install
-pnpm build
-```
-
-Check for build errors. If the SDK doesn't build, it won't work in the scaffold!
-
-#### 4. Pack the SDK
-
-Navigate to the sdk-core package directory:
-
-```bash
-cd packages/sdk-core  # adjust path if package structure changes
-pnpm pack
-```
-
-This creates a file like `hypercerts-org-sdk-core-0.10.0-beta.9.tgz` in the current directory.
-
-#### 5. Copy to the scaffold's vendor directory
-
-```bash
-cp hypercerts-org-sdk-core-0.10.0-beta.9.tgz /path/to/hypercerts-scaffold/vendor/
-```
-
-#### 6. Update package.json in the scaffold
-
-Edit the scaffold's `package.json`:
-
-```json
-{
-  "dependencies": {
-    "@hypercerts-org/sdk-core": "file:vendor/hypercerts-org-sdk-core-0.10.0-beta.9.tgz"
-  }
-}
-```
-
-#### 7. Install and test
-
-```bash
-cd /path/to/hypercerts-scaffold
-pnpm install
-```
-
-This will extract the packed SDK and install it as a dependency.
-
-#### 8. Test all critical functionality
-
-Start the dev server:
-
-```bash
-pnpm run dev
-```
-
-Test these critical flows:
-
-- ✅ Login/authentication
-- ✅ Creating hypercerts
-- ✅ Viewing hypercerts
-- ✅ Viewing/editing profile
-- ✅ OAuth callback handling
-- ✅ Session management
-
-Check the console for errors and warnings.
-
-#### 9. If everything works, commit
-
-```bash
-git add vendor/ package.json pnpm-lock.yaml
-git commit -m "chore: update SDK to 0.10.0-beta.9"
-git push
-```
-
-**Document breaking changes** if you had to update scaffold code to accommodate SDK changes.
-
-### Troubleshooting
-
-**Build errors after SDK update:**
-- Check that the SDK version is compatible with the scaffold's TypeScript version
-- Check for breaking changes in SDK type definitions
-- Update type imports if SDK has reorganized exports
-
-**Runtime errors:**
-- Check SDK release notes or commit messages for breaking API changes
-- Check if authentication flow has changed
-- Check if data structures have changed
-
-**Type errors:**
-- SDK may have changed type definitions
-- Update your code to match new types
-- Check if SDK has deprecated/removed types you were using
-
-**Import errors:**
-- SDK may have reorganized exports
-- Check SDK source for new import paths
-- Update import statements accordingly
+If types have changed, update code in `lib/types.ts`, `lib/create-actions.ts`, and `lib/queries.ts` to match.
 
 ---
 
@@ -252,9 +88,20 @@ REDIS_PASSWORD=your_password
 
 # PDS server URL
 NEXT_PUBLIC_PDS_URL=https://pds-eu-west4.test.certified.app
+
+# If enabling ePDS email login, also set:
+OAUTH_SESSION_SECRET=<paste the output from the command below>
 ```
 
-**Important:** 
+To generate a session secret, run this command separately in your terminal and paste the output above:
+
+```bash
+# Generate a session secret (required for ePDS email login)
+openssl rand -hex 32
+```
+
+**Important:**
+
 - `NEXT_PUBLIC_BASE_URL` **must** use `127.0.0.1` (not `localhost`) for OAuth to work
 - Never commit `.env.local` to git - it contains secrets!
 
@@ -283,27 +130,59 @@ pnpm run dev
 pnpm run lint
 ```
 
+### Test Environment
+
+If running Playwright tests, copy `tests/.env.test.example` to `tests/.env.test` and fill in test credentials. See the example file for details.
+
 ### Common Development Tasks
 
 **Check types:**
+
 ```bash
 npx tsc --noEmit
 ```
 
 **Run linter:**
+
 ```bash
 pnpm run lint
 ```
 
 **Build for production:**
+
 ```bash
 pnpm run build
 ```
 
 **Start production server:**
+
 ```bash
 pnpm run start
 ```
+
+### Code Formatting
+
+This project uses Prettier for formatting and ESLint for linting, enforced via pre-commit hooks.
+
+**Format all files:**
+
+```bash
+pnpm run format
+```
+
+**Check formatting without writing:**
+
+```bash
+pnpm run format:check
+```
+
+**Pre-commit hooks (automatic):**
+A `lint-staged` hook runs automatically on every commit via Husky:
+
+- Prettier formats staged `.ts`, `.tsx`, and `.mjs` files
+- ESLint fixes staged `.ts` and `.tsx` files
+
+You don't need to run these manually — they run on `git commit`.
 
 ---
 
@@ -314,6 +193,7 @@ pnpm run start
 **Symptom:** Error connecting to Redis, session storage fails
 
 **Solutions:**
+
 - Check Redis is running: `docker ps` (should see hypercerts-redis)
 - Start Redis if stopped: `docker start hypercerts-redis`
 - Check `REDIS_HOST`, `REDIS_PORT`, `REDIS_PASSWORD` in `.env.local`
@@ -324,6 +204,7 @@ pnpm run start
 **Symptom:** "Invalid redirect_uri" or OAuth callback fails
 
 **Solutions:**
+
 - **Must use `127.0.0.1`, not `localhost`** - OAuth requires IP addresses for loopback
 - Check `NEXT_PUBLIC_BASE_URL` in `.env.local` matches how you're accessing the app
 - Restart dev server after changing `.env.local`
@@ -333,28 +214,52 @@ pnpm run start
 **Symptom:** Redirect loop after login
 
 **Solutions:**
+
 - Clear browser cookies
 - Restart dev server
 - Try in incognito/private browsing mode
 - Check Redis is running and accessible
 
-### Build Errors After SDK Update
+### OAuth Branding
+
+OAuth branding (custom logo, colors, CSS on the PDS sign-in pages) only works when **both** conditions are met:
+
+1. **The PDS is a certified PDS** — branding is a feature of certified PDS instances (e.g. `pds-eu-west4.test.certified.app`). Standard/uncertified PDS instances do not support custom OAuth branding.
+2. **Your app's client URL has been added to the PDS's trusted OAuth clients list** — the PDS only applies branding CSS for client URLs registered in its `PDS_OAUTH_TRUSTED_CLIENTS` environment variable. Even if your app serves correct branding metadata at `/client-metadata.json`, the PDS will ignore it unless your URL is explicitly trusted.
+
+Additionally, branding cannot work in local development (loopback mode). When using a loopback `client_id` (localhost/127.0.0.1), the PDS auto-generates minimal client metadata and ignores custom branding fields. This is part of the ATProto specification.
+
+#### Getting your domain trusted by the PDS
+
+To get a domain added to the PDS trusted clients list:
+
+1. **Contact @aspiers on GitHub** with your request
+2. **Provide the full client_id URL** (e.g., `https://your-app.vercel.app/client-metadata.json`)
+3. **Production/stable URLs are preferred** over ephemeral URLs
+
+Once your domain is added to the trusted list, the PDS will apply your branding CSS to the OAuth consent pages.
+
+**Vercel deployments:** Your Vercel production URL must also be added to the PDS trusted clients list for branding to appear. The app serves branding metadata automatically — the only requirement is that the URL is trusted by the PDS.
+
+### Build Errors After Lexicon Update
 
 **Symptom:** TypeScript errors, import errors, type mismatches
 
 **Solutions:**
-- Check for breaking changes in SDK
+
+- Check for breaking changes in the lexicon package
 - Update type definitions in scaffold code
 - Check for deprecated APIs
-- Update import statements if SDK reorganized exports
-- Check SDK version compatibility with Next.js/React versions
+- Update import statements if the lexicon package reorganized exports
+- Check lexicon version compatibility with Next.js/React versions
 
 ### ngrok Issues
 
 **Symptom:** Works locally but not with ngrok
 
 **Solutions:**
-- Update `NEXT_PUBLIC_BASE_URL` to your ngrok URL (e.g., `https://abc123.ngrok.io`)
+
+- Update `NEXT_PUBLIC_BASE_URL` to your ngrok URL (e.g., `https://abc123.ngrok-free.app`)
 - Restart dev server after changing URL
 - Note: ngrok URLs change on each restart unless you have a paid plan
 
@@ -362,7 +267,7 @@ pnpm run start
 
 ## Contributing
 
-We welcome contributions! This scaffold is a community resource for learning and building with the Hypercerts SDK.
+We welcome contributions! This scaffold is a community resource for learning and building with Hypercerts and ATProto.
 
 ### Reporting Issues
 
@@ -373,7 +278,7 @@ Found a bug or have a question? We'd love to hear from you!
    - Clear description of the problem
    - Steps to reproduce
    - Expected vs actual behavior
-   - SDK version (check `vendor/` directory)
+   - Lexicon version (check `vendor/` directory)
    - Screenshots/logs if relevant
    - Your environment (OS, Node version, etc.)
 
@@ -395,7 +300,7 @@ We accept pull requests for:
 1. **Fork the repository**
 2. **Create a feature branch:** `git checkout -b feature/amazing-feature`
 3. **Make your changes**
-4. **Test thoroughly** (especially if SDK-related):
+4. **Test thoroughly** (especially if lexicon-related):
    - Run the dev server
    - Test login/auth flow
    - Test creating/viewing hypercerts
@@ -410,13 +315,13 @@ We accept pull requests for:
    - Any breaking changes
    - Screenshots if UI changes
 
-### SDK-Dependent Changes
+### Lexicon-Dependent Changes
 
-If your contribution depends on a newer SDK version:
+If your contribution depends on a newer lexicon version:
 
-1. **Document which SDK version is required** in the PR description
-2. **Update the vendor package** (follow "Updating the Vendor SDK Package" above)
-3. **Include both the code changes and the SDK update** in the same PR
+1. **Document which lexicon version is required** in the PR description
+2. **Update the vendor package** (follow "Updating the Lexicon Package" above)
+3. **Include both the code changes and the lexicon update** in the same PR
 4. **Note any breaking changes** in the PR description
 5. **Test extensively** - you're changing a critical dependency
 
@@ -446,7 +351,7 @@ If you're making breaking changes to the scaffold:
 hypercerts-scaffold/
 ├── app/                    # Next.js app directory
 │   ├── api/               # API routes
-│   │   ├── auth/         # Authentication endpoints
+│   │   ├── oauth/        # OAuth flow endpoints (ATProto + ePDS)
 │   │   ├── certs/        # Hypercert operations
 │   │   └── profile/      # Profile management
 │   ├── hypercerts/       # Hypercert pages
@@ -454,58 +359,52 @@ hypercerts-scaffold/
 ├── components/            # React components
 ├── lib/                   # Core libraries
 │   ├── api/              # API client utilities
-│   ├── hypercerts-sdk.ts # SDK initialization
+│   ├── hypercerts-sdk.ts # OAuth client initialization (NodeOAuthClient)
+│   ├── atproto-writes.ts # ATProto write utilities
+│   ├── record-validation.ts # Lexicon record validation
+│   ├── types.ts          # TypeScript types and Collections enum
+│   ├── blob-utils.ts     # Blob URL resolution
 │   ├── repo-context.ts   # Repository context helper
 │   └── ...
 ├── providers/             # React context providers
 ├── queries/               # TanStack Query hooks
-├── vendor/                # Packed SDK versions
-│   └── hypercerts-org-sdk-core-*.tgz
+├── vendor/                # Packed lexicon package (types + validators)
+│   └── hypercerts-org-lexicon-*.tgz
 ├── .env.example          # Environment variable template
 └── .env.local            # Your local environment (gitignored)
 ```
 
 ### Key Files
 
-| File | Purpose |
-|------|---------|
-| `lib/hypercerts-sdk.ts` | Initializes the Hypercerts SDK with OAuth config |
-| `lib/repo-context.ts` | Helper to get authenticated repository context |
-| `lib/create-actions.ts` | Server actions for common operations |
-| `providers/OAuthProvider.tsx` | Client-side OAuth state management |
-| `app/api/auth/*` | OAuth flow endpoints (login, callback, logout) |
+| File                          | Purpose                                                      |
+| ----------------------------- | ------------------------------------------------------------ |
+| `lib/hypercerts-sdk.ts`       | Initializes NodeOAuthClient with OAuth config, Redis storage |
+| `lib/atproto-writes.ts`       | ATProto write utilities for CRUD operations                  |
+| `lib/record-validation.ts`    | Lexicon record validation helpers                            |
+| `lib/types.ts`                | TypeScript types and Collections enum                        |
+| `lib/blob-utils.ts`           | Blob URL resolution utilities                                |
+| `lib/repo-context.ts`         | Helper to get authenticated repository context               |
+| `lib/create-actions.ts`       | Server actions for CRUD operations via native ATProto        |
+| `providers/OAuthProvider.tsx` | Client-side OAuth state management                           |
+| `app/api/oauth/*`             | ATProto OAuth flow endpoints (login, callback, logout)       |
+| `app/api/oauth/epds/*`        | ePDS email OAuth flow endpoints (login, callback)            |
 
 ---
 
-## Testing Against SDK Changes
+## Testing Against Lexicon Changes
 
-If you're an SDK maintainer or want to test SDK changes:
+If you're a lexicon maintainer or want to test lexicon changes:
 
 ### Quick Test Cycle
 
-1. **Make SDK changes**
-2. **Build SDK:** `pnpm build` (in SDK repo)
-3. **Pack SDK:** `pnpm pack` (in SDK package directory)
+1. **Make lexicon changes**
+2. **Build lexicon:** `pnpm build` (in lexicon repo)
+3. **Pack lexicon:** `pnpm pack` (in lexicon package directory)
 4. **Copy to scaffold:** `cp *.tgz /path/to/scaffold/vendor/`
 5. **Update scaffold package.json** to point to new `.tgz`
 6. **Install:** `pnpm install` (in scaffold)
 7. **Test:** `pnpm run dev` (in scaffold)
 8. **Iterate:** Repeat as needed
-
-### Using `pnpm link` (alternative)
-
-For rapid iteration, you can link the SDK directly:
-
-```bash
-# In SDK repo
-cd packages/sdk-core
-pnpm link
-
-# In scaffold repo
-pnpm link @hypercerts-org/sdk-core
-```
-
-**Note:** Remember to unlink and restore the packed version before committing!
 
 ---
 
@@ -513,7 +412,7 @@ pnpm link @hypercerts-org/sdk-core
 
 - **Issues/Bugs:** https://github.com/hypercerts-org/hypercerts-scaffold-atproto/issues
 - **Maintainer:** [@kzoeps](https://github.com/kzoeps)
-- **SDK Repository:** https://github.com/hypercerts-org/hypercerts-sdk
+- **Lexicon Repository:** https://github.com/hypercerts-org/hypercerts-sdk
 - **Hypercerts Docs:** https://hypercerts.org/docs
 - **ATProto Docs:** https://atproto.com/docs
 
@@ -521,4 +420,4 @@ pnpm link @hypercerts-org/sdk-core
 
 ## License
 
-This scaffold is open source and available under the same license as the Hypercerts SDK.
+This scaffold is open source and available under the same license as the Hypercerts lexicon package.

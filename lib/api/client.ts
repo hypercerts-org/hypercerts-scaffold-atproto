@@ -7,7 +7,7 @@ export class APIError extends Error {
   constructor(
     public status: number,
     message: string,
-    public data?: unknown
+    public data?: unknown,
   ) {
     super(message);
     this.name = "APIError";
@@ -23,7 +23,7 @@ interface RequestOptions extends Omit<RequestInit, "body"> {
  */
 export async function apiClient<T>(
   url: string,
-  options?: RequestOptions
+  options?: RequestOptions,
 ): Promise<T> {
   const { body, headers, ...restOptions } = options || {};
 
@@ -36,8 +36,7 @@ export async function apiClient<T>(
   };
 
   if (body) {
-    config.body =
-      typeof body === "string" ? body : JSON.stringify(body);
+    config.body = typeof body === "string" ? body : JSON.stringify(body);
   }
 
   const response = await fetch(url, config);
@@ -78,7 +77,7 @@ export async function apiClient<T>(
 export async function apiClientFormData<T>(
   url: string,
   formData: FormData,
-  options?: Omit<RequestInit, "body">
+  options?: Omit<RequestInit, "body">,
 ): Promise<T> {
   const response = await fetch(url, {
     method: "POST",
@@ -119,7 +118,7 @@ export async function apiClientFormData<T>(
  */
 export async function externalApiClient<T>(
   url: string,
-  options?: RequestInit
+  options?: RequestInit,
 ): Promise<T> {
   const response = await fetch(url, {
     headers: {
@@ -132,7 +131,7 @@ export async function externalApiClient<T>(
   if (!response.ok) {
     throw new APIError(
       response.status,
-      `External API request failed: ${response.statusText}`
+      `External API request failed: ${response.statusText}`,
     );
   }
 

@@ -1,22 +1,67 @@
 /**
  * Application Configuration
- * 
+ *
  * Centralized configuration with auto-detection for different environments:
  * - Local development: Uses 127.0.0.1 (RFC 8252 compliant)
  * - Vercel production/preview: Auto-detects from VERCEL_URL
  * - Custom deployments: Uses NEXT_PUBLIC_BASE_URL
- * 
+ *
  * @see https://datatracker.ietf.org/doc/html/rfc8252 (OAuth for Native Apps)
  */
 
-import { ATPROTO_SCOPE, TRANSITION_SCOPES } from "@hypercerts-org/sdk-core";
+import { OAuthClientMetadataInput } from "@atproto/oauth-client-node";
+import { generateBrandingCss } from "./atproto-branding";
 
-/**
- * OAuth scope configuration
- * Currently using transition:generic, will migrate to granular scopes
- * also during local development transition:generic is a requirement
- */
-export const OAUTH_SCOPE = [ATPROTO_SCOPE, TRANSITION_SCOPES.GENERIC].join(" ");
+const ATPROTO_SCOPE = "atproto";
+
+export const HYPERCERT_COLLECTIONS = {
+  CLAIM: "org.hypercerts.claim.activity",
+  RIGHTS: "org.hypercerts.claim.rights",
+  LOCATION: "app.certified.location",
+  CONTRIBUTION: "org.hypercerts.claim.contribution",
+  CONTRIBUTOR_INFORMATION: "org.hypercerts.claim.contributorInformation",
+  MEASUREMENT: "org.hypercerts.context.measurement",
+  EVALUATION: "org.hypercerts.context.evaluation",
+  ATTACHMENT: "org.hypercerts.context.attachment",
+  COLLECTION: "org.hypercerts.collection",
+  FUNDING_RECEIPT: "org.hypercerts.funding.receipt",
+  WORK_SCOPE_TAG: "org.hypercerts.workscope.tag",
+  CERTIFIED_PROFILE: "app.certified.actor.profile",
+  BSKY_PROFILE: "app.bsky.actor.profile",
+} as const;
+
+// Granular repo scope — collections with full CRUD access
+const REPO_COLLECTIONS = [
+  HYPERCERT_COLLECTIONS.CLAIM,
+  HYPERCERT_COLLECTIONS.RIGHTS,
+  HYPERCERT_COLLECTIONS.LOCATION,
+  HYPERCERT_COLLECTIONS.CONTRIBUTION,
+  HYPERCERT_COLLECTIONS.CONTRIBUTOR_INFORMATION,
+  HYPERCERT_COLLECTIONS.MEASUREMENT,
+  HYPERCERT_COLLECTIONS.EVALUATION,
+  HYPERCERT_COLLECTIONS.ATTACHMENT,
+  HYPERCERT_COLLECTIONS.COLLECTION,
+  HYPERCERT_COLLECTIONS.FUNDING_RECEIPT,
+  HYPERCERT_COLLECTIONS.WORK_SCOPE_TAG,
+  HYPERCERT_COLLECTIONS.CERTIFIED_PROFILE,
+];
+
+const HYPERCERT_REPO_SCOPE = `repo?${REPO_COLLECTIONS.map((c) => "collection=" + c).join("&")}&action=create&action=update&action=delete`;
+
+// Bsky profile scope — only create and update (no delete)
+const BSKY_PROFILE_SCOPE = `repo?collection=${HYPERCERT_COLLECTIONS.BSKY_PROFILE}&action=create&action=update`;
+
+const BLOB_SCOPE = "blob:*/*";
+const RPC_SCOPE =
+  "rpc:app.bsky.actor.getProfile?aud=did:web:api.bsky.app%23bsky_appview";
+
+const GRANULAR_SCOPE = [
+  ATPROTO_SCOPE,
+  HYPERCERT_REPO_SCOPE,
+  BSKY_PROFILE_SCOPE,
+  RPC_SCOPE,
+  BLOB_SCOPE,
+].join(" ");
 
 /**
  * Validates a URL format
@@ -71,7 +116,7 @@ function validateBaseUrl(url: string): void {
   if (!isValidUrl(url)) {
     throw new Error(
       `Invalid NEXT_PUBLIC_BASE_URL: "${url}" is not a valid URL.\n` +
-      `Expected format: http://127.0.0.1:3000 (local) or https://yourdomain.com (production)`
+        `Expected format: http://127.0.0.1:3000 (local) or https://yourdomain.com (production)`,
     );
   }
 
@@ -81,8 +126,8 @@ function validateBaseUrl(url: string): void {
     if (parsed.protocol !== "http:") {
       throw new Error(
         `Invalid NEXT_PUBLIC_BASE_URL: Loopback addresses must use HTTP, not HTTPS.\n` +
-        `Current: ${url}\n` +
-        `Expected: http://127.0.0.1:${parsed.port || 3000}`
+          `Current: ${url}\n` +
+          `Expected: http://127.0.0.1:${parsed.port || 3000}`,
       );
     }
 
@@ -91,8 +136,8 @@ function validateBaseUrl(url: string): void {
     if (parsed.hostname === "localhost") {
       throw new Error(
         `Invalid NEXT_PUBLIC_BASE_URL: Loopback must use IP address, not hostname.\n` +
-        `Current: ${url}\n` +
-        `Expected: http://127.0.0.1:${parsed.port || 3000}\n`
+          `Current: ${url}\n` +
+          `Expected: http://127.0.0.1:${parsed.port || 3000}\n`,
       );
     }
 
@@ -100,8 +145,8 @@ function validateBaseUrl(url: string): void {
     if (!parsed.port) {
       throw new Error(
         `Invalid NEXT_PUBLIC_BASE_URL: Loopback addresses must include a port.\n` +
-        `Current: ${url}\n` +
-        `Expected: http://127.0.0.1:3000`
+          `Current: ${url}\n` +
+          `Expected: http://127.0.0.1:3000`,
       );
     }
   } else {
@@ -110,8 +155,8 @@ function validateBaseUrl(url: string): void {
     if (parsed.protocol !== "https:") {
       throw new Error(
         `Invalid NEXT_PUBLIC_BASE_URL: Production URLs must use HTTPS.\n` +
-        `Current: ${url}\n` +
-        `Expected: https://${parsed.hostname}`
+          `Current: ${url}\n` +
+          `Expected: https://${parsed.hostname}`,
       );
     }
   }
@@ -136,7 +181,7 @@ function getRedirectBaseUrl(baseUrl: string): string {
 function buildClientId(
   baseUrl: string,
   scope: string,
-  redirectUri: string
+  redirectUri: string,
 ): string {
   if (isLoopback(baseUrl)) {
     // ATProto loopback client_id uses "http://localhost" (not IP)
@@ -159,9 +204,16 @@ try {
   throw error;
 }
 
+/**
+ * OAuth scope — granular scopes (repo, rpc, blob) for all environments.
+ */
+export const OAUTH_SCOPE = GRANULAR_SCOPE;
+
 const redirectBaseUrl = getRedirectBaseUrl(baseUrl);
-const redirectUri = `${redirectBaseUrl}/api/auth/callback`;
+const redirectUri = `${redirectBaseUrl}/api/oauth/callback`;
+const epdsRedirectUri = `${redirectBaseUrl}/api/oauth/epds/callback`;
 const jwksUri = `${redirectBaseUrl}/jwks.json`;
+const epdsClientId = buildClientId(baseUrl, OAUTH_SCOPE, epdsRedirectUri);
 const clientId = buildClientId(baseUrl, OAUTH_SCOPE, redirectUri);
 
 // Environment flags
@@ -177,31 +229,101 @@ export const config = {
   // Core URLs
   baseUrl,
   redirectBaseUrl,
-  
+
   // Environment flags
   isLoopback: isLoopbackMode,
   isDevelopment,
   isProduction,
-  
+
   // OAuth configuration
   clientId,
   redirectUri,
+  epdsRedirectUri,
   jwksUri,
   scope: OAUTH_SCOPE,
-  
-  // Network endpoints
-  pdsUrl: process.env.NEXT_PUBLIC_PDS_URL!,
-  
+
+  // ePDS (certified PDS) configuration — optional, only needed for ePDS login
+  epdsUrl: process.env.NEXT_PUBLIC_EPDS_URL,
+  epdsClientId,
+
+  // Server-only secret for HMAC-signing the transient OAuth session cookie
+  // Must be 32+ characters. Only needed if ePDS login is used.
+  oauthSessionSecret: process.env.OAUTH_SESSION_SECRET,
+
+  handleResolver:
+    process.env.NEXT_PUBLIC_HANDLE_RESOLVER || "https://bsky.social",
+
   // Redis configuration
   redis: {
     host: process.env.REDIS_HOST!,
     port: process.env.REDIS_PORT!,
     password: process.env.REDIS_PASSWORD!,
   },
-  
+
   // Private keys (server-only, not exposed to client)
   jwkPrivate: process.env.ATPROTO_JWK_PRIVATE!,
 } as const;
+
+/**
+ * Build OAuth client metadata object
+ *
+ * Returns the full OAuth client metadata according to RFC 7591.
+ * In production mode, includes custom branding CSS for PDS OAuth pages.
+ * In loopback mode, returns minimal metadata without branding.
+ *
+ * @returns OAuth client metadata object
+ * @see https://datatracker.ietf.org/doc/html/rfc7591
+ */
+export function buildClientMetadata(): OAuthClientMetadataInput &
+  Record<string, unknown> {
+  if (config.isLoopback) {
+    // Loopback mode: minimal metadata, application_type is "web"
+    return {
+      client_id: config.clientId,
+      client_name: "Hypercerts Scaffold",
+      client_uri: config.baseUrl,
+      redirect_uris: config.epdsUrl
+        ? [config.redirectUri, config.epdsRedirectUri]
+        : [config.redirectUri],
+      scope: OAUTH_SCOPE,
+      logo_uri: `${config.baseUrl}/certified.png`,
+      email_template_uri: `${config.baseUrl}/email-template.html`,
+      email_subject_template: "{{code}} — Your {{app_name}} verification code",
+      brand_color: "#1c1e21",
+      background_color: "#f8f8fa",
+      grant_types: ["authorization_code", "refresh_token"],
+      response_types: ["code"],
+      token_endpoint_auth_method: "none",
+      jwks_uri: config.jwksUri,
+      application_type: "web",
+      dpop_bound_access_tokens: true,
+    };
+  }
+
+  return {
+    client_id: config.clientId,
+    client_name: "Hypercerts Scaffold",
+    client_uri: config.baseUrl,
+    redirect_uris: config.epdsUrl
+      ? [config.redirectUri, config.epdsRedirectUri]
+      : [config.redirectUri],
+    scope: OAUTH_SCOPE,
+    jwks_uri: config.jwksUri,
+    logo_uri: `${config.baseUrl}/certified.png`,
+    email_template_uri: `${config.baseUrl}/email-template.html`,
+    email_subject_template: "{{code}} — Your {{app_name}} verification code",
+    brand_color: "#1c1e21",
+    background_color: "#f8f8fa",
+    grant_types: ["authorization_code", "refresh_token"],
+    response_types: ["code"],
+    token_endpoint_auth_method: "none",
+    application_type: "web",
+    dpop_bound_access_tokens: true,
+    branding: {
+      css: generateBrandingCss(config.baseUrl),
+    },
+  };
+}
 
 // Validate required environment variables
 const requiredEnvVars = [
@@ -216,13 +338,16 @@ for (const envVar of requiredEnvVars) {
   if (!process.env[envVar]) {
     throw new Error(
       `Missing required environment variable: ${envVar}\n` +
-      `Please check your .env.local file.`
+        `Please check your .env.local file.`,
     );
   }
 }
 
 // Log configuration at startup (helpful for debugging)
-if (typeof window === "undefined") {
+if (
+  typeof window === "undefined" &&
+  process.env.NEXT_PUBLIC_VERCEL_TARGET_ENV !== "production"
+) {
   console.log("\n🔧 Application Configuration:");
   console.log(`   Environment: ${isProduction ? "production" : "development"}`);
   console.log(`   Mode: ${isLoopbackMode ? "loopback (local)" : "production"}`);
@@ -230,5 +355,5 @@ if (typeof window === "undefined") {
   console.log(`   Client ID: ${clientId}`);
   console.log(`   Redirect URI: ${redirectUri}`);
   console.log(`   JWKS URI: ${jwksUri}`);
-  console.log(`   PDS: ${config.pdsUrl}\n`);
+  console.log(`   Handle Resolver: ${config.handleResolver}\n`);
 }

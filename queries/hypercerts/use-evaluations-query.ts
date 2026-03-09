@@ -13,7 +13,7 @@ export function useEvaluationLinksQuery(hypercertUri: string) {
 }
 
 export function useEvaluationRecordsQuery(
-  links: { did: string; collection: string; rkey: string }[] | undefined
+  links: { did: string; collection: string; rkey: string }[] | undefined,
 ) {
   return useQueries({
     queries: (links || []).map((link) => ({
