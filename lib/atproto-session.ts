@@ -24,7 +24,6 @@ export const getSession = cache(
 
 export const getAgent = cache(async function getAgent(): Promise<Agent | null> {
   const session = await getSession();
-  console.log(session);
   if (!session) return null;
   return new Agent(session);
 });
