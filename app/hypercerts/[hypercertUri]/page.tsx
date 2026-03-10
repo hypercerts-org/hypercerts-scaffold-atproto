@@ -1,16 +1,17 @@
-import type { Metadata } from "next";
 import HypercertDetailsView from "@/components/hypercert-detail-view";
+import { Button } from "@/components/ui/button";
 import { getSession } from "@/lib/atproto-session";
 import { getRepoContext } from "@/lib/repo-context";
-import { getBlobURL, extractDidFromAtUri, parseAtUri } from "@/lib/utils";
 import { resolveSessionPds } from "@/lib/server-utils";
-import { ArrowLeft, AlertCircle, LogIn } from "lucide-react";
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
 import {
-  OrgHypercertsDefs,
-  OrgHypercertsClaimActivity,
-} from "@hypercerts-org/lexicon";
+  extractDidFromAtUri,
+  parseAtUri,
+  resolveHypercertImageUrl,
+} from "@/lib/utils";
+import { OrgHypercertsClaimActivity } from "@hypercerts-org/lexicon";
+import { AlertCircle, ArrowLeft, LogIn } from "lucide-react";
+import type { Metadata } from "next";
+import Link from "next/link";
 
 export async function generateMetadata({
   params,
@@ -184,13 +185,7 @@ export default async function HypercertViewPage({
 
   if (image && session) {
     const pdsUrl = await resolveSessionPds(session);
-
-    // TODO: check for uri and image types. for now we will assume its a small image
-    imageUri = getBlobURL(
-      (image as OrgHypercertsDefs.SmallImage).image,
-      ownerDid,
-      pdsUrl,
-    );
+    imageUri = resolveHypercertImageUrl(image, ownerDid, pdsUrl);
   }
 
   const isOwner = Boolean(session?.did && ownerDid && session.did === ownerDid);

@@ -1,6 +1,8 @@
 import { BlobRef } from "@atproto/lexicon";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
+import { OrgHypercertsDefs } from "@hypercerts-org/lexicon";
+import type { $Typed } from "@hypercerts-org/lexicon";
 import type { OrgHypercertsClaimActivity } from "@hypercerts-org/lexicon";
 
 /** The LinearDocument.Main type as used by the hypercerts lexicon */
@@ -47,6 +49,66 @@ export function getBlobURL(
     return url;
   }
   return undefined;
+}
+
+function hasUriField(value: Record<string, unknown>): value is { uri: string } {
+  return typeof value.uri === "string";
+}
+
+function hasBlobImageField(
+  value: Record<string, unknown>,
+): value is { image: BlobRef | string | undefined } {
+  return "image" in value;
+}
+
+export function resolveHypercertImageUrl(
+  image:
+    | $Typed<OrgHypercertsDefs.Uri>
+    | $Typed<OrgHypercertsDefs.SmallImage>
+    | { $type: string }
+    | Record<string, unknown>
+    | undefined,
+  did?: string,
+  pdsUrl?: string,
+): string | undefined {
+  try {
+    if (!image) {
+      return undefined;
+    }
+
+    // 1. Check via $type type guards (when PDS includes $type on union members)
+    if (OrgHypercertsDefs.isUri(image)) {
+      return (image as OrgHypercertsDefs.Uri).uri;
+    }
+
+    if (OrgHypercertsDefs.isSmallImage(image)) {
+      return getBlobURL(
+        (image as OrgHypercertsDefs.SmallImage).image,
+        did,
+        pdsUrl,
+      );
+    }
+
+    // 2. Structural fallback — PDS may omit $type on union members.
+    //    Check for Uri shape: { uri: string }
+    if ("uri" in image && hasUriField(image)) {
+      return image.uri;
+    }
+
+    //    Check for SmallImage shape: { image: <BlobRef-like with ref> }
+    if (hasBlobImageField(image)) {
+      return getBlobURL(image.image, did, pdsUrl);
+    }
+
+    return undefined;
+  } catch (e) {
+    console.error("resolveHypercertImageUrl failed:", e, {
+      image,
+      did,
+      pdsUrl,
+    });
+    return undefined;
+  }
 }
 
 /**

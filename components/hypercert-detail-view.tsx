@@ -18,7 +18,7 @@ import {
   Pencil,
   Trash2,
 } from "lucide-react";
-import Image from "next/image";
+import HypercertImage from "@/components/hypercert-image";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -110,13 +110,11 @@ export default function HypercertDetailsView({
         {/* Hero Image */}
         {imageUri ? (
           <div className="glass-panel border-border/50 relative aspect-[16/7] overflow-hidden rounded-xl border">
-            <Image
-              fill
-              unoptimized
-              alt={record.title || "Hypercert cover"}
+            <HypercertImage
               src={imageUri}
-              className="object-cover"
+              alt={record.title || "Hypercert cover"}
               priority
+              fallback={null}
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
           </div>
