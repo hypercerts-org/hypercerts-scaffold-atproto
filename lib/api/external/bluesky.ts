@@ -78,3 +78,51 @@ export async function requestPasswordReset(email: string): Promise<void> {
     throw new APIError(response.status, errorMessage);
   }
 }
+
+/**
+ * Reset a password using a token received via email
+ */
+export async function resetPassword(
+  token: string,
+  password: string,
+): Promise<void> {
+  const epdsUrl = process.env.NEXT_PUBLIC_EPDS_URL;
+  if (!epdsUrl) {
+    throw new Error("NEXT_PUBLIC_EPDS_URL is not set. Cannot reset password.");
+  }
+  const normalizedUrl = epdsUrl.replace(/\/+$/, "");
+  const url = `${normalizedUrl}/xrpc/com.atproto.server.resetPassword`;
+
+  const response = await fetch(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ token, password }),
+  });
+
+  if (!response.ok) {
+    let errorMessage = `Request failed with status ${response.status}`;
+
+    try {
+      const errorData: unknown = await response.json();
+      if (
+        typeof errorData === "object" &&
+        errorData !== null &&
+        "message" in errorData
+      ) {
+        errorMessage = (errorData as { message: string }).message;
+      } else if (
+        typeof errorData === "object" &&
+        errorData !== null &&
+        "error" in errorData
+      ) {
+        errorMessage = (errorData as { error: string }).error;
+      }
+    } catch {
+      errorMessage = response.statusText || errorMessage;
+    }
+
+    throw new APIError(response.status, errorMessage);
+  }
+}
