@@ -41,14 +41,11 @@ export async function searchActors(
 /**
  * Request a password reset email for the given address
  */
-export async function requestPasswordReset(email: string): Promise<void> {
-  const epdsUrl = process.env.NEXT_PUBLIC_EPDS_URL;
-  if (!epdsUrl) {
-    throw new Error(
-      "NEXT_PUBLIC_EPDS_URL is not set. Cannot request password reset.",
-    );
-  }
-  const normalizedUrl = epdsUrl.replace(/\/+$/, "");
+export async function requestPasswordReset(
+  email: string,
+  pdsUrl: string,
+): Promise<void> {
+  const normalizedUrl = pdsUrl.replace(/\/+$/, "");
   const url = `${normalizedUrl}/xrpc/com.atproto.server.requestPasswordReset`;
 
   const response = await fetch(url, {
@@ -85,12 +82,9 @@ export async function requestPasswordReset(email: string): Promise<void> {
 export async function resetPassword(
   token: string,
   password: string,
+  pdsUrl: string,
 ): Promise<void> {
-  const epdsUrl = process.env.NEXT_PUBLIC_EPDS_URL;
-  if (!epdsUrl) {
-    throw new Error("NEXT_PUBLIC_EPDS_URL is not set. Cannot reset password.");
-  }
-  const normalizedUrl = epdsUrl.replace(/\/+$/, "");
+  const normalizedUrl = pdsUrl.replace(/\/+$/, "");
   const url = `${normalizedUrl}/xrpc/com.atproto.server.resetPassword`;
 
   const response = await fetch(url, {
