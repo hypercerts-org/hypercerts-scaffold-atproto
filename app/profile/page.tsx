@@ -99,15 +99,14 @@ export default async function ProfilePage() {
                       </p>
                     </div>
                   </div>
-                  <Link href="/reset-password">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="font-[family-name:var(--font-outfit)]"
-                    >
-                      Change password
-                    </Button>
-                  </Link>
+                  <Button
+                    asChild
+                    variant="outline"
+                    size="sm"
+                    className="font-[family-name:var(--font-outfit)]"
+                  >
+                    <Link href="/reset-password">Change password</Link>
+                  </Button>
                 </div>
               </div>
             </div>
