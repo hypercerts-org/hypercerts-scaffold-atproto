@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { redirect } from "next/navigation";
+import { getAgent } from "@/lib/atproto-session";
 import ResetPasswordForm from "@/components/reset-password-form";
 import { KeyRound } from "lucide-react";
 
@@ -7,7 +9,15 @@ export const metadata: Metadata = {
   description: "Request a password reset for your account.",
 };
 
-export default function ResetPasswordPage() {
+export default async function ResetPasswordPage() {
+  const agent = await getAgent();
+  if (!agent) redirect("/");
+
+  const sessionInfo = await agent.com.atproto.server
+    .getSession()
+    .catch(() => null);
+  const email = sessionInfo?.data?.email || "";
+
   return (
     <div className="noise-bg relative min-h-screen">
       <div className="relative z-10 mx-auto max-w-7xl px-4 py-8 lg:py-12">
@@ -22,14 +32,14 @@ export default function ResetPasswordPage() {
             </h1>
           </div>
           <p className="text-muted-foreground mt-2 max-w-xl pl-[52px] font-[family-name:var(--font-outfit)] text-sm">
-            Enter your email address and we&apos;ll send you a link to reset
-            your password.
+            Reset your account password. A reset code will be sent to your
+            email.
           </p>
         </div>
 
         {/* Main content */}
         <main className="animate-fade-in-up max-w-2xl">
-          <ResetPasswordForm />
+          <ResetPasswordForm initialEmail={email} />
         </main>
       </div>
     </div>

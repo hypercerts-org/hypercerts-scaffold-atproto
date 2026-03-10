@@ -1,12 +1,14 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
+import Link from "next/link";
 import { getAgent, getSession } from "@/lib/atproto-session";
 import ProfileForm from "@/components/profile-form";
 import { convertBlobUrlToCdn } from "@/lib/utils";
 import { resolveSessionPds } from "@/lib/server-utils";
-import { UserCircle } from "lucide-react";
+import { KeyRound, UserCircle } from "lucide-react";
 import { AppCertifiedActorProfile } from "@hypercerts-org/lexicon";
 import { getCertifiedProfileImageURL } from "@/lib/profile-utils";
+import { Button } from "@/components/ui/button";
 
 export const metadata: Metadata = {
   title: "Profile",
@@ -73,6 +75,43 @@ export default async function ProfilePage() {
               bannerUrl,
             }}
           />
+
+          <section className="mt-6">
+            <div className="glass-panel overflow-hidden rounded-2xl">
+              <div className="px-6 py-5">
+                {/* Section heading */}
+                <p className="text-muted-foreground font-[family-name:var(--font-outfit)] text-xs tracking-wider uppercase">
+                  Account
+                </p>
+
+                {/* Change Password row */}
+                <div className="mt-4 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="bg-create-accent/10 flex size-8 items-center justify-center rounded-full">
+                      <KeyRound className="text-create-accent size-4" />
+                    </div>
+                    <div>
+                      <p className="font-[family-name:var(--font-outfit)] text-sm font-medium">
+                        Change Password
+                      </p>
+                      <p className="text-muted-foreground font-[family-name:var(--font-outfit)] text-xs">
+                        Update your account password
+                      </p>
+                    </div>
+                  </div>
+                  <Link href="/reset-password">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="font-[family-name:var(--font-outfit)]"
+                    >
+                      Change password
+                    </Button>
+                  </Link>
+                </div>
+              </div>
+            </div>
+          </section>
         </main>
       </div>
     </div>
