@@ -117,7 +117,6 @@ export default function ResetPasswordForm({
                   type="button"
                   className="text-muted-foreground hover:text-foreground absolute top-1/2 right-3 -translate-y-1/2"
                   onClick={() => setShowPassword((prev) => !prev)}
-                  tabIndex={-1}
                   aria-label={showPassword ? "Hide password" : "Show password"}
                 >
                   {showPassword ? (
@@ -144,7 +143,6 @@ export default function ResetPasswordForm({
                   type="button"
                   className="text-muted-foreground hover:text-foreground absolute top-1/2 right-3 -translate-y-1/2"
                   onClick={() => setShowConfirmPassword((prev) => !prev)}
-                  tabIndex={-1}
                   aria-label={
                     showConfirmPassword ? "Hide password" : "Show password"
                   }
@@ -182,7 +180,9 @@ export default function ResetPasswordForm({
               variant="outline"
               className="w-full"
               disabled={requestMutation.isPending}
-              onClick={() => requestMutation.mutate({ email, pdsUrl })}
+              onClick={() =>
+                requestMutation.mutate({ email: email.trim(), pdsUrl })
+              }
             >
               {requestMutation.isPending ? "Resending..." : "Resend reset code"}
             </Button>
