@@ -3,17 +3,20 @@
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { createHypercertFromParams } from "@/lib/api/hypercerts";
-import type { CreateHypercertParams } from "@hypercerts-org/sdk-core";
+import type { CreateHypercertParams } from "@/lib/types";
 
 interface UseCreateHypercertMutationOptions {
-  onSuccess?: (data: Awaited<ReturnType<typeof createHypercertFromParams>>) => void;
+  onSuccess?: (
+    data: Awaited<ReturnType<typeof createHypercertFromParams>>,
+  ) => void;
 }
 
 export function useCreateHypercertMutation(
-  options?: UseCreateHypercertMutationOptions
+  options?: UseCreateHypercertMutationOptions,
 ) {
   return useMutation({
-    mutationFn: (params: CreateHypercertParams) => createHypercertFromParams(params),
+    mutationFn: (params: CreateHypercertParams) =>
+      createHypercertFromParams(params),
     onSuccess: (data) => {
       toast.success("Hypercert created successfully!");
       options?.onSuccess?.(data);

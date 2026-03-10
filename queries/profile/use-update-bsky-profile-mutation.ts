@@ -17,7 +17,7 @@ interface UseUpdateBskyProfileMutationOptions {
 }
 
 export function useUpdateBskyProfileMutation(
-  options?: UseUpdateBskyProfileMutationOptions
+  options?: UseUpdateBskyProfileMutationOptions,
 ) {
   const queryClient = useQueryClient();
 

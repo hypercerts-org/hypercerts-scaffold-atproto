@@ -1,9 +1,12 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
-import { getAuthenticatedRepo, getSession } from "@/lib/atproto-session";
+import { getAgent, getSession } from "@/lib/atproto-session";
 import ProfileForm from "@/components/profile-form";
-import { getBlobURL, convertBlobUrlToCdn } from "@/lib/utils";
+import { convertBlobUrlToCdn } from "@/lib/utils";
+import { resolveSessionPds } from "@/lib/server-utils";
 import { UserCircle } from "lucide-react";
+import { AppCertifiedActorProfile } from "@hypercerts-org/lexicon";
+import { getCertifiedProfileImageURL } from "@/lib/profile-utils";
 
 export const metadata: Metadata = {
   title: "Profile",
@@ -16,33 +19,50 @@ export const metadata: Metadata = {
 };
 
 export default async function ProfilePage() {
-  const repo = await getAuthenticatedRepo();
+  const repo = await getAgent();
   if (!repo) redirect("/");
-  const profile = await repo.profile.getCertifiedProfile();
+  const profileResult = await repo.com.atproto.repo
+    .getRecord({
+      repo: repo.assertDid,
+      collection: "app.certified.actor.profile",
+      rkey: "self",
+    })
+    .catch(() => null);
+  const profile = profileResult?.data?.value as
+    | AppCertifiedActorProfile.Record
+    | undefined;
 
-  const avatarUrl = convertBlobUrlToCdn(profile?.avatar);
-  const bannerUrl = convertBlobUrlToCdn(profile?.banner);
+  const session = await getSession();
+  const pdsUrl = session ? await resolveSessionPds(session) : undefined;
+  const avatarUrl =
+    convertBlobUrlToCdn(
+      getCertifiedProfileImageURL(profile?.avatar, repo.assertDid, pdsUrl),
+    ) || "";
+  const bannerUrl =
+    convertBlobUrlToCdn(
+      getCertifiedProfileImageURL(profile?.banner, repo.assertDid, pdsUrl),
+    ) || "";
 
   return (
-    <div className="relative min-h-screen noise-bg">
-      <div className="relative z-10 max-w-7xl mx-auto px-4 py-8 lg:py-12">
+    <div className="noise-bg relative min-h-screen">
+      <div className="relative z-10 mx-auto max-w-7xl px-4 py-8 lg:py-12">
         {/* Page header */}
-        <div className="mb-8 lg:mb-10 animate-fade-in">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="size-10 rounded-full bg-create-accent/10 flex items-center justify-center">
-              <UserCircle className="size-5 text-create-accent" />
+        <div className="animate-fade-in mb-8 lg:mb-10">
+          <div className="mb-2 flex items-center gap-3">
+            <div className="bg-create-accent/10 flex size-10 items-center justify-center rounded-full">
+              <UserCircle className="text-create-accent size-5" />
             </div>
-            <h1 className="text-3xl lg:text-4xl font-[family-name:var(--font-syne)] font-bold tracking-tight text-foreground">
+            <h1 className="text-foreground font-[family-name:var(--font-syne)] text-3xl font-bold tracking-tight lg:text-4xl">
               Profile
             </h1>
           </div>
-          <p className="mt-2 text-sm font-[family-name:var(--font-outfit)] text-muted-foreground max-w-xl pl-[52px]">
+          <p className="text-muted-foreground mt-2 max-w-xl pl-[52px] font-[family-name:var(--font-outfit)] text-sm">
             Manage your display name, bio, avatar, and profile settings.
           </p>
         </div>
 
         {/* Main content */}
-        <main className="max-w-2xl animate-fade-in-up">
+        <main className="animate-fade-in-up max-w-2xl">
           <ProfileForm
             initialProfile={{
               displayName: profile?.displayName || "",

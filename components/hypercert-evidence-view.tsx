@@ -1,6 +1,7 @@
 "use client";
 
-import { getPDSlsURI } from "@/lib/utils";
+import React from "react";
+import { getPDSlsURI, linearDocumentToString } from "@/lib/utils";
 import {
   Card,
   CardContent,
@@ -11,26 +12,32 @@ import {
 import { URILink } from "./uri-link";
 import { Badge } from "./ui/badge";
 import { Link as LinkIcon } from "lucide-react";
-import { OrgHypercertsClaimAttachment, OrgHypercertsDefs } from "@hypercerts-org/sdk-core";
+import { OrgHypercertsContextAttachment } from "@hypercerts-org/lexicon";
 
-type Attachment = OrgHypercertsClaimAttachment.Main;
+type ContentItem = NonNullable<
+  OrgHypercertsContextAttachment.Main["content"]
+>[number];
+
+type Attachment = OrgHypercertsContextAttachment.Main;
 
 export default function HypercertEvidenceView({
   evidence,
+  actions,
 }: {
   evidence?: Attachment;
+  actions?: React.ReactNode;
 }) {
   if (!evidence) {
     return null;
   }
 
-  const getContentTypeColor = (type?: string) => {
+  const getContentTypeColor = () => {
     // All content types use the same color
     return "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-100";
   };
 
   // Helper to extract URL from content item
-  const getContentUrl = (contentItem: Attachment["content"][number]): string => {
+  const getContentUrl = (contentItem: ContentItem): string => {
     // Check if it's a Uri type
     if ("uri" in contentItem && contentItem.uri) {
       return contentItem.uri;
@@ -43,11 +50,11 @@ export default function HypercertEvidenceView({
   };
 
   return (
-    <Card className="glass-panel rounded-xl border border-border/50 overflow-hidden">
+    <Card className="glass-panel border-border/50 overflow-hidden rounded-xl border">
       <CardHeader className="pb-4">
-        <div className="flex items-start justify-between gap-4 flex-wrap">
-          <div className="space-y-2 flex-1">
-            <CardTitle className="text-lg font-[family-name:var(--font-syne)]">
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div className="min-w-0 flex-1 space-y-2">
+            <CardTitle className="font-[family-name:var(--font-syne)] text-lg">
               {evidence.title}
             </CardTitle>
             <CardDescription className="font-[family-name:var(--font-outfit)]">
@@ -56,41 +63,45 @@ export default function HypercertEvidenceView({
               </time>
             </CardDescription>
           </div>
-          <Badge className={`${getContentTypeColor(evidence.contentType)} font-[family-name:var(--font-outfit)] shrink-0`}>
-            {evidence.contentType
-              ? evidence.contentType.charAt(0).toUpperCase() +
-                evidence.contentType.slice(1)
-              : "Evidence"}
-          </Badge>
+          <div className="flex shrink-0 items-center gap-2">
+            <Badge
+              className={`${getContentTypeColor()} font-[family-name:var(--font-outfit)]`}
+            >
+              {evidence.contentType
+                ? evidence.contentType.charAt(0).toUpperCase() +
+                  evidence.contentType.slice(1)
+                : "Evidence"}
+            </Badge>
+            {actions}
+          </div>
         </div>
       </CardHeader>
       <CardContent className="space-y-5">
         <div className="space-y-2">
-          <p className="text-sm font-[family-name:var(--font-outfit)] font-medium">
+          <p className="font-[family-name:var(--font-outfit)] text-sm font-medium">
             {evidence.shortDescription}
           </p>
-          {evidence.description && (
-            <p className="text-sm font-[family-name:var(--font-outfit)] text-muted-foreground whitespace-pre-wrap leading-relaxed">
-              {evidence.description}
+          {evidence.description ? (
+            <p className="text-muted-foreground font-[family-name:var(--font-outfit)] text-sm leading-relaxed whitespace-pre-wrap">
+              {linearDocumentToString(evidence.description)}
             </p>
-          )}
+          ) : null}
         </div>
 
-        {evidence.content && evidence.content.length > 0 && (
-          <div className="space-y-3 pt-2 border-t border-border/50">
+        {evidence.content && evidence.content.length > 0 ? (
+          <div className="border-border/50 space-y-3 border-t pt-2">
             {evidence.content.map((contentItem, index) => {
               const contentUrl = getContentUrl(contentItem);
               return (
                 <div key={index} className="flex items-start gap-3">
-                  <LinkIcon className="size-4 text-create-accent shrink-0 mt-0.5" />
-                  <div className="space-y-1 flex-1 min-w-0">
-                    <dt className="text-xs font-[family-name:var(--font-outfit)] text-muted-foreground uppercase tracking-wider">
-                      {evidence.content.length > 1 
+                  <LinkIcon className="text-create-accent mt-0.5 size-4 shrink-0" />
+                  <div className="min-w-0 flex-1 space-y-1">
+                    <dt className="text-muted-foreground font-[family-name:var(--font-outfit)] text-xs tracking-wider uppercase">
+                      {evidence.content!.length > 1
                         ? `Evidence Source ${index + 1}`
-                        : "Evidence Source"
-                      }
+                        : "Evidence Source"}
                     </dt>
-                    <dd className="text-sm font-[family-name:var(--font-outfit)] break-all">
+                    <dd className="font-[family-name:var(--font-outfit)] text-sm break-all">
                       {contentUrl ? (
                         <URILink
                           label={contentUrl}
@@ -111,7 +122,7 @@ export default function HypercertEvidenceView({
               );
             })}
           </div>
-        )}
+        ) : null}
       </CardContent>
     </Card>
   );

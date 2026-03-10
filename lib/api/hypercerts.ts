@@ -9,21 +9,20 @@ import type {
   AddAttachmentResponse,
   AddLocationResponse,
   AttachmentLocationParam,
+  UpdateHypercertRequest,
+  UpdateHypercertResponse,
 } from "./types";
 
 /**
  * Create a new hypercert
  */
 export async function createHypercert(
-  params: CreateHypercertRequest
+  params: CreateHypercertRequest,
 ): Promise<CreateHypercertResponse> {
   const formData = new FormData();
   formData.append("title", params.title);
   formData.append("shortDescription", params.shortDescription);
-  formData.append(
-    "description",
-    params.description ?? params.shortDescription
-  );
+  formData.append("description", params.description ?? params.shortDescription);
   formData.append("startDate", params.startDate);
   formData.append("endDate", params.endDate);
   formData.append("rights", JSON.stringify(params.rights));
@@ -33,25 +32,19 @@ export async function createHypercert(
     formData.append("image", params.image);
   }
 
-  return apiClientFormData<CreateHypercertResponse>(
-    "/api/certs/create",
-    formData
-  );
+  return apiClientFormData<CreateHypercertResponse>("/api/certs", formData);
 }
 
 /**
  * Create hypercert using SDK params directly (from hypercerts-base-form)
  */
 export async function createHypercertFromParams(
-  params: import("@hypercerts-org/sdk-core").CreateHypercertParams
+  params: import("@/lib/types").CreateHypercertParams,
 ): Promise<CreateHypercertResponse> {
   const formData = new FormData();
   formData.append("title", params.title);
   formData.append("shortDescription", params.shortDescription);
-  formData.append(
-    "description",
-    params.description ?? params.shortDescription
-  );
+  formData.append("description", params.description ?? params.shortDescription);
   formData.append("startDate", params.startDate);
   formData.append("endDate", params.endDate);
   formData.append("rights", JSON.stringify(params.rights));
@@ -65,10 +58,7 @@ export async function createHypercertFromParams(
     formData.append("contributions", JSON.stringify(params.contributions));
   }
 
-  return apiClientFormData<CreateHypercertResponse>(
-    "/api/certs/create",
-    formData
-  );
+  return apiClientFormData<CreateHypercertResponse>("/api/certs", formData);
 }
 
 /**
@@ -88,14 +78,14 @@ export async function addAttachment(params: {
   const formData = new FormData();
   formData.append("title", params.title);
   formData.append("shortDescription", params.shortDescription);
-  
+
   if (params.description) {
     formData.append("description", params.description);
   }
   if (params.contentType) {
     formData.append("contentType", params.contentType);
   }
-  
+
   formData.append("hypercertUri", params.hypercertUri);
   formData.append("evidenceMode", params.evidenceMode);
 
@@ -115,9 +105,11 @@ export async function addAttachment(params: {
       formData.append("lpVersion", params.location.lpVersion);
       formData.append("srs", params.location.srs);
       formData.append("locationType", params.location.locationType);
-      if (params.location.name) formData.append("locationName", params.location.name);
-      if (params.location.description) formData.append("locationDescription", params.location.description);
-      
+      if (params.location.name)
+        formData.append("locationName", params.location.name);
+      if (params.location.description)
+        formData.append("locationDescription", params.location.description);
+
       if (typeof params.location.location === "string") {
         formData.append("locationContentMode", "link");
         formData.append("locationUrl", params.location.location);
@@ -130,7 +122,7 @@ export async function addAttachment(params: {
 
   return apiClientFormData<AddAttachmentResponse>(
     "/api/certs/add-attachment",
-    formData
+    formData,
   );
 }
 
@@ -172,6 +164,42 @@ export async function addLocation(params: {
 
   return apiClientFormData<AddLocationResponse>(
     "/api/certs/add-location",
-    formData
+    formData,
   );
+}
+
+/**
+ * Update an existing hypercert
+ */
+export async function updateHypercert(
+  params: UpdateHypercertRequest,
+): Promise<UpdateHypercertResponse> {
+  const formData = new FormData();
+  formData.append("hypercertUri", params.hypercertUri);
+
+  if (params.title !== undefined) formData.append("title", params.title);
+  if (params.shortDescription !== undefined)
+    formData.append("shortDescription", params.shortDescription);
+  if (params.description !== undefined)
+    formData.append("description", params.description);
+  if (params.startDate === null) {
+    formData.append("startDate", "null");
+  } else if (params.startDate !== undefined) {
+    formData.append("startDate", params.startDate);
+  }
+  if (params.endDate === null) {
+    formData.append("endDate", "null");
+  } else if (params.endDate !== undefined) {
+    formData.append("endDate", params.endDate);
+  }
+
+  if (params.image === null) {
+    formData.append("image", "null");
+  } else if (params.image) {
+    formData.append("image", params.image);
+  }
+
+  return apiClientFormData<UpdateHypercertResponse>("/api/certs", formData, {
+    method: "PUT",
+  });
 }

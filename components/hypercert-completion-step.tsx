@@ -18,16 +18,16 @@ export default function HypercertCompletionStep({
     : "/hypercerts";
 
   return (
-    <div className="relative overflow-hidden rounded-2xl gradient-mesh">
+    <div className="gradient-mesh relative overflow-hidden rounded-2xl">
       {/* Noise overlay */}
       <div className="noise-bg relative">
-        <div className="relative z-10 px-8 py-12 lg:py-16 text-center">
+        <div className="relative z-10 px-8 py-12 text-center lg:py-16">
           {/* Animated success icon */}
-          <div className="inline-flex items-center justify-center mb-6 animate-scale-in">
+          <div className="animate-scale-in mb-6 inline-flex items-center justify-center">
             <div className="relative">
-              <div className="h-20 w-20 rounded-2xl bg-create-accent/15 flex items-center justify-center">
+              <div className="bg-create-accent/15 flex h-20 w-20 items-center justify-center rounded-2xl">
                 <svg
-                  className="h-10 w-10 text-create-accent"
+                  className="text-create-accent h-10 w-10"
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
@@ -42,61 +42,74 @@ export default function HypercertCompletionStep({
                 </svg>
               </div>
               {/* Glow ring */}
-              <div className="absolute inset-0 rounded-2xl bg-create-accent/10 blur-xl -z-10" />
+              <div className="bg-create-accent/10 absolute inset-0 -z-10 rounded-2xl blur-xl" />
             </div>
           </div>
 
           {/* Title */}
-          <h2 className="text-2xl lg:text-3xl font-[family-name:var(--font-syne)] font-bold tracking-tight text-foreground mb-2 animate-fade-in-up">
+          <h2 className="text-foreground animate-fade-in-up mb-2 font-[family-name:var(--font-syne)] text-2xl font-bold tracking-tight lg:text-3xl">
             Hypercert Created
           </h2>
-          <p className="text-sm font-[family-name:var(--font-outfit)] text-muted-foreground max-w-md mx-auto mb-8 animate-fade-in-up" style={{ animationDelay: "100ms" }}>
-            Your impact claim is now live. Share it, view the details, or create another one.
+          <p
+            className="text-muted-foreground animate-fade-in-up mx-auto mb-8 max-w-md font-[family-name:var(--font-outfit)] text-sm"
+            style={{ animationDelay: "100ms" }}
+          >
+            Your impact claim is now live. Share it, view the details, or create
+            another one.
           </p>
 
           {/* CID display */}
-          {hypercertInfo?.hypercertCid && (
-            <div className="inline-block glass-panel rounded-xl px-5 py-3 mb-8 animate-fade-in-up" style={{ animationDelay: "200ms" }}>
-              <p className="text-[11px] uppercase tracking-wider font-[family-name:var(--font-outfit)] font-medium text-muted-foreground mb-1">
+          {hypercertInfo?.hypercertCid ? (
+            <div
+              className="glass-panel animate-fade-in-up mb-8 inline-block rounded-xl px-5 py-3"
+              style={{ animationDelay: "200ms" }}
+            >
+              <p className="text-muted-foreground mb-1 font-[family-name:var(--font-outfit)] text-[11px] font-medium tracking-wider uppercase">
                 Content Identifier
               </p>
-              <p className="font-mono text-xs text-foreground break-all max-w-lg">
+              <p className="text-foreground max-w-lg font-mono text-xs break-all">
                 {hypercertInfo.hypercertCid}
               </p>
             </div>
-          )}
+          ) : null}
 
-          {!hypercertInfo?.hypercertCid && (
-            <p className="text-sm font-[family-name:var(--font-outfit)] text-muted-foreground mb-8 animate-fade-in-up" style={{ animationDelay: "200ms" }}>
-              We couldn&apos;t resolve a specific hypercert ID, but your
-              record should now be available in your hypercerts list.
+          {!hypercertInfo?.hypercertCid ? (
+            <p
+              className="text-muted-foreground animate-fade-in-up mb-8 font-[family-name:var(--font-outfit)] text-sm"
+              style={{ animationDelay: "200ms" }}
+            >
+              We couldn&apos;t resolve a specific hypercert ID, but your record
+              should now be available in your hypercerts list.
             </p>
-          )}
+          ) : null}
 
           {/* Actions */}
-          <div className="flex flex-wrap items-center justify-center gap-3 animate-fade-in-up" style={{ animationDelay: "300ms" }}>
-            {onBack && (
+          <div
+            className="animate-fade-in-up flex flex-wrap items-center justify-center gap-3"
+            style={{ animationDelay: "300ms" }}
+          >
+            {onBack ? (
               <Button
                 type="button"
                 variant="ghost"
                 onClick={onBack}
-                className="gap-2 font-[family-name:var(--font-outfit)] text-muted-foreground hover:text-foreground"
+                className="text-muted-foreground hover:text-foreground gap-2 font-[family-name:var(--font-outfit)]"
               >
                 <ArrowLeft className="h-4 w-4" />
                 Back
               </Button>
-            )}
+            ) : null}
 
-            {hypercertInfo?.hypercertCid && (
+            {hypercertInfo?.hypercertCid ? (
               <Link href={viewHref}>
-                <Button className="gap-2 bg-create-accent hover:bg-create-accent/90 text-create-accent-foreground font-[family-name:var(--font-outfit)] font-medium shadow-sm">
+                <Button className="bg-create-accent hover:bg-create-accent/90 text-create-accent-foreground gap-2 font-[family-name:var(--font-outfit)] font-medium shadow-sm">
                   <ExternalLink className="h-4 w-4" />
                   View Hypercert
                 </Button>
               </Link>
-            )}
+            ) : null}
 
-            {onCreateAnother && (
+            {onCreateAnother ? (
               <Button
                 type="button"
                 variant="outline"
@@ -106,7 +119,7 @@ export default function HypercertCompletionStep({
                 <Plus className="h-4 w-4" />
                 Create Another
               </Button>
-            )}
+            ) : null}
           </div>
         </div>
       </div>

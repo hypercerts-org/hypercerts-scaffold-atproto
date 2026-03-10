@@ -1,20 +1,11 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import {
-  InputGroup,
-  InputGroupAddon,
-  InputGroupInput,
-} from "@/components/ui/input-group";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { AtSignIcon, LogOut, User, Sparkles } from "lucide-react";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { LogOut, User, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { FormEventHandler, useState } from "react";
+import { useState } from "react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -25,7 +16,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useLoginMutation, useLogoutMutation } from "@/queries/auth";
+import { useLogoutMutation } from "@/queries/auth";
+import LoginDialog, { AuthMode } from "@/components/login-dialog";
 
 export interface NavbarProps {
   isSignedIn: boolean;
@@ -41,29 +33,16 @@ export default function Navbar({
   isSignedIn,
   avatarUrl,
   handle: userHandle,
-  userDid,
-  activeDid,
   activeProfileName,
   activeProfileHandle,
 }: NavbarProps) {
-  const [handle, setHandle] = useState("");
-  const [open, setOpen] = useState(false);
   const pathname = usePathname();
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [loginMode, setLoginMode] = useState<AuthMode>("signin");
 
-  const loginMutation = useLoginMutation();
   const logoutMutation = useLogoutMutation();
 
-  const isLoading = loginMutation.isPending || logoutMutation.isPending;
-
-  const handleSubmit: FormEventHandler<HTMLFormElement> = async (e) => {
-    e.preventDefault();
-    loginMutation.mutate(handle, {
-      onSuccess: () => {
-        setOpen(false);
-        setHandle("");
-      },
-    });
-  };
+  const isLoading = logoutMutation.isPending;
 
   const handleLogout = () => {
     logoutMutation.mutate();
@@ -72,14 +51,14 @@ export default function Navbar({
   const fallback = userHandle?.slice(0, 2).toUpperCase() || "ME";
 
   return (
-    <nav className="sticky top-0 z-50 border-b border-border/40 glass-panel">
-      <div className="flex h-16 items-center justify-between px-6 max-w-7xl mx-auto">
+    <nav className="border-border/40 glass-panel sticky top-0 z-50 border-b">
+      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
         {/* Logo */}
-        <Link href="/" className="flex items-center gap-2 group">
-          <div className="h-8 w-8 rounded-lg bg-create-accent/15 flex items-center justify-center group-hover:bg-create-accent/25 transition-colors">
-            <Sparkles className="h-4 w-4 text-create-accent" />
+        <Link href="/" className="group flex items-center gap-2">
+          <div className="bg-create-accent/15 group-hover:bg-create-accent/25 flex h-8 w-8 items-center justify-center rounded-lg transition-colors">
+            <Sparkles className="text-create-accent h-4 w-4" />
           </div>
-          <span className="text-lg font-[family-name:var(--font-syne)] font-bold tracking-tight">
+          <span className="font-[family-name:var(--font-syne)] text-lg font-bold tracking-tight">
             Hypercerts
           </span>
         </Link>
@@ -89,11 +68,13 @@ export default function Navbar({
           {isSignedIn ? (
             <>
               {/* Nav Links */}
-              <div className="hidden md:flex items-center gap-1">
+              <div className="hidden items-center gap-1 md:flex">
                 <Link
                   href="/hypercerts"
-                  className={`px-3 py-1.5 text-sm font-[family-name:var(--font-outfit)] font-medium rounded-lg transition-colors ${
-                    pathname === "/hypercerts" || (pathname?.startsWith("/hypercerts") && pathname !== "/hypercerts/create")
+                  className={`rounded-lg px-3 py-1.5 font-[family-name:var(--font-outfit)] text-sm font-medium transition-colors ${
+                    pathname === "/hypercerts" ||
+                    (pathname?.startsWith("/hypercerts") &&
+                      pathname !== "/hypercerts/create")
                       ? "bg-create-accent/10 text-create-accent hover:bg-create-accent/20"
                       : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
                   }`}
@@ -102,7 +83,7 @@ export default function Navbar({
                 </Link>
                 <Link
                   href="/hypercerts/create"
-                  className={`px-3 py-1.5 text-sm font-[family-name:var(--font-outfit)] font-medium rounded-lg transition-colors ${
+                  className={`rounded-lg px-3 py-1.5 font-[family-name:var(--font-outfit)] text-sm font-medium transition-colors ${
                     pathname === "/hypercerts/create"
                       ? "bg-create-accent/10 text-create-accent hover:bg-create-accent/20"
                       : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
@@ -116,10 +97,10 @@ export default function Navbar({
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <button
-                    className="rounded-full focus:outline-none focus:ring-2 focus:ring-create-accent focus:ring-offset-2"
+                    className="focus:ring-create-accent rounded-full focus:ring-2 focus:ring-offset-2 focus:outline-none"
                     aria-label="Open user menu"
                   >
-                    <Avatar className="h-9 w-9 ring-2 ring-border hover:ring-create-accent/50 transition-all">
+                    <Avatar className="ring-border hover:ring-create-accent/50 h-9 w-9 ring-2 transition-all">
                       <AvatarImage src={avatarUrl} />
                       <AvatarFallback className="bg-create-accent/15 text-create-accent font-[family-name:var(--font-syne)] font-semibold">
                         {fallback}
@@ -128,39 +109,47 @@ export default function Navbar({
                   </button>
                 </DropdownMenuTrigger>
 
-                <DropdownMenuContent align="end" className="w-56 glass-panel border-border/60">
+                <DropdownMenuContent
+                  align="end"
+                  className="glass-panel border-border/60 w-56"
+                >
                   <DropdownMenuLabel className="flex flex-col gap-1">
-                    <span className="text-sm font-[family-name:var(--font-outfit)] font-semibold">My Account</span>
-                    {userHandle && (
-                      <span className="text-xs font-[family-name:var(--font-outfit)] text-muted-foreground">
+                    <span className="font-[family-name:var(--font-outfit)] text-sm font-semibold">
+                      My Account
+                    </span>
+                    {userHandle ? (
+                      <span className="text-muted-foreground font-[family-name:var(--font-outfit)] text-xs">
                         @{userHandle}
                       </span>
-                    )}
+                    ) : null}
                   </DropdownMenuLabel>
-                  
-                  {activeProfileName && (
+
+                  {activeProfileName ? (
                     <>
                       <DropdownMenuSeparator />
                       <DropdownMenuLabel className="flex flex-col gap-1">
-                        <span className="text-xs uppercase tracking-wider font-[family-name:var(--font-outfit)] font-medium text-muted-foreground">
+                        <span className="text-muted-foreground font-[family-name:var(--font-outfit)] text-xs font-medium tracking-wider uppercase">
                           Active Profile
                         </span>
-                        <span className="text-sm font-[family-name:var(--font-outfit)] font-semibold">
+                        <span className="font-[family-name:var(--font-outfit)] text-sm font-semibold">
                           {activeProfileName}
                         </span>
-                        {activeProfileHandle && (
-                          <span className="text-xs font-[family-name:var(--font-outfit)] text-muted-foreground">
+                        {activeProfileHandle ? (
+                          <span className="text-muted-foreground font-[family-name:var(--font-outfit)] text-xs">
                             @{activeProfileHandle}
                           </span>
-                        )}
+                        ) : null}
                       </DropdownMenuLabel>
                     </>
-                  )}
+                  ) : null}
 
                   <DropdownMenuSeparator />
 
                   <DropdownMenuItem className="font-[family-name:var(--font-outfit)]">
-                    <Link className="flex items-center gap-2 w-full" href="/profile">
+                    <Link
+                      className="flex w-full items-center gap-2"
+                      href="/profile"
+                    >
                       <User className="h-4 w-4" />
                       Profile
                     </Link>
@@ -180,57 +169,41 @@ export default function Navbar({
               </DropdownMenu>
             </>
           ) : (
-            <Popover open={open} onOpenChange={setOpen}>
-              <PopoverTrigger asChild>
-                <Button 
-                  disabled={isLoading} 
+            <>
+              <div className="flex items-center gap-2">
+                <Button
+                  disabled={isLoading}
                   size="sm"
+                  variant="outline"
+                  onClick={() => {
+                    setLoginMode("signup");
+                    setDialogOpen(true);
+                  }}
+                  className="font-[family-name:var(--font-outfit)] font-medium"
+                >
+                  Create Account
+                </Button>
+                <Button
+                  disabled={isLoading}
+                  size="sm"
+                  onClick={() => {
+                    setLoginMode("signin");
+                    setDialogOpen(true);
+                  }}
                   className="bg-create-accent hover:bg-create-accent/90 text-create-accent-foreground font-[family-name:var(--font-outfit)] font-medium shadow-sm"
                 >
                   Sign In
                 </Button>
-              </PopoverTrigger>
-              <PopoverContent align="end" className="w-80 glass-panel border-border/60">
-                <form onSubmit={handleSubmit} className="grid gap-4">
-                  <div className="space-y-2">
-                    <h4 className="text-base font-[family-name:var(--font-syne)] font-bold">Welcome back</h4>
-                    <p className="text-sm font-[family-name:var(--font-outfit)] text-muted-foreground">
-                      Enter your handle to continue
-                    </p>
-                  </div>
-                  <InputGroup>
-                    <InputGroupInput
-                      value={handle}
-                      onChange={(e) => setHandle(e.target.value)}
-                      placeholder="your.handle"
-                      required
-                      className="font-[family-name:var(--font-outfit)]"
-                    />
-                    <InputGroupAddon>
-                      <AtSignIcon />
-                    </InputGroupAddon>
-                  </InputGroup>
-                  <div className="flex flex-col gap-2">
-                    <Button 
-                      type="submit" 
-                      size="sm" 
-                      disabled={loginMutation.isPending}
-                      className="bg-create-accent hover:bg-create-accent/90 text-create-accent-foreground font-[family-name:var(--font-outfit)] font-medium"
-                    >
-                      {loginMutation.isPending ? "Signing in..." : "Sign In"}
-                    </Button>
-                    <Button
-                      variant="link"
-                      type="button"
-                      size="sm"
-                      className="text-xs font-[family-name:var(--font-outfit)] text-muted-foreground hover:text-foreground"
-                    >
-                      Create an account
-                    </Button>
-                  </div>
-                </form>
-              </PopoverContent>
-            </Popover>
+              </div>
+              <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+                <DialogContent className="glass-panel border-border/60 p-6 sm:max-w-sm">
+                  <DialogTitle className="sr-only">
+                    {loginMode === "signin" ? "Sign In" : "Create Account"}
+                  </DialogTitle>
+                  <LoginDialog key={loginMode} initialMode={loginMode} />
+                </DialogContent>
+              </Dialog>
+            </>
           )}
         </div>
       </div>

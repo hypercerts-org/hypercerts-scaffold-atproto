@@ -19,7 +19,7 @@ export default function FormFooter({
   submitDisabled?: boolean;
 }) {
   return (
-    <div className="flex items-center justify-between gap-4 pt-6 mt-6 border-t border-border/50">
+    <div className="border-border/50 mt-6 flex items-center justify-between gap-4 border-t pt-6">
       <div>
         {onBack && (
           <Button
@@ -27,7 +27,7 @@ export default function FormFooter({
             variant="ghost"
             disabled={saving}
             onClick={onBack}
-            className="gap-2 text-muted-foreground hover:text-foreground font-[family-name:var(--font-outfit)]"
+            className="text-muted-foreground hover:text-foreground gap-2 font-[family-name:var(--font-outfit)]"
           >
             <ArrowLeft className="h-4 w-4" />
             Back
@@ -52,7 +52,7 @@ export default function FormFooter({
         <Button
           type="submit"
           disabled={saving || submitDisabled}
-          className="min-w-[160px] bg-create-accent hover:bg-create-accent/90 text-create-accent-foreground font-[family-name:var(--font-outfit)] font-medium shadow-sm transition-all duration-200 hover:shadow-md"
+          className="bg-create-accent hover:bg-create-accent/90 text-create-accent-foreground min-w-[160px] font-[family-name:var(--font-outfit)] font-medium shadow-sm transition-all duration-200 hover:shadow-md"
         >
           {saving ? (
             <>

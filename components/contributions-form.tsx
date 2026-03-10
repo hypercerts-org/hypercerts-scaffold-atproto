@@ -33,7 +33,7 @@ export default function HypercertContributionForm({
 
   const addContributor = (user: ProfileView) => {
     const isAdded = contributors.find(
-      (contributor) => contributor.did === user.did
+      (contributor) => contributor.did === user.did,
     );
     if (!isAdded) {
       setContributors((prev) => [...prev, user]);
@@ -42,7 +42,7 @@ export default function HypercertContributionForm({
 
   const removeContributor = (user: ProfileView) => {
     setContributors((prev) =>
-      prev.filter((contributor) => contributor.did !== user.did)
+      prev.filter((contributor) => contributor.did !== user.did),
     );
   };
 
@@ -63,13 +63,15 @@ export default function HypercertContributionForm({
   };
 
   const handleContributionCreation = async () => {
-    const mappedContributors = [
-      ...contributors.map(({ did }) => did),
-      ...manualContributors.filter((uri) => uri.trim() !== ""),
-    ];
+    const mappedContributors: string[] = [];
+    for (const c of contributors) mappedContributors.push(c.did);
+    for (const uri of manualContributors) {
+      const trimmed = uri.trim();
+      if (trimmed !== "") mappedContributors.push(trimmed);
+    }
 
     if (!mappedContributors.length) return;
-    
+
     // Validate hypercertUri exists
     if (!hypercertInfo?.hypercertUri) {
       throw new Error("Hypercert URI is required to create a contribution");
@@ -105,7 +107,8 @@ export default function HypercertContributionForm({
       onNext?.();
     } catch (error) {
       console.error("Error saving contribution:", error);
-      toast.error("Failed to create contribution");
+      const message = error instanceof Error ? error.message : "Unknown error";
+      toast.error(`Failed to create contribution: ${message}`);
     } finally {
       setSaving(false);
     }
@@ -121,7 +124,7 @@ export default function HypercertContributionForm({
       "did:plc:ragtjsm2j2vknwkz3zp4oxrd",
     ]);
     setDescription(
-      "Led the technical development and implementation of the community platform, including backend infrastructure, API design, and database architecture. Coordinated with stakeholders to ensure project milestones were met on time."
+      "Led the technical development and implementation of the community platform, including backend infrastructure, API design, and database architecture. Coordinated with stakeholders to ensure project milestones were met on time.",
     );
     const startDate = new Date();
     startDate.setMonth(startDate.getMonth() - 6);
@@ -133,7 +136,7 @@ export default function HypercertContributionForm({
 
   return (
     <FormInfo
-      stepLabel="Step 2 of 6" // TODO: update stepLabel when contributions step is re-enabled
+      stepLabel="Step 2 of 5" // NOTE: contributions step is currently disabled; stepLabel reflects the 5-step flow
       title="Add Contributions"
       description="Link roles, contributors, and timeframes to your hypercert."
     >
@@ -145,7 +148,7 @@ export default function HypercertContributionForm({
             variant="outline"
             size="sm"
             onClick={handleAutofill}
-            className="gap-2 text-xs font-[family-name:var(--font-outfit)]"
+            className="gap-2 font-[family-name:var(--font-outfit)] text-xs"
           >
             <Wand2 className="h-3.5 w-3.5" />
             Autofill Demo
@@ -154,7 +157,10 @@ export default function HypercertContributionForm({
 
         {/* Role */}
         <div className="space-y-2">
-          <Label htmlFor="role" className="text-sm font-[family-name:var(--font-outfit)] font-medium">
+          <Label
+            htmlFor="role"
+            className="font-[family-name:var(--font-outfit)] text-sm font-medium"
+          >
             Role / Title *
           </Label>
           <Input
@@ -172,10 +178,10 @@ export default function HypercertContributionForm({
         {/* Contributors */}
         <div className="space-y-3">
           <div className="flex items-center gap-2">
-            <div className="h-6 w-6 rounded-lg bg-create-accent/10 flex items-center justify-center">
-              <Users className="h-3.5 w-3.5 text-create-accent" />
+            <div className="bg-create-accent/10 flex h-6 w-6 items-center justify-center rounded-lg">
+              <Users className="text-create-accent h-3.5 w-3.5" />
             </div>
-            <Label className="text-sm font-[family-name:var(--font-outfit)] font-medium">
+            <Label className="font-[family-name:var(--font-outfit)] text-sm font-medium">
               Contributors *
             </Label>
           </div>
@@ -190,7 +196,7 @@ export default function HypercertContributionForm({
                 {contributors.map((contributor) => (
                   <div
                     key={contributor.did}
-                    className="flex justify-between items-center gap-4 border border-border/60 p-3 rounded-lg bg-background/50"
+                    className="border-border/60 bg-background/50 flex items-center justify-between gap-4 rounded-lg border p-3"
                   >
                     <UserAvatar user={contributor} />
                     <Button
@@ -247,7 +253,10 @@ export default function HypercertContributionForm({
 
         {/* Description */}
         <div className="space-y-2">
-          <Label htmlFor="description" className="text-sm font-[family-name:var(--font-outfit)] font-medium">
+          <Label
+            htmlFor="description"
+            className="font-[family-name:var(--font-outfit)] text-sm font-medium"
+          >
             Description (Optional)
           </Label>
           <Textarea
@@ -260,13 +269,13 @@ export default function HypercertContributionForm({
             disabled={saving}
             className="font-[family-name:var(--font-outfit)]"
           />
-          <p className="text-[11px] font-[family-name:var(--font-outfit)] text-muted-foreground">
+          <p className="text-muted-foreground font-[family-name:var(--font-outfit)] text-[11px]">
             {description.length} / 2000 characters
           </p>
         </div>
 
         {/* Dates */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <div className="space-y-2">
             <DatePicker
               label="Work Started"
