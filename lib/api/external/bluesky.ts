@@ -2,7 +2,7 @@
  * Bluesky API functions
  */
 
-import { externalApiClient } from "../client";
+import { APIError, externalApiClient } from "../client";
 import type { BlueskyProfile, BlueskySearchActorsResponse } from "../types";
 
 const BLUESKY_PUBLIC_API = "https://public.api.bsky.app";
@@ -36,4 +36,40 @@ export async function searchActors(
     url.toString(),
   );
   return response.actors || [];
+}
+
+const BSKY_SOCIAL_API = "https://bsky.social";
+
+/**
+ * Request a password reset email for the given address
+ */
+export async function requestPasswordReset(email: string): Promise<void> {
+  const url = `${BSKY_SOCIAL_API}/xrpc/com.atproto.server.requestPasswordReset`;
+
+  const response = await fetch(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ email }),
+  });
+
+  if (!response.ok) {
+    let errorMessage = `Request failed with status ${response.status}`;
+
+    try {
+      const errorData: unknown = await response.json();
+      if (
+        typeof errorData === "object" &&
+        errorData !== null &&
+        "message" in errorData
+      ) {
+        errorMessage = (errorData as { message: string }).message;
+      }
+    } catch {
+      errorMessage = response.statusText || errorMessage;
+    }
+
+    throw new APIError(response.status, errorMessage);
+  }
 }
