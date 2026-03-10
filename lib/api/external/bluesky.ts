@@ -38,13 +38,18 @@ export async function searchActors(
   return response.actors || [];
 }
 
-const BSKY_SOCIAL_API = "https://bsky.social";
-
 /**
  * Request a password reset email for the given address
  */
 export async function requestPasswordReset(email: string): Promise<void> {
-  const url = `${BSKY_SOCIAL_API}/xrpc/com.atproto.server.requestPasswordReset`;
+  const epdsUrl = process.env.NEXT_PUBLIC_EPDS_URL;
+  if (!epdsUrl) {
+    throw new Error(
+      "NEXT_PUBLIC_EPDS_URL is not set. Cannot request password reset.",
+    );
+  }
+  const normalizedUrl = epdsUrl.replace(/\/+$/, "");
+  const url = `${normalizedUrl}/xrpc/com.atproto.server.requestPasswordReset`;
 
   const response = await fetch(url, {
     method: "POST",
