@@ -1,0 +1,54 @@
+import type { Metadata } from "next";
+import { redirect } from "next/navigation";
+import { getAgent, getSession } from "@/lib/atproto-session";
+import { resolveSessionPds } from "@/lib/server-utils";
+import ResetPasswordForm from "@/components/reset-password-form";
+import { KeyRound } from "lucide-react";
+
+export const metadata: Metadata = {
+  title: "Reset Password",
+  description: "Request a password reset for your account.",
+};
+
+export default async function ResetPasswordPage() {
+  const agent = await getAgent();
+  if (!agent) redirect("/");
+
+  const sessionInfo = await agent.com.atproto.server
+    .getSession()
+    .catch(() => null);
+  const email = sessionInfo?.data?.email || "";
+
+  const session = await getSession();
+  const resolvedPdsUrl = session ? await resolveSessionPds(session) : null;
+  if (!resolvedPdsUrl || resolvedPdsUrl === "https://cdn.bsky.app") {
+    throw new Error("Could not find PDS URL for your account.");
+  }
+
+  return (
+    <div className="noise-bg relative min-h-screen">
+      <div className="relative z-10 mx-auto max-w-7xl px-4 py-8 lg:py-12">
+        {/* Page header */}
+        <div className="animate-fade-in mb-8 lg:mb-10">
+          <div className="mb-2 flex items-center gap-3">
+            <div className="bg-create-accent/10 flex size-10 items-center justify-center rounded-full">
+              <KeyRound className="text-create-accent size-5" />
+            </div>
+            <h1 className="text-foreground font-[family-name:var(--font-syne)] text-3xl font-bold tracking-tight lg:text-4xl">
+              Reset Password
+            </h1>
+          </div>
+          <p className="text-muted-foreground mt-2 max-w-xl pl-[52px] font-[family-name:var(--font-outfit)] text-sm">
+            Reset your account password. A reset code will be sent to your
+            email.
+          </p>
+        </div>
+
+        {/* Main content */}
+        <main className="animate-fade-in-up max-w-2xl">
+          <ResetPasswordForm initialEmail={email} pdsUrl={resolvedPdsUrl} />
+        </main>
+      </div>
+    </div>
+  );
+}

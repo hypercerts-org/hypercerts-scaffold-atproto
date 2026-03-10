@@ -54,6 +54,8 @@ const BSKY_PROFILE_SCOPE = `repo?collection=${HYPERCERT_COLLECTIONS.BSKY_PROFILE
 const BLOB_SCOPE = "blob:*/*";
 const RPC_SCOPE =
   "rpc:app.bsky.actor.getProfile?aud=did:web:api.bsky.app%23bsky_appview";
+// for password reset and knowing which email to send to and for email verification as well
+const EMAIL_SCOPE = "account:email";
 
 const GRANULAR_SCOPE = [
   ATPROTO_SCOPE,
@@ -61,6 +63,7 @@ const GRANULAR_SCOPE = [
   BSKY_PROFILE_SCOPE,
   RPC_SCOPE,
   BLOB_SCOPE,
+  EMAIL_SCOPE,
 ].join(" ");
 
 /**

@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
-import { LogOut, User, Sparkles } from "lucide-react";
+import { Check, Copy, LogOut, Sparkles, User } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
@@ -25,20 +25,17 @@ export interface NavbarProps {
   handle?: string;
   userDid?: string;
   activeDid?: string;
-  activeProfileName?: string;
-  activeProfileHandle?: string;
 }
 
 export default function Navbar({
   isSignedIn,
   avatarUrl,
   handle: userHandle,
-  activeProfileName,
-  activeProfileHandle,
 }: NavbarProps) {
   const pathname = usePathname();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [loginMode, setLoginMode] = useState<AuthMode>("signin");
+  const [copied, setCopied] = useState(false);
 
   const logoutMutation = useLogoutMutation();
 
@@ -118,30 +115,25 @@ export default function Navbar({
                       My Account
                     </span>
                     {userHandle ? (
-                      <span className="text-muted-foreground font-[family-name:var(--font-outfit)] text-xs">
+                      <button
+                        type="button"
+                        className="text-muted-foreground hover:text-foreground flex items-center gap-1.5 font-[family-name:var(--font-outfit)] text-xs transition-colors"
+                        onClick={() => {
+                          navigator.clipboard.writeText(`@${userHandle}`);
+                          setCopied(true);
+                          setTimeout(() => setCopied(false), 1500);
+                        }}
+                        title="Copy handle"
+                      >
                         @{userHandle}
-                      </span>
+                        {copied ? (
+                          <Check className="size-3 text-green-500" />
+                        ) : (
+                          <Copy className="size-3 opacity-50" />
+                        )}
+                      </button>
                     ) : null}
                   </DropdownMenuLabel>
-
-                  {activeProfileName ? (
-                    <>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuLabel className="flex flex-col gap-1">
-                        <span className="text-muted-foreground font-[family-name:var(--font-outfit)] text-xs font-medium tracking-wider uppercase">
-                          Active Profile
-                        </span>
-                        <span className="font-[family-name:var(--font-outfit)] text-sm font-semibold">
-                          {activeProfileName}
-                        </span>
-                        {activeProfileHandle ? (
-                          <span className="text-muted-foreground font-[family-name:var(--font-outfit)] text-xs">
-                            @{activeProfileHandle}
-                          </span>
-                        ) : null}
-                      </DropdownMenuLabel>
-                    </>
-                  ) : null}
 
                   <DropdownMenuSeparator />
 
