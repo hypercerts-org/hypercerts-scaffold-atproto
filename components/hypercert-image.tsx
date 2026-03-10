@@ -13,12 +13,14 @@ interface HypercertImageProps {
   className?: string;
   /** Whether to use priority loading (Next.js Image prop) */
   priority?: boolean;
+  /** Responsive sizes hint for next/image when using `fill` */
+  sizes?: string;
   /** Fallback content when no image is available. Defaults to an Award icon. Pass `null` to render nothing. */
   fallback?: React.ReactNode;
 }
 
 export default function HypercertImage(props: HypercertImageProps) {
-  const { src, alt, className, priority, fallback } = props;
+  const { src, alt, className, priority, sizes, fallback } = props;
 
   if (src) {
     return (
@@ -26,6 +28,7 @@ export default function HypercertImage(props: HypercertImageProps) {
         fill
         src={src}
         alt={alt ?? "Hypercert image"}
+        sizes={sizes}
         className={cn("object-cover", className)}
         priority={priority}
       />

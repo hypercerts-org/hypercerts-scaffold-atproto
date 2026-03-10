@@ -51,6 +51,16 @@ export function getBlobURL(
   return undefined;
 }
 
+function hasUriField(value: Record<string, unknown>): value is { uri: string } {
+  return typeof value.uri === "string";
+}
+
+function hasBlobImageField(
+  value: Record<string, unknown>,
+): value is { image: BlobRef | string | undefined } {
+  return "image" in value;
+}
+
 export function resolveHypercertImageUrl(
   image:
     | $Typed<OrgHypercertsDefs.Uri>
@@ -81,20 +91,13 @@ export function resolveHypercertImageUrl(
 
     // 2. Structural fallback — PDS may omit $type on union members.
     //    Check for Uri shape: { uri: string }
-    if (
-      "uri" in image &&
-      typeof (image as Record<string, unknown>).uri === "string"
-    ) {
-      return (image as unknown as OrgHypercertsDefs.Uri).uri;
+    if ("uri" in image && hasUriField(image)) {
+      return image.uri;
     }
 
     //    Check for SmallImage shape: { image: <BlobRef-like with ref> }
-    if ("image" in image) {
-      return getBlobURL(
-        (image as unknown as OrgHypercertsDefs.SmallImage).image,
-        did,
-        pdsUrl,
-      );
+    if (hasBlobImageField(image)) {
+      return getBlobURL(image.image, did, pdsUrl);
     }
 
     return undefined;
