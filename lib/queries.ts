@@ -1,11 +1,14 @@
 import { Agent } from "@atproto/api";
-import { OrgHypercertsClaimActivity as HypercertClaim } from "@hypercerts-org/sdk-core";
-import { OrgHypercertsClaimEvaluation as HypercertEvaluation } from "@hypercerts-org/sdk-core";
-import { OrgHypercertsClaimContributionDetails as HypercertContribution } from "@hypercerts-org/sdk-core";
-import { OrgHypercertsClaimAttachment as HypercertEvidence } from "@hypercerts-org/sdk-core";
-import { AppCertifiedLocation as HypercertLocation } from "@hypercerts-org/sdk-core";
+import {
+  OrgHypercertsClaimActivity,
+  OrgHypercertsContextEvaluation,
+  OrgHypercertsClaimContribution,
+  OrgHypercertsContextAttachment,
+  AppCertifiedLocation,
+} from "@hypercerts-org/lexicon";
 import { Collections } from "@/lib/types";
 import { parseAtUri } from "@/lib/utils";
+import { assertValidRecord } from "@/lib/record-validation";
 
 export const getRecordWithURI = async <T>(
   uri: string,
@@ -57,8 +60,13 @@ export const uploadFile = async (atProtoAgent: Agent, file?: File) => {
 
 export const createHypercert = async (
   atProtoAgent: Agent,
-  record: HypercertClaim.Record,
+  record: OrgHypercertsClaimActivity.Record,
 ) => {
+  assertValidRecord(
+    "activity",
+    record,
+    OrgHypercertsClaimActivity.validateRecord,
+  );
   const data = await atProtoAgent.com.atproto.repo.createRecord({
     repo: atProtoAgent.assertDid,
     collection: Collections.claim,
@@ -70,8 +78,13 @@ export const createHypercert = async (
 export const updateHypercert = async (
   rkey: string,
   atProtoAgent: Agent,
-  record: HypercertClaim.Record,
+  record: OrgHypercertsClaimActivity.Record,
 ) => {
+  assertValidRecord(
+    "activity",
+    record,
+    OrgHypercertsClaimActivity.validateRecord,
+  );
   const data = await atProtoAgent.com.atproto.repo.putRecord({
     rkey,
     repo: atProtoAgent.assertDid,
@@ -83,8 +96,13 @@ export const updateHypercert = async (
 
 export const createContribution = async (
   atProtoAgent: Agent,
-  record: HypercertContribution.Record,
+  record: OrgHypercertsClaimContribution.Record,
 ) => {
+  assertValidRecord(
+    "contributionDetails",
+    record,
+    OrgHypercertsClaimContribution.validateRecord,
+  );
   const response = await atProtoAgent?.com.atproto.repo.createRecord({
     record,
     collection: Collections.contribution,
@@ -95,8 +113,13 @@ export const createContribution = async (
 
 export const createEvaluation = async (
   atProtoAgent: Agent,
-  record: HypercertEvaluation.Record,
+  record: OrgHypercertsContextEvaluation.Record,
 ) => {
+  assertValidRecord(
+    "evaluation",
+    record,
+    OrgHypercertsContextEvaluation.validateRecord,
+  );
   const response = await atProtoAgent?.com.atproto.repo.createRecord({
     record,
     collection: Collections.evaluation,
@@ -107,8 +130,13 @@ export const createEvaluation = async (
 
 export const createEvidence = async (
   atProtoAgent: Agent,
-  record: HypercertEvidence.Record,
+  record: OrgHypercertsContextAttachment.Record,
 ) => {
+  assertValidRecord(
+    "evidence",
+    record,
+    OrgHypercertsContextAttachment.validateRecord,
+  );
   const response = await atProtoAgent.com.atproto.repo.createRecord({
     record,
     collection: Collections.evidence,
@@ -119,8 +147,9 @@ export const createEvidence = async (
 
 export const createLocation = async (
   atProtoAgent: Agent,
-  record: HypercertLocation.Record,
+  record: AppCertifiedLocation.Record,
 ) => {
+  assertValidRecord("location", record, AppCertifiedLocation.validateRecord);
   const response = await atProtoAgent.com.atproto.repo.createRecord({
     record,
     collection: Collections.location,

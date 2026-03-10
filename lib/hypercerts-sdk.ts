@@ -1,4 +1,4 @@
-import { ATProtoSDKConfig, createATProtoSDK } from "@hypercerts-org/sdk-core";
+import { NodeOAuthClient, JoseKey } from "@atproto/oauth-client-node";
 import { buildClientMetadata, config, OAUTH_SCOPE } from "./config";
 import {
   RedisSessionStore,
@@ -14,24 +14,24 @@ export { OAUTH_SCOPE };
 
 const clientMetadata = buildClientMetadata();
 
-const oauthConfig = {
-  clientId: clientMetadata.client_id,
-  redirectUri: clientMetadata.redirect_uris[0],
-  scope: clientMetadata.scope,
-  jwksUri: clientMetadata.jwks_uri,
-  jwkPrivate: config.jwkPrivate,
-  developmentMode: config.isDevelopment,
-} as ATProtoSDKConfig["oauth"];
-
-// Create ATProto SDK instance
-const sdk = createATProtoSDK({
-  oauth: oauthConfig,
-  storage: {
-    sessionStore,
-    stateStore,
-  },
+const oauthClient = new NodeOAuthClient({
+  clientMetadata,
+  stateStore,
+  sessionStore,
   handleResolver: config.handleResolver,
-  logger: console,
+  // keyset is needed for non-loopback (production) clients that use private_key_jwt
+  // For loopback, token_endpoint_auth_method is 'none' so keyset is optional
+  ...(config.jwkPrivate
+    ? {
+        keyset: await Promise.all(
+          (
+            JSON.parse(config.jwkPrivate).keys ?? [
+              JSON.parse(config.jwkPrivate),
+            ]
+          ).map((jwk: Record<string, unknown>) => JoseKey.fromJWK(jwk)),
+        ),
+      }
+    : {}),
 });
 
-export default sdk;
+export default oauthClient;

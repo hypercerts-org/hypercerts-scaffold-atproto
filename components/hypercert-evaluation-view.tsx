@@ -22,9 +22,9 @@ export interface Evaluation {
     max: number;
     value: number;
   };
-  content?: string[];
-  measurements?: string[];
-  location?: string;
+  content?: { $type: string; uri: string }[];
+  measurements?: { uri: string; cid: string }[];
+  location?: { uri: string; cid: string };
 }
 
 export default function HypercertEvaluationView({
@@ -114,17 +114,20 @@ export default function HypercertEvaluationView({
                   Content
                 </dt>
                 <dd className="space-y-1">
-                  {evaluation.content.map((uri, index) => (
-                    <div
-                      key={index}
-                      className="font-[family-name:var(--font-outfit)] text-sm break-all"
-                    >
-                      <URILink
-                        label={uri}
-                        uri={uri.includes("https") ? uri : getPDSlsURI(uri)}
-                      />
-                    </div>
-                  ))}
+                  {evaluation.content.map((item, index) => {
+                    const uri = item.uri;
+                    return (
+                      <div
+                        key={index}
+                        className="font-[family-name:var(--font-outfit)] text-sm break-all"
+                      >
+                        <URILink
+                          label={uri}
+                          uri={uri.startsWith("https") ? uri : getPDSlsURI(uri)}
+                        />
+                      </div>
+                    );
+                  })}
                 </dd>
               </div>
             </div>
@@ -139,17 +142,20 @@ export default function HypercertEvaluationView({
                   Referenced Measurements
                 </dt>
                 <dd className="space-y-1">
-                  {evaluation.measurements.map((uri, index) => (
-                    <div
-                      key={index}
-                      className="font-[family-name:var(--font-outfit)] text-sm break-all"
-                    >
-                      <URILink
-                        label={uri}
-                        uri={uri.includes("https") ? uri : getPDSlsURI(uri)}
-                      />
-                    </div>
-                  ))}
+                  {evaluation.measurements.map((item, index) => {
+                    const uri = item.uri;
+                    return (
+                      <div
+                        key={index}
+                        className="font-[family-name:var(--font-outfit)] text-sm break-all"
+                      >
+                        <URILink
+                          label={uri}
+                          uri={uri.startsWith("https") ? uri : getPDSlsURI(uri)}
+                        />
+                      </div>
+                    );
+                  })}
                 </dd>
               </div>
             </div>
@@ -164,14 +170,15 @@ export default function HypercertEvaluationView({
                   Location
                 </dt>
                 <dd className="font-[family-name:var(--font-outfit)] text-sm break-all">
-                  <URILink
-                    label={evaluation.location}
-                    uri={
-                      evaluation.location.includes("https")
-                        ? evaluation.location
-                        : getPDSlsURI(evaluation.location)
-                    }
-                  />
+                  {(() => {
+                    const uri = evaluation.location.uri;
+                    return (
+                      <URILink
+                        label={uri}
+                        uri={uri.startsWith("https") ? uri : getPDSlsURI(uri)}
+                      />
+                    );
+                  })()}
                 </dd>
               </div>
             </div>

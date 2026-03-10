@@ -1,24 +1,39 @@
 import { getRepoContext } from "@/lib/repo-context";
+import {
+  resolveStrongRef,
+  createLocationRecord,
+  uploadContentBlob,
+  type LocationCreateParams,
+} from "@/lib/atproto-writes";
+import {
+  getStringField,
+  parseAtUri,
+  stringToLinearDocument,
+} from "@/lib/utils";
 import { NextRequest, NextResponse } from "next/server";
+import {
+  OrgHypercertsContextAttachment,
+  OrgHypercertsDefs,
+} from "@hypercerts-org/lexicon";
+import { assertValidRecord } from "@/lib/record-validation";
 
 export async function POST(req: NextRequest) {
   try {
     const data = await req.formData();
     const ctxPromise = getRepoContext();
 
-    const title = (data.get("title") as string | null)?.trim() ?? "";
+    const title = getStringField(data, "title")?.trim() ?? "";
     const shortDescription =
-      (data.get("shortDescription") as string | null)?.trim() ?? undefined;
+      getStringField(data, "shortDescription")?.trim() ?? undefined;
     const description =
-      (data.get("description") as string | null)?.trim() ?? undefined;
+      getStringField(data, "description")?.trim() ?? undefined;
     const contentType =
-      (data.get("contentType") as string | null)?.trim() ?? undefined;
+      getStringField(data, "contentType")?.trim() ?? undefined;
 
-    const evidenceMode =
-      (data.get("evidenceMode") as string | null)?.trim() ?? "link";
+    const evidenceMode = getStringField(data, "evidenceMode")?.trim() ?? "link";
 
     const hypercertUri =
-      (data.get("hypercertUri") as string | null)?.trim() ?? undefined;
+      getStringField(data, "hypercertUri")?.trim() ?? undefined;
 
     if (!hypercertUri) {
       return NextResponse.json(
@@ -34,8 +49,7 @@ export async function POST(req: NextRequest) {
     let content: string | Blob;
 
     if (evidenceMode === "link") {
-      const evidenceUrl =
-        (data.get("evidenceUrl") as string | null)?.trim() ?? "";
+      const evidenceUrl = getStringField(data, "evidenceUrl")?.trim() ?? "";
 
       if (!evidenceUrl) {
         return NextResponse.json(
@@ -81,28 +95,27 @@ export async function POST(req: NextRequest) {
           description?: string;
         }
       | undefined = undefined;
-    const locationMode = (data.get("locationMode") as string | null)?.trim();
+    const locationMode = getStringField(data, "locationMode")?.trim();
 
     if (locationMode === "string") {
-      const locationString = (
-        data.get("locationString") as string | null
-      )?.trim();
+      const locationString = getStringField(data, "locationString")?.trim();
       if (locationString) {
         location = locationString;
       }
     } else if (locationMode === "create") {
-      const lpVersion = (data.get("lpVersion") as string | null)?.trim();
-      const srs = (data.get("srs") as string | null)?.trim();
-      const locationType = (data.get("locationType") as string | null)?.trim();
-      const locationContentMode = (
-        data.get("locationContentMode") as string | null
+      const lpVersion = getStringField(data, "lpVersion")?.trim();
+      const srs = getStringField(data, "srs")?.trim();
+      const locationType = getStringField(data, "locationType")?.trim();
+      const locationContentMode = getStringField(
+        data,
+        "locationContentMode",
       )?.trim();
 
       if (lpVersion && srs && locationType) {
         let locationData: string | File | undefined;
 
         if (locationContentMode === "link") {
-          locationData = (data.get("locationUrl") as string | null)?.trim();
+          locationData = getStringField(data, "locationUrl")?.trim();
         } else if (locationContentMode === "file") {
           locationData = (data.get("locationFile") as File | null) ?? undefined;
         }
@@ -113,28 +126,111 @@ export async function POST(req: NextRequest) {
             srs,
             locationType,
             location: locationData,
-            ...(data.get("locationName") && {
-              name: (data.get("locationName") as string).trim(),
+            ...(getStringField(data, "locationName") && {
+              name: getStringField(data, "locationName")!.trim(),
             }),
-            ...(data.get("locationDescription") && {
-              description: (data.get("locationDescription") as string).trim(),
+            ...(getStringField(data, "locationDescription") && {
+              description: getStringField(data, "locationDescription")!.trim(),
             }),
           };
         }
       }
     }
 
-    const response = await ctx.scopedRepo.hypercerts.addAttachment({
-      subjects: hypercertUri,
-      content,
-      title,
-      shortDescription,
-      description,
-      contentType,
-      ...(location && { location }),
-    });
+    // 1. Resolve subject to StrongRef
+    const subjectRef = await resolveStrongRef(
+      ctx.agent,
+      hypercertUri,
+      "org.hypercerts.claim.activity",
+    );
 
-    return NextResponse.json(response);
+    // 2. Resolve content — string URL or uploaded blob
+    let contentField:
+      | (OrgHypercertsDefs.Uri & { $type: "org.hypercerts.defs#uri" })
+      | (OrgHypercertsDefs.SmallBlob & {
+          $type: "org.hypercerts.defs#smallBlob";
+        });
+    if (typeof content === "string") {
+      contentField = { $type: "org.hypercerts.defs#uri", uri: content };
+    } else {
+      // content is a Blob/File
+      const blobRef = await uploadContentBlob(ctx.agent, content);
+      contentField = { $type: "org.hypercerts.defs#smallBlob", blob: blobRef };
+    }
+
+    // 3. Optionally create location record
+    let locationRef: { uri: string; cid: string } | undefined;
+    let createdLocationRef: { uri: string; cid: string } | undefined;
+    if (location) {
+      if (typeof location === "string") {
+        locationRef = await resolveStrongRef(
+          ctx.agent,
+          location,
+          "app.certified.location",
+        );
+      } else {
+        locationRef = await createLocationRecord(
+          ctx.agent,
+          ctx.activeDid,
+          location as LocationCreateParams,
+        );
+        createdLocationRef = locationRef;
+      }
+    }
+
+    // 4. Build attachment record
+    const record: OrgHypercertsContextAttachment.Record = {
+      $type: "org.hypercerts.context.attachment",
+      subjects: [subjectRef],
+      content: [contentField],
+      title,
+      createdAt: new Date().toISOString(),
+      ...(shortDescription ? { shortDescription } : {}),
+      ...(description
+        ? { description: stringToLinearDocument(description) }
+        : {}),
+      ...(contentType ? { contentType } : {}),
+      ...(locationRef ? { location: locationRef } : {}),
+    };
+
+    try {
+      assertValidRecord(
+        "attachment",
+        record,
+        OrgHypercertsContextAttachment.validateRecord,
+      );
+
+      const result = await ctx.agent.com.atproto.repo.createRecord({
+        repo: ctx.activeDid,
+        collection: "org.hypercerts.context.attachment",
+        record,
+      });
+
+      return NextResponse.json({ uri: result.data.uri, cid: result.data.cid });
+    } catch (e) {
+      // Best-effort: compensate orphaned location record if we created one
+      if (createdLocationRef) {
+        const parsed = parseAtUri(createdLocationRef.uri);
+        if (parsed) {
+          await ctx.agent.com.atproto.repo
+            .deleteRecord({
+              repo: ctx.activeDid,
+              collection: parsed.collection || "app.certified.location",
+              rkey: parsed.rkey,
+            })
+            .catch(() => undefined);
+        }
+      }
+
+      // Validation errors return 400; other errors re-throw
+      if (
+        e instanceof Error &&
+        e.message.startsWith("Invalid attachment record")
+      ) {
+        return NextResponse.json({ error: e.message }, { status: 400 });
+      }
+      throw e;
+    }
   } catch (e) {
     console.error("Error in add-attachment API:", e);
     return NextResponse.json(

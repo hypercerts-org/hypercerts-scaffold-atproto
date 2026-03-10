@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
-import { getAuthenticatedRepo } from "@/lib/atproto-session";
+import { getAgent } from "@/lib/atproto-session";
 import BskyProfileForm from "@/components/bsky-profile-form";
 import { UserCircle } from "lucide-react";
 
@@ -15,12 +15,15 @@ export const metadata: Metadata = {
 };
 
 export default async function BskyProfilePage() {
-  const repo = await getAuthenticatedRepo();
+  const repo = await getAgent();
   if (!repo) redirect("/");
-  const profile = await repo.profile.getBskyProfile();
+  const profileResult = await repo
+    .getProfile({ actor: repo.assertDid })
+    .catch(() => null);
+  const profile = profileResult?.data;
 
-  const avatarUrl = profile.avatar || "";
-  const bannerUrl = profile.banner || "";
+  const avatarUrl = profile?.avatar ?? "";
+  const bannerUrl = profile?.banner ?? "";
 
   return (
     <div className="noise-bg relative min-h-screen">
@@ -49,8 +52,8 @@ export default async function BskyProfilePage() {
         <main className="animate-fade-in-up max-w-2xl">
           <BskyProfileForm
             initialProfile={{
-              displayName: profile.displayName || "",
-              description: profile.description || "",
+              displayName: profile?.displayName || "",
+              description: profile?.description || "",
               avatarUrl,
               bannerUrl,
             }}

@@ -1,5 +1,4 @@
 import "server-only";
-import sdk from "./hypercerts-sdk";
 import type { OAuthSession } from "@atproto/oauth-client-node";
 
 /**
@@ -13,7 +12,8 @@ export async function resolveSessionPds(
   session: OAuthSession,
 ): Promise<string> {
   try {
-    const pdsUrl = await sdk.resolveSessionPds(session);
+    const tokenInfo = await session.getTokenInfo();
+    const pdsUrl = tokenInfo.aud;
     // Remove trailing slash if present
     return pdsUrl.endsWith("/") ? pdsUrl.slice(0, -1) : pdsUrl;
   } catch (error) {

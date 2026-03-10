@@ -9,16 +9,33 @@
  * @see https://datatracker.ietf.org/doc/html/rfc8252 (OAuth for Native Apps)
  */
 
-import { ATPROTO_SCOPE, HYPERCERT_COLLECTIONS } from "@hypercerts-org/sdk-core";
 import { OAuthClientMetadataInput } from "@atproto/oauth-client-node";
 import { generateBrandingCss } from "./atproto-branding";
+
+const ATPROTO_SCOPE = "atproto";
+
+export const HYPERCERT_COLLECTIONS = {
+  CLAIM: "org.hypercerts.claim.activity",
+  RIGHTS: "org.hypercerts.claim.rights",
+  LOCATION: "app.certified.location",
+  CONTRIBUTION: "org.hypercerts.claim.contribution",
+  CONTRIBUTOR_INFORMATION: "org.hypercerts.claim.contributorInformation",
+  MEASUREMENT: "org.hypercerts.context.measurement",
+  EVALUATION: "org.hypercerts.context.evaluation",
+  ATTACHMENT: "org.hypercerts.context.attachment",
+  COLLECTION: "org.hypercerts.collection",
+  FUNDING_RECEIPT: "org.hypercerts.funding.receipt",
+  WORK_SCOPE_TAG: "org.hypercerts.workscope.tag",
+  CERTIFIED_PROFILE: "app.certified.actor.profile",
+  BSKY_PROFILE: "app.bsky.actor.profile",
+} as const;
 
 // Granular repo scope — collections with full CRUD access
 const REPO_COLLECTIONS = [
   HYPERCERT_COLLECTIONS.CLAIM,
   HYPERCERT_COLLECTIONS.RIGHTS,
   HYPERCERT_COLLECTIONS.LOCATION,
-  HYPERCERT_COLLECTIONS.CONTRIBUTION_DETAILS,
+  HYPERCERT_COLLECTIONS.CONTRIBUTION,
   HYPERCERT_COLLECTIONS.CONTRIBUTOR_INFORMATION,
   HYPERCERT_COLLECTIONS.MEASUREMENT,
   HYPERCERT_COLLECTIONS.EVALUATION,

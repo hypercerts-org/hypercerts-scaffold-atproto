@@ -1,9 +1,12 @@
 import LoginDialog from "@/components/login-dialog";
 import Navbar from "@/components/navbar";
-import { getSession, getAuthenticatedRepo } from "@/lib/atproto-session";
+import { getSession, getAgent, resolveHandle } from "@/lib/atproto-session";
 import { convertBlobUrlToCdn } from "@/lib/utils";
+import { resolveSessionPds } from "@/lib/server-utils";
 import { Suspense } from "react";
 import { AuthErrorToast } from "./AuthErrorToast";
+import { AppCertifiedActorProfile } from "@hypercerts-org/lexicon";
+import { getCertifiedProfileImageURL } from "@/lib/profile-utils";
 
 export async function SignedInProvider({
   children,
@@ -16,14 +19,27 @@ export async function SignedInProvider({
   let handle: string | undefined = undefined;
 
   if (session) {
-    const repo = await getAuthenticatedRepo();
-    if (repo) {
-      const profile = await repo.profile
-        .getCertifiedProfile()
+    const agent = await getAgent();
+    if (agent) {
+      const profileResult = await agent.com.atproto.repo
+        .getRecord({
+          repo: agent.assertDid,
+          collection: "app.certified.actor.profile",
+          rkey: "self",
+        })
         .catch(() => null);
+      const profile = profileResult?.data?.value as
+        | AppCertifiedActorProfile.Record
+        | undefined;
 
-      avatarUrl = convertBlobUrlToCdn(profile?.avatar) || "";
-      handle = profile?.handle || "";
+      const pdsUrl = await resolveSessionPds(session);
+      const rawAvatarUrl = getCertifiedProfileImageURL(
+        profile?.avatar,
+        agent.assertDid,
+        pdsUrl,
+      );
+      avatarUrl = convertBlobUrlToCdn(rawAvatarUrl) || "";
+      handle = (await resolveHandle(agent, agent.assertDid)) || "";
     }
   }
 

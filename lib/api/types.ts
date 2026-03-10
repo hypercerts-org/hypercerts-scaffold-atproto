@@ -2,10 +2,7 @@
  * Shared API types for the application
  */
 
-import type {
-  CreateHypercertResult,
-  UpdateResult,
-} from "@hypercerts-org/sdk-core";
+import type { CreateHypercertResult, UpdateResult } from "@/lib/types";
 
 // Auth types
 export interface LoginRequest {
@@ -28,11 +25,7 @@ export interface CreateHypercertRequest {
     type: string;
     description: string;
   };
-  workScope: {
-    withinAllOf?: string[];
-    withinAnyOf?: string[];
-    withinNoneOf?: string[];
-  };
+  workScope?: string[]; // array of tag strings
   image?: File;
 }
 

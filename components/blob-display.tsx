@@ -1,6 +1,6 @@
 "use client";
 
-import { OrgHypercertsDefs } from "@hypercerts-org/sdk-core";
+import { OrgHypercertsDefs } from "@hypercerts-org/lexicon";
 import { getBlobURL, getPDSlsURI } from "@/lib/utils";
 import { $Typed, BlobRef } from "@atproto/api";
 import { ReactNode } from "react";
@@ -34,7 +34,7 @@ export function BlobDisplay({
           <>
             {" · "}
             <URILink
-              uri={getBlobURL(content, did)}
+              uri={getBlobURL(blobRef, did)}
               label={blobRef.toString()}
             />
           </>

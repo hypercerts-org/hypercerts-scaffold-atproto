@@ -1,4 +1,7 @@
-import { SessionStore, StateStore } from "@hypercerts-org/sdk-core";
+import type {
+  NodeSavedSessionStore as SessionStore,
+  NodeSavedStateStore as StateStore,
+} from "@atproto/oauth-client-node";
 import { redisClient } from "./redis";
 import { NodeSavedSession, NodeSavedState } from "@atproto/oauth-client-node";
 

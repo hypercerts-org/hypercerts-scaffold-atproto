@@ -1,23 +1,28 @@
-import { getAuthenticatedRepo } from "@/lib/atproto-session";
-import { LocationParams } from "@hypercerts-org/sdk-core";
+import { getAgent } from "@/lib/atproto-session";
+import {
+  createLocationRecord,
+  type LocationCreateParams,
+} from "@/lib/atproto-writes";
+import { parseAtUri, getStringField } from "@/lib/utils";
 import { NextRequest, NextResponse } from "next/server";
+import { OrgHypercertsClaimActivity } from "@hypercerts-org/lexicon";
+import { assertValidRecord } from "@/lib/record-validation";
 
 export async function POST(req: NextRequest) {
   try {
     const data = await req.formData();
-    const repoPromise = getAuthenticatedRepo();
+    const repoPromise = getAgent();
 
-    const hypercertUri = (data.get("hypercertUri") as string | null)?.trim();
-    const srs = (data.get("srs") as string | null)?.trim();
-    const contentMode =
-      (data.get("contentMode") as string | null)?.trim() ?? "link";
+    const hypercertUri = getStringField(data, "hypercertUri")?.trim();
+    const srs = getStringField(data, "srs")?.trim();
+    const contentMode = getStringField(data, "contentMode")?.trim() ?? "link";
 
-    const name = (data.get("name") as string | null)?.trim() ?? undefined;
+    const name = getStringField(data, "name")?.trim() ?? undefined;
     const description =
-      (data.get("description") as string | null)?.trim() ?? undefined;
+      getStringField(data, "description")?.trim() ?? undefined;
 
-    const locationType = (data.get("locationType") as string | null)?.trim();
-    const lpVersion = (data.get("lpVersion") as string | null)?.trim();
+    const locationType = getStringField(data, "locationType")?.trim();
+    const lpVersion = getStringField(data, "lpVersion")?.trim();
 
     if (!locationType || !lpVersion || !srs) {
       return NextResponse.json(
@@ -35,9 +40,9 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    let locationPayload: LocationParams;
+    let locationPayload: LocationCreateParams;
     if (contentMode === "link") {
-      const locationUrl = (data.get("locationUrl") as string | null)?.trim();
+      const locationUrl = getStringField(data, "locationUrl")?.trim();
 
       if (!locationUrl) {
         return NextResponse.json(
@@ -85,12 +90,57 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const result = await personalRepository.hypercerts.attachLocation(
-      hypercertUri,
-      locationPayload,
+    // 1. Create location record
+    const locationRef = await createLocationRecord(
+      personalRepository,
+      personalRepository.assertDid,
+      locationPayload as LocationCreateParams,
     );
 
-    return NextResponse.json(result);
+    // 2. Fetch existing hypercert and append location
+    const hypercertParsed = parseAtUri(hypercertUri);
+    if (!hypercertParsed) throw new Error("Invalid hypercertUri");
+
+    if (hypercertParsed.did !== personalRepository.assertDid) {
+      return NextResponse.json(
+        { error: "Cannot modify another user's hypercert" },
+        { status: 403 },
+      );
+    }
+
+    const existingResult = await personalRepository.com.atproto.repo.getRecord({
+      repo: hypercertParsed.did,
+      collection: hypercertParsed.collection || "org.hypercerts.claim.activity",
+      rkey: hypercertParsed.rkey,
+    });
+    const existingRecord = existingResult.data
+      .value as OrgHypercertsClaimActivity.Record;
+
+    const existingLocations = existingRecord.locations ?? [];
+    existingRecord.locations = [...existingLocations, locationRef];
+
+    // 3. Update hypercert
+    try {
+      assertValidRecord(
+        "activity",
+        existingRecord,
+        OrgHypercertsClaimActivity.validateRecord,
+      );
+    } catch (e) {
+      return NextResponse.json(
+        { error: e instanceof Error ? e.message : "Validation failed" },
+        { status: 400 },
+      );
+    }
+
+    await personalRepository.com.atproto.repo.putRecord({
+      repo: personalRepository.assertDid,
+      collection: hypercertParsed.collection || "org.hypercerts.claim.activity",
+      rkey: hypercertParsed.rkey,
+      record: existingRecord,
+    });
+
+    return NextResponse.json(locationRef);
   } catch (e) {
     const detail = e instanceof Error ? e.message : String(e);
     console.error("Error in add-location API:", detail);

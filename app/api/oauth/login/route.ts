@@ -1,4 +1,4 @@
-import sdk from "@/lib/hypercerts-sdk";
+import oauthClient from "@/lib/hypercerts-sdk";
 import { NextResponse } from "next/server";
 
 export async function POST(request: Request) {
@@ -16,8 +16,8 @@ export async function POST(request: Request) {
     );
   }
   try {
-    const authUrl = await sdk.authorize(handle);
-    return NextResponse.json({ authUrl });
+    const authUrl = await oauthClient.authorize(handle);
+    return NextResponse.json({ authUrl: authUrl.toString() });
   } catch (e) {
     console.error("Failed to initiate login process", e);
     return Response.json(

@@ -1,9 +1,14 @@
 import { BlobRef } from "@atproto/lexicon";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
-import { OrgHypercertsClaimActivity as Hypercert } from "@hypercerts-org/sdk-core";
-import { OrgHypercertsClaimContributionDetails as Contribution } from "@hypercerts-org/sdk-core";
-import { OrgHypercertsClaimEvaluation as Evaluation } from "@hypercerts-org/sdk-core";
+import { OrgHypercertsDefs } from "@hypercerts-org/lexicon";
+import type { $Typed } from "@hypercerts-org/lexicon";
+import type { OrgHypercertsClaimActivity } from "@hypercerts-org/lexicon";
+
+/** The LinearDocument.Main type as used by the hypercerts lexicon */
+type LinearDocument = NonNullable<
+  OrgHypercertsClaimActivity.Main["description"]
+>;
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -15,15 +20,12 @@ export const getPDSlsURI = (uri?: string) => {
 };
 
 export function getBlobURL(
-  blobRef: BlobRef | string | { $type: string } | undefined,
+  blobRef: BlobRef | string | undefined,
   did?: string,
   pdsUrl?: string,
 ): string | undefined {
   if (typeof blobRef === "string") {
     return blobRef;
-  }
-  if (blobRef && "$type" in blobRef && blobRef.$type === "string") {
-    return blobRef.$type;
   }
   if (blobRef && "ref" in blobRef) {
     const cid = blobRef.ref ?? undefined;
@@ -47,6 +49,66 @@ export function getBlobURL(
     return url;
   }
   return undefined;
+}
+
+function hasUriField(value: Record<string, unknown>): value is { uri: string } {
+  return typeof value.uri === "string";
+}
+
+function hasBlobImageField(
+  value: Record<string, unknown>,
+): value is { image: BlobRef | string | undefined } {
+  return "image" in value;
+}
+
+export function resolveHypercertImageUrl(
+  image:
+    | $Typed<OrgHypercertsDefs.Uri>
+    | $Typed<OrgHypercertsDefs.SmallImage>
+    | { $type: string }
+    | Record<string, unknown>
+    | undefined,
+  did?: string,
+  pdsUrl?: string,
+): string | undefined {
+  try {
+    if (!image) {
+      return undefined;
+    }
+
+    // 1. Check via $type type guards (when PDS includes $type on union members)
+    if (OrgHypercertsDefs.isUri(image)) {
+      return (image as OrgHypercertsDefs.Uri).uri;
+    }
+
+    if (OrgHypercertsDefs.isSmallImage(image)) {
+      return getBlobURL(
+        (image as OrgHypercertsDefs.SmallImage).image,
+        did,
+        pdsUrl,
+      );
+    }
+
+    // 2. Structural fallback — PDS may omit $type on union members.
+    //    Check for Uri shape: { uri: string }
+    if ("uri" in image && hasUriField(image)) {
+      return image.uri;
+    }
+
+    //    Check for SmallImage shape: { image: <BlobRef-like with ref> }
+    if (hasBlobImageField(image)) {
+      return getBlobURL(image.image, did, pdsUrl);
+    }
+
+    return undefined;
+  } catch (e) {
+    console.error("resolveHypercertImageUrl failed:", e, {
+      image,
+      did,
+      pdsUrl,
+    });
+    return undefined;
+  }
 }
 
 /**
@@ -90,39 +152,6 @@ export function convertBlobUrlToCdn(url: string | null | undefined): string {
   }
 }
 
-export const validateHypercert = (data: unknown) => {
-  if (!Hypercert.isRecord(data)) {
-    return { success: false, error: "Invalid Hypercert Record" };
-  }
-  const validation = Hypercert.validateRecord(data);
-  if (validation.success) {
-    return { success: true, error: null };
-  }
-  return { success: false, error: validation.error.message };
-};
-
-export const validateContribution = (data: unknown) => {
-  if (!Contribution.isRecord(data)) {
-    return { success: false, error: "Invalid Contribution Record" };
-  }
-  const validation = Contribution.validateRecord(data);
-  if (validation.success) {
-    return { success: true, error: null };
-  }
-  return { success: false, error: validation.error.message };
-};
-
-export const validateEvaluation = (data: unknown) => {
-  if (!Evaluation.isRecord(data)) {
-    return { success: false, error: "Invalid Evaluation Record" };
-  }
-  const validation = Evaluation.validateRecord(data);
-  if (validation.success) {
-    return { success: true, error: null };
-  }
-  return { success: false, error: validation.error.message };
-};
-
 export function parseAtUri(atUri?: string) {
   // at://did:plc:xyz/app.namespace.record/abc123
   if (!atUri) return;
@@ -138,6 +167,12 @@ export function extractDidFromAtUri(atUri: string): string | null {
   return match ? match[1] : null;
 }
 
+/** Safely extract a string field from FormData, returning null if the value is a File */
+export function getStringField(data: FormData, key: string): string | null {
+  const value = data.get(key);
+  return typeof value === "string" ? value : null;
+}
+
 export function buildStrongRef(cid?: string, uri?: string) {
   if (!cid || !uri) return;
   return {
@@ -145,4 +180,39 @@ export function buildStrongRef(cid?: string, uri?: string) {
     cid,
     uri,
   };
+}
+
+/**
+ * Converts a plain string into a PubLeafletPagesLinearDocument.Main structure
+ * suitable for the `description` field on activity and attachment records.
+ */
+export function stringToLinearDocument(text: string): LinearDocument {
+  return {
+    $type: "pub.leaflet.pages.linearDocument",
+    blocks: [
+      {
+        block: {
+          $type: "pub.leaflet.blocks.text",
+          plaintext: text,
+        } as LinearDocument["blocks"][number]["block"],
+      },
+    ],
+  };
+}
+
+/**
+ * Extracts plain text from a PubLeafletPagesLinearDocument.Main structure.
+ * Returns an empty string if the document is undefined or has no text blocks.
+ */
+export function linearDocumentToString(
+  doc: LinearDocument | undefined,
+): string {
+  if (!doc?.blocks) return "";
+  return doc.blocks
+    .map(
+      (b: LinearDocument["blocks"][number]) =>
+        (b.block as { plaintext?: string })?.plaintext ?? "",
+    )
+    .filter(Boolean)
+    .join("\n");
 }

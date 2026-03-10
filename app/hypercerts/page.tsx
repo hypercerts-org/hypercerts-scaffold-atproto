@@ -1,21 +1,20 @@
-import type { Metadata } from "next";
-import Loader from "@/components/loader";
+import HypercertImage from "@/components/hypercert-image";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { getRepoContext } from "@/lib/repo-context";
 import { getSession } from "@/lib/atproto-session";
-import { getBlobURL } from "@/lib/utils";
+import { getRepoContext } from "@/lib/repo-context";
 import { resolveSessionPds } from "@/lib/server-utils";
-import Image from "next/image";
+import { resolveHypercertImageUrl } from "@/lib/utils";
+import { OrgHypercertsClaimActivity } from "@hypercerts-org/lexicon";
+import { Award, Calendar, FileText, Plus } from "lucide-react";
+import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { Award, Calendar, Plus, FileText } from "lucide-react";
-import { OrgHypercertsDefs } from "@hypercerts-org/sdk-core";
 
 export const metadata: Metadata = {
   title: "Hypercerts",
@@ -31,10 +30,22 @@ export default async function MyHypercertsPage() {
 
   if (!ctx || !session) redirect("/");
 
-  const [{ records }, pdsUrl] = await Promise.all([
-    ctx.scopedRepo.hypercerts.list({ limit: 100 }),
+  const [hypercertsResult, pdsUrl] = await Promise.all([
+    ctx.agent.com.atproto.repo.listRecords({
+      repo: ctx.activeDid,
+      collection: "org.hypercerts.claim.activity",
+      limit: 100,
+    }),
     resolveSessionPds(session),
   ]);
+
+  // listRecords returns { data: { records: Array<{ uri, cid, value }> } }
+  const records = hypercertsResult.data.records
+    .filter((r) => OrgHypercertsClaimActivity.isRecord(r.value))
+    .map((r) => ({
+      uri: r.uri,
+      record: r.value as OrgHypercertsClaimActivity.Record,
+    }));
 
   return (
     <main className="noise-bg relative min-h-screen">
@@ -54,13 +65,7 @@ export default async function MyHypercertsPage() {
         </div>
 
         {/* Content */}
-        {!records ? (
-          <div className="animate-fade-in-up [animation-delay:100ms]">
-            <div className="glass-panel mx-auto max-w-md rounded-2xl p-12">
-              <Loader />
-            </div>
-          </div>
-        ) : records.length === 0 ? (
+        {records.length === 0 ? (
           <div className="animate-fade-in-up [animation-delay:100ms]">
             <div className="glass-panel mx-auto max-w-md space-y-4 rounded-2xl p-12 text-center">
               <div className="bg-create-accent/10 mx-auto flex size-16 items-center justify-center rounded-full">
@@ -90,16 +95,23 @@ export default async function MyHypercertsPage() {
               {records.map(({ record: cert, uri }) => {
                 const imageUrl =
                   ctx.activeDid && cert.image
-                    ? getBlobURL(
-                        (cert.image as OrgHypercertsDefs.SmallImage).image,
+                    ? resolveHypercertImageUrl(
+                        cert.image,
                         ctx.activeDid,
                         pdsUrl,
                       )
                     : null;
 
-                const workScope = Array.isArray(cert.workScope)
-                  ? cert.workScope
-                  : [];
+                let workScope: string[] = [];
+                if (
+                  cert.workScope &&
+                  OrgHypercertsClaimActivity.isWorkScopeString(cert.workScope)
+                ) {
+                  workScope = cert.workScope.scope
+                    .split(",")
+                    .map((s: string) => s.trim())
+                    .filter(Boolean);
+                }
                 const createdDate = cert.createdAt
                   ? new Date(cert.createdAt).toLocaleDateString()
                   : null;
@@ -113,18 +125,11 @@ export default async function MyHypercertsPage() {
                     <Card className="glass-panel border-border/50 hover:border-create-accent/50 flex h-full flex-col overflow-hidden rounded-xl border transition-all duration-300 hover:shadow-lg">
                       {/* Image or Placeholder */}
                       <div className="from-create-accent/20 via-create-accent/10 relative aspect-[4/3] overflow-hidden bg-gradient-to-br to-transparent">
-                        {imageUrl ? (
-                          <Image
-                            fill
-                            alt={cert.title || "Hypercert cover"}
-                            src={imageUrl}
-                            className="object-cover transition-transform duration-300 group-hover:scale-105"
-                          />
-                        ) : (
-                          <div className="absolute inset-0 flex items-center justify-center">
-                            <Award className="text-create-accent/30 size-16" />
-                          </div>
-                        )}
+                        <HypercertImage
+                          src={imageUrl}
+                          alt={cert.title || "Hypercert cover"}
+                          className="transition-transform duration-300 group-hover:scale-105"
+                        />
                       </div>
 
                       {/* Content */}

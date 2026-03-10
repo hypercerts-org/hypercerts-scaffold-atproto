@@ -39,7 +39,7 @@ export async function createHypercert(
  * Create hypercert using SDK params directly (from hypercerts-base-form)
  */
 export async function createHypercertFromParams(
-  params: import("@hypercerts-org/sdk-core").CreateHypercertParams,
+  params: import("@/lib/types").CreateHypercertParams,
 ): Promise<CreateHypercertResponse> {
   const formData = new FormData();
   formData.append("title", params.title);

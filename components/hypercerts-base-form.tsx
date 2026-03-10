@@ -8,8 +8,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
 import { Textarea } from "@/components/ui/textarea";
-import { OrgHypercertsClaimActivity as Hypercert } from "@hypercerts-org/sdk-core";
-import type { CreateHypercertParams } from "@hypercerts-org/sdk-core";
+import { OrgHypercertsClaimActivity } from "@hypercerts-org/lexicon";
+import type { CreateHypercertParams } from "@/lib/types";
 import { Label } from "@radix-ui/react-label";
 import {
   PlusIcon,
@@ -35,7 +35,7 @@ export interface HypercertsBaseFormProps {
   saveDisabled: boolean;
   onSave?: (record: CreateHypercertParams, advance?: boolean) => void;
   updateActions?: boolean;
-  certInfo?: Hypercert.Main;
+  certInfo?: OrgHypercertsClaimActivity.Main;
   hypercertUri?: string;
   nextStepper: () => void;
 }
@@ -61,7 +61,8 @@ export default function HypercertsBaseForm({
   nextStepper,
 }: HypercertsBaseFormProps) {
   const initialWorkScope =
-    certInfo?.workScope && Hypercert.isWorkScopeString(certInfo.workScope)
+    certInfo?.workScope &&
+    OrgHypercertsClaimActivity.isWorkScopeString(certInfo.workScope)
       ? certInfo.workScope.scope.split(",").map((scope: string) => scope.trim())
       : undefined;
   const [title, setTitle] = useState(certInfo?.title || "");
@@ -190,15 +191,16 @@ export default function HypercertsBaseForm({
       title,
       shortDescription,
       rights: {
-        name: rights.name.trim(),
-        type: rights.type.trim(),
-        description: rights.description.trim(),
+        rightsName: rights.name.trim(),
+        rightsType: rights.type.trim(),
+        rightsDescription: rights.description.trim(),
       },
       description: shortDescription,
       image: backgroundImage,
       startDate: startDate.toISOString(),
       endDate: endDate.toISOString(),
       contributions,
+      workScope: workScope.filter((s) => s.trim()),
     };
     return record;
   };
@@ -354,6 +356,7 @@ export default function HypercertsBaseForm({
                 src={imagePreview}
                 alt="Preview"
                 fill
+                unoptimized
                 className="object-cover opacity-60 transition-opacity group-hover:opacity-40"
               />
               <div className="relative z-10 flex flex-col items-center gap-1">

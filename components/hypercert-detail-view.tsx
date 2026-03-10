@@ -1,10 +1,10 @@
 "use client";
 
 import { URILink } from "./uri-link";
-import { getPDSlsURI } from "@/lib/utils";
+import { getPDSlsURI, linearDocumentToString } from "@/lib/utils";
 
 import dynamic from "next/dynamic";
-import type { HypercertClaim } from "@hypercerts-org/sdk-core";
+import { OrgHypercertsClaimActivity } from "@hypercerts-org/lexicon";
 import {
   MeasurementsSectionSkeleton,
   EvidenceSectionSkeleton,
@@ -18,7 +18,7 @@ import {
   Pencil,
   Trash2,
 } from "lucide-react";
-import Image from "next/image";
+import HypercertImage from "@/components/hypercert-image";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -45,7 +45,7 @@ export default function HypercertDetailsView({
   isOwner,
 }: {
   hypercertUri: string;
-  record: HypercertClaim;
+  record: OrgHypercertsClaimActivity.Record;
   imageUri?: string;
   isOwner?: boolean;
 }) {
@@ -55,11 +55,18 @@ export default function HypercertDetailsView({
       router.push("/hypercerts");
     },
   });
-  const workScope = Array.isArray(record.workScope) ? record.workScope : [];
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- contributors field exists on record but not in HypercertClaim type yet
-  const rawContributors = (record as any).contributors;
-  const contributors = Array.isArray(rawContributors)
-    ? rawContributors
+  let workScope: string[] = [];
+  if (
+    record.workScope &&
+    OrgHypercertsClaimActivity.isWorkScopeString(record.workScope)
+  ) {
+    workScope = record.workScope.scope
+      .split(",")
+      .map((s: string) => s.trim())
+      .filter(Boolean);
+  }
+  const contributors = Array.isArray(record.contributors)
+    ? record.contributors
     : undefined;
 
   return (
@@ -103,12 +110,11 @@ export default function HypercertDetailsView({
         {/* Hero Image */}
         {imageUri ? (
           <div className="glass-panel border-border/50 relative aspect-[16/7] overflow-hidden rounded-xl border">
-            <Image
-              fill
-              alt={record.title || "Hypercert cover"}
+            <HypercertImage
               src={imageUri}
-              className="object-cover"
+              alt={record.title || "Hypercert cover"}
               priority
+              fallback={null}
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
           </div>
@@ -227,7 +233,7 @@ export default function HypercertDetailsView({
               Description
             </h2>
             <p className="text-muted-foreground font-[family-name:var(--font-outfit)] text-sm leading-relaxed whitespace-pre-wrap">
-              {record.description}
+              {linearDocumentToString(record.description)}
             </p>
           </div>
         </div>
