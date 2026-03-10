@@ -16,8 +16,9 @@ import { config, OAUTH_SCOPE } from "@/lib/config";
 
 export async function GET(req: NextRequest): Promise<NextResponse> {
   try {
-    // 0. Read optional email for login_hint (Flow 1)
+    // 0. Read optional email for login_hint (Flow 1) and handle mode
     const email = req.nextUrl.searchParams.get("email");
+    const handleMode = req.nextUrl.searchParams.get("handle_mode");
 
     // 1. Generate PKCE + DPoP values
     const { privateKey, publicJwk, privateJwk } = generateDpopKeyPair();
@@ -80,6 +81,10 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     authUrl.searchParams.set("request_uri", request_uri);
     if (email) {
       authUrl.searchParams.set("login_hint", email);
+      authUrl.searchParams.set(
+        "epds_handle_mode",
+        handleMode === "picker" ? "picker" : "random",
+      );
     }
 
     // 10. Create redirect response
