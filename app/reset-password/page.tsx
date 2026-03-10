@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
-import { getAgent } from "@/lib/atproto-session";
+import { getAgent, getSession } from "@/lib/atproto-session";
+import { resolveSessionPds } from "@/lib/server-utils";
 import ResetPasswordForm from "@/components/reset-password-form";
 import { KeyRound } from "lucide-react";
 
@@ -17,6 +18,12 @@ export default async function ResetPasswordPage() {
     .getSession()
     .catch(() => null);
   const email = sessionInfo?.data?.email || "";
+
+  const session = await getSession();
+  const resolvedPdsUrl = session ? await resolveSessionPds(session) : null;
+  if (!resolvedPdsUrl || resolvedPdsUrl === "https://cdn.bsky.app") {
+    throw new Error("Could not find PDS URL for your account.");
+  }
 
   return (
     <div className="noise-bg relative min-h-screen">
@@ -39,7 +46,7 @@ export default async function ResetPasswordPage() {
 
         {/* Main content */}
         <main className="animate-fade-in-up max-w-2xl">
-          <ResetPasswordForm initialEmail={email} />
+          <ResetPasswordForm initialEmail={email} pdsUrl={resolvedPdsUrl} />
         </main>
       </div>
     </div>

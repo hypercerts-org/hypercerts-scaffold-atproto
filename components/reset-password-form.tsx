@@ -13,8 +13,10 @@ import { useResetPasswordMutation } from "@/queries/auth/use-reset-password-muta
 
 export default function ResetPasswordForm({
   initialEmail,
+  pdsUrl,
 }: {
   initialEmail: string;
+  pdsUrl: string;
 }) {
   const [step, setStep] = useState<"request" | "confirm" | "success">(
     "request",
@@ -30,11 +32,14 @@ export default function ResetPasswordForm({
 
   const handleRequestSubmit = (e: FormEvent) => {
     e.preventDefault();
-    requestMutation.mutate(email.trim(), {
-      onSuccess: () => {
-        setStep("confirm");
+    requestMutation.mutate(
+      { email: email.trim(), pdsUrl },
+      {
+        onSuccess: () => {
+          setStep("confirm");
+        },
       },
-    });
+    );
   };
 
   const handleResetSubmit = (e: FormEvent) => {
@@ -44,7 +49,7 @@ export default function ResetPasswordForm({
       return;
     }
     resetMutation.mutate(
-      { token, password },
+      { token, password, pdsUrl },
       {
         onSuccess: () => {
           setStep("success");
@@ -177,7 +182,7 @@ export default function ResetPasswordForm({
               variant="outline"
               className="w-full"
               disabled={requestMutation.isPending}
-              onClick={() => requestMutation.mutate(email)}
+              onClick={() => requestMutation.mutate({ email, pdsUrl })}
             >
               {requestMutation.isPending ? "Resending..." : "Resend reset code"}
             </Button>

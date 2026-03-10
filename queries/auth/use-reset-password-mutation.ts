@@ -6,8 +6,15 @@ import { resetPassword } from "@/lib/api/external/bluesky";
 
 export function useResetPasswordMutation() {
   return useMutation({
-    mutationFn: ({ token, password }: { token: string; password: string }) =>
-      resetPassword(token, password),
+    mutationFn: ({
+      token,
+      password,
+      pdsUrl,
+    }: {
+      token: string;
+      password: string;
+      pdsUrl: string;
+    }) => resetPassword(token, password, pdsUrl),
     onSuccess: () => {
       toast.success("Password reset successfully!");
     },
