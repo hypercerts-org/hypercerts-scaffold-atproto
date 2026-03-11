@@ -17,7 +17,7 @@ import { processContributions } from "@/lib/contribution-helpers";
 
 export type RepositoryRole = "admin" | "writer" | "reader";
 import { cookies } from "next/headers";
-import { getSession, resolveHandle } from "./atproto-session";
+import { getAgent, getSession, resolveHandle } from "./atproto-session";
 import oauthClient from "./hypercerts-sdk";
 
 export interface GrantAccessParams {
@@ -520,4 +520,36 @@ export const deleteRecord = async (params: {
     rkey: parsed.rkey,
   });
   return { success: true };
+};
+
+export const requestEmailUpdate = async (): Promise<{
+  tokenRequired: boolean;
+}> => {
+  const agent = await getAgent();
+  if (!agent) {
+    throw new Error("Not authenticated");
+  }
+  try {
+    const result = await agent.com.atproto.server.requestEmailUpdate();
+    return { tokenRequired: result.data.tokenRequired };
+  } catch (error) {
+    console.error("requestEmailUpdate failed:", error);
+    throw error;
+  }
+};
+
+export const updateEmail = async (
+  email: string,
+  token?: string,
+): Promise<void> => {
+  const agent = await getAgent();
+  if (!agent) {
+    throw new Error("Not authenticated");
+  }
+  try {
+    await agent.com.atproto.server.updateEmail({ email, token });
+  } catch (error) {
+    console.error("updateEmail failed:", error);
+    throw error;
+  }
 };
