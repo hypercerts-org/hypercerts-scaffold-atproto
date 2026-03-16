@@ -13,7 +13,7 @@ export async function SignedInProvider({
 }: {
   children?: React.ReactNode;
 }) {
-  const [session] = await Promise.all([getSession()]);
+  const session = await getSession();
 
   let avatarUrl: string | undefined = undefined;
   let handle: string | undefined = undefined;
@@ -48,12 +48,7 @@ export async function SignedInProvider({
       <Suspense fallback={null}>
         <AuthErrorToast />
       </Suspense>
-      <Navbar
-        isSignedIn={!!session}
-        avatarUrl={avatarUrl}
-        handle={handle}
-        userDid={session?.did}
-      />
+      <Navbar isSignedIn={!!session} avatarUrl={avatarUrl} handle={handle} />
       {session ? (
         <>{children}</>
       ) : (

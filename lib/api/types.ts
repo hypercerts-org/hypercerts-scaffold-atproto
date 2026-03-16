@@ -14,21 +14,6 @@ export interface LoginResponse {
 }
 
 // Hypercert types
-export interface CreateHypercertRequest {
-  title: string;
-  shortDescription: string;
-  description?: string;
-  startDate: string;
-  endDate: string;
-  rights: {
-    name: string;
-    type: string;
-    description: string;
-  };
-  workScope?: string[]; // array of tag strings
-  image?: File;
-}
-
 export type CreateHypercertResponse = CreateHypercertResult;
 
 export interface UpdateHypercertRequest {
@@ -55,33 +40,8 @@ export type AttachmentLocationParam =
       description?: string;
     };
 
-export interface AddAttachmentRequest {
-  title: string;
-  shortDescription: string;
-  description?: string;
-  contentType?: string;
-  hypercertUri: string;
-  evidenceMode: "link" | "file";
-  evidenceUrl?: string;
-  evidenceFile?: File;
-  location?: AttachmentLocationParam;
-}
-
 export interface AddAttachmentResponse {
   success: boolean;
-}
-
-export interface AddLocationRequest {
-  lpVersion: string;
-  srs: string;
-  locationType: string;
-  createdAt: string;
-  name?: string;
-  description?: string;
-  contentMode: "link" | "file";
-  locationUrl?: string;
-  locationFile?: File;
-  hypercertUri: string;
 }
 
 export interface AddLocationResponse {
@@ -89,15 +49,6 @@ export interface AddLocationResponse {
 }
 
 // Profile types
-export interface UpdateProfileRequest {
-  displayName?: string | null;
-  description?: string | null;
-  pronouns?: string | null;
-  website?: string | null;
-  avatar?: File | null;
-  banner?: File | null;
-}
-
 export interface UpdateProfileResponse {
   ok: boolean;
   profile: {
@@ -111,13 +62,6 @@ export interface UpdateProfileResponse {
 }
 
 // Bsky Profile types
-export interface UpdateBskyProfileRequest {
-  displayName?: string | null;
-  description?: string | null;
-  avatar?: File | null;
-  banner?: File | null;
-}
-
 export interface UpdateBskyProfileResponse {
   ok: boolean;
   profile: {
@@ -148,9 +92,4 @@ export interface BlueskyProfile {
 
 export interface BlueskySearchActorsResponse {
   actors: BlueskyProfile[];
-}
-
-// Handle availability check
-export interface HandleCheckResponse {
-  available: boolean;
 }

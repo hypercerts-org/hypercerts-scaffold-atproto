@@ -52,7 +52,7 @@ export default async function EditHypercertPage({
     );
 
   const [viewCtx, session] = await Promise.all([
-    getRepoContext({ targetDid: ownerDid }),
+    getRepoContext(),
     getSession(),
   ]);
 

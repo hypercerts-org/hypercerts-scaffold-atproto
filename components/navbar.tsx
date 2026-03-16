@@ -23,8 +23,6 @@ export interface NavbarProps {
   isSignedIn: boolean;
   avatarUrl?: string;
   handle?: string;
-  userDid?: string;
-  activeDid?: string;
 }
 
 export default function Navbar({

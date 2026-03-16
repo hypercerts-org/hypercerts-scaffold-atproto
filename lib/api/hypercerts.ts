@@ -4,7 +4,6 @@
 
 import { apiClientFormData } from "./client";
 import type {
-  CreateHypercertRequest,
   CreateHypercertResponse,
   AddAttachmentResponse,
   AddLocationResponse,
@@ -12,28 +11,6 @@ import type {
   UpdateHypercertRequest,
   UpdateHypercertResponse,
 } from "./types";
-
-/**
- * Create a new hypercert
- */
-export async function createHypercert(
-  params: CreateHypercertRequest,
-): Promise<CreateHypercertResponse> {
-  const formData = new FormData();
-  formData.append("title", params.title);
-  formData.append("shortDescription", params.shortDescription);
-  formData.append("description", params.description ?? params.shortDescription);
-  formData.append("startDate", params.startDate);
-  formData.append("endDate", params.endDate);
-  formData.append("rights", JSON.stringify(params.rights));
-  formData.append("workScope", JSON.stringify(params.workScope));
-
-  if (params.image) {
-    formData.append("image", params.image);
-  }
-
-  return apiClientFormData<CreateHypercertResponse>("/api/certs", formData);
-}
 
 /**
  * Create hypercert using SDK params directly (from hypercerts-base-form)

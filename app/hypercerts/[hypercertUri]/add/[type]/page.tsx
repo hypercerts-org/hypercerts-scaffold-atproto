@@ -1,11 +1,7 @@
 import { redirect } from "next/navigation";
 import { getSession } from "@/lib/atproto-session";
 import AddRecordForm from "@/components/add-record-form";
-
-function extractDidFromAtUri(atUri: string): string | null {
-  const match = atUri.match(/^at:\/\/([^/]+)\/([^/]+)\/(.+)$/);
-  return match ? match[1] : null;
-}
+import { extractDidFromAtUri } from "@/lib/utils";
 
 export default async function AddRecordPage({
   params,

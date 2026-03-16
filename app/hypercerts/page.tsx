@@ -32,7 +32,7 @@ export default async function MyHypercertsPage() {
 
   const [hypercertsResult, pdsUrl] = await Promise.all([
     ctx.agent.com.atproto.repo.listRecords({
-      repo: ctx.activeDid,
+      repo: ctx.userDid,
       collection: "org.hypercerts.claim.activity",
       limit: 100,
     }),
@@ -94,12 +94,8 @@ export default async function MyHypercertsPage() {
             <div className="stagger-children grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {records.map(({ record: cert, uri }) => {
                 const imageUrl =
-                  ctx.activeDid && cert.image
-                    ? resolveHypercertImageUrl(
-                        cert.image,
-                        ctx.activeDid,
-                        pdsUrl,
-                      )
+                  ctx.userDid && cert.image
+                    ? resolveHypercertImageUrl(cert.image, ctx.userDid, pdsUrl)
                     : null;
 
                 let workScope: string[] = [];

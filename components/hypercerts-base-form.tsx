@@ -70,7 +70,7 @@ export default function HypercertsBaseForm({
   const [shortDescription, setShortDescription] = useState(
     certInfo?.shortDescription || "",
   );
-  const [buttonClicked, setButtonClicked] = useState<"saveNext" | "create">();
+  const [buttonClicked, setButtonClicked] = useState<"create">();
   const [workScope, setWorkScope] = useState<string[]>(
     initialWorkScope || [""],
   );
@@ -657,10 +657,7 @@ export default function HypercertsBaseForm({
               aria-label="Save and go to Contributions"
               className="bg-create-accent hover:bg-create-accent/90 text-create-accent-foreground min-w-[120px] font-[family-name:var(--font-outfit)] font-medium"
             >
-              {isSaving ? <Spinner className="mr-2" /> : null}
-              {isSaving && buttonClicked === "saveNext"
-                ? "Creating..."
-                : "Next"}
+              Next
             </Button>
           </div>
         </div>

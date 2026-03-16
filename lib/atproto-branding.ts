@@ -267,5 +267,3 @@ main.flex.flex-col.items-center > button:nth-of-type(2)::after {
   }
 }`;
 }
-
-export { sanitizeUrlForCss };

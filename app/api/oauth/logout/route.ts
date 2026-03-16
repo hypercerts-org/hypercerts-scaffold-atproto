@@ -8,6 +8,7 @@ export async function POST() {
     if (session) {
       await session.signOut();
       cookieStore.delete("user-did");
+      cookieStore.delete("active-did");
     }
     return NextResponse.json(
       { message: "Signed out successfully" },
