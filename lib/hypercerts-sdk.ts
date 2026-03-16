@@ -1,5 +1,5 @@
 import { NodeOAuthClient, JoseKey } from "@atproto/oauth-client-node";
-import { buildClientMetadata, config, OAUTH_SCOPE } from "./config";
+import { buildClientMetadata, config } from "./config";
 import {
   RedisSessionStore,
   RedisStateStore,
@@ -7,10 +7,8 @@ import {
 } from "./redis-state-store";
 
 export const sessionStore = new RedisSessionStore();
-export const stateStore = new RedisStateStore();
+const stateStore = new RedisStateStore();
 export const epdsStateStore = new RedisEpdsStateStore();
-
-export { OAUTH_SCOPE };
 
 const clientMetadata = buildClientMetadata();
 

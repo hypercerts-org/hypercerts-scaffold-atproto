@@ -30,7 +30,7 @@ export async function resolveBlobToUrl(
   // Try to resolve via authenticated session first (gives correct PDS URL)
   const [session, viewCtx] = await Promise.all([
     getSession(),
-    getRepoContext({ targetDid: ownerDid }),
+    getRepoContext(),
   ]);
   if (session && viewCtx) {
     const pdsUrl = await resolveSessionPds(session);

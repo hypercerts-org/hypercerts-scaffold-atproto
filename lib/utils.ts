@@ -173,15 +173,6 @@ export function getStringField(data: FormData, key: string): string | null {
   return typeof value === "string" ? value : null;
 }
 
-export function buildStrongRef(cid?: string, uri?: string) {
-  if (!cid || !uri) return;
-  return {
-    $type: "com.atproto.repo.strongRef" as const,
-    cid,
-    uri,
-  };
-}
-
 /**
  * Converts a plain string into a PubLeafletPagesLinearDocument.Main structure
  * suitable for the `description` field on activity and attachment records.

@@ -15,21 +15,11 @@ import {
 import { assertValidRecord } from "@/lib/record-validation";
 import { processContributions } from "@/lib/contribution-helpers";
 
-export type RepositoryRole = "admin" | "writer" | "reader";
-import { cookies } from "next/headers";
-import { getAgent, getSession, resolveHandle } from "./atproto-session";
-import oauthClient from "./hypercerts-sdk";
-
-export interface GrantAccessParams {
-  repoDid: string;
-  userDid: string;
-  role: RepositoryRole;
-}
+import { getAgent, resolveHandle } from "./atproto-session";
 
 export interface ActiveProfileInfo {
   name: string | undefined;
   handle: string | undefined;
-  isOrganization: boolean;
 }
 
 export interface SerializedRecord {
@@ -45,7 +35,7 @@ export const getActiveProfileInfo =
 
     const profileResult = await ctx.agent.com.atproto.repo
       .getRecord({
-        repo: ctx.targetDid,
+        repo: ctx.userDid,
         collection: "app.certified.actor.profile",
         rkey: "self",
       })
@@ -54,38 +44,12 @@ export const getActiveProfileInfo =
       | AppCertifiedActorProfile.Record
       | undefined;
     if (!profile) return null;
-    const handle = await resolveHandle(ctx.agent, ctx.targetDid);
+    const handle = await resolveHandle(ctx.agent, ctx.userDid);
     return {
       name: profile.displayName || handle,
       handle,
-      isOrganization: false,
     };
   };
-export const switchActiveProfile = async (did: string): Promise<void> => {
-  const cookiePromise = cookies();
-  const session = await getSession();
-  if (!session) {
-    throw new Error(
-      "Cannot switch profiles: no active session found. Please log in first.",
-    );
-  }
-
-  const cookieStore = await cookiePromise;
-  cookieStore.set("active-did", did, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
-    path: "/",
-  });
-};
-
-export const logout = async (): Promise<void> => {
-  const session = await getSession();
-  if (!session) {
-    return;
-  }
-  oauthClient.revoke(session.sub);
-};
 
 export const addContribution = async (params: {
   hypercertUri: string;
@@ -190,7 +154,7 @@ export const addEvaluation = async (params: {
     OrgHypercertsContextEvaluation.validateRecord,
   );
   const result = await ctx.agent.com.atproto.repo.createRecord({
-    repo: ctx.activeDid,
+    repo: ctx.userDid,
     collection: "org.hypercerts.context.evaluation",
     record,
   });
@@ -243,7 +207,7 @@ export const addMeasurement = async (params: {
   if (params.locations && params.locations.length > 0) {
     locationRefs = await processLocations(
       ctx.agent,
-      ctx.activeDid,
+      ctx.userDid,
       params.locations,
     );
   }
@@ -273,7 +237,7 @@ export const addMeasurement = async (params: {
     OrgHypercertsContextMeasurement.validateRecord,
   );
   const result = await ctx.agent.com.atproto.repo.createRecord({
-    repo: ctx.activeDid,
+    repo: ctx.userDid,
     collection: "org.hypercerts.context.measurement",
     record,
   });
@@ -287,7 +251,7 @@ export const getMeasurementRecord = async (params: {
   rkey: string;
 }): Promise<SerializedRecord> => {
   const { did, collection, rkey } = params;
-  const ctx = await getRepoContext({ targetDid: did });
+  const ctx = await getRepoContext();
   if (!ctx) {
     throw new Error(
       "getMeasurementRecord failed: could not establish repository context. The user session may have expired or the target DID is unreachable.",
@@ -312,7 +276,7 @@ export const getEvaluationRecord = async (params: {
   rkey: string;
 }): Promise<SerializedRecord> => {
   const { did, collection, rkey } = params;
-  const ctx = await getRepoContext({ targetDid: did });
+  const ctx = await getRepoContext();
   if (!ctx) {
     throw new Error(
       "getEvaluationRecord failed: could not establish repository context. The user session may have expired or the target DID is unreachable.",
@@ -337,7 +301,7 @@ export const getEvidenceRecord = async (params: {
   rkey: string;
 }): Promise<SerializedRecord> => {
   const { did, collection, rkey } = params;
-  const ctx = await getRepoContext({ targetDid: did });
+  const ctx = await getRepoContext();
   if (!ctx) {
     throw new Error(
       "getEvidenceRecord failed: could not establish repository context. The user session may have expired or the target DID is unreachable.",
@@ -362,7 +326,7 @@ export const getContributorInformationRecord = async (params: {
   rkey: string;
 }): Promise<SerializedRecord> => {
   const { did, collection, rkey } = params;
-  const ctx = await getRepoContext({ targetDid: did });
+  const ctx = await getRepoContext();
   if (!ctx) {
     throw new Error(
       "getContributorInformationRecord failed: could not establish repository context. The user session may have expired or the target DID is unreachable.",
@@ -393,107 +357,17 @@ export const deleteHypercert = async (params: {
   if (!parsed) {
     throw new Error("deleteHypercert failed: invalid hypercertUri.");
   }
-  if (parsed.did !== ctx.activeDid) {
+  if (parsed.did !== ctx.userDid) {
     throw new Error(
       "deleteHypercert failed: Forbidden — URI DID does not match active session DID.",
     );
   }
   await ctx.agent.com.atproto.repo.deleteRecord({
-    repo: ctx.activeDid,
+    repo: ctx.userDid,
     collection: parsed.collection || "org.hypercerts.claim.activity",
     rkey: parsed.rkey,
   });
   return { success: true };
-};
-
-export const updateMeasurement = async (params: {
-  measurementUri: string;
-  updates: {
-    metric?: string;
-    value?: string;
-    unit?: string;
-    measurers?: string[];
-    startDate?: string;
-    endDate?: string;
-    methodType?: string;
-    methodURI?: string;
-    evidenceURI?: string[];
-    comment?: string;
-  };
-}): Promise<{ uri: string; cid: string }> => {
-  const ctx = await getRepoContext();
-  if (!ctx) {
-    throw new Error(
-      "updateMeasurement failed: could not establish repository context.",
-    );
-  }
-  // Defense-in-depth: ATProto scoped repos already prevent cross-repo writes,
-  // but we validate the DID for consistency with deleteRecord/deleteHypercert
-  // and to surface clear errors on mismatched URIs.
-  const parsed = parseAtUri(params.measurementUri);
-  if (!parsed || !parsed.collection || !parsed.rkey) {
-    throw new Error("updateMeasurement failed: invalid AT-URI format");
-  }
-  if (parsed.did !== ctx.activeDid) {
-    throw new Error(
-      "updateMeasurement failed: Forbidden — URI DID does not match active session DID.",
-    );
-  }
-  // Fetch existing measurement
-  const existingResult = await ctx.agent.com.atproto.repo.getRecord({
-    repo: parsed.did,
-    collection: parsed.collection || "org.hypercerts.context.measurement",
-    rkey: parsed.rkey,
-  });
-  const existing = existingResult.data
-    .value as OrgHypercertsContextMeasurement.Record & {
-    subject?: OrgHypercertsContextMeasurement.Record["subjects"] extends
-      | (infer T)[]
-      | undefined
-      ? T
-      : never;
-  };
-
-  // Preserve existing subjects, or migrate from old singular subject field
-  const existingSubjects =
-    existing.subjects ?? (existing.subject ? [existing.subject] : undefined);
-
-  // Merge updates, preserving immutable fields
-  const record: OrgHypercertsContextMeasurement.Record = {
-    ...existing,
-    $type: "org.hypercerts.context.measurement",
-    ...(existingSubjects !== undefined ? { subjects: existingSubjects } : {}),
-  };
-
-  // Apply individual updates
-  const updates = params.updates;
-  if (updates.metric !== undefined) record.metric = updates.metric;
-  if (updates.value !== undefined) record.value = updates.value;
-  if (updates.unit !== undefined) record.unit = updates.unit;
-  if (updates.startDate !== undefined) record.startDate = updates.startDate;
-  if (updates.endDate !== undefined) record.endDate = updates.endDate;
-  if (updates.methodType !== undefined) record.methodType = updates.methodType;
-  if (updates.methodURI !== undefined) record.methodURI = updates.methodURI;
-  if (updates.evidenceURI !== undefined)
-    record.evidenceURI = updates.evidenceURI;
-  if (updates.comment !== undefined) record.comment = updates.comment;
-  if (updates.measurers !== undefined) {
-    record.measurers = updates.measurers.map((did) => ({ did }));
-  }
-
-  assertValidRecord(
-    "measurement",
-    record,
-    OrgHypercertsContextMeasurement.validateRecord,
-  );
-  const result = await ctx.agent.com.atproto.repo.putRecord({
-    repo: ctx.activeDid,
-    collection: parsed.collection || "org.hypercerts.context.measurement",
-    rkey: parsed.rkey,
-    record,
-  });
-
-  return { uri: result.data.uri, cid: result.data.cid };
 };
 
 export const deleteRecord = async (params: {
@@ -509,13 +383,13 @@ export const deleteRecord = async (params: {
   if (!parsed || !parsed.collection || !parsed.rkey) {
     throw new Error("deleteRecord failed: invalid AT-URI format");
   }
-  if (parsed.did !== ctx.activeDid) {
+  if (parsed.did !== ctx.userDid) {
     throw new Error(
       "deleteRecord failed: Forbidden — URI DID does not match active session DID.",
     );
   }
   await ctx.agent.com.atproto.repo.deleteRecord({
-    repo: ctx.activeDid,
+    repo: ctx.userDid,
     collection: parsed.collection,
     rkey: parsed.rkey,
   });
