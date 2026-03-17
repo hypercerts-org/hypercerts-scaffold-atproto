@@ -5,7 +5,7 @@ import { getAgent, getSession } from "@/lib/atproto-session";
 import ProfileForm from "@/components/profile-form";
 import { convertBlobUrlToCdn } from "@/lib/utils";
 import { resolveSessionPds } from "@/lib/server-utils";
-import { KeyRound, Mail, UserCircle } from "lucide-react";
+import { KeyRound, UserCircle } from "lucide-react";
 import { AppCertifiedActorProfile } from "@hypercerts-org/lexicon";
 import { getCertifiedProfileImageURL } from "@/lib/profile-utils";
 import { Button } from "@/components/ui/button";
@@ -106,31 +106,6 @@ export default async function ProfilePage() {
                     className="font-[family-name:var(--font-outfit)]"
                   >
                     <Link href="/reset-password">Change password</Link>
-                  </Button>
-                </div>
-
-                {/* Change Email row */}
-                <div className="mt-4 flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="bg-create-accent/10 flex size-8 items-center justify-center rounded-full">
-                      <Mail className="text-create-accent size-4" />
-                    </div>
-                    <div>
-                      <p className="font-[family-name:var(--font-outfit)] text-sm font-medium">
-                        Change Email
-                      </p>
-                      <p className="text-muted-foreground font-[family-name:var(--font-outfit)] text-xs">
-                        Update your account email address
-                      </p>
-                    </div>
-                  </div>
-                  <Button
-                    asChild
-                    variant="outline"
-                    size="sm"
-                    className="font-[family-name:var(--font-outfit)]"
-                  >
-                    <Link href="/update-email">Change email</Link>
                   </Button>
                 </div>
               </div>
