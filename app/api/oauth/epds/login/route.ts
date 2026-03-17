@@ -11,7 +11,6 @@ import {
   getEpdsClientId,
   getEpdsRedirectUri,
   EPDS_HANDLE_MODES,
-  type EpdsHandleMode,
 } from "@/lib/epds-config";
 import { epdsStateStore } from "@/lib/hypercerts-sdk";
 import { config, OAUTH_SCOPE } from "@/lib/config";
@@ -95,10 +94,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
       authUrl.searchParams.set("login_hint", email);
     }
     if (handleMode) {
-      authUrl.searchParams.set(
-        "epds_handle_mode",
-        handleMode as EpdsHandleMode,
-      );
+      authUrl.searchParams.set("epds_handle_mode", handleMode);
     }
 
     // 10. Create redirect response
