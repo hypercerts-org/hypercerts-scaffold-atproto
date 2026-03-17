@@ -2,8 +2,8 @@
  * Bsky Profile API functions
  */
 
-import { apiClientFormData } from "./client";
-import type { UpdateBskyProfileResponse } from "./types";
+import { apiClientFormData } from "@/lib/api/client";
+import type { UpdateBskyProfileResponse } from "@/lib/api/types";
 
 /**
  * Update user Bluesky profile

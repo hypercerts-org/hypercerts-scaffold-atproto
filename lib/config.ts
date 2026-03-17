@@ -10,7 +10,7 @@
  */
 
 import { OAuthClientMetadataInput } from "@atproto/oauth-client-node";
-import { generateBrandingCss } from "./atproto-branding";
+import { generateBrandingCss } from "@/lib/atproto-branding";
 
 const ATPROTO_SCOPE = "atproto";
 

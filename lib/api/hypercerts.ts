@@ -2,7 +2,7 @@
  * Hypercerts API functions
  */
 
-import { apiClientFormData } from "./client";
+import { apiClientFormData } from "@/lib/api/client";
 import type {
   CreateHypercertResponse,
   AddAttachmentResponse,
@@ -10,7 +10,7 @@ import type {
   AttachmentLocationParam,
   UpdateHypercertRequest,
   UpdateHypercertResponse,
-} from "./types";
+} from "@/lib/api/types";
 
 /**
  * Create hypercert using SDK params directly (from hypercerts-base-form)
