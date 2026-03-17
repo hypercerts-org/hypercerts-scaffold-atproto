@@ -2,12 +2,12 @@ import "server-only";
 
 import { Agent } from "@atproto/api";
 import { BlobRef } from "@atproto/lexicon";
-import { parseAtUri } from "./utils";
+import { parseAtUri } from "@/lib/utils";
 import {
   AppCertifiedLocation,
   OrgHypercertsDefs,
 } from "@hypercerts-org/lexicon";
-import { assertValidRecord } from "./record-validation";
+import { assertValidRecord } from "@/lib/record-validation";
 
 export interface StrongRef {
   uri: string;

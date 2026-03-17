@@ -27,7 +27,7 @@ export async function generateMetadata({
   }
 
   try {
-    const viewCtx = await getRepoContext({ targetDid: ownerDid });
+    const viewCtx = await getRepoContext();
     if (!viewCtx) {
       return { title: "Hypercert" };
     }
@@ -105,7 +105,7 @@ export default async function HypercertViewPage({
     );
 
   const [viewCtx, session] = await Promise.all([
-    getRepoContext({ targetDid: ownerDid }),
+    getRepoContext(),
     getSession(),
   ]);
   if (!viewCtx)

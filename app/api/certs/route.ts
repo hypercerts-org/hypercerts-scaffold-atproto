@@ -155,7 +155,7 @@ export async function POST(req: NextRequest) {
       );
     }
     const rightsResult = await ctx.agent.com.atproto.repo.createRecord({
-      repo: ctx.activeDid,
+      repo: ctx.userDid,
       collection: "org.hypercerts.claim.rights",
       record: rightsRecord,
     });
@@ -195,7 +195,7 @@ export async function POST(req: NextRequest) {
         OrgHypercertsClaimActivity.validateRecord,
       );
       const claimResult = await ctx.agent.com.atproto.repo.createRecord({
-        repo: ctx.activeDid,
+        repo: ctx.userDid,
         collection: "org.hypercerts.claim.activity",
         record: claimRecord,
       });
@@ -224,7 +224,7 @@ export async function POST(req: NextRequest) {
       if (parsedRights) {
         await ctx.agent.com.atproto.repo
           .deleteRecord({
-            repo: ctx.activeDid,
+            repo: ctx.userDid,
             collection:
               parsedRights.collection || "org.hypercerts.claim.rights",
             rkey: parsedRights.rkey,
@@ -287,7 +287,7 @@ export async function PUT(req: NextRequest) {
         { status: 400 },
       );
     }
-    if (parsed.did !== ctx.activeDid) {
+    if (parsed.did !== ctx.userDid) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
@@ -358,7 +358,7 @@ export async function PUT(req: NextRequest) {
       );
     }
     const result = await ctx.agent.com.atproto.repo.putRecord({
-      repo: ctx.activeDid,
+      repo: ctx.userDid,
       collection: parsed.collection || "org.hypercerts.claim.activity",
       rkey: parsed.rkey,
       record,

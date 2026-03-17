@@ -43,7 +43,7 @@ export const processContributions = async (
   }
 
   // 2. Ownership check — must happen before any child record writes
-  if (hypercertParsed.did !== ctx.activeDid) {
+  if (hypercertParsed.did !== ctx.userDid) {
     throw new Error(
       "processContributions failed: cannot modify another user's hypercert.",
     );
@@ -81,7 +81,7 @@ export const processContributions = async (
       OrgHypercertsClaimContribution.validateRecord,
     );
     const detailsResult = await ctx.agent.com.atproto.repo.createRecord({
-      repo: ctx.activeDid,
+      repo: ctx.userDid,
       collection: "org.hypercerts.claim.contribution",
       record: detailsRecord,
     });
@@ -104,7 +104,7 @@ export const processContributions = async (
           OrgHypercertsClaimContributorInformation.validateRecord,
         );
         const infoResult = await ctx.agent.com.atproto.repo.createRecord({
-          repo: ctx.activeDid,
+          repo: ctx.userDid,
           collection: "org.hypercerts.claim.contributorInformation",
           record: infoRecord,
         });
@@ -140,7 +140,7 @@ export const processContributions = async (
     OrgHypercertsClaimActivity.validateRecord,
   );
   const putResult = await ctx.agent.com.atproto.repo.putRecord({
-    repo: ctx.activeDid,
+    repo: ctx.userDid,
     collection: hypercertParsed.collection,
     rkey: hypercertParsed.rkey,
     record: existingRecord,

@@ -56,7 +56,3 @@ export enum Collections {
   rights = "org.hypercerts.claim.rights",
   evaluation = "org.hypercerts.context.evaluation",
 }
-
-export function isRecordObject(v: unknown): v is Record<string, unknown> {
-  return typeof v === "object" && v !== null && !Array.isArray(v);
-}

@@ -67,6 +67,3 @@ export const queryKeys = {
     },
   },
 } as const;
-
-// Type helper for query keys
-export type QueryKeys = typeof queryKeys;

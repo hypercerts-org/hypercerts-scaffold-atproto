@@ -20,10 +20,6 @@ const HypercertsCreateForm = dynamic(
   () => import("@/components/hypercerts-create-form"),
   { loading: () => <HypercertsCreateFormSkeleton /> },
 );
-// const HypercertContributionForm = dynamic(
-//   () => import("@/components/contributions-form"),
-//   { loading: () => <ContributionFormSkeleton /> }
-// );
 const HypercertEvidenceForm = dynamic(
   () => import("@/components/evidence-form"),
   { loading: () => <EvidenceFormSkeleton /> },
@@ -85,14 +81,6 @@ export default function Home() {
                 nextStepper={nextStepper}
               />
             ) : null}
-            {/* TODO commented out for now while SDK addContribution stabilized */}
-            {/* {step === 2 && hypercertInfo && (
-              <HypercertContributionForm
-                hypercertInfo={hypercertInfo}
-                onNext={() => setStep((step) => step + 1)}
-                onBack={previousStepper}
-              />
-            )} */}
             {step === 2 && hypercertInfo ? (
               <HypercertEvidenceForm
                 hypercertInfo={hypercertInfo}

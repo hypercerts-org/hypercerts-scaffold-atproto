@@ -10,46 +10,30 @@
  */
 
 import { OAuthClientMetadataInput } from "@atproto/oauth-client-node";
-import { generateBrandingCss } from "./atproto-branding";
+import { generateBrandingCss } from "@/lib/atproto-branding";
 
 const ATPROTO_SCOPE = "atproto";
 
-export const HYPERCERT_COLLECTIONS = {
-  CLAIM: "org.hypercerts.claim.activity",
-  RIGHTS: "org.hypercerts.claim.rights",
-  LOCATION: "app.certified.location",
-  CONTRIBUTION: "org.hypercerts.claim.contribution",
-  CONTRIBUTOR_INFORMATION: "org.hypercerts.claim.contributorInformation",
-  MEASUREMENT: "org.hypercerts.context.measurement",
-  EVALUATION: "org.hypercerts.context.evaluation",
-  ATTACHMENT: "org.hypercerts.context.attachment",
-  COLLECTION: "org.hypercerts.collection",
-  FUNDING_RECEIPT: "org.hypercerts.funding.receipt",
-  WORK_SCOPE_TAG: "org.hypercerts.workscope.tag",
-  CERTIFIED_PROFILE: "app.certified.actor.profile",
-  BSKY_PROFILE: "app.bsky.actor.profile",
-} as const;
-
 // Granular repo scope — collections with full CRUD access
 const REPO_COLLECTIONS = [
-  HYPERCERT_COLLECTIONS.CLAIM,
-  HYPERCERT_COLLECTIONS.RIGHTS,
-  HYPERCERT_COLLECTIONS.LOCATION,
-  HYPERCERT_COLLECTIONS.CONTRIBUTION,
-  HYPERCERT_COLLECTIONS.CONTRIBUTOR_INFORMATION,
-  HYPERCERT_COLLECTIONS.MEASUREMENT,
-  HYPERCERT_COLLECTIONS.EVALUATION,
-  HYPERCERT_COLLECTIONS.ATTACHMENT,
-  HYPERCERT_COLLECTIONS.COLLECTION,
-  HYPERCERT_COLLECTIONS.FUNDING_RECEIPT,
-  HYPERCERT_COLLECTIONS.WORK_SCOPE_TAG,
-  HYPERCERT_COLLECTIONS.CERTIFIED_PROFILE,
+  "org.hypercerts.claim.activity",
+  "org.hypercerts.claim.rights",
+  "app.certified.location",
+  "org.hypercerts.claim.contribution",
+  "org.hypercerts.claim.contributorInformation",
+  "org.hypercerts.context.measurement",
+  "org.hypercerts.context.evaluation",
+  "org.hypercerts.context.attachment",
+  "org.hypercerts.collection",
+  "org.hypercerts.funding.receipt",
+  "org.hypercerts.workscope.tag",
+  "app.certified.actor.profile",
 ];
 
 const HYPERCERT_REPO_SCOPE = `repo?${REPO_COLLECTIONS.map((c) => "collection=" + c).join("&")}&action=create&action=update&action=delete`;
 
 // Bsky profile scope — only create and update (no delete)
-const BSKY_PROFILE_SCOPE = `repo?collection=${HYPERCERT_COLLECTIONS.BSKY_PROFILE}&action=create&action=update`;
+const BSKY_PROFILE_SCOPE = `repo?collection=app.bsky.actor.profile&action=create&action=update`;
 
 const BLOB_SCOPE = "blob:*/*";
 const RPC_SCOPE =
@@ -248,10 +232,6 @@ export const config = {
   // ePDS (certified PDS) configuration — optional, only needed for ePDS login
   epdsUrl: process.env.NEXT_PUBLIC_EPDS_URL,
   epdsClientId,
-
-  // Server-only secret for HMAC-signing the transient OAuth session cookie
-  // Must be 32+ characters. Only needed if ePDS login is used.
-  oauthSessionSecret: process.env.OAUTH_SESSION_SECRET,
 
   handleResolver:
     process.env.NEXT_PUBLIC_HANDLE_RESOLVER || "https://bsky.social",

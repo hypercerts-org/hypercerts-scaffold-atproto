@@ -21,7 +21,7 @@ export interface DisplayContributor {
 }
 
 /** Type guard: checks if value is a ContributorIdentity (has `identity` string field) */
-export function isContributorIdentity(v: unknown): v is ContributorIdentity {
+function isContributorIdentity(v: unknown): v is ContributorIdentity {
   return (
     typeof v === "object" &&
     v !== null &&
@@ -31,7 +31,7 @@ export function isContributorIdentity(v: unknown): v is ContributorIdentity {
 }
 
 /** Type guard: checks if value is a ContributorRole (has `role` string field) */
-export function isContributorRole(v: unknown): v is ContributorRole {
+function isContributorRole(v: unknown): v is ContributorRole {
   return (
     typeof v === "object" &&
     v !== null &&
@@ -41,7 +41,7 @@ export function isContributorRole(v: unknown): v is ContributorRole {
 }
 
 /** Type guard: checks if value is a StrongRef (has `uri` and `cid` string fields) */
-export function isStrongRef(v: unknown): v is StrongRef {
+function isStrongRef(v: unknown): v is StrongRef {
   return (
     typeof v === "object" &&
     v !== null &&
@@ -66,7 +66,7 @@ export function isStrongRef(v: unknown): v is StrongRef {
  * 3. isDid = identity.startsWith("did:")
  * 4. weight = contributionWeight
  */
-export function parseContributor(contributor: Contributor): DisplayContributor {
+function parseContributor(contributor: Contributor): DisplayContributor {
   let identity = "";
   let identityRef: StrongRef | undefined;
   let needsResolution = false;

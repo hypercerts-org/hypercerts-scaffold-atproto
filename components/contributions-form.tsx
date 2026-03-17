@@ -101,8 +101,7 @@ export default function HypercertContributionForm({
     }
     setSaving(true);
     try {
-      const contributionData = await handleContributionCreation();
-      console.log(contributionData);
+      await handleContributionCreation();
       toast.success("Contribution created!");
       onNext?.();
     } catch (error) {
@@ -136,7 +135,7 @@ export default function HypercertContributionForm({
 
   return (
     <FormInfo
-      stepLabel="Step 2 of 5" // NOTE: contributions step is currently disabled; stepLabel reflects the 5-step flow
+      stepLabel="Add Contributions"
       title="Add Contributions"
       description="Link roles, contributors, and timeframes to your hypercert."
     >

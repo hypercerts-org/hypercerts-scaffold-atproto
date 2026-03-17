@@ -75,7 +75,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const ctx = await ctxPromise; // defaults targetDid=activeDid
+    const ctx = await ctxPromise;
     if (!ctx) {
       return NextResponse.json(
         { error: "Could not authenticate repo" },
@@ -171,7 +171,7 @@ export async function POST(req: NextRequest) {
       } else {
         locationRef = await createLocationRecord(
           ctx.agent,
-          ctx.activeDid,
+          ctx.userDid,
           location as LocationCreateParams,
         );
         createdLocationRef = locationRef;
@@ -201,7 +201,7 @@ export async function POST(req: NextRequest) {
       );
 
       const result = await ctx.agent.com.atproto.repo.createRecord({
-        repo: ctx.activeDid,
+        repo: ctx.userDid,
         collection: "org.hypercerts.context.attachment",
         record,
       });
@@ -214,7 +214,7 @@ export async function POST(req: NextRequest) {
         if (parsed) {
           await ctx.agent.com.atproto.repo
             .deleteRecord({
-              repo: ctx.activeDid,
+              repo: ctx.userDid,
               collection: parsed.collection || "app.certified.location",
               rkey: parsed.rkey,
             })

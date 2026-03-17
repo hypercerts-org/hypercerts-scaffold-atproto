@@ -2,8 +2,8 @@
  * Auth API functions
  */
 
-import { apiClient } from "./client";
-import type { LoginRequest, LoginResponse } from "./types";
+import { apiClient } from "@/lib/api/client";
+import type { LoginRequest, LoginResponse } from "@/lib/api/types";
 
 /**
  * Initiate login flow
