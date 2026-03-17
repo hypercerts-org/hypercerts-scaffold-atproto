@@ -66,12 +66,13 @@ This scaffold uses **native ATProto** — all record operations go through `@atp
 
 ### Optional Variables
 
-| Variable                      | Description                                                                                                                                                  |
-| ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `NEXT_PUBLIC_EPDS_URL`        | ePDS URL for email-based login. When set, enables the Email login tab in the UI. Example: `https://epds1.test.certified.app`                                 |
-| `OAUTH_SESSION_SECRET`        | Server-only HMAC secret for ePDS OAuth session cookie. Required when `NEXT_PUBLIC_EPDS_URL` is set. Must be 32+ chars. Generate with: `openssl rand -hex 32` |
-| `REDIS_USERNAME`              | Redis username. Defaults to `default` when `REDIS_PASSWORD` is set.                                                                                          |
-| `NEXT_PUBLIC_HANDLE_RESOLVER` | Handle resolver URL. Defaults to `https://bsky.social`.                                                                                                      |
+| Variable                       | Description                                                                                                                                                  |
+| ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `NEXT_PUBLIC_EPDS_URL`         | ePDS URL for email-based login. When set, enables the Email login tab in the UI. Example: `https://epds1.test.certified.app`                                 |
+| `NEXT_PUBLIC_EPDS_HANDLE_MODE` | ePDS handle creation mode. Valid values: `random`, `picker`, `picker-with-random` (default). Only used when `NEXT_PUBLIC_EPDS_URL` is set.                   |
+| `OAUTH_SESSION_SECRET`         | Server-only HMAC secret for ePDS OAuth session cookie. Required when `NEXT_PUBLIC_EPDS_URL` is set. Must be 32+ chars. Generate with: `openssl rand -hex 32` |
+| `REDIS_USERNAME`               | Redis username. Defaults to `default` when `REDIS_PASSWORD` is set.                                                                                          |
+| `NEXT_PUBLIC_HANDLE_RESOLVER`  | Handle resolver URL. Defaults to `https://bsky.social`.                                                                                                      |
 
 ### Local Development
 
