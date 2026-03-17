@@ -81,10 +81,9 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     authUrl.searchParams.set("request_uri", request_uri);
     if (email) {
       authUrl.searchParams.set("login_hint", email);
-      authUrl.searchParams.set(
-        "epds_handle_mode",
-        handleMode === "picker" ? "picker" : "random",
-      );
+    }
+    if (handleMode === "picker") {
+      authUrl.searchParams.set("epds_handle_mode", "picker");
     }
 
     // 10. Create redirect response
