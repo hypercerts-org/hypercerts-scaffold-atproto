@@ -117,13 +117,13 @@ function EmailForm({
 }) {
   const [email, setEmail] = useState("");
   const [isRedirecting, setIsRedirecting] = useState(false);
-  const [handleMode, setHandleMode] = useState<"random" | "picker">("random");
+  const [pickerMode, setPickerMode] = useState(false);
 
   const handleContinue = () => {
     setIsRedirecting(true);
     const url = new URL("/api/oauth/epds/login", window.location.origin);
     if (email) url.searchParams.set("email", email);
-    url.searchParams.set("handle_mode", handleMode);
+    if (pickerMode) url.searchParams.set("handle_mode", "picker");
     window.location.href = url.toString();
   };
 
@@ -158,10 +158,8 @@ function EmailForm({
       <label className="flex cursor-pointer items-center gap-2 px-1">
         <input
           type="checkbox"
-          checked={handleMode === "picker"}
-          onChange={(e) =>
-            setHandleMode(e.target.checked ? "picker" : "random")
-          }
+          checked={pickerMode}
+          onChange={(e) => setPickerMode(e.target.checked)}
           className="accent-create-accent h-3.5 w-3.5 cursor-pointer rounded"
         />
         <span className="text-muted-foreground font-[family-name:var(--font-outfit)] text-xs">
