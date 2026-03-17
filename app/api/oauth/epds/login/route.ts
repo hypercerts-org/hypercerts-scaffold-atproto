@@ -10,6 +10,8 @@ import {
   getEpdsEndpoints,
   getEpdsClientId,
   getEpdsRedirectUri,
+  EPDS_HANDLE_MODES,
+  type EpdsHandleMode,
 } from "@/lib/epds-config";
 import { epdsStateStore } from "@/lib/hypercerts-sdk";
 import { config, OAUTH_SCOPE } from "@/lib/config";
@@ -19,6 +21,16 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     // 0. Read optional email for login_hint (Flow 1) and handle mode
     const email = req.nextUrl.searchParams.get("email");
     const handleMode = req.nextUrl.searchParams.get("handle_mode");
+
+    if (
+      handleMode !== null &&
+      !(EPDS_HANDLE_MODES as readonly string[]).includes(handleMode)
+    ) {
+      return NextResponse.json(
+        { error: "Invalid handle_mode value" },
+        { status: 400 },
+      );
+    }
 
     // 1. Generate PKCE + DPoP values
     const { privateKey, publicJwk, privateJwk } = generateDpopKeyPair();
@@ -82,8 +94,11 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     if (email) {
       authUrl.searchParams.set("login_hint", email);
     }
-    if (handleMode === "picker") {
-      authUrl.searchParams.set("epds_handle_mode", "picker");
+    if (handleMode) {
+      authUrl.searchParams.set(
+        "epds_handle_mode",
+        handleMode as EpdsHandleMode,
+      );
     }
 
     // 10. Create redirect response

@@ -1,12 +1,12 @@
 "use server";
 import { getRepoContext } from "@/lib/repo-context";
-import { resolveRecordBlobs } from "./blob-utils";
+import { resolveRecordBlobs } from "@/lib/blob-utils";
 import { parseAtUri } from "@/lib/utils";
 import {
   resolveStrongRef,
   processLocations,
   type StrongRef,
-} from "./atproto-writes";
+} from "@/lib/atproto-writes";
 import {
   AppCertifiedActorProfile,
   OrgHypercertsContextEvaluation,
@@ -15,7 +15,7 @@ import {
 import { assertValidRecord } from "@/lib/record-validation";
 import { processContributions } from "@/lib/contribution-helpers";
 
-import { getAgent, resolveHandle } from "./atproto-session";
+import { resolveHandle } from "@/lib/atproto-session";
 
 export interface ActiveProfileInfo {
   name: string | undefined;
@@ -394,36 +394,4 @@ export const deleteRecord = async (params: {
     rkey: parsed.rkey,
   });
   return { success: true };
-};
-
-export const requestEmailUpdate = async (): Promise<{
-  tokenRequired: boolean;
-}> => {
-  const agent = await getAgent();
-  if (!agent) {
-    throw new Error("Not authenticated");
-  }
-  try {
-    const result = await agent.com.atproto.server.requestEmailUpdate();
-    return { tokenRequired: result.data.tokenRequired };
-  } catch (error) {
-    console.error("requestEmailUpdate failed:", error);
-    throw error;
-  }
-};
-
-export const updateEmail = async (
-  email: string,
-  token?: string,
-): Promise<void> => {
-  const agent = await getAgent();
-  if (!agent) {
-    throw new Error("Not authenticated");
-  }
-  try {
-    await agent.com.atproto.server.updateEmail({ email, token });
-  } catch (error) {
-    console.error("updateEmail failed:", error);
-    throw error;
-  }
 };
