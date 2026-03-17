@@ -13,9 +13,13 @@ export default async function UpdateEmailPage() {
   const agent = await getAgent();
   if (!agent) redirect("/");
 
-  const sessionInfo = await agent.com.atproto.server
-    .getSession()
-    .catch(() => null);
+  let sessionInfo;
+  try {
+    sessionInfo = await agent.com.atproto.server.getSession();
+  } catch (err) {
+    console.error("[update-email] Failed to fetch session:", err);
+    redirect("/");
+  }
   const email = sessionInfo?.data?.email || "";
 
   return (
