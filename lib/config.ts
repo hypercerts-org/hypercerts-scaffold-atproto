@@ -14,6 +14,10 @@ import { generateBrandingCss } from "@/lib/atproto-branding";
 
 const ATPROTO_SCOPE = "atproto";
 
+// ePDS handle modes (duplicated from epds-config.ts to avoid circular dependency)
+const EPDS_HANDLE_MODES = ["random", "picker", "picker-with-random"] as const;
+type EpdsHandleMode = (typeof EPDS_HANDLE_MODES)[number];
+
 // Granular repo scope — collections with full CRUD access
 const REPO_COLLECTIONS = [
   "org.hypercerts.claim.activity",
@@ -236,6 +240,24 @@ export const config = {
   handleResolver:
     process.env.NEXT_PUBLIC_HANDLE_RESOLVER || "https://bsky.social",
 
+  // ePDS handle mode configuration
+  epdsHandleMode: (() => {
+    // Only validate when ePDS is enabled
+    if (!process.env.NEXT_PUBLIC_EPDS_URL) {
+      return "picker-with-random"; // Safe default when ePDS disabled
+    }
+
+    const mode =
+      process.env.NEXT_PUBLIC_EPDS_HANDLE_MODE || "picker-with-random";
+    if (!(EPDS_HANDLE_MODES as readonly string[]).includes(mode)) {
+      throw new Error(
+        `Invalid NEXT_PUBLIC_EPDS_HANDLE_MODE: "${mode}". ` +
+          `Must be one of: ${EPDS_HANDLE_MODES.join(", ")}`,
+      );
+    }
+    return mode as EpdsHandleMode;
+  })(),
+
   // Redis configuration
   redis: {
     host: process.env.REDIS_HOST!,
@@ -280,6 +302,7 @@ export function buildClientMetadata(): OAuthClientMetadataInput &
       jwks_uri: config.jwksUri,
       application_type: "web",
       dpop_bound_access_tokens: true,
+      ...(config.epdsUrl ? { epds_handle_mode: config.epdsHandleMode } : {}),
     };
   }
 
@@ -305,6 +328,7 @@ export function buildClientMetadata(): OAuthClientMetadataInput &
     branding: {
       css: generateBrandingCss(config.baseUrl),
     },
+    ...(config.epdsUrl ? { epds_handle_mode: config.epdsHandleMode } : {}),
   };
 }
 
