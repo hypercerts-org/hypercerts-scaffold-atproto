@@ -2,8 +2,8 @@
  * Constellation API functions (backlinks service)
  */
 
-import { externalApiClient } from "../client";
-import type { BacklinksResponse } from "../types";
+import { externalApiClient } from "@/lib/api/client";
+import type { BacklinksResponse } from "@/lib/api/types";
 
 const CONSTELLATION_BASE_URL = "https://constellation.microcosm.blue";
 

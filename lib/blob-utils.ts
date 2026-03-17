@@ -1,8 +1,8 @@
 import "server-only";
-import { getSession } from "./atproto-session";
-import { getRepoContext } from "./repo-context";
-import { getBlobURL } from "./utils";
-import { resolveSessionPds } from "./server-utils";
+import { getSession } from "@/lib/atproto-session";
+import { getRepoContext } from "@/lib/repo-context";
+import { getBlobURL } from "@/lib/utils";
+import { resolveSessionPds } from "@/lib/server-utils";
 import { BlobRef } from "@atproto/lexicon";
 
 function isBlobRefLike(v: Record<string, unknown>): boolean {

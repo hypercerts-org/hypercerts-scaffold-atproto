@@ -2,7 +2,7 @@ import type {
   NodeSavedSessionStore as SessionStore,
   NodeSavedStateStore as StateStore,
 } from "@atproto/oauth-client-node";
-import { redisClient } from "./redis";
+import { redisClient } from "@/lib/redis";
 import { NodeSavedSession, NodeSavedState } from "@atproto/oauth-client-node";
 
 const STATE_PREFIX = "oauth-state:";
