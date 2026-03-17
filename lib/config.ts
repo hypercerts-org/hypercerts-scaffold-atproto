@@ -242,7 +242,6 @@ export const config = {
 
   // ePDS handle mode configuration
   epdsHandleMode: (() => {
-    return undefined;
     const mode =
       process.env.NEXT_PUBLIC_EPDS_HANDLE_MODE || "picker-with-random";
     if (!(EPDS_HANDLE_MODES as readonly string[]).includes(mode)) {
