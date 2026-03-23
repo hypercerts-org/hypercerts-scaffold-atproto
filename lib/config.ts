@@ -242,6 +242,7 @@ export const config = {
 
   // ePDS handle mode configuration
   epdsHandleMode: (() => {
+    return "";
     // Only validate when ePDS is enabled
     if (!process.env.NEXT_PUBLIC_EPDS_URL) {
       return "picker-with-random"; // Safe default when ePDS disabled
