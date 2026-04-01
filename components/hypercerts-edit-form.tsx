@@ -190,8 +190,12 @@ export default function HypercertsEditForm({
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             placeholder="Enter the hypercert name"
+            maxLength={256}
             className="font-[family-name:var(--font-outfit)]"
           />
+          <p className="text-muted-foreground font-[family-name:var(--font-outfit)] text-[11px]">
+            {title.length} / 256 characters
+          </p>
         </div>
 
         <div className="flex flex-col gap-1.5">
@@ -206,8 +210,12 @@ export default function HypercertsEditForm({
             value={shortDescription}
             onChange={(e) => setShortDescription(e.target.value)}
             placeholder="Enter a short description"
+            maxLength={300}
             className="min-h-[100px] font-[family-name:var(--font-outfit)]"
           />
+          <p className="text-muted-foreground font-[family-name:var(--font-outfit)] text-[11px]">
+            {shortDescription.length} / 300 characters
+          </p>
         </div>
       </div>
 

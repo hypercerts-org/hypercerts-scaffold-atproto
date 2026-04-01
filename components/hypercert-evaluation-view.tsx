@@ -38,6 +38,14 @@ export default function HypercertEvaluationView({
     return null;
   }
 
+  const evaluators = Array.isArray(evaluation.evaluators)
+    ? evaluation.evaluators
+    : [];
+  const content = Array.isArray(evaluation.content) ? evaluation.content : [];
+  const measurements = Array.isArray(evaluation.measurements)
+    ? evaluation.measurements
+    : [];
+
   return (
     <Card className="glass-panel border-border/50 overflow-hidden rounded-xl border">
       <CardHeader className="pb-4">
@@ -86,27 +94,33 @@ export default function HypercertEvaluationView({
                 Evaluators
               </dt>
               <dd className="space-y-1">
-                {evaluation.evaluators.map((evaluator, index) => {
-                  const did =
-                    typeof evaluator === "object" ? evaluator.did : evaluator;
-                  return (
-                    <div
-                      key={index}
-                      className="font-[family-name:var(--font-outfit)] text-sm break-all"
-                    >
-                      <URILink
-                        uri={`https://bsky.app/profile/${did}`}
-                        label={did}
-                      />
-                    </div>
-                  );
-                })}
+                {evaluators.length > 0 ? (
+                  evaluators.map((evaluator, index) => {
+                    const did =
+                      typeof evaluator === "object" ? evaluator.did : evaluator;
+                    return (
+                      <div
+                        key={index}
+                        className="font-[family-name:var(--font-outfit)] text-sm break-all"
+                      >
+                        <URILink
+                          uri={`https://bsky.app/profile/${did}`}
+                          label={did}
+                        />
+                      </div>
+                    );
+                  })
+                ) : (
+                  <div className="text-muted-foreground font-[family-name:var(--font-outfit)] text-sm">
+                    No evaluators listed
+                  </div>
+                )}
               </dd>
             </div>
           </div>
 
           {/* Content */}
-          {evaluation.content && evaluation.content.length > 0 ? (
+          {content.length > 0 ? (
             <div className="border-border/50 flex items-start gap-3 border-t pt-4">
               <FileText className="text-create-accent mt-0.5 size-4 shrink-0" />
               <div className="min-w-0 flex-1 space-y-2">
@@ -114,7 +128,7 @@ export default function HypercertEvaluationView({
                   Content
                 </dt>
                 <dd className="space-y-1">
-                  {evaluation.content.map((item, index) => {
+                  {content.map((item, index) => {
                     const uri = item.uri;
                     return (
                       <div
@@ -134,7 +148,7 @@ export default function HypercertEvaluationView({
           ) : null}
 
           {/* Referenced Measurements */}
-          {evaluation.measurements && evaluation.measurements.length > 0 ? (
+          {measurements.length > 0 ? (
             <div className="border-border/50 flex items-start gap-3 border-t pt-4">
               <FileText className="text-create-accent mt-0.5 size-4 shrink-0" />
               <div className="min-w-0 flex-1 space-y-2">
@@ -142,7 +156,7 @@ export default function HypercertEvaluationView({
                   Referenced Measurements
                 </dt>
                 <dd className="space-y-1">
-                  {evaluation.measurements.map((item, index) => {
+                  {measurements.map((item, index) => {
                     const uri = item.uri;
                     return (
                       <div

@@ -25,6 +25,11 @@ export default function HypercertMeasurementView({
   if (!measurement) {
     return null;
   }
+
+  const measurers = Array.isArray(measurement.measurers)
+    ? measurement.measurers
+    : [];
+
   return (
     <Card className="glass-panel border-border/50 overflow-hidden rounded-xl border">
       <CardHeader className="pb-4">
@@ -87,21 +92,27 @@ export default function HypercertMeasurementView({
                 Measurers
               </dt>
               <dd className="space-y-1">
-                {measurement.measurers.map((measurer, index) => {
-                  const did =
-                    typeof measurer === "object" ? measurer.did : measurer;
-                  return (
-                    <div
-                      key={index}
-                      className="font-[family-name:var(--font-outfit)] text-sm break-all"
-                    >
-                      <URILink
-                        uri={`https://bsky.app/profile/${did}`}
-                        label={did}
-                      />
-                    </div>
-                  );
-                })}
+                {measurers.length > 0 ? (
+                  measurers.map((measurer, index) => {
+                    const did =
+                      typeof measurer === "object" ? measurer.did : measurer;
+                    return (
+                      <div
+                        key={index}
+                        className="font-[family-name:var(--font-outfit)] text-sm break-all"
+                      >
+                        <URILink
+                          uri={`https://bsky.app/profile/${did}`}
+                          label={did}
+                        />
+                      </div>
+                    );
+                  })
+                ) : (
+                  <div className="text-muted-foreground font-[family-name:var(--font-outfit)] text-sm">
+                    No measurers listed
+                  </div>
+                )}
               </dd>
             </div>
           </div>

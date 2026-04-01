@@ -294,9 +294,13 @@ export default function HypercertsBaseForm({
             onChange={(e) => setTitle(e.target.value)}
             value={title}
             placeholder="Enter the hypercert name"
+            maxLength={256}
             required
             className="font-[family-name:var(--font-outfit)]"
           />
+          <p className="text-muted-foreground font-[family-name:var(--font-outfit)] text-[11px]">
+            {title.length} / 256 characters
+          </p>
         </div>
 
         <div className="flex flex-col gap-1.5">
@@ -311,9 +315,13 @@ export default function HypercertsBaseForm({
             id="description"
             value={shortDescription}
             placeholder="Enter a short description"
+            maxLength={300}
             required
             className="min-h-[100px] font-[family-name:var(--font-outfit)]"
           />
+          <p className="text-muted-foreground font-[family-name:var(--font-outfit)] text-[11px]">
+            {shortDescription.length} / 300 characters
+          </p>
         </div>
       </div>
 
@@ -409,6 +417,7 @@ export default function HypercertsBaseForm({
                 value={value}
                 onChange={(e) => handleWorkScopeChange(index, e.target.value)}
                 placeholder="Enter a tag"
+                maxLength={100}
                 required={index === 0}
                 className="h-9 w-40 font-[family-name:var(--font-outfit)] text-sm"
               />
@@ -514,6 +523,9 @@ export default function HypercertsBaseForm({
                 maxLength={100}
                 className="font-[family-name:var(--font-outfit)]"
               />
+              <p className="text-muted-foreground font-[family-name:var(--font-outfit)] text-[11px]">
+                {contributionRole.length} / 100 characters
+              </p>
             </div>
 
             <div className="space-y-2">
@@ -597,12 +609,12 @@ export default function HypercertsBaseForm({
                 placeholder="What the contribution concretely achieved..."
                 value={contributionDescription}
                 onChange={(e) => setContributionDescription(e.target.value)}
-                maxLength={2000}
+                maxLength={1000}
                 rows={4}
                 className="font-[family-name:var(--font-outfit)]"
               />
               <p className="text-muted-foreground font-[family-name:var(--font-outfit)] text-[11px]">
-                {contributionDescription.length} / 2000 characters
+                {contributionDescription.length} / 1000 characters
               </p>
             </div>
 
