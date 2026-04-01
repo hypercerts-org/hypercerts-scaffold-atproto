@@ -172,6 +172,9 @@ export default function HypercertContributionForm({
             disabled={saving}
             className="font-[family-name:var(--font-outfit)]"
           />
+          <p className="text-muted-foreground font-[family-name:var(--font-outfit)] text-[11px]">
+            {role.length} / 100 characters
+          </p>
         </div>
 
         {/* Contributors */}
@@ -263,13 +266,13 @@ export default function HypercertContributionForm({
             placeholder="What the contribution concretely achieved..."
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            maxLength={2000}
+            maxLength={1000}
             rows={4}
             disabled={saving}
             className="font-[family-name:var(--font-outfit)]"
           />
           <p className="text-muted-foreground font-[family-name:var(--font-outfit)] text-[11px]">
-            {description.length} / 2000 characters
+            {description.length} / 1000 characters
           </p>
         </div>
 

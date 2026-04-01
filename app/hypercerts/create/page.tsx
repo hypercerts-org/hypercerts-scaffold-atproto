@@ -1,6 +1,5 @@
 "use client";
 
-import ActiveProfileInfoBox from "@/components/active-profile-info-box";
 import { StepperHeader } from "@/components/edit-cert-stepper";
 import type { CreateHypercertResult } from "@/lib/types";
 import dynamic from "next/dynamic";
@@ -68,7 +67,6 @@ export default function Home() {
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-[260px_1fr] lg:gap-12">
           {/* Sidebar - persistent and always visible */}
           <aside className="space-y-6 lg:sticky lg:top-8 lg:self-start">
-            <ActiveProfileInfoBox />
             <StepperHeader step={step} />
           </aside>
 

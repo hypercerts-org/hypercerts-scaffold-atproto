@@ -8,48 +8,17 @@ import {
   type StrongRef,
 } from "@/lib/atproto-writes";
 import {
-  AppCertifiedActorProfile,
   OrgHypercertsContextEvaluation,
   OrgHypercertsContextMeasurement,
 } from "@hypercerts-org/lexicon";
 import { assertValidRecord } from "@/lib/record-validation";
 import { processContributions } from "@/lib/contribution-helpers";
 
-import { resolveHandle } from "@/lib/atproto-session";
-
-export interface ActiveProfileInfo {
-  name: string | undefined;
-  handle: string | undefined;
-}
-
 export interface SerializedRecord {
   uri: string;
   cid: string;
   value: Record<string, unknown>;
 }
-
-export const getActiveProfileInfo =
-  async (): Promise<ActiveProfileInfo | null> => {
-    const ctx = await getRepoContext();
-    if (!ctx) return null;
-
-    const profileResult = await ctx.agent.com.atproto.repo
-      .getRecord({
-        repo: ctx.userDid,
-        collection: "app.certified.actor.profile",
-        rkey: "self",
-      })
-      .catch(() => null);
-    const profile = profileResult?.data?.value as
-      | AppCertifiedActorProfile.Record
-      | undefined;
-    if (!profile) return null;
-    const handle = await resolveHandle(ctx.agent, ctx.userDid);
-    return {
-      name: profile.displayName || handle,
-      handle,
-    };
-  };
 
 export const addContribution = async (params: {
   hypercertUri: string;
