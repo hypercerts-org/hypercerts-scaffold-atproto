@@ -457,7 +457,7 @@ export default function MeasurementForm({
                 value={unit}
                 onChange={(e) => setUnit(e.target.value)}
                 placeholder="e.g., kg CO2e, hectares, trees, %..."
-                maxLength={100}
+                maxLength={50}
                 required
                 disabled={mutation.isPending}
                 className="font-[family-name:var(--font-outfit)]"
@@ -993,10 +993,14 @@ export default function MeasurementForm({
                 value={comment}
                 onChange={(e) => setComment(e.target.value)}
                 placeholder="Additional notes or annotations about this measurement..."
+                maxLength={300}
                 rows={3}
                 disabled={mutation.isPending}
                 className="font-[family-name:var(--font-outfit)]"
               />
+              <p className="text-muted-foreground font-[family-name:var(--font-outfit)] text-[11px]">
+                {comment.length} / 300 characters
+              </p>
             </div>
           )}
         </div>

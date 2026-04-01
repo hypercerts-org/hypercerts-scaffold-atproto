@@ -146,8 +146,8 @@ export default function HypercertEvidenceForm({
       toast.error("Short description is required.");
       return false;
     }
-    if (shortDescription.length > 3000) {
-      toast.error("Short description must be at most 3000 characters.");
+    if (shortDescription.length > 300) {
+      toast.error("Short description must be at most 300 characters.");
       return false;
     }
 
@@ -260,6 +260,9 @@ export default function HypercertEvidenceForm({
             required
             className="font-[family-name:var(--font-outfit)]"
           />
+          <p className="text-muted-foreground font-[family-name:var(--font-outfit)] text-[11px]">
+            {title.length} / 256 characters
+          </p>
         </div>
 
         {/* Attachment Type */}
@@ -311,13 +314,13 @@ export default function HypercertEvidenceForm({
             placeholder="Summarize what this evidence demonstrates..."
             value={shortDescription}
             onChange={(e) => setShortDescription(e.target.value)}
-            maxLength={3000}
+            maxLength={300}
             rows={3}
             required
             className="font-[family-name:var(--font-outfit)]"
           />
           <p className="text-muted-foreground font-[family-name:var(--font-outfit)] text-[11px]">
-            {shortDescription.length} / 3000 characters
+            {shortDescription.length} / 300 characters
           </p>
         </div>
 

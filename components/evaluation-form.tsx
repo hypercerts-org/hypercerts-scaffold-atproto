@@ -101,11 +101,8 @@ export default function EvaluationForm({
       "https://example.com/evaluation-report.pdf",
       "https://example.com/field-verification-photos.zip",
     ]);
-    setUseMeasurements(true);
-    setMeasurementUris([
-      "at://did:plc:z72i7hdynmk6r22z27h6tvur/org.hypercerts.claim.measurement/3jzfcijpqzk2a",
-      "at://did:plc:z72i7hdynmk6r22z27h6tvur/org.hypercerts.claim.measurement/3jzfcijpqzk2b",
-    ]);
+    setUseMeasurements(false);
+    setMeasurementUris([""]);
     toast.success("Form autofilled with dummy data");
   };
 
@@ -317,12 +314,15 @@ export default function EvaluationForm({
             value={summary}
             onChange={(e) => setSummary(e.target.value)}
             placeholder="A brief evaluation summary..."
-            maxLength={5000}
+            maxLength={1000}
             rows={5}
             required
             disabled={mutation.isPending}
             className="font-[family-name:var(--font-outfit)]"
           />
+          <p className="text-muted-foreground font-[family-name:var(--font-outfit)] text-[11px]">
+            {summary.length} / 1000 characters
+          </p>
         </div>
 
         {/* Score Toggle */}
@@ -497,7 +497,7 @@ export default function EvaluationForm({
                 <div key={index} className="flex items-center gap-2">
                   <Input
                     type="text"
-                    placeholder="at://did:plc:xxx/org.hypercerts.claim.measurement/xxx"
+                    placeholder="at://did:plc:xxx/org.hypercerts.context.measurement/xxx"
                     value={uri}
                     onChange={(e) =>
                       handleUriChange(

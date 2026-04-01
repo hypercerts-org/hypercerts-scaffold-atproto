@@ -31,6 +31,8 @@ export default function HypercertEvidenceView({
     return null;
   }
 
+  const content = Array.isArray(evidence.content) ? evidence.content : [];
+
   const getContentTypeColor = () => {
     // All content types use the same color
     return "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-100";
@@ -88,16 +90,16 @@ export default function HypercertEvidenceView({
           ) : null}
         </div>
 
-        {evidence.content && evidence.content.length > 0 ? (
+        {content.length > 0 ? (
           <div className="border-border/50 space-y-3 border-t pt-2">
-            {evidence.content.map((contentItem, index) => {
+            {content.map((contentItem, index) => {
               const contentUrl = getContentUrl(contentItem);
               return (
                 <div key={index} className="flex items-start gap-3">
                   <LinkIcon className="text-create-accent mt-0.5 size-4 shrink-0" />
                   <div className="min-w-0 flex-1 space-y-1">
                     <dt className="text-muted-foreground font-[family-name:var(--font-outfit)] text-xs tracking-wider uppercase">
-                      {evidence.content!.length > 1
+                      {content.length > 1
                         ? `Evidence Source ${index + 1}`
                         : "Evidence Source"}
                     </dt>
