@@ -43,7 +43,7 @@ const BLOB_SCOPE = "blob:*/*";
 const RPC_SCOPE =
   "rpc:app.bsky.actor.getProfile?aud=did:web:api.bsky.app%23bsky_appview";
 // for password reset and knowing which email to send to and for email verification as well
-const EMAIL_SCOPE = "account:email";
+const EMAIL_SCOPE = "account:email?action=manage";
 
 const GRANULAR_SCOPE = [
   ATPROTO_SCOPE,

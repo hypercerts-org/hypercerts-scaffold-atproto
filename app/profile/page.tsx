@@ -3,6 +3,8 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { getAgent, getSession } from "@/lib/atproto-session";
 import ProfileForm from "@/components/profile-form";
+import VerifyEmailButton from "@/components/verify-email-button";
+import UpdateEmailButton from "@/components/update-email-button";
 import { convertBlobUrlToCdn } from "@/lib/utils";
 import { resolveSessionPds } from "@/lib/server-utils";
 import { KeyRound, UserCircle } from "lucide-react";
@@ -33,6 +35,12 @@ export default async function ProfilePage() {
   const profile = profileResult?.data?.value as
     | AppCertifiedActorProfile.Record
     | undefined;
+
+  const sessionInfo = await repo.com.atproto.server
+    .getSession()
+    .catch(() => null);
+  const accountEmail = sessionInfo?.data?.email || "";
+  const emailConfirmed = sessionInfo?.data?.emailConfirmed ?? true;
 
   const session = await getSession();
   const pdsUrl = session ? await resolveSessionPds(session) : undefined;
@@ -108,6 +116,9 @@ export default async function ProfilePage() {
                     <Link href="/reset-password">Change password</Link>
                   </Button>
                 </div>
+
+                {!emailConfirmed && <VerifyEmailButton email={accountEmail} />}
+                {emailConfirmed && <UpdateEmailButton email={accountEmail} />}
               </div>
             </div>
           </section>
