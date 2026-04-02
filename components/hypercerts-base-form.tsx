@@ -10,6 +10,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { Textarea } from "@/components/ui/textarea";
 import { OrgHypercertsClaimActivity } from "@hypercerts-org/lexicon";
 import type { CreateHypercertParams } from "@/lib/types";
+import { localDateToAtprotoDatetime } from "@/lib/datetime";
 import { Label } from "@radix-ui/react-label";
 import {
   PlusIcon,
@@ -180,8 +181,18 @@ export default function HypercertsBaseForm({
           contributionDetails: {
             role: contributionRole,
             contributionDescription: contributionDescription || undefined,
-            startDate: contributionStartDate?.toISOString(),
-            endDate: contributionEndDate?.toISOString(),
+            startDate: contributionStartDate
+              ? localDateToAtprotoDatetime(
+                  contributionStartDate,
+                  "contribution startDate",
+                )
+              : undefined,
+            endDate: contributionEndDate
+              ? localDateToAtprotoDatetime(
+                  contributionEndDate,
+                  "contribution endDate",
+                )
+              : undefined,
           },
         },
       ];
@@ -197,8 +208,8 @@ export default function HypercertsBaseForm({
       },
       description: shortDescription,
       image: backgroundImage,
-      startDate: startDate.toISOString(),
-      endDate: endDate.toISOString(),
+      startDate: localDateToAtprotoDatetime(startDate, "startDate"),
+      endDate: localDateToAtprotoDatetime(endDate, "endDate"),
       contributions,
       workScope: workScope.filter((s) => s.trim()),
     };

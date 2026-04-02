@@ -8,7 +8,6 @@ interface AddLocationParams {
   lpVersion: string;
   srs: string;
   locationType: string;
-  createdAt: string;
   name?: string;
   description?: string;
   contentMode: "link" | "file";

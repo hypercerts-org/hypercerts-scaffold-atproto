@@ -100,7 +100,6 @@ export default function HypercertLocationForm({
       lpVersion: lpVersion.trim(),
       srs: srs.trim(),
       locationType: effectiveLocationType.trim(),
-      createdAt: new Date().toISOString(),
       name: name.trim() || undefined,
       description: description.trim() || undefined,
       contentMode,

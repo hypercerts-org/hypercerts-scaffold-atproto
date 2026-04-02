@@ -8,6 +8,7 @@ import {
   OrgHypercertsDefs,
 } from "@hypercerts-org/lexicon";
 import { assertValidRecord } from "@/lib/record-validation";
+import { currentAtprotoDatetime } from "@/lib/datetime";
 
 export interface StrongRef {
   uri: string;
@@ -80,7 +81,7 @@ export async function createLocationRecord(
     srs: params.srs,
     locationType: params.locationType,
     location: locationContent,
-    createdAt: new Date().toISOString(),
+    createdAt: currentAtprotoDatetime(),
     ...(params.name ? { name: params.name } : {}),
     ...(params.description ? { description: params.description } : {}),
   };

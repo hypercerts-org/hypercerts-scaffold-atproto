@@ -110,7 +110,6 @@ export async function addLocation(params: {
   lpVersion: string;
   srs: string;
   locationType: string;
-  createdAt: string;
   name?: string;
   description?: string;
   contentMode: "link" | "file";
@@ -122,7 +121,6 @@ export async function addLocation(params: {
   formData.append("lpVersion", params.lpVersion);
   formData.append("srs", params.srs);
   formData.append("locationType", params.locationType);
-  formData.append("createdAt", params.createdAt);
   formData.append("hypercertUri", params.hypercertUri);
   formData.append("contentMode", params.contentMode);
 

@@ -2,6 +2,7 @@ import "server-only";
 import { parseAtUri } from "@/lib/utils";
 import type { RepoContext } from "@/lib/repo-context";
 import { assertValidRecord } from "@/lib/record-validation";
+import { coerceAtprotoDatetime, currentAtprotoDatetime } from "@/lib/datetime";
 import {
   OrgHypercertsClaimContribution,
   OrgHypercertsClaimContributorInformation,
@@ -63,16 +64,23 @@ export const processContributions = async (
   const allNewContributors: unknown[] = [];
 
   for (const contribution of contributions) {
+    const normalizedStartDate = contribution.startDate
+      ? coerceAtprotoDatetime(contribution.startDate, "contribution startDate")
+      : undefined;
+    const normalizedEndDate = contribution.endDate
+      ? coerceAtprotoDatetime(contribution.endDate, "contribution endDate")
+      : undefined;
+
     // 4. Create contributionDetails record
     const detailsRecord: OrgHypercertsClaimContribution.Record = {
       $type: "org.hypercerts.claim.contribution",
       role: contribution.role,
-      createdAt: new Date().toISOString(),
+      createdAt: currentAtprotoDatetime(),
       ...(contribution.contributionDescription
         ? { contributionDescription: contribution.contributionDescription }
         : {}),
-      ...(contribution.startDate ? { startDate: contribution.startDate } : {}),
-      ...(contribution.endDate ? { endDate: contribution.endDate } : {}),
+      ...(normalizedStartDate ? { startDate: normalizedStartDate } : {}),
+      ...(normalizedEndDate ? { endDate: normalizedEndDate } : {}),
     };
 
     assertValidRecord(
@@ -96,7 +104,7 @@ export const processContributions = async (
         const infoRecord: OrgHypercertsClaimContributorInformation.Record = {
           $type: "org.hypercerts.claim.contributorInformation",
           identifier,
-          createdAt: new Date().toISOString(),
+          createdAt: currentAtprotoDatetime(),
         };
         assertValidRecord(
           "contributorInformation",

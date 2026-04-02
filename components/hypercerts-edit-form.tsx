@@ -6,6 +6,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { toast } from "sonner";
 import { useUpdateHypercertMutation } from "@/queries/hypercerts";
+import { localDateToAtprotoDatetime } from "@/lib/datetime";
 import type { OrgHypercertsClaimActivity } from "@hypercerts-org/lexicon";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -26,6 +27,22 @@ export default function HypercertsEditForm({
   record,
   imageUri,
 }: HypercertsEditFormProps) {
+  const parseRecordDate = (raw: string | undefined): Date | null => {
+    if (!raw) return null;
+
+    const datePartMatch = raw.match(/^(\d{4})-(\d{2})-(\d{2})(?:T|$)/);
+    if (datePartMatch) {
+      const year = Number(datePartMatch[1]);
+      const month = Number(datePartMatch[2]);
+      const day = Number(datePartMatch[3]);
+      return new Date(year, month - 1, day);
+    }
+
+    const parsed = new Date(raw);
+    if (Number.isNaN(parsed.getTime())) return null;
+    return parsed;
+  };
+
   const router = useRouter();
   const encodedUri = encodeURIComponent(hypercertUri);
   const detailHref = `/hypercerts/${encodedUri}`;
@@ -35,10 +52,10 @@ export default function HypercertsEditForm({
     record.shortDescription ?? "",
   );
   const [startDate, setStartDate] = useState<Date | null>(
-    record.startDate ? new Date(record.startDate) : null,
+    parseRecordDate(record.startDate),
   );
   const [endDate, setEndDate] = useState<Date | null>(
-    record.endDate ? new Date(record.endDate) : null,
+    parseRecordDate(record.endDate),
   );
   const [newImage, setNewImage] = useState<File | undefined>();
   const [imagePreview, setImagePreview] = useState<string | null>(
@@ -148,13 +165,17 @@ export default function HypercertsEditForm({
     const nextStart = startDate ? toDateString(startDate) : "";
     const prevStart = recordDateString(record.startDate);
     if (nextStart !== prevStart) {
-      updates.startDate = nextStart || null;
+      updates.startDate = startDate
+        ? localDateToAtprotoDatetime(startDate, "startDate")
+        : null;
     }
 
     const nextEnd = endDate ? toDateString(endDate) : "";
     const prevEnd = recordDateString(record.endDate);
     if (nextEnd !== prevEnd) {
-      updates.endDate = nextEnd || null;
+      updates.endDate = endDate
+        ? localDateToAtprotoDatetime(endDate, "endDate")
+        : null;
     }
     if (removeImage) updates.image = null;
     else if (newImage) updates.image = newImage;

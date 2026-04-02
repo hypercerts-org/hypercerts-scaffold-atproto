@@ -4,6 +4,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { addContribution } from "@/lib/create-actions";
 import { BaseHypercertFormProps } from "@/lib/types";
+import { localDateToAtprotoDatetime } from "@/lib/datetime";
 import type { ProfileView } from "@atproto/api/dist/client/types/app/bsky/actor/defs";
 import { Trash, PlusCircle, Users, Wand2 } from "lucide-react";
 import { FormEventHandler, useState } from "react";
@@ -83,8 +84,15 @@ export default function HypercertContributionForm({
       contributionDetails: {
         role,
         contributionDescription: description || undefined,
-        startDate: workTimeframeFrom?.toISOString(),
-        endDate: workTimeframeTo?.toISOString(),
+        startDate: workTimeframeFrom
+          ? localDateToAtprotoDatetime(
+              workTimeframeFrom,
+              "contribution startDate",
+            )
+          : undefined,
+        endDate: workTimeframeTo
+          ? localDateToAtprotoDatetime(workTimeframeTo, "contribution endDate")
+          : undefined,
       },
     };
 

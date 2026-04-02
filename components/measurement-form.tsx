@@ -7,6 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { queryKeys } from "@/lib/api/query-keys";
 import { addMeasurement, MeasurementLocationParam } from "@/lib/create-actions";
+import { coerceAtprotoDatetime } from "@/lib/datetime";
 import type { ProfileView } from "@atproto/api/dist/client/types/app/bsky/actor/defs";
 import type { CreateHypercertResult } from "@/lib/types";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -282,8 +283,13 @@ export default function MeasurementForm({
       unit,
       ...(allMeasurerDids.length > 0 && { measurers: allMeasurerDids }),
       ...(useDates &&
-        startDate && { startDate: new Date(startDate).toISOString() }),
-      ...(useDates && endDate && { endDate: new Date(endDate).toISOString() }),
+        startDate && {
+          startDate: coerceAtprotoDatetime(startDate, "measurement startDate"),
+        }),
+      ...(useDates &&
+        endDate && {
+          endDate: coerceAtprotoDatetime(endDate, "measurement endDate"),
+        }),
       ...(useMethod && methodType && { methodType }),
       ...(useMethod && methodUri && { methodURI: methodUri }),
       ...(useEvidence && {
