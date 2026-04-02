@@ -1,13 +1,14 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { DatePicker } from "@/components/date-range-picker";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { queryKeys } from "@/lib/api/query-keys";
 import { addMeasurement, MeasurementLocationParam } from "@/lib/create-actions";
-import { coerceAtprotoDatetime } from "@/lib/datetime";
+import { localDateToAtprotoDatetime } from "@/lib/datetime";
 import type { ProfileView } from "@atproto/api/dist/client/types/app/bsky/actor/defs";
 import type { CreateHypercertResult } from "@/lib/types";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -99,8 +100,8 @@ export default function MeasurementForm({
   const [unit, setUnit] = useState("");
 
   const [useDates, setUseDates] = useState(false);
-  const [startDate, setStartDate] = useState("");
-  const [endDate, setEndDate] = useState("");
+  const [startDate, setStartDate] = useState<Date | null>(null);
+  const [endDate, setEndDate] = useState<Date | null>(null);
 
   const [useMethod, setUseMethod] = useState(false);
   const [methodType, setMethodType] = useState("");
@@ -144,8 +145,8 @@ export default function MeasurementForm({
     setValue("500");
     setUnit("trees");
     setUseDates(true);
-    setStartDate("2024-01-01T00:00");
-    setEndDate("2024-12-31T23:59");
+    setStartDate(new Date(2024, 0, 1));
+    setEndDate(new Date(2024, 11, 31));
     setUseMethod(true);
     setMethodType("satellite-verification");
     setMethodUri("https://example.com/methodology.pdf");
@@ -276,28 +277,36 @@ export default function MeasurementForm({
 
     const locationParams = useLocations ? buildLocationParams() : [];
 
-    mutation.mutate({
-      subject: hypercertInfo.hypercertUri,
-      metric,
-      value,
-      unit,
-      ...(allMeasurerDids.length > 0 && { measurers: allMeasurerDids }),
-      ...(useDates &&
-        startDate && {
-          startDate: coerceAtprotoDatetime(startDate, "measurement startDate"),
+    try {
+      mutation.mutate({
+        subject: hypercertInfo.hypercertUri,
+        metric,
+        value,
+        unit,
+        ...(allMeasurerDids.length > 0 && { measurers: allMeasurerDids }),
+        ...(useDates &&
+          startDate && {
+            startDate: localDateToAtprotoDatetime(
+              startDate,
+              "measurement startDate",
+            ),
+          }),
+        ...(useDates &&
+          endDate && {
+            endDate: localDateToAtprotoDatetime(endDate, "measurement endDate"),
+          }),
+        ...(useMethod && methodType && { methodType }),
+        ...(useMethod && methodUri && { methodURI: methodUri }),
+        ...(useEvidence && {
+          evidenceURI: evidenceUris.filter((uri) => uri.trim() !== ""),
         }),
-      ...(useDates &&
-        endDate && {
-          endDate: coerceAtprotoDatetime(endDate, "measurement endDate"),
-        }),
-      ...(useMethod && methodType && { methodType }),
-      ...(useMethod && methodUri && { methodURI: methodUri }),
-      ...(useEvidence && {
-        evidenceURI: evidenceUris.filter((uri) => uri.trim() !== ""),
-      }),
-      ...(locationParams.length > 0 && { locations: locationParams }),
-      ...(useComment && comment.trim() && { comment: comment.trim() }),
-    });
+        ...(locationParams.length > 0 && { locations: locationParams }),
+        ...(useComment && comment.trim() && { comment: comment.trim() }),
+      });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Unknown error";
+      toast.error(`Failed to add measurement: ${message}`);
+    }
   };
 
   return (
@@ -494,35 +503,17 @@ export default function MeasurementForm({
             <div className="border-create-accent/30 animate-fade-in-up space-y-4 border-l-2 pl-4">
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <div className="space-y-2">
-                  <Label
-                    htmlFor="start-date"
-                    className="font-[family-name:var(--font-outfit)] text-sm font-medium"
-                  >
-                    Start Date
-                  </Label>
-                  <Input
-                    id="start-date"
-                    type="datetime-local"
-                    value={startDate}
-                    onChange={(e) => setStartDate(e.target.value)}
-                    disabled={mutation.isPending}
-                    className="font-[family-name:var(--font-outfit)]"
+                  <DatePicker
+                    label="Start Date"
+                    initDate={startDate ?? undefined}
+                    onChange={(date) => setStartDate(date)}
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label
-                    htmlFor="end-date"
-                    className="font-[family-name:var(--font-outfit)] text-sm font-medium"
-                  >
-                    End Date
-                  </Label>
-                  <Input
-                    id="end-date"
-                    type="datetime-local"
-                    value={endDate}
-                    onChange={(e) => setEndDate(e.target.value)}
-                    disabled={mutation.isPending}
-                    className="font-[family-name:var(--font-outfit)]"
+                  <DatePicker
+                    label="End Date"
+                    initDate={endDate ?? undefined}
+                    onChange={(date) => setEndDate(date)}
                   />
                 </div>
               </div>

@@ -304,10 +304,10 @@ export async function PUT(req: NextRequest) {
     if (shortDescription !== null) updates.shortDescription = shortDescription;
     if (description !== null)
       updates.description = stringToLinearDocument(description);
-    if (startDate !== null && startDate !== "null") {
+    if (startDate !== null && startDate !== "null" && startDate !== "") {
       updates.startDate = coerceAtprotoDatetime(startDate, "startDate");
     }
-    if (endDate !== null && endDate !== "null") {
+    if (endDate !== null && endDate !== "null" && endDate !== "") {
       updates.endDate = coerceAtprotoDatetime(endDate, "endDate");
     }
 
