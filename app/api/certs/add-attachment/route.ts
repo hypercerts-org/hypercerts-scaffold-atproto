@@ -10,6 +10,7 @@ import {
   parseAtUri,
   stringToLinearDocument,
 } from "@/lib/utils";
+import { currentAtprotoDatetime } from "@/lib/datetime";
 import { NextRequest, NextResponse } from "next/server";
 import {
   OrgHypercertsContextAttachment,
@@ -184,7 +185,7 @@ export async function POST(req: NextRequest) {
       subjects: [subjectRef],
       content: [contentField],
       title,
-      createdAt: new Date().toISOString(),
+      createdAt: currentAtprotoDatetime(),
       ...(shortDescription ? { shortDescription } : {}),
       ...(description
         ? { description: stringToLinearDocument(description) }

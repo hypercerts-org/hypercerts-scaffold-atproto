@@ -7,6 +7,7 @@ import {
   processLocations,
   type StrongRef,
 } from "@/lib/atproto-writes";
+import { coerceAtprotoDatetime, currentAtprotoDatetime } from "@/lib/datetime";
 import {
   OrgHypercertsContextEvaluation,
   OrgHypercertsContextMeasurement,
@@ -103,7 +104,7 @@ export const addEvaluation = async (params: {
     subject,
     evaluators: evaluationData.evaluators.map((did) => ({ did })),
     summary: evaluationData.summary,
-    createdAt: new Date().toISOString(),
+    createdAt: currentAtprotoDatetime(),
     ...(evaluationData.score ? { score: evaluationData.score } : {}),
     ...(evaluationData.content
       ? {
@@ -181,18 +182,25 @@ export const addMeasurement = async (params: {
     );
   }
 
+  const normalizedStartDate = params.startDate
+    ? coerceAtprotoDatetime(params.startDate, "measurement startDate")
+    : undefined;
+  const normalizedEndDate = params.endDate
+    ? coerceAtprotoDatetime(params.endDate, "measurement endDate")
+    : undefined;
+
   const record: OrgHypercertsContextMeasurement.Record = {
     $type: "org.hypercerts.context.measurement",
     subjects: [subject],
     metric: params.metric,
     value: params.value,
     unit: params.unit,
-    createdAt: new Date().toISOString(),
+    createdAt: currentAtprotoDatetime(),
     ...(params.measurers?.length
       ? { measurers: params.measurers.map((did) => ({ did })) }
       : {}),
-    ...(params.startDate ? { startDate: params.startDate } : {}),
-    ...(params.endDate ? { endDate: params.endDate } : {}),
+    ...(normalizedStartDate ? { startDate: normalizedStartDate } : {}),
+    ...(normalizedEndDate ? { endDate: normalizedEndDate } : {}),
     ...(params.methodType ? { methodType: params.methodType } : {}),
     ...(params.methodURI ? { methodURI: params.methodURI } : {}),
     ...(params.evidenceURI?.length ? { evidenceURI: params.evidenceURI } : {}),

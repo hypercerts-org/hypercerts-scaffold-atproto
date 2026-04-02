@@ -5,6 +5,7 @@ import {
   getStringField,
   stringToLinearDocument,
 } from "@/lib/utils";
+import { coerceAtprotoDatetime, currentAtprotoDatetime } from "@/lib/datetime";
 import { assertValidRecord } from "@/lib/record-validation";
 import {
   processContributions,
@@ -104,13 +105,16 @@ export async function POST(req: NextRequest) {
       ? JSON.parse(workScopeRaw)
       : [];
 
+    const normalizedStartDate = coerceAtprotoDatetime(startDate, "startDate");
+    const normalizedEndDate = coerceAtprotoDatetime(endDate, "endDate");
+
     const hypercertParams: HypercertParams = {
       title,
       shortDescription,
       description: description ?? shortDescription,
       workScope: workScopeTags.length > 0 ? workScopeTags : undefined,
-      startDate,
-      endDate,
+      startDate: normalizedStartDate,
+      endDate: normalizedEndDate,
       rights,
       image: image || undefined,
     };
@@ -140,7 +144,7 @@ export async function POST(req: NextRequest) {
       rightsName: hypercertParams.rights?.rightsName ?? "",
       rightsType: hypercertParams.rights?.rightsType ?? "",
       rightsDescription: hypercertParams.rights?.rightsDescription ?? "",
-      createdAt: new Date().toISOString(),
+      createdAt: currentAtprotoDatetime(),
     };
     try {
       assertValidRecord(
@@ -175,7 +179,7 @@ export async function POST(req: NextRequest) {
       startDate: hypercertParams.startDate,
       endDate: hypercertParams.endDate,
       rights: rightsRef,
-      createdAt: new Date().toISOString(),
+      createdAt: currentAtprotoDatetime(),
       ...(imageField ? { image: imageField } : {}),
       ...(hypercertParams.workScope && hypercertParams.workScope.length > 0
         ? {
@@ -244,6 +248,9 @@ export async function POST(req: NextRequest) {
         { status: 400 },
       );
     }
+    if (e instanceof Error && e.message.startsWith("Invalid ")) {
+      return NextResponse.json({ error: e.message }, { status: 400 });
+    }
     console.error("Error creating hypercert:", e);
     return NextResponse.json(
       { error: "Failed to create hypercert" },
@@ -297,9 +304,12 @@ export async function PUT(req: NextRequest) {
     if (shortDescription !== null) updates.shortDescription = shortDescription;
     if (description !== null)
       updates.description = stringToLinearDocument(description);
-    if (startDate !== null && startDate !== "null")
-      updates.startDate = startDate;
-    if (endDate !== null && endDate !== "null") updates.endDate = endDate;
+    if (startDate !== null && startDate !== "null") {
+      updates.startDate = coerceAtprotoDatetime(startDate, "startDate");
+    }
+    if (endDate !== null && endDate !== "null") {
+      updates.endDate = coerceAtprotoDatetime(endDate, "endDate");
+    }
 
     // Handle image: File = new image, string "null" = remove, absent = no change
     let image: Blob | null | undefined;
@@ -366,6 +376,9 @@ export async function PUT(req: NextRequest) {
 
     return NextResponse.json({ uri: result.data.uri, cid: result.data.cid });
   } catch (e) {
+    if (e instanceof Error && e.message.startsWith("Invalid ")) {
+      return NextResponse.json({ error: e.message }, { status: 400 });
+    }
     console.error("Error updating hypercert:", e);
     return NextResponse.json(
       { error: "Failed to update hypercert" },
