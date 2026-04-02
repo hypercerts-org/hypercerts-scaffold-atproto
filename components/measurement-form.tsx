@@ -129,11 +129,6 @@ export default function MeasurementForm({
       }
       onNext();
     },
-    onError: (err) => {
-      console.error(err);
-      const message = err instanceof Error ? err.message : "Unknown error";
-      toast.error(`Failed to add measurement: ${message}`);
-    },
   });
 
   const handleAutofill = () => {
@@ -262,7 +257,7 @@ export default function MeasurementForm({
     );
   };
 
-  const handleSubmit: FormEventHandler<HTMLFormElement> = (e) => {
+  const handleSubmit: FormEventHandler<HTMLFormElement> = async (e) => {
     e.preventDefault();
     if (!hypercertInfo.hypercertUri) {
       toast.error("Hypercert URI not found");
@@ -276,25 +271,33 @@ export default function MeasurementForm({
     }
 
     const locationParams = useLocations ? buildLocationParams() : [];
+    let normalizedStartDate: string | undefined;
+    let normalizedEndDate: string | undefined;
 
     try {
-      mutation.mutate({
+      normalizedStartDate =
+        useDates && startDate
+          ? localDateToAtprotoDatetime(startDate, "measurement startDate")
+          : undefined;
+      normalizedEndDate =
+        useDates && endDate
+          ? localDateToAtprotoDatetime(endDate, "measurement endDate")
+          : undefined;
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Unknown error";
+      toast.error(`Invalid measurement date: ${message}`);
+      return;
+    }
+
+    try {
+      await mutation.mutateAsync({
         subject: hypercertInfo.hypercertUri,
         metric,
         value,
         unit,
         ...(allMeasurerDids.length > 0 && { measurers: allMeasurerDids }),
-        ...(useDates &&
-          startDate && {
-            startDate: localDateToAtprotoDatetime(
-              startDate,
-              "measurement startDate",
-            ),
-          }),
-        ...(useDates &&
-          endDate && {
-            endDate: localDateToAtprotoDatetime(endDate, "measurement endDate"),
-          }),
+        ...(normalizedStartDate ? { startDate: normalizedStartDate } : {}),
+        ...(normalizedEndDate ? { endDate: normalizedEndDate } : {}),
         ...(useMethod && methodType && { methodType }),
         ...(useMethod && methodUri && { methodURI: methodUri }),
         ...(useEvidence && {
@@ -304,6 +307,7 @@ export default function MeasurementForm({
         ...(useComment && comment.trim() && { comment: comment.trim() }),
       });
     } catch (err) {
+      console.error(err);
       const message = err instanceof Error ? err.message : "Unknown error";
       toast.error(`Failed to add measurement: ${message}`);
     }
