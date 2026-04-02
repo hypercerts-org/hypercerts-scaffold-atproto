@@ -7,6 +7,7 @@ import { resolveSessionPds } from "@/lib/server-utils";
 import { AppCertifiedActorProfile } from "@hypercerts-org/lexicon";
 import { assertValidRecord } from "@/lib/record-validation";
 import { getCertifiedProfileImageURL } from "@/lib/profile-utils";
+import { currentAtprotoDatetime } from "@/lib/datetime";
 
 export async function POST(req: Request) {
   try {
@@ -77,7 +78,7 @@ export async function POST(req: Request) {
 
       const record: AppCertifiedActorProfile.Record = {
         $type: "app.certified.actor.profile",
-        createdAt: new Date().toISOString(),
+        createdAt: currentAtprotoDatetime(),
       };
       if (displayName) record.displayName = displayName;
       if (description) record.description = description;
