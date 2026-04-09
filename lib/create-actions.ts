@@ -56,7 +56,7 @@ export const addEvaluation = async (params: {
   hypercertUri: string;
   evaluators: string[];
   summary: string;
-  score?: { min: number; max: number; value: number };
+  score?: { min: string; max: string; value: string };
   content?: string[];
   measurements?: string[];
   location?: string;
@@ -99,13 +99,21 @@ export const addEvaluation = async (params: {
       )
     : undefined;
 
+  const normalizedScore = evaluationData.score
+    ? {
+        min: `${evaluationData.score.min}`,
+        max: `${evaluationData.score.max}`,
+        value: `${evaluationData.score.value}`,
+      }
+    : undefined;
+
   const record: OrgHypercertsContextEvaluation.Record = {
     $type: "org.hypercerts.context.evaluation",
     subject,
     evaluators: evaluationData.evaluators.map((did) => ({ did })),
     summary: evaluationData.summary,
     createdAt: currentAtprotoDatetime(),
-    ...(evaluationData.score ? { score: evaluationData.score } : {}),
+    ...(normalizedScore ? { score: normalizedScore } : {}),
     ...(evaluationData.content
       ? {
           content: evaluationData.content.map((uri) => ({

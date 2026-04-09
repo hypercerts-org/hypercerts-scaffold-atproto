@@ -5,11 +5,7 @@ import {
   uploadContentBlob,
   type LocationCreateParams,
 } from "@/lib/atproto-writes";
-import {
-  getStringField,
-  parseAtUri,
-  stringToLinearDocument,
-} from "@/lib/utils";
+import { getStringField, parseAtUri } from "@/lib/utils";
 import { currentAtprotoDatetime } from "@/lib/datetime";
 import { NextRequest, NextResponse } from "next/server";
 import {
@@ -188,7 +184,12 @@ export async function POST(req: NextRequest) {
       createdAt: currentAtprotoDatetime(),
       ...(shortDescription ? { shortDescription } : {}),
       ...(description
-        ? { description: stringToLinearDocument(description) }
+        ? {
+            description: {
+              $type: "org.hypercerts.defs#descriptionString",
+              value: description,
+            },
+          }
         : {}),
       ...(contentType ? { contentType } : {}),
       ...(locationRef ? { location: locationRef } : {}),

@@ -368,8 +368,7 @@ export async function GET() {
 ├── providers/                 # React providers (QueryClient, auth gating)
 ├── queries/                   # TanStack Query hooks (auth, hypercerts, profile)
 ├── public/                    # Static assets (logos, email template)
-├── scripts/                   # Utility scripts (JWK generation)
-└── vendor/                    # Packed @hypercerts-org/lexicon tarball (types + validators)
+└── scripts/                   # Utility scripts (JWK generation)
 ```
 
 ### Key Files

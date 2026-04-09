@@ -24,8 +24,8 @@ importers:
         specifier: ^0.3.14
         version: 0.3.15
       '@hypercerts-org/lexicon':
-        specifier: file:./vendor/hypercerts-org-lexicon-0.10.0.tgz
-        version: file:vendor/hypercerts-org-lexicon-0.10.0.tgz(@atproto/xrpc@0.7.7)
+        specifier: 0.11.1
+        version: 0.11.1(@atproto/xrpc@0.7.7)
       '@radix-ui/react-accordion':
         specifier: ^1.2.12
         version: 1.2.12(@types/react-dom@19.2.3(@types/react@19.2.7))(@types/react@19.2.7)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
@@ -171,24 +171,6 @@ packages:
   '@alloc/quick-lru@5.2.0':
     resolution: {integrity: sha512-UrcABB+4bUrFABwbluTIBErXwvbsU/V7TZWfmbgJfbkwiBuziS9gxdODUyuiecfdGQ85jglMW6juS3+z5TsKLw==}
     engines: {node: '>=10'}
-
-  '@atcute/atproto@3.1.10':
-    resolution: {integrity: sha512-+GKZpOc0PJcdWMQEkTfg/rSNDAAHxmAUGBl60g2az15etqJn5WaUPNGFE2sB7hKpwi5Ue2h/L0OacINcE/JDDQ==}
-
-  '@atcute/bluesky@3.2.20':
-    resolution: {integrity: sha512-N+o7K31ptnHSFoYKOHfQYJHFqU7CgGbCX8lDeWvpQuwkEMTEPojrQXIQD/+FL+FVEvRV/84LNi9cEnhPKShE5w==}
-
-  '@atcute/leaflet@1.0.20':
-    resolution: {integrity: sha512-Ql7I/CM0MafrJ7vSAbza2gLUIufJGZJx/exKX5Kb7nNG3U/n1HQxhZchATUfu4PL5iINRFE/swWbHITm1juj2Q==}
-
-  '@atcute/lexicons@1.2.9':
-    resolution: {integrity: sha512-/RRHm2Cw9o8Mcsrq0eo8fjS9okKYLGfuFwrQ0YoP/6sdSDsXshaTLJsvLlcUcaDaSJ1YFOuHIo3zr2Om2F/16g==}
-
-  '@atcute/uint8array@1.1.1':
-    resolution: {integrity: sha512-3LsC8XB8TKe9q/5hOA5sFuzGaIFdJZJNewC5OKa3o/eU6+K7JR6see9Zy2JbQERNVnRl11EzbNov1efgLMAs4g==}
-
-  '@atcute/util-text@1.1.1':
-    resolution: {integrity: sha512-JH0SxzUQJAmbOBTYyhxQbkkI6M33YpjlVLEcbP5GYt43xgFArzV0FJVmEpvIj0kjsmphHB45b6IitdvxPdec9w==}
 
   '@atproto-labs/did-resolver@0.2.5':
     resolution: {integrity: sha512-he7EC6OMSifNs01a4RT9mta/yYitoKDzlK9ty2TFV5Uj/+HpB4vYMRdIDFrRW0Hcsehy90E2t/dw0t7361MEKQ==}
@@ -582,9 +564,8 @@ packages:
     resolution: {integrity: sha512-bV0Tgo9K4hfPCek+aMAn81RppFKv2ySDQeMoSZuvTASywNTnVJCArCZE2FWqpvIatKu7VMRLWlR1EazvVhDyhQ==}
     engines: {node: '>=18.18'}
 
-  '@hypercerts-org/lexicon@file:vendor/hypercerts-org-lexicon-0.10.0.tgz':
-    resolution: {integrity: sha512-L+/FQOktgj0wPfQ68kuQDYVkb+R1nJr8HZcVCiPxq3wWfNdcUmMbOCsMNsZhB8cCboW+aYo+quwyRXi9Q8h7lQ==, tarball: file:vendor/hypercerts-org-lexicon-0.10.0.tgz}
-    version: 0.10.0
+  '@hypercerts-org/lexicon@0.11.1':
+    resolution: {integrity: sha512-akJjxDPQO9EtgibrqH6QECzH7wmaaEMMaFz2TM7yjSWHrugj3rY5OH3tMu585m2ZNy2gHU9r6zk1BSzn8ojgrA==}
     peerDependencies:
       '@atproto/xrpc': '*'
 
@@ -2443,9 +2424,6 @@ packages:
       jiti:
         optional: true
 
-  esm-env@1.2.2:
-    resolution: {integrity: sha512-Epxrv+Nr/CaL4ZcFGPJIYLWFom+YeV1DqMLHJoEd9SYRxNbaFruBwfEX/kkHUJf55j2+TUbmDcmuilbP1TmXHA==}
-
   espree@10.4.0:
     resolution: {integrity: sha512-j6PAQ2uUr79PZhBjP5C5fhl8e39FmRnOjsD5lGnWrFU8i2G776tBK7+nP8KuQUTTyAZUwfQqXAgrVH5MbH9CYQ==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
@@ -3899,33 +3877,6 @@ snapshots:
 
   '@alloc/quick-lru@5.2.0': {}
 
-  '@atcute/atproto@3.1.10':
-    dependencies:
-      '@atcute/lexicons': 1.2.9
-
-  '@atcute/bluesky@3.2.20':
-    dependencies:
-      '@atcute/atproto': 3.1.10
-      '@atcute/lexicons': 1.2.9
-
-  '@atcute/leaflet@1.0.20':
-    dependencies:
-      '@atcute/atproto': 3.1.10
-      '@atcute/lexicons': 1.2.9
-
-  '@atcute/lexicons@1.2.9':
-    dependencies:
-      '@atcute/uint8array': 1.1.1
-      '@atcute/util-text': 1.1.1
-      '@standard-schema/spec': 1.1.0
-      esm-env: 1.2.2
-
-  '@atcute/uint8array@1.1.1': {}
-
-  '@atcute/util-text@1.1.1':
-    dependencies:
-      unicode-segmenter: 0.14.5
-
   '@atproto-labs/did-resolver@0.2.5':
     dependencies:
       '@atproto-labs/fetch': 0.2.3
@@ -4574,10 +4525,8 @@ snapshots:
 
   '@humanwhocodes/retry@0.4.3': {}
 
-  '@hypercerts-org/lexicon@file:vendor/hypercerts-org-lexicon-0.10.0.tgz(@atproto/xrpc@0.7.7)':
+  '@hypercerts-org/lexicon@0.11.1(@atproto/xrpc@0.7.7)':
     dependencies:
-      '@atcute/bluesky': 3.2.20
-      '@atcute/leaflet': 1.0.20
       '@atproto/lexicon': 0.6.0
       '@atproto/xrpc': 0.7.7
       multiformats: 13.4.2
@@ -6557,8 +6506,6 @@ snapshots:
       jiti: 2.6.1
     transitivePeerDependencies:
       - supports-color
-
-  esm-env@1.2.2: {}
 
   espree@10.4.0:
     dependencies:
