@@ -9,6 +9,18 @@ import {
   OrgHypercertsClaimActivity,
 } from "@hypercerts-org/lexicon";
 
+const normalizeLegacyDescription = (record: {
+  description?: unknown;
+}): void => {
+  const legacyDescription = record.description;
+  if (typeof legacyDescription === "string") {
+    record.description = {
+      $type: "org.hypercerts.defs#descriptionString",
+      value: legacyDescription,
+    };
+  }
+};
+
 export interface ContributionEntry {
   contributors: string[];
   role: string;
@@ -142,6 +154,7 @@ export const processContributions = async (
   ];
 
   // 6. Update hypercert with appended contributors
+  normalizeLegacyDescription(existingRecord);
   assertValidRecord(
     "activity",
     existingRecord,
