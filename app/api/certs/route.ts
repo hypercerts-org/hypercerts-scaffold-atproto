@@ -14,6 +14,18 @@ import {
   OrgHypercertsDefs,
 } from "@hypercerts-org/lexicon";
 
+const normalizeLegacyDescription = (record: {
+  description?: unknown;
+}): void => {
+  const legacyDescription = record.description;
+  if (typeof legacyDescription === "string") {
+    record.description = {
+      $type: "org.hypercerts.defs#descriptionString",
+      value: legacyDescription,
+    };
+  }
+};
+
 interface HypercertRights {
   rightsName?: string;
   rightsType?: string;
@@ -357,6 +369,8 @@ export async function PUT(req: NextRequest) {
       };
     }
     // else image === undefined → preserve existing (already in spread)
+
+    normalizeLegacyDescription(record as { description?: unknown });
 
     try {
       assertValidRecord(
