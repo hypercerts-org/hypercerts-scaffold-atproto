@@ -31,7 +31,7 @@ specific edit failure; the blocker is the legacy plain-string `description`.
 {
   "description": {
     "$type": "org.hypercerts.defs#descriptionString",
-    "description": "Reforestation activities across the watershed."
+    "value": "Reforestation activities across the watershed."
   }
 }
 ```
