@@ -8,6 +8,18 @@ import { NextRequest, NextResponse } from "next/server";
 import { OrgHypercertsClaimActivity } from "@hypercerts-org/lexicon";
 import { assertValidRecord } from "@/lib/record-validation";
 
+const normalizeLegacyDescription = (record: {
+  description?: unknown;
+}): void => {
+  const legacyDescription = record.description;
+  if (typeof legacyDescription === "string") {
+    record.description = {
+      $type: "org.hypercerts.defs#descriptionString",
+      value: legacyDescription,
+    };
+  }
+};
+
 export async function POST(req: NextRequest) {
   try {
     const data = await req.formData();
@@ -121,6 +133,7 @@ export async function POST(req: NextRequest) {
 
     // 3. Update hypercert
     try {
+      normalizeLegacyDescription(existingRecord as { description?: unknown });
       assertValidRecord(
         "activity",
         existingRecord,
