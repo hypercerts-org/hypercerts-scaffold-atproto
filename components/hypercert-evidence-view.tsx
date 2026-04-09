@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { getPDSlsURI, linearDocumentToString } from "@/lib/utils";
+import { getDescriptionText, getPDSlsURI } from "@/lib/utils";
 import {
   Card,
   CardContent,
@@ -85,7 +85,7 @@ export default function HypercertEvidenceView({
           </p>
           {evidence.description ? (
             <p className="text-muted-foreground font-[family-name:var(--font-outfit)] text-sm leading-relaxed whitespace-pre-wrap">
-              {linearDocumentToString(evidence.description)}
+              {getDescriptionText(evidence.description)}
             </p>
           ) : null}
         </div>

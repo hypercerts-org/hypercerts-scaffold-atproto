@@ -1,10 +1,6 @@
 import { getRepoContext } from "@/lib/repo-context";
 import { uploadContentBlob } from "@/lib/atproto-writes";
-import {
-  parseAtUri,
-  getStringField,
-  stringToLinearDocument,
-} from "@/lib/utils";
+import { parseAtUri, getStringField } from "@/lib/utils";
 import { coerceAtprotoDatetime, currentAtprotoDatetime } from "@/lib/datetime";
 import { assertValidRecord } from "@/lib/record-validation";
 import {
@@ -174,7 +170,10 @@ export async function POST(req: NextRequest) {
       title: hypercertParams.title,
       shortDescription: hypercertParams.shortDescription,
       description: hypercertParams.description
-        ? stringToLinearDocument(hypercertParams.description)
+        ? {
+            $type: "org.hypercerts.defs#descriptionString",
+            value: hypercertParams.description,
+          }
         : undefined,
       startDate: hypercertParams.startDate,
       endDate: hypercertParams.endDate,
@@ -302,8 +301,12 @@ export async function PUT(req: NextRequest) {
     const updates: Record<string, unknown> = {};
     if (title !== null) updates.title = title;
     if (shortDescription !== null) updates.shortDescription = shortDescription;
-    if (description !== null)
-      updates.description = stringToLinearDocument(description);
+    if (description !== null) {
+      updates.description = {
+        $type: "org.hypercerts.defs#descriptionString",
+        value: description,
+      };
+    }
     if (startDate !== null && startDate !== "null" && startDate !== "") {
       updates.startDate = coerceAtprotoDatetime(startDate, "startDate");
     }

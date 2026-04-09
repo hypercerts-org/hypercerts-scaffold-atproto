@@ -1,17 +1,5 @@
 # Agent Instructions
 
-This project uses **hb** (beads) for issue tracking. Run `hb onboard` to get started.
-
-## Quick Reference
-
-```bash
-hb ready              # Find available work
-hb show <id>          # View issue details
-hb update <id> --status in_progress  # Claim work
-hb close <id>         # Complete work
-hb sync               # Sync with git
-```
-
 ## Build / Lint / Test Commands
 
 ```bash
@@ -123,17 +111,15 @@ Server-only files use `import "server-only"` or `"use server"` directive.
 
 1. **File issues for remaining work** — Create issues for anything that needs follow-up
 2. **Run quality gates** (if code changed) — `pnpm run build` must pass
-3. **Update issue status** — Close finished work, update in-progress items
-4. **PUSH TO REMOTE** — This is MANDATORY:
+3. **PUSH TO REMOTE** — This is MANDATORY:
    ```bash
    git pull --rebase
-   hb sync
    git push
    git status  # MUST show "up to date with origin"
    ```
-5. **Clean up** — Clear stashes, prune remote branches
-6. **Verify** — All changes committed AND pushed
-7. **Hand off** — Provide context for next session
+4. **Clean up** — Clear stashes, prune remote branches
+5. **Verify** — All changes committed AND pushed
+6. **Hand off** — Provide context for next session
 
 **CRITICAL RULES:**
 

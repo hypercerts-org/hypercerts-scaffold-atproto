@@ -18,9 +18,9 @@ export interface Evaluation {
   createdAt: string;
   evaluators: (string | { did: string })[];
   score?: {
-    min: number;
-    max: number;
-    value: number;
+    min: string;
+    max: string;
+    value: string;
   };
   content?: { $type: string; uri: string }[];
   measurements?: { uri: string; cid: string }[];
