@@ -5,8 +5,19 @@ import {
   getEpdsClientId,
   getEpdsRedirectUri,
 } from "@/lib/epds-config";
-import { sessionStore, epdsStateStore } from "@/lib/hypercerts-sdk";
+import {
+  sessionStore,
+  epdsStateStore,
+  sessionIdStore,
+} from "@/lib/hypercerts-sdk";
 import { config, OAUTH_SCOPE } from "@/lib/config";
+import {
+  generateSessionId,
+  LEGACY_ACTIVE_DID_COOKIE_NAME,
+  LEGACY_USER_DID_COOKIE_NAME,
+  SESSION_COOKIE_NAME,
+  SESSION_COOKIE_OPTIONS,
+} from "@/lib/session-cookie";
 import type { NodeSavedSession } from "@atproto/oauth-client-node";
 
 export async function GET(req: NextRequest): Promise<NextResponse> {
@@ -38,7 +49,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
 
     const { codeVerifier, dpopPrivateJwk } = oauthState;
 
-    // 5. Restore DPoP key pair from the private JWK stored in the cookie
+    // 5. Restore DPoP key pair from the private JWK stored in Redis state
     const { privateKey, publicJwk } = restoreDpopKeyPair(
       dpopPrivateJwk as import("node:crypto").JsonWebKey,
     );
@@ -136,17 +147,25 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     // Session persists in Redis for 24h; SDK handles token refresh within that window
     await sessionStore.set(tokenData.sub, nodeSavedSession);
 
+    const previousSessionId = req.cookies.get(SESSION_COOKIE_NAME)?.value;
+    if (previousSessionId) {
+      await sessionIdStore.del(previousSessionId);
+    }
+
+    const sessionId = generateSessionId();
+    await sessionIdStore.set(sessionId, tokenData.sub);
+
     // 12. Create redirect response to /
     const response = NextResponse.redirect(new URL("/", config.baseUrl));
 
-    // 13. Set user-did cookie (session cookie — no maxAge, expires when browser closes)
-    // Avoids stale cookie outliving the backend session (Redis/refresh token)
-    response.cookies.set("user-did", tokenData.sub, {
-      httpOnly: true,
-      secure: config.isProduction,
-      sameSite: "lax",
-      path: "/",
-    });
+    // 13. Set opaque session id cookie and clear legacy cookies
+    response.cookies.set(
+      SESSION_COOKIE_NAME,
+      sessionId,
+      SESSION_COOKIE_OPTIONS,
+    );
+    response.cookies.delete(LEGACY_USER_DID_COOKIE_NAME);
+    response.cookies.delete(LEGACY_ACTIVE_DID_COOKIE_NAME);
 
     return response;
   } catch (error) {

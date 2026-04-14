@@ -3,18 +3,32 @@ import { cache } from "react";
 import { cookies } from "next/headers";
 import { Agent } from "@atproto/api";
 import type { OAuthSession } from "@atproto/oauth-client-node";
-import oauthClient from "@/lib/hypercerts-sdk";
+import oauthClient, { sessionIdStore } from "@/lib/hypercerts-sdk";
+import { SESSION_COOKIE_NAME } from "@/lib/session-cookie";
 
 export type { OAuthSession };
 
 export const getSession = cache(
   async function getSession(): Promise<OAuthSession | null> {
     const cookieStore = await cookies();
-    const userDid = cookieStore.get("user-did")?.value;
-    if (!userDid) return null;
+    const sessionId = cookieStore.get(SESSION_COOKIE_NAME)?.value;
+    if (!sessionId) return null;
+
+    const userDid = await sessionIdStore.get(sessionId);
+    if (!userDid) {
+      console.warn(`No DID mapping found for session id ${sessionId}`);
+      return null;
+    }
 
     try {
-      return await oauthClient.restore(userDid);
+      const restoredSession = await oauthClient.restore(userDid);
+      if (!restoredSession || restoredSession.did !== userDid) {
+        console.warn(
+          `Session restore mismatch (sid=${sessionId}, expected DID=${userDid})`,
+        );
+        return null;
+      }
+      return restoredSession;
     } catch (error) {
       console.error(`Failed to restore session for DID ${userDid}:`, error);
       return null;
