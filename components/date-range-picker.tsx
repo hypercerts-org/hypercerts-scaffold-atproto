@@ -20,13 +20,27 @@ export interface DatePickerProps {
 
 export function DatePicker({ label, onChange, initDate }: DatePickerProps) {
   const [open, setOpen] = React.useState(false);
+  const [month, setMonth] = React.useState<Date>(initDate ?? new Date());
+
+  React.useEffect(() => {
+    if (initDate) {
+      setMonth(initDate);
+    }
+  }, [initDate]);
+
+  const handleOpenChange = (nextOpen: boolean) => {
+    setOpen(nextOpen);
+    if (nextOpen) {
+      setMonth(initDate ?? new Date());
+    }
+  };
 
   return (
     <div className="flex flex-col gap-3">
       <Label htmlFor="date" className="px-1">
         {label}
       </Label>
-      <Popover open={open} onOpenChange={setOpen}>
+      <Popover open={open} onOpenChange={handleOpenChange}>
         <PopoverTrigger asChild>
           <Button
             variant="outline"
@@ -41,6 +55,8 @@ export function DatePicker({ label, onChange, initDate }: DatePickerProps) {
           <Calendar
             mode="single"
             selected={initDate}
+            month={month}
+            onMonthChange={setMonth}
             captionLayout="dropdown"
             onSelect={(date) => {
               onChange(date!);

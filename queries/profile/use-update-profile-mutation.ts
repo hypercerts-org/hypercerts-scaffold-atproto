@@ -1,9 +1,8 @@
 "use client";
 
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { updateProfile } from "@/lib/api/profile";
-import { queryKeys } from "@/lib/api/query-keys";
 
 interface UpdateProfileParams {
   displayName?: string | null;
@@ -21,16 +20,10 @@ interface UseUpdateProfileMutationOptions {
 export function useUpdateProfileMutation(
   options?: UseUpdateProfileMutationOptions,
 ) {
-  const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: (params: UpdateProfileParams) => updateProfile(params),
     onSuccess: (data) => {
       toast.success("Profile successfully updated");
-      // Invalidate profile queries
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.profile.active(),
-      });
       options?.onSuccess?.(data);
     },
     onError: (error) => {

@@ -46,9 +46,9 @@ export default function EvaluationForm({
   const [summary, setSummary] = useState("");
 
   const [useScore, setUseScore] = useState(false);
-  const [scoreMin, setScoreMin] = useState<number>(0);
-  const [scoreMax, setScoreMax] = useState<number>(10);
-  const [scoreValue, setScoreValue] = useState<number>(5);
+  const [scoreMin, setScoreMin] = useState("0");
+  const [scoreMax, setScoreMax] = useState("10");
+  const [scoreValue, setScoreValue] = useState("5");
 
   const [useContent, setUseContent] = useState(false);
   const [contentUris, setContentUris] = useState<string[]>([""]);
@@ -93,19 +93,16 @@ export default function EvaluationForm({
         "an estimated 125 tons of CO2 will be sequestered annually once trees reach maturity.",
     );
     setUseScore(true);
-    setScoreMin(1);
-    setScoreMax(10);
-    setScoreValue(8);
+    setScoreMin("1");
+    setScoreMax("10");
+    setScoreValue("8");
     setUseContent(true);
     setContentUris([
       "https://example.com/evaluation-report.pdf",
       "https://example.com/field-verification-photos.zip",
     ]);
-    setUseMeasurements(true);
-    setMeasurementUris([
-      "at://did:plc:z72i7hdynmk6r22z27h6tvur/org.hypercerts.claim.measurement/3jzfcijpqzk2a",
-      "at://did:plc:z72i7hdynmk6r22z27h6tvur/org.hypercerts.claim.measurement/3jzfcijpqzk2b",
-    ]);
+    setUseMeasurements(false);
+    setMeasurementUris([""]);
     toast.success("Form autofilled with dummy data");
   };
 
@@ -183,7 +180,11 @@ export default function EvaluationForm({
       evaluators: allEvaluatorDids,
       summary,
       ...(useScore && {
-        score: { min: scoreMin, max: scoreMax, value: scoreValue },
+        score: {
+          min: scoreMin,
+          max: scoreMax,
+          value: scoreValue,
+        },
       }),
       ...(useContent && {
         content: contentUris.filter((uri) => uri.trim() !== ""),
@@ -317,12 +318,15 @@ export default function EvaluationForm({
             value={summary}
             onChange={(e) => setSummary(e.target.value)}
             placeholder="A brief evaluation summary..."
-            maxLength={5000}
+            maxLength={1000}
             rows={5}
             required
             disabled={mutation.isPending}
             className="font-[family-name:var(--font-outfit)]"
           />
+          <p className="text-muted-foreground font-[family-name:var(--font-outfit)] text-[11px]">
+            {summary.length} / 1000 characters
+          </p>
         </div>
 
         {/* Score Toggle */}
@@ -360,7 +364,7 @@ export default function EvaluationForm({
                     id="score-min"
                     type="number"
                     value={scoreMin}
-                    onChange={(e) => setScoreMin(parseInt(e.target.value) || 0)}
+                    onChange={(e) => setScoreMin(e.target.value)}
                     disabled={mutation.isPending}
                     className="font-[family-name:var(--font-outfit)]"
                   />
@@ -376,9 +380,7 @@ export default function EvaluationForm({
                     id="score-value"
                     type="number"
                     value={scoreValue}
-                    onChange={(e) =>
-                      setScoreValue(parseInt(e.target.value) || 0)
-                    }
+                    onChange={(e) => setScoreValue(e.target.value)}
                     disabled={mutation.isPending}
                     className="font-[family-name:var(--font-outfit)]"
                   />
@@ -394,7 +396,7 @@ export default function EvaluationForm({
                     id="score-max"
                     type="number"
                     value={scoreMax}
-                    onChange={(e) => setScoreMax(parseInt(e.target.value) || 0)}
+                    onChange={(e) => setScoreMax(e.target.value)}
                     disabled={mutation.isPending}
                     className="font-[family-name:var(--font-outfit)]"
                   />
@@ -497,7 +499,7 @@ export default function EvaluationForm({
                 <div key={index} className="flex items-center gap-2">
                   <Input
                     type="text"
-                    placeholder="at://did:plc:xxx/org.hypercerts.claim.measurement/xxx"
+                    placeholder="at://did:plc:xxx/org.hypercerts.context.measurement/xxx"
                     value={uri}
                     onChange={(e) =>
                       handleUriChange(

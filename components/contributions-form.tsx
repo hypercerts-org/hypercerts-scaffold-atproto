@@ -4,6 +4,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { addContribution } from "@/lib/create-actions";
 import { BaseHypercertFormProps } from "@/lib/types";
+import { localDateToAtprotoDatetime } from "@/lib/datetime";
 import type { ProfileView } from "@atproto/api/dist/client/types/app/bsky/actor/defs";
 import { Trash, PlusCircle, Users, Wand2 } from "lucide-react";
 import { FormEventHandler, useState } from "react";
@@ -83,8 +84,15 @@ export default function HypercertContributionForm({
       contributionDetails: {
         role,
         contributionDescription: description || undefined,
-        startDate: workTimeframeFrom?.toISOString(),
-        endDate: workTimeframeTo?.toISOString(),
+        startDate: workTimeframeFrom
+          ? localDateToAtprotoDatetime(
+              workTimeframeFrom,
+              "contribution startDate",
+            )
+          : undefined,
+        endDate: workTimeframeTo
+          ? localDateToAtprotoDatetime(workTimeframeTo, "contribution endDate")
+          : undefined,
       },
     };
 
@@ -101,8 +109,7 @@ export default function HypercertContributionForm({
     }
     setSaving(true);
     try {
-      const contributionData = await handleContributionCreation();
-      console.log(contributionData);
+      await handleContributionCreation();
       toast.success("Contribution created!");
       onNext?.();
     } catch (error) {
@@ -136,7 +143,7 @@ export default function HypercertContributionForm({
 
   return (
     <FormInfo
-      stepLabel="Step 2 of 5" // NOTE: contributions step is currently disabled; stepLabel reflects the 5-step flow
+      stepLabel="Add Contributions"
       title="Add Contributions"
       description="Link roles, contributors, and timeframes to your hypercert."
     >
@@ -173,6 +180,9 @@ export default function HypercertContributionForm({
             disabled={saving}
             className="font-[family-name:var(--font-outfit)]"
           />
+          <p className="text-muted-foreground font-[family-name:var(--font-outfit)] text-[11px]">
+            {role.length} / 100 characters
+          </p>
         </div>
 
         {/* Contributors */}
@@ -264,13 +274,13 @@ export default function HypercertContributionForm({
             placeholder="What the contribution concretely achieved..."
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            maxLength={2000}
+            maxLength={1000}
             rows={4}
             disabled={saving}
             className="font-[family-name:var(--font-outfit)]"
           />
           <p className="text-muted-foreground font-[family-name:var(--font-outfit)] text-[11px]">
-            {description.length} / 2000 characters
+            {description.length} / 1000 characters
           </p>
         </div>
 

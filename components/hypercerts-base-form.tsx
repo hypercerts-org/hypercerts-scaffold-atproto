@@ -10,6 +10,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { Textarea } from "@/components/ui/textarea";
 import { OrgHypercertsClaimActivity } from "@hypercerts-org/lexicon";
 import type { CreateHypercertParams } from "@/lib/types";
+import { localDateToAtprotoDatetime } from "@/lib/datetime";
 import { Label } from "@radix-ui/react-label";
 import {
   PlusIcon,
@@ -70,7 +71,7 @@ export default function HypercertsBaseForm({
   const [shortDescription, setShortDescription] = useState(
     certInfo?.shortDescription || "",
   );
-  const [buttonClicked, setButtonClicked] = useState<"saveNext" | "create">();
+  const [buttonClicked, setButtonClicked] = useState<"create">();
   const [workScope, setWorkScope] = useState<string[]>(
     initialWorkScope || [""],
   );
@@ -180,8 +181,18 @@ export default function HypercertsBaseForm({
           contributionDetails: {
             role: contributionRole,
             contributionDescription: contributionDescription || undefined,
-            startDate: contributionStartDate?.toISOString(),
-            endDate: contributionEndDate?.toISOString(),
+            startDate: contributionStartDate
+              ? localDateToAtprotoDatetime(
+                  contributionStartDate,
+                  "contribution startDate",
+                )
+              : undefined,
+            endDate: contributionEndDate
+              ? localDateToAtprotoDatetime(
+                  contributionEndDate,
+                  "contribution endDate",
+                )
+              : undefined,
           },
         },
       ];
@@ -197,8 +208,8 @@ export default function HypercertsBaseForm({
       },
       description: shortDescription,
       image: backgroundImage,
-      startDate: startDate.toISOString(),
-      endDate: endDate.toISOString(),
+      startDate: localDateToAtprotoDatetime(startDate, "startDate"),
+      endDate: localDateToAtprotoDatetime(endDate, "endDate"),
       contributions,
       workScope: workScope.filter((s) => s.trim()),
     };
@@ -294,9 +305,13 @@ export default function HypercertsBaseForm({
             onChange={(e) => setTitle(e.target.value)}
             value={title}
             placeholder="Enter the hypercert name"
+            maxLength={256}
             required
             className="font-[family-name:var(--font-outfit)]"
           />
+          <p className="text-muted-foreground font-[family-name:var(--font-outfit)] text-[11px]">
+            {title.length} / 256 characters
+          </p>
         </div>
 
         <div className="flex flex-col gap-1.5">
@@ -311,9 +326,13 @@ export default function HypercertsBaseForm({
             id="description"
             value={shortDescription}
             placeholder="Enter a short description"
+            maxLength={300}
             required
             className="min-h-[100px] font-[family-name:var(--font-outfit)]"
           />
+          <p className="text-muted-foreground font-[family-name:var(--font-outfit)] text-[11px]">
+            {shortDescription.length} / 300 characters
+          </p>
         </div>
       </div>
 
@@ -409,6 +428,7 @@ export default function HypercertsBaseForm({
                 value={value}
                 onChange={(e) => handleWorkScopeChange(index, e.target.value)}
                 placeholder="Enter a tag"
+                maxLength={100}
                 required={index === 0}
                 className="h-9 w-40 font-[family-name:var(--font-outfit)] text-sm"
               />
@@ -514,6 +534,9 @@ export default function HypercertsBaseForm({
                 maxLength={100}
                 className="font-[family-name:var(--font-outfit)]"
               />
+              <p className="text-muted-foreground font-[family-name:var(--font-outfit)] text-[11px]">
+                {contributionRole.length} / 100 characters
+              </p>
             </div>
 
             <div className="space-y-2">
@@ -597,12 +620,12 @@ export default function HypercertsBaseForm({
                 placeholder="What the contribution concretely achieved..."
                 value={contributionDescription}
                 onChange={(e) => setContributionDescription(e.target.value)}
-                maxLength={2000}
+                maxLength={1000}
                 rows={4}
                 className="font-[family-name:var(--font-outfit)]"
               />
               <p className="text-muted-foreground font-[family-name:var(--font-outfit)] text-[11px]">
-                {contributionDescription.length} / 2000 characters
+                {contributionDescription.length} / 1000 characters
               </p>
             </div>
 
@@ -657,10 +680,7 @@ export default function HypercertsBaseForm({
               aria-label="Save and go to Contributions"
               className="bg-create-accent hover:bg-create-accent/90 text-create-accent-foreground min-w-[120px] font-[family-name:var(--font-outfit)] font-medium"
             >
-              {isSaving ? <Spinner className="mr-2" /> : null}
-              {isSaving && buttonClicked === "saveNext"
-                ? "Creating..."
-                : "Next"}
+              Next
             </Button>
           </div>
         </div>

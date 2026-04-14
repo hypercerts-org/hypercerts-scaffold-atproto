@@ -1,10 +1,7 @@
 import { getRepoContext } from "@/lib/repo-context";
 import { uploadContentBlob } from "@/lib/atproto-writes";
-import {
-  parseAtUri,
-  getStringField,
-  stringToLinearDocument,
-} from "@/lib/utils";
+import { parseAtUri, getStringField } from "@/lib/utils";
+import { coerceAtprotoDatetime, currentAtprotoDatetime } from "@/lib/datetime";
 import { assertValidRecord } from "@/lib/record-validation";
 import {
   processContributions,
@@ -16,6 +13,18 @@ import {
   OrgHypercertsClaimActivity,
   OrgHypercertsDefs,
 } from "@hypercerts-org/lexicon";
+
+const normalizeLegacyDescription = (record: {
+  description?: unknown;
+}): void => {
+  const legacyDescription = record.description;
+  if (typeof legacyDescription === "string") {
+    record.description = {
+      $type: "org.hypercerts.defs#descriptionString",
+      value: legacyDescription,
+    };
+  }
+};
 
 interface HypercertRights {
   rightsName?: string;
@@ -104,13 +113,16 @@ export async function POST(req: NextRequest) {
       ? JSON.parse(workScopeRaw)
       : [];
 
+    const normalizedStartDate = coerceAtprotoDatetime(startDate, "startDate");
+    const normalizedEndDate = coerceAtprotoDatetime(endDate, "endDate");
+
     const hypercertParams: HypercertParams = {
       title,
       shortDescription,
       description: description ?? shortDescription,
       workScope: workScopeTags.length > 0 ? workScopeTags : undefined,
-      startDate,
-      endDate,
+      startDate: normalizedStartDate,
+      endDate: normalizedEndDate,
       rights,
       image: image || undefined,
     };
@@ -140,7 +152,7 @@ export async function POST(req: NextRequest) {
       rightsName: hypercertParams.rights?.rightsName ?? "",
       rightsType: hypercertParams.rights?.rightsType ?? "",
       rightsDescription: hypercertParams.rights?.rightsDescription ?? "",
-      createdAt: new Date().toISOString(),
+      createdAt: currentAtprotoDatetime(),
     };
     try {
       assertValidRecord(
@@ -155,7 +167,7 @@ export async function POST(req: NextRequest) {
       );
     }
     const rightsResult = await ctx.agent.com.atproto.repo.createRecord({
-      repo: ctx.activeDid,
+      repo: ctx.userDid,
       collection: "org.hypercerts.claim.rights",
       record: rightsRecord,
     });
@@ -170,12 +182,15 @@ export async function POST(req: NextRequest) {
       title: hypercertParams.title,
       shortDescription: hypercertParams.shortDescription,
       description: hypercertParams.description
-        ? stringToLinearDocument(hypercertParams.description)
+        ? {
+            $type: "org.hypercerts.defs#descriptionString",
+            value: hypercertParams.description,
+          }
         : undefined,
       startDate: hypercertParams.startDate,
       endDate: hypercertParams.endDate,
       rights: rightsRef,
-      createdAt: new Date().toISOString(),
+      createdAt: currentAtprotoDatetime(),
       ...(imageField ? { image: imageField } : {}),
       ...(hypercertParams.workScope && hypercertParams.workScope.length > 0
         ? {
@@ -195,7 +210,7 @@ export async function POST(req: NextRequest) {
         OrgHypercertsClaimActivity.validateRecord,
       );
       const claimResult = await ctx.agent.com.atproto.repo.createRecord({
-        repo: ctx.activeDid,
+        repo: ctx.userDid,
         collection: "org.hypercerts.claim.activity",
         record: claimRecord,
       });
@@ -224,7 +239,7 @@ export async function POST(req: NextRequest) {
       if (parsedRights) {
         await ctx.agent.com.atproto.repo
           .deleteRecord({
-            repo: ctx.activeDid,
+            repo: ctx.userDid,
             collection:
               parsedRights.collection || "org.hypercerts.claim.rights",
             rkey: parsedRights.rkey,
@@ -243,6 +258,9 @@ export async function POST(req: NextRequest) {
         { error: `Invalid JSON in ${field}` },
         { status: 400 },
       );
+    }
+    if (e instanceof Error && e.message.startsWith("Invalid ")) {
+      return NextResponse.json({ error: e.message }, { status: 400 });
     }
     console.error("Error creating hypercert:", e);
     return NextResponse.json(
@@ -287,7 +305,7 @@ export async function PUT(req: NextRequest) {
         { status: 400 },
       );
     }
-    if (parsed.did !== ctx.activeDid) {
+    if (parsed.did !== ctx.userDid) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
@@ -295,11 +313,18 @@ export async function PUT(req: NextRequest) {
     const updates: Record<string, unknown> = {};
     if (title !== null) updates.title = title;
     if (shortDescription !== null) updates.shortDescription = shortDescription;
-    if (description !== null)
-      updates.description = stringToLinearDocument(description);
-    if (startDate !== null && startDate !== "null")
-      updates.startDate = startDate;
-    if (endDate !== null && endDate !== "null") updates.endDate = endDate;
+    if (description !== null) {
+      updates.description = {
+        $type: "org.hypercerts.defs#descriptionString",
+        value: description,
+      };
+    }
+    if (startDate !== null && startDate !== "null" && startDate !== "") {
+      updates.startDate = coerceAtprotoDatetime(startDate, "startDate");
+    }
+    if (endDate !== null && endDate !== "null" && endDate !== "") {
+      updates.endDate = coerceAtprotoDatetime(endDate, "endDate");
+    }
 
     // Handle image: File = new image, string "null" = remove, absent = no change
     let image: Blob | null | undefined;
@@ -345,6 +370,8 @@ export async function PUT(req: NextRequest) {
     }
     // else image === undefined → preserve existing (already in spread)
 
+    normalizeLegacyDescription(record as { description?: unknown });
+
     try {
       assertValidRecord(
         "activity",
@@ -358,7 +385,7 @@ export async function PUT(req: NextRequest) {
       );
     }
     const result = await ctx.agent.com.atproto.repo.putRecord({
-      repo: ctx.activeDid,
+      repo: ctx.userDid,
       collection: parsed.collection || "org.hypercerts.claim.activity",
       rkey: parsed.rkey,
       record,
@@ -366,6 +393,9 @@ export async function PUT(req: NextRequest) {
 
     return NextResponse.json({ uri: result.data.uri, cid: result.data.cid });
   } catch (e) {
+    if (e instanceof Error && e.message.startsWith("Invalid ")) {
+      return NextResponse.json({ error: e.message }, { status: 400 });
+    }
     console.error("Error updating hypercert:", e);
     return NextResponse.json(
       { error: "Failed to update hypercert" },

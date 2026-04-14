@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { getPDSlsURI, linearDocumentToString } from "@/lib/utils";
+import { getDescriptionText, getPDSlsURI } from "@/lib/utils";
 import {
   Card,
   CardContent,
@@ -30,6 +30,8 @@ export default function HypercertEvidenceView({
   if (!evidence) {
     return null;
   }
+
+  const content = Array.isArray(evidence.content) ? evidence.content : [];
 
   const getContentTypeColor = () => {
     // All content types use the same color
@@ -83,21 +85,21 @@ export default function HypercertEvidenceView({
           </p>
           {evidence.description ? (
             <p className="text-muted-foreground font-[family-name:var(--font-outfit)] text-sm leading-relaxed whitespace-pre-wrap">
-              {linearDocumentToString(evidence.description)}
+              {getDescriptionText(evidence.description)}
             </p>
           ) : null}
         </div>
 
-        {evidence.content && evidence.content.length > 0 ? (
+        {content.length > 0 ? (
           <div className="border-border/50 space-y-3 border-t pt-2">
-            {evidence.content.map((contentItem, index) => {
+            {content.map((contentItem, index) => {
               const contentUrl = getContentUrl(contentItem);
               return (
                 <div key={index} className="flex items-start gap-3">
                   <LinkIcon className="text-create-accent mt-0.5 size-4 shrink-0" />
                   <div className="min-w-0 flex-1 space-y-1">
                     <dt className="text-muted-foreground font-[family-name:var(--font-outfit)] text-xs tracking-wider uppercase">
-                      {evidence.content!.length > 1
+                      {content.length > 1
                         ? `Evidence Source ${index + 1}`
                         : "Evidence Source"}
                     </dt>

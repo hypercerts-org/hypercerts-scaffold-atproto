@@ -2,11 +2,12 @@ import type {
   NodeSavedSessionStore as SessionStore,
   NodeSavedStateStore as StateStore,
 } from "@atproto/oauth-client-node";
-import { redisClient } from "./redis";
+import { redisClient } from "@/lib/redis";
 import { NodeSavedSession, NodeSavedState } from "@atproto/oauth-client-node";
 
 const STATE_PREFIX = "oauth-state:";
 const SESSION_PREFIX = "session:";
+const SID_PREFIX = "sid:";
 const STATE_EXPIRATION_SECONDS = 600; // 10 minutes for temporary OAuth state
 const SESSION_EXPIRATION_SECONDS = 86400; // 24 hours for user sessions
 const EPDS_STATE_PREFIX = "epds-oauth-state:";
@@ -60,6 +61,30 @@ export class RedisSessionStore implements SessionStore {
 
   async del(did: string): Promise<void> {
     const key = `${SESSION_PREFIX}${did}`;
+    await redisClient.del(key);
+  }
+}
+
+/**
+ * Redis-backed session id store
+ * Maps an opaque sid to a user DID.
+ */
+export class RedisSessionIdStore {
+  async set(sessionId: string, did: string): Promise<void> {
+    const key = `${SID_PREFIX}${sessionId}`;
+    await redisClient.set(key, did, {
+      EX: SESSION_EXPIRATION_SECONDS,
+    });
+  }
+
+  async get(sessionId: string): Promise<string | undefined> {
+    const key = `${SID_PREFIX}${sessionId}`;
+    const did = await redisClient.get(key);
+    return did ?? undefined;
+  }
+
+  async del(sessionId: string): Promise<void> {
+    const key = `${SID_PREFIX}${sessionId}`;
     await redisClient.del(key);
   }
 }

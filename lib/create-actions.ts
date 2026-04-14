@@ -1,91 +1,25 @@
 "use server";
 import { getRepoContext } from "@/lib/repo-context";
-import { resolveRecordBlobs } from "./blob-utils";
+import { resolveRecordBlobs } from "@/lib/blob-utils";
 import { parseAtUri } from "@/lib/utils";
 import {
   resolveStrongRef,
   processLocations,
   type StrongRef,
-} from "./atproto-writes";
+} from "@/lib/atproto-writes";
+import { coerceAtprotoDatetime, currentAtprotoDatetime } from "@/lib/datetime";
 import {
-  AppCertifiedActorProfile,
   OrgHypercertsContextEvaluation,
   OrgHypercertsContextMeasurement,
 } from "@hypercerts-org/lexicon";
 import { assertValidRecord } from "@/lib/record-validation";
 import { processContributions } from "@/lib/contribution-helpers";
 
-export type RepositoryRole = "admin" | "writer" | "reader";
-import { cookies } from "next/headers";
-import { getSession, resolveHandle } from "./atproto-session";
-import oauthClient from "./hypercerts-sdk";
-
-export interface GrantAccessParams {
-  repoDid: string;
-  userDid: string;
-  role: RepositoryRole;
-}
-
-export interface ActiveProfileInfo {
-  name: string | undefined;
-  handle: string | undefined;
-  isOrganization: boolean;
-}
-
 export interface SerializedRecord {
   uri: string;
   cid: string;
   value: Record<string, unknown>;
 }
-
-export const getActiveProfileInfo =
-  async (): Promise<ActiveProfileInfo | null> => {
-    const ctx = await getRepoContext();
-    if (!ctx) return null;
-
-    const profileResult = await ctx.agent.com.atproto.repo
-      .getRecord({
-        repo: ctx.targetDid,
-        collection: "app.certified.actor.profile",
-        rkey: "self",
-      })
-      .catch(() => null);
-    const profile = profileResult?.data?.value as
-      | AppCertifiedActorProfile.Record
-      | undefined;
-    if (!profile) return null;
-    const handle = await resolveHandle(ctx.agent, ctx.targetDid);
-    return {
-      name: profile.displayName || handle,
-      handle,
-      isOrganization: false,
-    };
-  };
-export const switchActiveProfile = async (did: string): Promise<void> => {
-  const cookiePromise = cookies();
-  const session = await getSession();
-  if (!session) {
-    throw new Error(
-      "Cannot switch profiles: no active session found. Please log in first.",
-    );
-  }
-
-  const cookieStore = await cookiePromise;
-  cookieStore.set("active-did", did, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
-    path: "/",
-  });
-};
-
-export const logout = async (): Promise<void> => {
-  const session = await getSession();
-  if (!session) {
-    return;
-  }
-  oauthClient.revoke(session.sub);
-};
 
 export const addContribution = async (params: {
   hypercertUri: string;
@@ -122,7 +56,7 @@ export const addEvaluation = async (params: {
   hypercertUri: string;
   evaluators: string[];
   summary: string;
-  score?: { min: number; max: number; value: number };
+  score?: { min: string; max: string; value: string };
   content?: string[];
   measurements?: string[];
   location?: string;
@@ -165,13 +99,21 @@ export const addEvaluation = async (params: {
       )
     : undefined;
 
+  const normalizedScore = evaluationData.score
+    ? {
+        min: `${evaluationData.score.min}`,
+        max: `${evaluationData.score.max}`,
+        value: `${evaluationData.score.value}`,
+      }
+    : undefined;
+
   const record: OrgHypercertsContextEvaluation.Record = {
     $type: "org.hypercerts.context.evaluation",
     subject,
     evaluators: evaluationData.evaluators.map((did) => ({ did })),
     summary: evaluationData.summary,
-    createdAt: new Date().toISOString(),
-    ...(evaluationData.score ? { score: evaluationData.score } : {}),
+    createdAt: currentAtprotoDatetime(),
+    ...(normalizedScore ? { score: normalizedScore } : {}),
     ...(evaluationData.content
       ? {
           content: evaluationData.content.map((uri) => ({
@@ -190,7 +132,7 @@ export const addEvaluation = async (params: {
     OrgHypercertsContextEvaluation.validateRecord,
   );
   const result = await ctx.agent.com.atproto.repo.createRecord({
-    repo: ctx.activeDid,
+    repo: ctx.userDid,
     collection: "org.hypercerts.context.evaluation",
     record,
   });
@@ -243,10 +185,17 @@ export const addMeasurement = async (params: {
   if (params.locations && params.locations.length > 0) {
     locationRefs = await processLocations(
       ctx.agent,
-      ctx.activeDid,
+      ctx.userDid,
       params.locations,
     );
   }
+
+  const normalizedStartDate = params.startDate
+    ? coerceAtprotoDatetime(params.startDate, "measurement startDate")
+    : undefined;
+  const normalizedEndDate = params.endDate
+    ? coerceAtprotoDatetime(params.endDate, "measurement endDate")
+    : undefined;
 
   const record: OrgHypercertsContextMeasurement.Record = {
     $type: "org.hypercerts.context.measurement",
@@ -254,12 +203,12 @@ export const addMeasurement = async (params: {
     metric: params.metric,
     value: params.value,
     unit: params.unit,
-    createdAt: new Date().toISOString(),
+    createdAt: currentAtprotoDatetime(),
     ...(params.measurers?.length
       ? { measurers: params.measurers.map((did) => ({ did })) }
       : {}),
-    ...(params.startDate ? { startDate: params.startDate } : {}),
-    ...(params.endDate ? { endDate: params.endDate } : {}),
+    ...(normalizedStartDate ? { startDate: normalizedStartDate } : {}),
+    ...(normalizedEndDate ? { endDate: normalizedEndDate } : {}),
     ...(params.methodType ? { methodType: params.methodType } : {}),
     ...(params.methodURI ? { methodURI: params.methodURI } : {}),
     ...(params.evidenceURI?.length ? { evidenceURI: params.evidenceURI } : {}),
@@ -273,7 +222,7 @@ export const addMeasurement = async (params: {
     OrgHypercertsContextMeasurement.validateRecord,
   );
   const result = await ctx.agent.com.atproto.repo.createRecord({
-    repo: ctx.activeDid,
+    repo: ctx.userDid,
     collection: "org.hypercerts.context.measurement",
     record,
   });
@@ -287,7 +236,7 @@ export const getMeasurementRecord = async (params: {
   rkey: string;
 }): Promise<SerializedRecord> => {
   const { did, collection, rkey } = params;
-  const ctx = await getRepoContext({ targetDid: did });
+  const ctx = await getRepoContext();
   if (!ctx) {
     throw new Error(
       "getMeasurementRecord failed: could not establish repository context. The user session may have expired or the target DID is unreachable.",
@@ -312,7 +261,7 @@ export const getEvaluationRecord = async (params: {
   rkey: string;
 }): Promise<SerializedRecord> => {
   const { did, collection, rkey } = params;
-  const ctx = await getRepoContext({ targetDid: did });
+  const ctx = await getRepoContext();
   if (!ctx) {
     throw new Error(
       "getEvaluationRecord failed: could not establish repository context. The user session may have expired or the target DID is unreachable.",
@@ -337,7 +286,7 @@ export const getEvidenceRecord = async (params: {
   rkey: string;
 }): Promise<SerializedRecord> => {
   const { did, collection, rkey } = params;
-  const ctx = await getRepoContext({ targetDid: did });
+  const ctx = await getRepoContext();
   if (!ctx) {
     throw new Error(
       "getEvidenceRecord failed: could not establish repository context. The user session may have expired or the target DID is unreachable.",
@@ -362,7 +311,7 @@ export const getContributorInformationRecord = async (params: {
   rkey: string;
 }): Promise<SerializedRecord> => {
   const { did, collection, rkey } = params;
-  const ctx = await getRepoContext({ targetDid: did });
+  const ctx = await getRepoContext();
   if (!ctx) {
     throw new Error(
       "getContributorInformationRecord failed: could not establish repository context. The user session may have expired or the target DID is unreachable.",
@@ -393,107 +342,17 @@ export const deleteHypercert = async (params: {
   if (!parsed) {
     throw new Error("deleteHypercert failed: invalid hypercertUri.");
   }
-  if (parsed.did !== ctx.activeDid) {
+  if (parsed.did !== ctx.userDid) {
     throw new Error(
       "deleteHypercert failed: Forbidden — URI DID does not match active session DID.",
     );
   }
   await ctx.agent.com.atproto.repo.deleteRecord({
-    repo: ctx.activeDid,
+    repo: ctx.userDid,
     collection: parsed.collection || "org.hypercerts.claim.activity",
     rkey: parsed.rkey,
   });
   return { success: true };
-};
-
-export const updateMeasurement = async (params: {
-  measurementUri: string;
-  updates: {
-    metric?: string;
-    value?: string;
-    unit?: string;
-    measurers?: string[];
-    startDate?: string;
-    endDate?: string;
-    methodType?: string;
-    methodURI?: string;
-    evidenceURI?: string[];
-    comment?: string;
-  };
-}): Promise<{ uri: string; cid: string }> => {
-  const ctx = await getRepoContext();
-  if (!ctx) {
-    throw new Error(
-      "updateMeasurement failed: could not establish repository context.",
-    );
-  }
-  // Defense-in-depth: ATProto scoped repos already prevent cross-repo writes,
-  // but we validate the DID for consistency with deleteRecord/deleteHypercert
-  // and to surface clear errors on mismatched URIs.
-  const parsed = parseAtUri(params.measurementUri);
-  if (!parsed || !parsed.collection || !parsed.rkey) {
-    throw new Error("updateMeasurement failed: invalid AT-URI format");
-  }
-  if (parsed.did !== ctx.activeDid) {
-    throw new Error(
-      "updateMeasurement failed: Forbidden — URI DID does not match active session DID.",
-    );
-  }
-  // Fetch existing measurement
-  const existingResult = await ctx.agent.com.atproto.repo.getRecord({
-    repo: parsed.did,
-    collection: parsed.collection || "org.hypercerts.context.measurement",
-    rkey: parsed.rkey,
-  });
-  const existing = existingResult.data
-    .value as OrgHypercertsContextMeasurement.Record & {
-    subject?: OrgHypercertsContextMeasurement.Record["subjects"] extends
-      | (infer T)[]
-      | undefined
-      ? T
-      : never;
-  };
-
-  // Preserve existing subjects, or migrate from old singular subject field
-  const existingSubjects =
-    existing.subjects ?? (existing.subject ? [existing.subject] : undefined);
-
-  // Merge updates, preserving immutable fields
-  const record: OrgHypercertsContextMeasurement.Record = {
-    ...existing,
-    $type: "org.hypercerts.context.measurement",
-    ...(existingSubjects !== undefined ? { subjects: existingSubjects } : {}),
-  };
-
-  // Apply individual updates
-  const updates = params.updates;
-  if (updates.metric !== undefined) record.metric = updates.metric;
-  if (updates.value !== undefined) record.value = updates.value;
-  if (updates.unit !== undefined) record.unit = updates.unit;
-  if (updates.startDate !== undefined) record.startDate = updates.startDate;
-  if (updates.endDate !== undefined) record.endDate = updates.endDate;
-  if (updates.methodType !== undefined) record.methodType = updates.methodType;
-  if (updates.methodURI !== undefined) record.methodURI = updates.methodURI;
-  if (updates.evidenceURI !== undefined)
-    record.evidenceURI = updates.evidenceURI;
-  if (updates.comment !== undefined) record.comment = updates.comment;
-  if (updates.measurers !== undefined) {
-    record.measurers = updates.measurers.map((did) => ({ did }));
-  }
-
-  assertValidRecord(
-    "measurement",
-    record,
-    OrgHypercertsContextMeasurement.validateRecord,
-  );
-  const result = await ctx.agent.com.atproto.repo.putRecord({
-    repo: ctx.activeDid,
-    collection: parsed.collection || "org.hypercerts.context.measurement",
-    rkey: parsed.rkey,
-    record,
-  });
-
-  return { uri: result.data.uri, cid: result.data.cid };
 };
 
 export const deleteRecord = async (params: {
@@ -509,13 +368,13 @@ export const deleteRecord = async (params: {
   if (!parsed || !parsed.collection || !parsed.rkey) {
     throw new Error("deleteRecord failed: invalid AT-URI format");
   }
-  if (parsed.did !== ctx.activeDid) {
+  if (parsed.did !== ctx.userDid) {
     throw new Error(
       "deleteRecord failed: Forbidden — URI DID does not match active session DID.",
     );
   }
   await ctx.agent.com.atproto.repo.deleteRecord({
-    repo: ctx.activeDid,
+    repo: ctx.userDid,
     collection: parsed.collection,
     rkey: parsed.rkey,
   });

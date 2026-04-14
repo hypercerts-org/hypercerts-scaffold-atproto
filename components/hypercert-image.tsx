@@ -31,6 +31,7 @@ export default function HypercertImage(props: HypercertImageProps) {
         sizes={sizes}
         className={cn("object-cover", className)}
         priority={priority}
+        unoptimized
       />
     );
   }

@@ -13,7 +13,6 @@ export const queryKeys = {
   // Profile
   profile: {
     all: ["profile"] as const,
-    active: () => [...queryKeys.profile.all, "active"] as const,
     byDid: (did: string) => [...queryKeys.profile.all, did] as const,
     handle: (did: string) => [...queryKeys.profile.all, "handle", did] as const,
   },
@@ -67,6 +66,3 @@ export const queryKeys = {
     },
   },
 } as const;
-
-// Type helper for query keys
-export type QueryKeys = typeof queryKeys;

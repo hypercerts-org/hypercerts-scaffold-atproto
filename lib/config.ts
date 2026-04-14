@@ -10,50 +10,40 @@
  */
 
 import { OAuthClientMetadataInput } from "@atproto/oauth-client-node";
-import { generateBrandingCss } from "./atproto-branding";
+import { generateBrandingCss } from "@/lib/atproto-branding";
 
 const ATPROTO_SCOPE = "atproto";
 
-export const HYPERCERT_COLLECTIONS = {
-  CLAIM: "org.hypercerts.claim.activity",
-  RIGHTS: "org.hypercerts.claim.rights",
-  LOCATION: "app.certified.location",
-  CONTRIBUTION: "org.hypercerts.claim.contribution",
-  CONTRIBUTOR_INFORMATION: "org.hypercerts.claim.contributorInformation",
-  MEASUREMENT: "org.hypercerts.context.measurement",
-  EVALUATION: "org.hypercerts.context.evaluation",
-  ATTACHMENT: "org.hypercerts.context.attachment",
-  COLLECTION: "org.hypercerts.collection",
-  FUNDING_RECEIPT: "org.hypercerts.funding.receipt",
-  WORK_SCOPE_TAG: "org.hypercerts.workscope.tag",
-  CERTIFIED_PROFILE: "app.certified.actor.profile",
-  BSKY_PROFILE: "app.bsky.actor.profile",
-} as const;
+// ePDS handle modes (duplicated from epds-config.ts to avoid circular dependency)
+const EPDS_HANDLE_MODES = ["random", "picker", "picker-with-random"] as const;
+type EpdsHandleMode = (typeof EPDS_HANDLE_MODES)[number];
 
 // Granular repo scope — collections with full CRUD access
 const REPO_COLLECTIONS = [
-  HYPERCERT_COLLECTIONS.CLAIM,
-  HYPERCERT_COLLECTIONS.RIGHTS,
-  HYPERCERT_COLLECTIONS.LOCATION,
-  HYPERCERT_COLLECTIONS.CONTRIBUTION,
-  HYPERCERT_COLLECTIONS.CONTRIBUTOR_INFORMATION,
-  HYPERCERT_COLLECTIONS.MEASUREMENT,
-  HYPERCERT_COLLECTIONS.EVALUATION,
-  HYPERCERT_COLLECTIONS.ATTACHMENT,
-  HYPERCERT_COLLECTIONS.COLLECTION,
-  HYPERCERT_COLLECTIONS.FUNDING_RECEIPT,
-  HYPERCERT_COLLECTIONS.WORK_SCOPE_TAG,
-  HYPERCERT_COLLECTIONS.CERTIFIED_PROFILE,
+  "org.hypercerts.claim.activity",
+  "org.hypercerts.claim.rights",
+  "app.certified.location",
+  "org.hypercerts.claim.contribution",
+  "org.hypercerts.claim.contributorInformation",
+  "org.hypercerts.context.measurement",
+  "org.hypercerts.context.evaluation",
+  "org.hypercerts.context.attachment",
+  "org.hypercerts.collection",
+  "org.hypercerts.funding.receipt",
+  "org.hypercerts.workscope.tag",
+  "app.certified.actor.profile",
 ];
 
 const HYPERCERT_REPO_SCOPE = `repo?${REPO_COLLECTIONS.map((c) => "collection=" + c).join("&")}&action=create&action=update&action=delete`;
 
 // Bsky profile scope — only create and update (no delete)
-const BSKY_PROFILE_SCOPE = `repo?collection=${HYPERCERT_COLLECTIONS.BSKY_PROFILE}&action=create&action=update`;
+const BSKY_PROFILE_SCOPE = `repo?collection=app.bsky.actor.profile&action=create&action=update`;
 
 const BLOB_SCOPE = "blob:*/*";
 const RPC_SCOPE =
   "rpc:app.bsky.actor.getProfile?aud=did:web:api.bsky.app%23bsky_appview";
+// for password reset and knowing which email to send to and for email verification as well
+const EMAIL_SCOPE = "account:email";
 
 const GRANULAR_SCOPE = [
   ATPROTO_SCOPE,
@@ -61,6 +51,7 @@ const GRANULAR_SCOPE = [
   BSKY_PROFILE_SCOPE,
   RPC_SCOPE,
   BLOB_SCOPE,
+  EMAIL_SCOPE,
 ].join(" ");
 
 /**
@@ -246,12 +237,26 @@ export const config = {
   epdsUrl: process.env.NEXT_PUBLIC_EPDS_URL,
   epdsClientId,
 
-  // Server-only secret for HMAC-signing the transient OAuth session cookie
-  // Must be 32+ characters. Only needed if ePDS login is used.
-  oauthSessionSecret: process.env.OAUTH_SESSION_SECRET,
-
   handleResolver:
     process.env.NEXT_PUBLIC_HANDLE_RESOLVER || "https://bsky.social",
+
+  // ePDS handle mode configuration
+  epdsHandleMode: (() => {
+    // Only validate when ePDS is enabled
+    if (!process.env.NEXT_PUBLIC_EPDS_URL) {
+      return "picker-with-random"; // Safe default when ePDS disabled
+    }
+
+    const mode =
+      process.env.NEXT_PUBLIC_EPDS_HANDLE_MODE || "picker-with-random";
+    if (!(EPDS_HANDLE_MODES as readonly string[]).includes(mode)) {
+      throw new Error(
+        `Invalid NEXT_PUBLIC_EPDS_HANDLE_MODE: "${mode}". ` +
+          `Must be one of: ${EPDS_HANDLE_MODES.join(", ")}`,
+      );
+    }
+    return mode as EpdsHandleMode;
+  })(),
 
   // Redis configuration
   redis: {
@@ -297,6 +302,7 @@ export function buildClientMetadata(): OAuthClientMetadataInput &
       jwks_uri: config.jwksUri,
       application_type: "web",
       dpop_bound_access_tokens: true,
+      ...(config.epdsUrl ? { epds_handle_mode: config.epdsHandleMode } : {}),
     };
   }
 
@@ -322,6 +328,7 @@ export function buildClientMetadata(): OAuthClientMetadataInput &
     branding: {
       css: generateBrandingCss(config.baseUrl),
     },
+    ...(config.epdsUrl ? { epds_handle_mode: config.epdsHandleMode } : {}),
   };
 }
 

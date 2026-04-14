@@ -70,3 +70,10 @@ export function getEpdsRedirectUri(): string {
 
   return config.epdsRedirectUri;
 }
+
+export const EPDS_HANDLE_MODES = [
+  "random",
+  "picker",
+  "picker-with-random",
+] as const;
+export type EpdsHandleMode = (typeof EPDS_HANDLE_MODES)[number];

@@ -2,11 +2,24 @@ import "server-only";
 import { parseAtUri } from "@/lib/utils";
 import type { RepoContext } from "@/lib/repo-context";
 import { assertValidRecord } from "@/lib/record-validation";
+import { coerceAtprotoDatetime, currentAtprotoDatetime } from "@/lib/datetime";
 import {
   OrgHypercertsClaimContribution,
   OrgHypercertsClaimContributorInformation,
   OrgHypercertsClaimActivity,
 } from "@hypercerts-org/lexicon";
+
+const normalizeLegacyDescription = (record: {
+  description?: unknown;
+}): void => {
+  const legacyDescription = record.description;
+  if (typeof legacyDescription === "string") {
+    record.description = {
+      $type: "org.hypercerts.defs#descriptionString",
+      value: legacyDescription,
+    };
+  }
+};
 
 export interface ContributionEntry {
   contributors: string[];
@@ -43,7 +56,7 @@ export const processContributions = async (
   }
 
   // 2. Ownership check — must happen before any child record writes
-  if (hypercertParsed.did !== ctx.activeDid) {
+  if (hypercertParsed.did !== ctx.userDid) {
     throw new Error(
       "processContributions failed: cannot modify another user's hypercert.",
     );
@@ -63,16 +76,23 @@ export const processContributions = async (
   const allNewContributors: unknown[] = [];
 
   for (const contribution of contributions) {
+    const normalizedStartDate = contribution.startDate
+      ? coerceAtprotoDatetime(contribution.startDate, "contribution startDate")
+      : undefined;
+    const normalizedEndDate = contribution.endDate
+      ? coerceAtprotoDatetime(contribution.endDate, "contribution endDate")
+      : undefined;
+
     // 4. Create contributionDetails record
     const detailsRecord: OrgHypercertsClaimContribution.Record = {
       $type: "org.hypercerts.claim.contribution",
       role: contribution.role,
-      createdAt: new Date().toISOString(),
+      createdAt: currentAtprotoDatetime(),
       ...(contribution.contributionDescription
         ? { contributionDescription: contribution.contributionDescription }
         : {}),
-      ...(contribution.startDate ? { startDate: contribution.startDate } : {}),
-      ...(contribution.endDate ? { endDate: contribution.endDate } : {}),
+      ...(normalizedStartDate ? { startDate: normalizedStartDate } : {}),
+      ...(normalizedEndDate ? { endDate: normalizedEndDate } : {}),
     };
 
     assertValidRecord(
@@ -81,7 +101,7 @@ export const processContributions = async (
       OrgHypercertsClaimContribution.validateRecord,
     );
     const detailsResult = await ctx.agent.com.atproto.repo.createRecord({
-      repo: ctx.activeDid,
+      repo: ctx.userDid,
       collection: "org.hypercerts.claim.contribution",
       record: detailsRecord,
     });
@@ -96,7 +116,7 @@ export const processContributions = async (
         const infoRecord: OrgHypercertsClaimContributorInformation.Record = {
           $type: "org.hypercerts.claim.contributorInformation",
           identifier,
-          createdAt: new Date().toISOString(),
+          createdAt: currentAtprotoDatetime(),
         };
         assertValidRecord(
           "contributorInformation",
@@ -104,7 +124,7 @@ export const processContributions = async (
           OrgHypercertsClaimContributorInformation.validateRecord,
         );
         const infoResult = await ctx.agent.com.atproto.repo.createRecord({
-          repo: ctx.activeDid,
+          repo: ctx.userDid,
           collection: "org.hypercerts.claim.contributorInformation",
           record: infoRecord,
         });
@@ -134,13 +154,14 @@ export const processContributions = async (
   ];
 
   // 6. Update hypercert with appended contributors
+  normalizeLegacyDescription(existingRecord);
   assertValidRecord(
     "activity",
     existingRecord,
     OrgHypercertsClaimActivity.validateRecord,
   );
   const putResult = await ctx.agent.com.atproto.repo.putRecord({
-    repo: ctx.activeDid,
+    repo: ctx.userDid,
     collection: hypercertParsed.collection,
     rkey: hypercertParsed.rkey,
     record: existingRecord,

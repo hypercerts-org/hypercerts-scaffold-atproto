@@ -8,13 +8,13 @@ This scaffold uses **native ATProto** for all record operations:
 - **`@atproto/oauth-client-node`** — `NodeOAuthClient` for OAuth session management
 - **`@hypercerts-org/lexicon`** — TypeScript types and `validateRecord` functions for all Hypercerts collections
 
-There is no SDK wrapper layer. The vendor directory contains a packed `@hypercerts-org/lexicon` tarball (type definitions and validators only).
+There is no SDK wrapper layer. The lexicon package is installed from the npm registry.
 
 ---
 
-## Vendor Package
+## Lexicon Package
 
-The `vendor/` directory contains a packed `@hypercerts-org/lexicon` tarball. This provides TypeScript types and `validateRecord` functions for Hypercerts collections. It is installed as a local dependency in `package.json`.
+The `@hypercerts-org/lexicon` package provides TypeScript types and `validateRecord` functions for Hypercerts collections. It is installed from the npm registry via `package.json`.
 
 ---
 
@@ -22,13 +22,9 @@ The `vendor/` directory contains a packed `@hypercerts-org/lexicon` tarball. Thi
 
 The lexicon package provides TypeScript types and record validators. To update:
 
-1. Clone/pull the [Hypercerts repository](https://github.com/hypercerts-org/hypercerts-sdk)
-2. Build: `pnpm install && pnpm build`
-3. Pack: `cd packages/lexicon && pnpm pack`
-4. Copy the `.tgz` to `vendor/`
-5. Update `package.json` to point to the new tarball
-6. Run `pnpm install`
-7. Check for type errors: `npx tsc --noEmit`
+1. Update `@hypercerts-org/lexicon` in `package.json` to the desired version
+2. Run `pnpm install`
+3. Check for type errors: `npx tsc --noEmit`
 
 If types have changed, update code in `lib/types.ts`, `lib/create-actions.ts`, and `lib/queries.ts` to match.
 
@@ -88,16 +84,6 @@ REDIS_PASSWORD=your_password
 
 # PDS server URL
 NEXT_PUBLIC_PDS_URL=https://pds-eu-west4.test.certified.app
-
-# If enabling ePDS email login, also set:
-OAUTH_SESSION_SECRET=<paste the output from the command below>
-```
-
-To generate a session secret, run this command separately in your terminal and paste the output above:
-
-```bash
-# Generate a session secret (required for ePDS email login)
-openssl rand -hex 32
 ```
 
 **Important:**
@@ -278,7 +264,7 @@ Found a bug or have a question? We'd love to hear from you!
    - Clear description of the problem
    - Steps to reproduce
    - Expected vs actual behavior
-   - Lexicon version (check `vendor/` directory)
+   - Lexicon version (check `package.json`)
    - Screenshots/logs if relevant
    - Your environment (OS, Node version, etc.)
 
@@ -320,7 +306,7 @@ We accept pull requests for:
 If your contribution depends on a newer lexicon version:
 
 1. **Document which lexicon version is required** in the PR description
-2. **Update the vendor package** (follow "Updating the Lexicon Package" above)
+2. **Update the lexicon dependency** (follow "Updating the Lexicon Package" above)
 3. **Include both the code changes and the lexicon update** in the same PR
 4. **Note any breaking changes** in the PR description
 5. **Test extensively** - you're changing a critical dependency
@@ -368,8 +354,6 @@ hypercerts-scaffold/
 │   └── ...
 ├── providers/             # React context providers
 ├── queries/               # TanStack Query hooks
-├── vendor/                # Packed lexicon package (types + validators)
-│   └── hypercerts-org-lexicon-*.tgz
 ├── .env.example          # Environment variable template
 └── .env.local            # Your local environment (gitignored)
 ```
@@ -388,23 +372,6 @@ hypercerts-scaffold/
 | `providers/OAuthProvider.tsx` | Client-side OAuth state management                           |
 | `app/api/oauth/*`             | ATProto OAuth flow endpoints (login, callback, logout)       |
 | `app/api/oauth/epds/*`        | ePDS email OAuth flow endpoints (login, callback)            |
-
----
-
-## Testing Against Lexicon Changes
-
-If you're a lexicon maintainer or want to test lexicon changes:
-
-### Quick Test Cycle
-
-1. **Make lexicon changes**
-2. **Build lexicon:** `pnpm build` (in lexicon repo)
-3. **Pack lexicon:** `pnpm pack` (in lexicon package directory)
-4. **Copy to scaffold:** `cp *.tgz /path/to/scaffold/vendor/`
-5. **Update scaffold package.json** to point to new `.tgz`
-6. **Install:** `pnpm install` (in scaffold)
-7. **Test:** `pnpm run dev` (in scaffold)
-8. **Iterate:** Repeat as needed
 
 ---
 
