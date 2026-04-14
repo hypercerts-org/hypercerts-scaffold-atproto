@@ -84,16 +84,6 @@ REDIS_PASSWORD=your_password
 
 # PDS server URL
 NEXT_PUBLIC_PDS_URL=https://pds-eu-west4.test.certified.app
-
-# If enabling ePDS email login, also set:
-OAUTH_SESSION_SECRET=<paste the output from the command below>
-```
-
-To generate a session secret, run this command separately in your terminal and paste the output above:
-
-```bash
-# Generate a session secret (required for ePDS email login)
-openssl rand -hex 32
 ```
 
 **Important:**
