@@ -13,17 +13,18 @@ export async function POST() {
     const [session, cookieStore] = await Promise.all([getSession(), cookies()]);
     const sessionId = cookieStore.get(SESSION_COOKIE_NAME)?.value;
 
-    if (session) {
-      await session.signOut();
+    try {
+      if (session) {
+        await session.signOut();
+      }
+    } finally {
+      if (sessionId) {
+        await sessionIdStore.del(sessionId);
+      }
+      cookieStore.delete(SESSION_COOKIE_NAME);
+      cookieStore.delete(LEGACY_USER_DID_COOKIE_NAME);
+      cookieStore.delete(LEGACY_ACTIVE_DID_COOKIE_NAME);
     }
-
-    if (sessionId) {
-      await sessionIdStore.del(sessionId);
-    }
-
-    cookieStore.delete(SESSION_COOKIE_NAME);
-    cookieStore.delete(LEGACY_USER_DID_COOKIE_NAME);
-    cookieStore.delete(LEGACY_ACTIVE_DID_COOKIE_NAME);
 
     return NextResponse.json(
       { message: "Signed out successfully" },

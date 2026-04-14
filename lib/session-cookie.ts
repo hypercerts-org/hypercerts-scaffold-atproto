@@ -1,3 +1,5 @@
+import "server-only";
+
 import { config } from "@/lib/config";
 
 export const SESSION_COOKIE_NAME = "sid";

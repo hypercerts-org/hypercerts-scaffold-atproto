@@ -1,4 +1,7 @@
-import oauthClient, { sessionIdStore } from "@/lib/hypercerts-sdk";
+import oauthClient, {
+  sessionIdStore,
+  sessionStore,
+} from "@/lib/hypercerts-sdk";
 import { config } from "@/lib/config";
 import {
   generateSessionId,
@@ -41,7 +44,15 @@ export async function GET(req: NextRequest) {
     const { session } = result;
     const previousSessionId = cookieStore.get(SESSION_COOKIE_NAME)?.value;
     if (previousSessionId) {
+      const previousDid = await sessionIdStore.get(previousSessionId);
       await sessionIdStore.del(previousSessionId);
+      if (previousDid && previousDid !== session.did) {
+        const previousSession = await oauthClient
+          .restore(previousDid)
+          .catch(() => null);
+        await previousSession?.signOut().catch(() => null);
+        await sessionStore.del(previousDid);
+      }
     }
 
     const sessionId = generateSessionId();
