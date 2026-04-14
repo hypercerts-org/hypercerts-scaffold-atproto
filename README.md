@@ -66,13 +66,12 @@ This scaffold uses **native ATProto** — all record operations go through `@atp
 
 ### Optional Variables
 
-| Variable                       | Description                                                                                                                                                  |
-| ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `NEXT_PUBLIC_EPDS_URL`         | ePDS URL for email-based login. When set, enables the Email login tab in the UI. Example: `https://epds1.test.certified.app`                                 |
-| `NEXT_PUBLIC_EPDS_HANDLE_MODE` | ePDS handle creation mode. Valid values: `random`, `picker`, `picker-with-random` (default). Only used when `NEXT_PUBLIC_EPDS_URL` is set.                   |
-| `OAUTH_SESSION_SECRET`         | Server-only HMAC secret for ePDS OAuth session cookie. Required when `NEXT_PUBLIC_EPDS_URL` is set. Must be 32+ chars. Generate with: `openssl rand -hex 32` |
-| `REDIS_USERNAME`               | Redis username. Defaults to `default` when `REDIS_PASSWORD` is set.                                                                                          |
-| `NEXT_PUBLIC_HANDLE_RESOLVER`  | Handle resolver URL. Defaults to `https://bsky.social`.                                                                                                      |
+| Variable                       | Description                                                                                                                                |
+| ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| `NEXT_PUBLIC_EPDS_URL`         | ePDS URL for email-based login. When set, enables the Email login tab in the UI. Example: `https://epds1.test.certified.app`               |
+| `NEXT_PUBLIC_EPDS_HANDLE_MODE` | ePDS handle creation mode. Valid values: `random`, `picker`, `picker-with-random` (default). Only used when `NEXT_PUBLIC_EPDS_URL` is set. |
+| `REDIS_USERNAME`               | Redis username. Defaults to `default` when `REDIS_PASSWORD` is set.                                                                        |
+| `NEXT_PUBLIC_HANDLE_RESOLVER`  | Handle resolver URL. Defaults to `https://bsky.social`.                                                                                    |
 
 ### Local Development
 
@@ -218,7 +217,7 @@ This scaffold uses OAuth 2.0 with DPoP (Demonstrating Proof of Possession) for a
 3. User approves the application
 4. OAuth callback receives the authorization code
 5. NodeOAuthClient exchanges code for session credentials (stored in Redis)
-6. A `user-did` cookie tracks the authenticated user for subsequent requests
+6. App creates an opaque `sid` cookie and stores `sid -> did` mapping in Redis
 
 ### Flow 2: Email Login (ePDS)
 
@@ -232,7 +231,7 @@ This scaffold uses OAuth 2.0 with DPoP (Demonstrating Proof of Possession) for a
 6. User enters the OTP code on the ePDS page
 7. ePDS redirects back to `/api/oauth/epds/callback` with an authorization code
 8. App exchanges the code for tokens using DPoP, creates a session in Redis
-9. User is authenticated — same `user-did` cookie as the standard flow
+9. User is authenticated — same `sid` cookie model as the standard flow
 
 **Key technical details:**
 
