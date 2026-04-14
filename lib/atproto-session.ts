@@ -16,16 +16,14 @@ export const getSession = cache(
 
     const userDid = await sessionIdStore.get(sessionId);
     if (!userDid) {
-      console.warn(`No DID mapping found for session id ${sessionId}`);
+      console.warn("No DID mapping found for provided session cookie");
       return null;
     }
 
     try {
       const restoredSession = await oauthClient.restore(userDid);
       if (!restoredSession || restoredSession.did !== userDid) {
-        console.warn(
-          `Session restore mismatch (sid=${sessionId}, expected DID=${userDid})`,
-        );
+        console.warn(`Session restore mismatch for DID ${userDid}`);
         return null;
       }
       return restoredSession;

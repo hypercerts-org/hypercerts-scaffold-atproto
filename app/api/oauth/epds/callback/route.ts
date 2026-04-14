@@ -147,13 +147,18 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     // Session persists in Redis for 24h; SDK handles token refresh within that window
     await sessionStore.set(tokenData.sub, nodeSavedSession);
 
-    const previousSessionId = req.cookies.get(SESSION_COOKIE_NAME)?.value;
-    if (previousSessionId) {
-      await sessionIdStore.del(previousSessionId);
-    }
-
     const sessionId = generateSessionId();
     await sessionIdStore.set(sessionId, tokenData.sub);
+
+    const previousSessionId = req.cookies.get(SESSION_COOKIE_NAME)?.value;
+    if (previousSessionId && previousSessionId !== sessionId) {
+      sessionIdStore.del(previousSessionId).catch((error) => {
+        console.error(
+          "[oauth/epds/callback] Failed to delete previous SID mapping:",
+          error,
+        );
+      });
+    }
 
     // 12. Create redirect response to /
     const response = NextResponse.redirect(new URL("/", config.baseUrl));
