@@ -211,8 +211,218 @@ main.flex.flex-col.items-center > button:nth-of-type(2)::after {
   justify-items: start !important;
 }
 
+/* ===== AUTH SERVICE POLISH ===== */
+body {
+  background:
+    radial-gradient(circle at top left, rgba(59,130,246,0.12), transparent 32%),
+    radial-gradient(circle at bottom right, rgba(15,37,68,0.18), transparent 36%),
+    linear-gradient(180deg, #f5f8fc 0%, #eef3f9 100%) !important;
+}
+.container {
+  position: relative;
+  background: rgba(255,255,255,0.92) !important;
+  border: 1px solid rgba(15,37,68,0.08) !important;
+  border-radius: 24px !important;
+  padding: 40px 32px !important;
+  box-shadow: 0 20px 50px rgba(15,37,68,0.12), 0 6px 18px rgba(15,37,68,0.06) !important;
+  backdrop-filter: blur(10px);
+}
+.container::before {
+  content: "" !important;
+  position: absolute !important;
+  inset: 0 0 auto 0 !important;
+  height: 4px !important;
+  border-radius: 24px 24px 0 0 !important;
+  background: linear-gradient(90deg, #0F2544 0%, #3B82F6 100%) !important;
+}
+.client-logo {
+  height: 72px !important;
+  width: auto !important;
+  margin-bottom: 20px !important;
+  filter: drop-shadow(0 8px 20px rgba(15,37,68,0.12));
+}
+h1 {
+  font-size: 2rem !important;
+  line-height: 1.1 !important;
+  letter-spacing: -0.03em !important;
+  margin-bottom: 10px !important;
+  color: #0F2544 !important;
+}
+.subtitle {
+  color: #5b6b80 !important;
+  font-size: 0.98rem !important;
+  line-height: 1.6 !important;
+  margin-bottom: 24px !important;
+}
+.subtitle strong {
+  color: #0F2544 !important;
+  font-weight: 700 !important;
+}
+.field {
+  margin-bottom: 18px !important;
+}
+.field label {
+  font-size: 0.92rem !important;
+  font-weight: 600 !important;
+  color: #24364d !important;
+  margin-bottom: 8px !important;
+}
+.field input {
+  height: 52px !important;
+  border-radius: 14px !important;
+  border: 1px solid rgba(15,37,68,0.14) !important;
+  background: rgba(248,250,252,0.95) !important;
+  color: #0F2544 !important;
+  transition: border-color 140ms ease, box-shadow 140ms ease, background 140ms ease, transform 140ms ease !important;
+}
+.field input:hover {
+  border-color: rgba(15,37,68,0.22) !important;
+  background: #ffffff !important;
+}
+.field input:focus {
+  border-color: #3B82F6 !important;
+  box-shadow: 0 0 0 4px rgba(59,130,246,0.14) !important;
+  background: #ffffff !important;
+}
+.otp-input {
+  height: 60px !important;
+  border-radius: 16px !important;
+  font-size: 2rem !important;
+  letter-spacing: 0.35em !important;
+  font-weight: 700 !important;
+  background: linear-gradient(180deg, #f8fbff 0%, #f1f6fc 100%) !important;
+}
+.btn-primary {
+  height: 52px !important;
+  border-radius: 14px !important;
+  border: 0 !important;
+  background: linear-gradient(135deg, #0F2544 0%, #1d4f91 45%, #3B82F6 100%) !important;
+  color: #ffffff !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.01em !important;
+  box-shadow: 0 12px 24px rgba(59,130,246,0.22) !important;
+  transition: transform 140ms ease, box-shadow 140ms ease, filter 140ms ease !important;
+}
+.btn-primary:hover {
+  transform: translateY(-1px) !important;
+  box-shadow: 0 16px 28px rgba(59,130,246,0.28) !important;
+  filter: saturate(1.04) !important;
+}
+.btn-primary:disabled {
+  opacity: 0.7 !important;
+  transform: none !important;
+  box-shadow: none !important;
+}
+.btn-secondary {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  min-height: 40px !important;
+  padding: 0 6px !important;
+  margin-top: 14px !important;
+  color: #4f6b94 !important;
+  font-weight: 600 !important;
+  text-decoration: none !important;
+  border-radius: 10px !important;
+}
+.btn-secondary:hover {
+  color: #0F2544 !important;
+  background: rgba(15,37,68,0.05) !important;
+}
+.error {
+  border: 1px solid rgba(220,38,38,0.14) !important;
+  background: linear-gradient(180deg, #fff5f5 0%, #fef2f2 100%) !important;
+  color: #b42318 !important;
+  border-radius: 14px !important;
+  padding: 14px 16px !important;
+  margin: 0 0 18px 0 !important;
+  font-weight: 500 !important;
+}
+.recovery-link {
+  margin-top: 18px !important;
+  color: #607089 !important;
+  font-size: 0.92rem !important;
+  text-decoration: none !important;
+}
+.recovery-link:hover {
+  color: #0F2544 !important;
+  text-decoration: underline !important;
+}
+#btn-resend,
+#btn-back {
+  margin-top: 10px !important;
+}
+@media (max-width: 640px) {
+  .container {
+    max-width: calc(100vw - 24px) !important;
+    padding: 28px 20px !important;
+    border-radius: 20px !important;
+  }
+  h1 {
+    font-size: 1.75rem !important;
+  }
+  .otp-input {
+    font-size: 1.7rem !important;
+    letter-spacing: 0.25em !important;
+  }
+  .client-logo {
+    height: 60px !important;
+  }
+}
+
 /* ===== DARK MODE ===== */
 @media (prefers-color-scheme: dark) {
+  body {
+    background:
+      radial-gradient(circle at top left, rgba(59,130,246,0.12), transparent 30%),
+      radial-gradient(circle at bottom right, rgba(15,37,68,0.24), transparent 35%),
+      linear-gradient(180deg, #08111f 0%, #0b1728 100%) !important;
+  }
+
+  .container {
+    background: rgba(10,18,31,0.88) !important;
+    border-color: rgba(148,163,184,0.14) !important;
+    box-shadow: 0 24px 60px rgba(0,0,0,0.42), 0 8px 24px rgba(0,0,0,0.24) !important;
+  }
+
+  h1,
+  .subtitle strong,
+  .field label {
+    color: #e8eef7 !important;
+  }
+
+  .subtitle,
+  .recovery-link,
+  .btn-secondary {
+    color: #9fb0c8 !important;
+  }
+
+  .field input {
+    background: rgba(15,23,42,0.9) !important;
+    border-color: rgba(148,163,184,0.16) !important;
+    color: #f8fafc !important;
+  }
+
+  .field input:hover,
+  .field input:focus {
+    background: rgba(15,23,42,1) !important;
+  }
+
+  .otp-input {
+    background: linear-gradient(180deg, #0f172a 0%, #111c31 100%) !important;
+  }
+
+  .btn-secondary:hover {
+    background: rgba(255,255,255,0.05) !important;
+    color: #ffffff !important;
+  }
+
+  .error {
+    border-color: rgba(248,113,113,0.18) !important;
+    background: rgba(69,10,10,0.65) !important;
+    color: #fecaca !important;
+  }
+
   /* Logo: invert to white so it's visible on dark panel */
   img[alt="Hypercerts Logo"] {
     filter: invert(1) !important;
