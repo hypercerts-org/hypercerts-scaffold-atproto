@@ -11,7 +11,7 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       {
         protocol: "https",
-        hostname: "pds-eu-west4.test.certified.app",
+        hostname: "dev.certified.app",
         port: "",
         pathname: "/**",
       },
