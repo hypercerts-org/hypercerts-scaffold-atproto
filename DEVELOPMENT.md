@@ -37,7 +37,7 @@ If types have changed, update code in `lib/types.ts`, `lib/create-actions.ts`, a
 - **Node.js 20+** (we recommend [nvm](https://github.com/nvm-sh/nvm) for version management)
 - **pnpm** package manager: `npm install -g pnpm`
 - **Docker** (for Redis) OR a cloud Redis instance
-- **A PDS account** for testing (e.g., on https://pds-eu-west4.test.certified.app)
+- **A PDS account** for testing (e.g., on https://dev.certified.app)
 
 ### First-time Setup
 
@@ -83,7 +83,7 @@ REDIS_PORT=12345
 REDIS_PASSWORD=your_password
 
 # PDS server URL
-NEXT_PUBLIC_PDS_URL=https://pds-eu-west4.test.certified.app
+NEXT_PUBLIC_PDS_URL=https://dev.certified.app
 ```
 
 **Important:**
@@ -210,7 +210,7 @@ You don't need to run these manually — they run on `git commit`.
 
 OAuth branding (custom logo, colors, CSS on the PDS sign-in pages) only works when **both** conditions are met:
 
-1. **The PDS is a certified PDS** — branding is a feature of certified PDS instances (e.g. `pds-eu-west4.test.certified.app`). Standard/uncertified PDS instances do not support custom OAuth branding.
+1. **The PDS is a certified PDS** — branding is a feature of certified PDS instances (e.g. `dev.certified.app`). Standard/uncertified PDS instances do not support custom OAuth branding.
 2. **Your app's client URL has been added to the PDS's trusted OAuth clients list** — the PDS only applies branding CSS for client URLs registered in its `PDS_OAUTH_TRUSTED_CLIENTS` environment variable. Even if your app serves correct branding metadata at `/client-metadata.json`, the PDS will ignore it unless your URL is explicitly trusted.
 
 Additionally, branding cannot work in local development (loopback mode). When using a loopback `client_id` (localhost/127.0.0.1), the PDS auto-generates minimal client metadata and ignores custom branding fields. This is part of the ATProto specification.
