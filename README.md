@@ -11,7 +11,7 @@ A Next.js scaffold for building applications on ATProto using native ATProto. Th
 - **Redis** for session & state storage:
   - **Local development:** `docker run -d -p 6379:6379 redis:alpine`
   - **Cloud Redis:** Upstash, Redis Labs, Railway, etc. (see [Environment Configuration](#environment-configuration))
-- **A PDS account** for testing (e.g., on https://pds-eu-west4.test.certified.app)
+- **A PDS account** for testing (e.g., on https://dev.certified.app)
 
 ## Quick Start
 
@@ -62,7 +62,7 @@ This scaffold uses **native ATProto** — all record operations go through `@atp
 | `REDIS_HOST`           | Redis server hostname (e.g., `localhost` for Docker, or cloud Redis host)                      |
 | `REDIS_PORT`           | Redis server port (default: `6379`)                                                            |
 | `REDIS_PASSWORD`       | Redis password. Leave empty for local Docker (no auth).                                        |
-| `NEXT_PUBLIC_PDS_URL`  | Personal Data Server URL (e.g., `https://pds-eu-west4.test.certified.app`)                     |
+| `NEXT_PUBLIC_PDS_URL`  | Personal Data Server URL (e.g., `https://dev.certified.app`)                                   |
 
 ### Optional Variables
 
@@ -88,7 +88,7 @@ This is required for [RFC 8252](https://datatracker.ietf.org/doc/html/rfc8252#se
 For development and testing, use these servers:
 
 ```env
-NEXT_PUBLIC_PDS_URL=https://pds-eu-west4.test.certified.app
+NEXT_PUBLIC_PDS_URL=https://dev.certified.app
 # Optional: Enable email login via ePDS
 NEXT_PUBLIC_EPDS_URL=https://epds1.test.certified.app
 ```
