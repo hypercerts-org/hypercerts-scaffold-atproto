@@ -55,7 +55,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     );
 
     // 6. Get endpoints and client info
-    const { tokenEndpoint } = getEpdsEndpoints();
+    const { issuer, tokenEndpoint } = await getEpdsEndpoints();
     const clientId = getEpdsClientId();
     const redirectUri = getEpdsRedirectUri();
 
@@ -119,9 +119,6 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     }
 
     // 11. Construct NodeSavedSession and write to Redis
-    // The issuer is the PDS origin (token endpoint without the /oauth/token path)
-    const issuer = tokenEndpoint.replace("/oauth/token", "");
-
     // NodeSavedSession = Omit<Session, 'dpopKey'> & { dpopJwk: Jwk }
     // dpopJwk must be the private JWK (includes 'd' parameter) — SDK uses this for DPoP proofs
     // sub must be AtprotoDid (`did:plc:${string}` | `did:web:${string}`) — cast from token response

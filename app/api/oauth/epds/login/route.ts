@@ -38,7 +38,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     const state = generateState();
 
     // 3. Get endpoints and client info
-    const { parEndpoint, authEndpoint } = getEpdsEndpoints();
+    const { parEndpoint, authEndpoint } = await getEpdsEndpoints();
     const clientId = getEpdsClientId();
     const redirectUri = getEpdsRedirectUri();
 

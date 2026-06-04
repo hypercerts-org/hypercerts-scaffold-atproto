@@ -48,6 +48,31 @@ export interface BaseHypercertFormProps {
   hypercertInfo?: CreateHypercertResult;
 }
 
+export interface EpdsOAuthEndpoints {
+  /**
+   * OAuth issuer selected from the ePDS protected-resource metadata.
+   * Store this value with tokens issued by the manual ePDS OAuth flow.
+   */
+  issuer: string;
+
+  /**
+   * Endpoint used to submit pushed authorization requests before redirecting
+   * the user to the browser authorization flow.
+   */
+  parEndpoint: string;
+
+  /**
+   * Browser endpoint where users authenticate or create an ePDS account.
+   */
+  authEndpoint: string;
+
+  /**
+   * Endpoint used by the callback route to exchange an authorization code for
+   * ePDS access and refresh tokens.
+   */
+  tokenEndpoint: string;
+}
+
 export enum Collections {
   claim = "org.hypercerts.claim.activity",
   contribution = "org.hypercerts.claim.contribution",
