@@ -4,6 +4,7 @@ import { parseAtUri, getStringField } from "@/lib/utils";
 import { coerceAtprotoDatetime, currentAtprotoDatetime } from "@/lib/datetime";
 import { assertValidRecord } from "@/lib/record-validation";
 import {
+  normalizeContributionWeight,
   processContributions,
   type ContributionEntry,
 } from "@/lib/contribution-helpers";
@@ -84,6 +85,7 @@ export async function POST(req: NextRequest) {
       contributionDescription?: string;
       startDate?: string;
       endDate?: string;
+      weight?: string;
       contributionDetails?: {
         role?: string;
         contributionDescription?: string;
@@ -99,7 +101,7 @@ export async function POST(req: NextRequest) {
     );
 
     const contributions: ContributionEntry[] | undefined =
-      rawContributions?.map((c) => ({
+      rawContributions?.map((c, index) => ({
         contributors: c.contributors,
         role: c.role ?? c.contributionDetails?.role ?? "",
         contributionDescription:
@@ -107,6 +109,10 @@ export async function POST(req: NextRequest) {
           c.contributionDetails?.contributionDescription,
         startDate: c.startDate ?? c.contributionDetails?.startDate,
         endDate: c.endDate ?? c.contributionDetails?.endDate,
+        weight: normalizeContributionWeight(
+          c.weight,
+          `contributions[${index}].weight`,
+        ),
       }));
 
     const workScopeTags: string[] = workScopeRaw

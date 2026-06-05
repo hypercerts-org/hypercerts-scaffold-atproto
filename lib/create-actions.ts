@@ -30,6 +30,7 @@ export const addContribution = async (params: {
     startDate?: string;
     endDate?: string;
   };
+  weight?: string;
 }): Promise<{ uri: string; cid: string }> => {
   const ctx = await getRepoContext();
   if (!ctx) {
@@ -46,6 +47,7 @@ export const addContribution = async (params: {
         params.contributionDetails.contributionDescription,
       startDate: params.contributionDetails.startDate,
       endDate: params.contributionDetails.endDate,
+      weight: params.weight,
     },
   ]);
 

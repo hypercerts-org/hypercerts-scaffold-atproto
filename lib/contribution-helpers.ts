@@ -21,12 +21,43 @@ const normalizeLegacyDescription = (record: {
   }
 };
 
+/**
+ * Contribution payload used when appending contributor records to an activity.
+ * Each entry creates one contribution-details record and one contributor-info
+ * record per contributor, then links them from the activity claim.
+ */
 export interface ContributionEntry {
   contributors: string[];
   role: string;
   contributionDescription?: string;
   startDate?: string;
   endDate?: string;
+  /** Relative contribution weight stored on each linked activity contributor. */
+  weight?: string;
+}
+
+/**
+ * Normalize and validate a contribution weight before writing it to a record.
+ * Use this when accepting API or form input so invalid weights fail before any
+ * child records are created. Returns `undefined` when no weight was supplied.
+ */
+export function normalizeContributionWeight(
+  weight: string | undefined,
+  label = "contribution weight",
+): string | undefined {
+  if (weight === undefined || weight.trim() === "") return undefined;
+
+  const normalized = weight.trim();
+  const isDecimal = /^\d+(?:\.\d+)?$/.test(normalized);
+  const parsed = Number(normalized);
+
+  if (!isDecimal || !Number.isFinite(parsed) || parsed <= 0) {
+    throw new Error(
+      `Invalid ${label}: expected a positive numeric string such as "1", "2.5", or "0.25".`,
+    );
+  }
+
+  return normalized;
 }
 
 /**
@@ -62,6 +93,14 @@ export const processContributions = async (
     );
   }
 
+  const normalizedContributions = contributions.map((contribution, index) => ({
+    ...contribution,
+    weight: normalizeContributionWeight(
+      contribution.weight,
+      `contributions[${index}].weight`,
+    ),
+  }));
+
   // 3. Fetch the existing hypercert record before creating child records
   const existingHypercertResult = await ctx.agent.com.atproto.repo.getRecord({
     repo: hypercertParsed.did,
@@ -75,7 +114,7 @@ export const processContributions = async (
 
   const allNewContributors: unknown[] = [];
 
-  for (const contribution of contributions) {
+  for (const contribution of normalizedContributions) {
     const normalizedStartDate = contribution.startDate
       ? coerceAtprotoDatetime(contribution.startDate, "contribution startDate")
       : undefined;
@@ -142,6 +181,9 @@ export const processContributions = async (
         $type: "com.atproto.repo.strongRef" as const,
         ...detailsRef,
       },
+      ...(contribution.weight
+        ? { contributionWeight: contribution.weight }
+        : {}),
     }));
 
     allNewContributors.push(...newContributors);
