@@ -18,6 +18,9 @@ const ATPROTO_SCOPE = "atproto";
 const EPDS_HANDLE_MODES = ["random", "picker", "picker-with-random"] as const;
 type EpdsHandleMode = (typeof EPDS_HANDLE_MODES)[number];
 
+const SESSION_STORE_KINDS = ["redis", "memory"] as const;
+type SessionStoreKind = (typeof SESSION_STORE_KINDS)[number];
+
 // Granular repo scope — collections with full CRUD access
 const REPO_COLLECTIONS = [
   "org.hypercerts.claim.activity",
@@ -165,6 +168,48 @@ function getRedirectBaseUrl(baseUrl: string): string {
 }
 
 /**
+ * Get the server-side store used for OAuth state and user sessions.
+ *
+ * Redis is the default and the only supported choice for shared deployments.
+ * The memory store is intentionally restricted to loopback local development so
+ * Vercel preview/production deployments cannot accidentally lose sessions on
+ * cold starts or across server instances.
+ */
+function getSessionStoreKind(baseUrl: string): SessionStoreKind {
+  const value = process.env.SESSION_STORE || "redis";
+
+  if (!(SESSION_STORE_KINDS as readonly string[]).includes(value)) {
+    throw new Error(
+      `Invalid SESSION_STORE: "${value}".\n` +
+        `Expected one of: ${SESSION_STORE_KINDS.join(", ")}.\n` +
+        `Use SESSION_STORE=memory only for local 127.0.0.1 development, or SESSION_STORE=redis for Vercel and production.`,
+    );
+  }
+
+  const sessionStoreKind = value as SessionStoreKind;
+
+  if (sessionStoreKind === "memory") {
+    if (process.env.VERCEL_ENV) {
+      throw new Error(
+        `Invalid SESSION_STORE=memory for Vercel ${process.env.VERCEL_ENV}.\n` +
+          `The memory store is process-local and would lose sessions across cold starts or instances.\n` +
+          `Set SESSION_STORE=redis and configure REDIS_HOST and REDIS_PORT instead.`,
+      );
+    }
+
+    if (!isLoopback(baseUrl)) {
+      throw new Error(
+        `Invalid SESSION_STORE=memory for NEXT_PUBLIC_BASE_URL: "${baseUrl}".\n` +
+          `The memory store is only safe for loopback local development.\n` +
+          `Use http://127.0.0.1:3000 locally, or set SESSION_STORE=redis for public URLs.`,
+      );
+    }
+  }
+
+  return sessionStoreKind;
+}
+
+/**
  * Build OAuth client ID according to ATProto spec
  * - Loopback: http://localhost?scope=...&redirect_uri=...
  * - Production: https://yourdomain.com/client-metadata.json
@@ -211,6 +256,7 @@ const clientId = buildClientId(baseUrl, OAUTH_SCOPE, redirectUri);
 const isLoopbackMode = isLoopback(baseUrl);
 const isDevelopment = process.env.NODE_ENV !== "production";
 const isProduction = process.env.NODE_ENV === "production";
+const sessionStoreKind = getSessionStoreKind(baseUrl);
 
 /**
  * Application configuration object
@@ -258,11 +304,14 @@ export const config = {
     return mode as EpdsHandleMode;
   })(),
 
-  // Redis configuration
+  // Session and OAuth state storage configuration
+  sessionStore: sessionStoreKind,
+
+  // Redis configuration (required only when SESSION_STORE=redis)
   redis: {
-    host: process.env.REDIS_HOST!,
-    port: process.env.REDIS_PORT!,
-    password: process.env.REDIS_PASSWORD!,
+    host: process.env.REDIS_HOST,
+    port: process.env.REDIS_PORT,
+    password: process.env.REDIS_PASSWORD,
   },
 
   // Private keys (server-only, not exposed to client)
@@ -333,12 +382,14 @@ export function buildClientMetadata(): OAuthClientMetadataInput &
 }
 
 // Validate required environment variables
-const requiredEnvVars = [
+const baseRequiredEnvVars = [
   "NEXT_PUBLIC_PDS_URL",
   "ATPROTO_JWK_PRIVATE",
-  "REDIS_HOST",
-  "REDIS_PORT",
-  "REDIS_PASSWORD",
+] as const;
+const redisRequiredEnvVars = ["REDIS_HOST", "REDIS_PORT"] as const;
+const requiredEnvVars = [
+  ...baseRequiredEnvVars,
+  ...(config.sessionStore === "redis" ? redisRequiredEnvVars : []),
 ] as const;
 
 for (const envVar of requiredEnvVars) {
@@ -362,5 +413,6 @@ if (
   console.log(`   Client ID: ${clientId}`);
   console.log(`   Redirect URI: ${redirectUri}`);
   console.log(`   JWKS URI: ${jwksUri}`);
-  console.log(`   Handle Resolver: ${config.handleResolver}\n`);
+  console.log(`   Handle Resolver: ${config.handleResolver}`);
+  console.log(`   Session Store: ${config.sessionStore}\n`);
 }

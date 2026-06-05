@@ -1,9 +1,12 @@
+import type { JsonWebKey } from "node:crypto";
 import type {
+  NodeSavedSession,
   NodeSavedSessionStore as SessionStore,
+  NodeSavedState,
   NodeSavedStateStore as StateStore,
 } from "@atproto/oauth-client-node";
+
 import { redisClient } from "@/lib/redis";
-import { NodeSavedSession, NodeSavedState } from "@atproto/oauth-client-node";
 
 const STATE_PREFIX = "oauth-state:";
 const SESSION_PREFIX = "session:";
@@ -12,6 +15,12 @@ const STATE_EXPIRATION_SECONDS = 600; // 10 minutes for temporary OAuth state
 const SESSION_EXPIRATION_SECONDS = 86400; // 24 hours for user sessions
 const EPDS_STATE_PREFIX = "epds-oauth-state:";
 
+/**
+ * Temporary ePDS OAuth callback state saved between login and callback.
+ *
+ * The code verifier completes the PKCE exchange and the private DPoP JWK signs
+ * the token request. This state is short-lived and must be deleted after use.
+ */
 export interface EpdsOAuthState {
   codeVerifier: string;
   dpopPrivateJwk: JsonWebKey;

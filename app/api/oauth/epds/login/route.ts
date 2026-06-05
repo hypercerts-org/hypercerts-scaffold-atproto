@@ -80,7 +80,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
       request_uri: string;
     };
 
-    // 8. Store OAuth state in Redis
+    // 8. Store OAuth state in the configured server-side store
     await epdsStateStore.set(state, {
       codeVerifier,
       dpopPrivateJwk: privateJwk,
