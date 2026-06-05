@@ -18,5 +18,6 @@ export {
 } from "./use-measurements-query";
 export {
   useContributorProfilesQuery,
+  useResolveContributionDetails,
   useResolveContributorIdentities,
 } from "./use-contributor-profiles-query";

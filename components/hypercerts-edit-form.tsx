@@ -6,7 +6,12 @@ import Image from "next/image";
 import Link from "next/link";
 import { toast } from "sonner";
 import { useUpdateHypercertMutation } from "@/queries/hypercerts";
+import { addContribution } from "@/lib/create-actions";
 import { localDateToAtprotoDatetime } from "@/lib/datetime";
+import {
+  CONTRIBUTION_WEIGHT_PATTERN,
+  isValidContributionWeight,
+} from "@/lib/contribution-validation";
 import type { OrgHypercertsClaimActivity } from "@hypercerts-org/lexicon";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,7 +19,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Spinner } from "@/components/ui/spinner";
 import { DatePicker } from "@/components/date-range-picker";
 import { Label } from "@radix-ui/react-label";
-import { Upload, Tag, Calendar, X } from "lucide-react";
+import { Upload, Tag, Calendar, X, Users, PlusIcon, Trash } from "lucide-react";
 
 interface HypercertsEditFormProps {
   hypercertUri: string;
@@ -63,12 +68,18 @@ export default function HypercertsEditForm({
   );
   // true when the user explicitly wants to remove the existing image
   const [removeImage, setRemoveImage] = useState(false);
+  const [manualContributors, setManualContributors] = useState<string[]>([""]);
+  const [contributionRole, setContributionRole] = useState("");
+  const [contributionWeight, setContributionWeight] = useState("");
+  const [contributionDescription, setContributionDescription] = useState("");
+  const [contributionStartDate, setContributionStartDate] =
+    useState<Date | null>(null);
+  const [contributionEndDate, setContributionEndDate] = useState<Date | null>(
+    null,
+  );
+  const [isAddingContribution, setIsAddingContribution] = useState(false);
 
-  const updateMutation = useUpdateHypercertMutation({
-    onSuccess: () => {
-      router.push(detailHref);
-    },
-  });
+  const updateMutation = useUpdateHypercertMutation();
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -107,6 +118,28 @@ export default function HypercertsEditForm({
     setImagePreview(null);
   };
 
+  const addManualContributor = () => {
+    setManualContributors((prev) => [...prev, ""]);
+  };
+
+  const removeManualContributor = (index: number) => {
+    setManualContributors((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const updateManualContributor = (index: number, value: string) => {
+    setManualContributors((prev) => {
+      const updated = [...prev];
+      updated[index] = value;
+      return updated;
+    });
+  };
+
+  const getManualContributorIdentifiers = (): string[] => {
+    return manualContributors
+      .map((identifier) => identifier.trim())
+      .filter((identifier) => identifier !== "");
+  };
+
   // Normalize a Date to a date-only string "YYYY-MM-DD" using local time,
   // avoiding UTC conversion that can shift the calendar day.
   const toDateString = (d: Date): string => {
@@ -134,7 +167,7 @@ export default function HypercertsEditForm({
     return `${y}-${m}-${day}`;
   };
 
-  const isPristine =
+  const isCorePristine =
     title === (record.title ?? "") &&
     shortDescription === (record.shortDescription ?? "") &&
     (startDate ? toDateString(startDate) : "") ===
@@ -144,7 +177,25 @@ export default function HypercertsEditForm({
     !newImage &&
     !removeImage;
 
-  const handleSubmit: FormEventHandler<HTMLFormElement> = (e) => {
+  const contributorIdentifiers = getManualContributorIdentifiers();
+  const hasNewContributors = contributorIdentifiers.length > 0;
+  const isContributionWeightValid =
+    isValidContributionWeight(contributionWeight);
+  const hasContributionDraft =
+    hasNewContributors ||
+    contributionRole.trim() !== "" ||
+    contributionWeight.trim() !== "" ||
+    contributionDescription.trim() !== "" ||
+    contributionStartDate !== null ||
+    contributionEndDate !== null;
+  const canSaveContribution =
+    hasNewContributors &&
+    contributionRole.trim() !== "" &&
+    isContributionWeightValid;
+  const isPristine = isCorePristine && !hasContributionDraft;
+  const isSaving = updateMutation.isPending || isAddingContribution;
+
+  const handleSubmit: FormEventHandler<HTMLFormElement> = async (e) => {
     e.preventDefault();
 
     // Guard: nothing changed — show feedback and bail out
@@ -153,8 +204,15 @@ export default function HypercertsEditForm({
       return;
     }
 
+    if (hasContributionDraft && !canSaveContribution) {
+      toast.error(
+        "To add contributors, enter at least one identifier, a role/title, and a positive weight if provided.",
+      );
+      return;
+    }
+
     // Build updates with only changed fields
-    const updates: Parameters<typeof updateMutation.mutate>[0] = {
+    const updates: Parameters<typeof updateMutation.mutateAsync>[0] = {
       hypercertUri,
     };
 
@@ -180,7 +238,47 @@ export default function HypercertsEditForm({
     if (removeImage) updates.image = null;
     else if (newImage) updates.image = newImage;
 
-    updateMutation.mutate(updates);
+    try {
+      if (!isCorePristine) {
+        await updateMutation.mutateAsync(updates);
+      }
+
+      if (hasContributionDraft) {
+        setIsAddingContribution(true);
+        await addContribution({
+          hypercertUri,
+          contributors: contributorIdentifiers,
+          weight: contributionWeight.trim() || undefined,
+          contributionDetails: {
+            role: contributionRole.trim(),
+            contributionDescription:
+              contributionDescription.trim() || undefined,
+            startDate: contributionStartDate
+              ? localDateToAtprotoDatetime(
+                  contributionStartDate,
+                  "contribution startDate",
+                )
+              : undefined,
+            endDate: contributionEndDate
+              ? localDateToAtprotoDatetime(
+                  contributionEndDate,
+                  "contribution endDate",
+                )
+              : undefined,
+          },
+        });
+        toast.success("Contributor added to hypercert.");
+      }
+
+      router.push(detailHref);
+    } catch (error) {
+      console.error("Save hypercert failed:", error);
+      toast.error(
+        error instanceof Error ? error.message : "Failed to save hypercert.",
+      );
+    } finally {
+      setIsAddingContribution(false);
+    }
   };
 
   return (
@@ -338,6 +436,160 @@ export default function HypercertsEditForm({
         </div>
       </div>
 
+      {/* ── Section: Contributors ── */}
+      <div className="space-y-4">
+        <div className="mb-1 flex items-center gap-2">
+          <div className="bg-create-accent/10 flex h-6 w-6 items-center justify-center rounded-lg">
+            <Users className="text-create-accent h-3.5 w-3.5" />
+          </div>
+          <h3 className="text-muted-foreground font-[family-name:var(--font-syne)] text-sm font-semibold tracking-wider uppercase">
+            Add Contributors
+          </h3>
+          <span className="text-muted-foreground/60 ml-1 font-[family-name:var(--font-outfit)] text-[11px]">
+            Optional
+          </span>
+        </div>
+
+        <div className="border-border/60 bg-muted/20 space-y-5 rounded-xl border p-5">
+          <p className="text-muted-foreground font-[family-name:var(--font-outfit)] text-xs">
+            Append contributor details to this hypercert. Use an org domain like
+            govtech.bt, a website, DID, AT-URI, or social profile URL.
+          </p>
+
+          <div className="space-y-2">
+            <Label
+              htmlFor="contribution-role"
+              className="font-[family-name:var(--font-outfit)] text-sm font-medium"
+            >
+              Role / Title
+            </Label>
+            <Input
+              id="contribution-role"
+              placeholder="e.g., Implementation partner, Funder, Reviewer"
+              value={contributionRole}
+              onChange={(e) => setContributionRole(e.target.value)}
+              maxLength={100}
+              disabled={isSaving}
+              className="font-[family-name:var(--font-outfit)]"
+            />
+            <p className="text-muted-foreground font-[family-name:var(--font-outfit)] text-[11px]">
+              {contributionRole.length} / 100 characters
+            </p>
+          </div>
+
+          <div className="space-y-2">
+            <Label className="font-[family-name:var(--font-outfit)] text-sm font-medium">
+              Contributor Identifiers
+            </Label>
+            {manualContributors.map((identifier, index) => (
+              <div key={index} className="flex items-center gap-2">
+                <Input
+                  type="text"
+                  placeholder="govtech.bt, jaggle.ai, did:plc:..., https://..."
+                  value={identifier}
+                  onChange={(e) =>
+                    updateManualContributor(index, e.target.value)
+                  }
+                  disabled={isSaving}
+                  className="font-[family-name:var(--font-outfit)]"
+                />
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => removeManualContributor(index)}
+                  disabled={manualContributors.length === 1 || isSaving}
+                  type="button"
+                  className="text-muted-foreground hover:text-destructive"
+                >
+                  <Trash className="h-4 w-4" />
+                </Button>
+              </div>
+            ))}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={addManualContributor}
+              disabled={isSaving}
+              type="button"
+              className="gap-2 font-[family-name:var(--font-outfit)]"
+            >
+              <PlusIcon className="h-3.5 w-3.5" /> Add Identifier
+            </Button>
+          </div>
+
+          <div className="space-y-2">
+            <Label
+              htmlFor="contribution-weight"
+              className="font-[family-name:var(--font-outfit)] text-sm font-medium"
+            >
+              Contribution Weight (Optional)
+            </Label>
+            <Input
+              id="contribution-weight"
+              type="text"
+              inputMode="decimal"
+              pattern={CONTRIBUTION_WEIGHT_PATTERN}
+              title="Use a positive number like 1, 0.5, or 25."
+              placeholder="e.g., 1, 0.5, 25"
+              value={contributionWeight}
+              onChange={(e) => setContributionWeight(e.target.value)}
+              maxLength={100}
+              disabled={isSaving}
+              className="font-[family-name:var(--font-outfit)]"
+            />
+            <p className="text-muted-foreground font-[family-name:var(--font-outfit)] text-[11px]">
+              Relative contribution weight. Values do not need to add up to 100.
+            </p>
+          </div>
+
+          <div className="space-y-2">
+            <Label
+              htmlFor="contribution-description"
+              className="font-[family-name:var(--font-outfit)] text-sm font-medium"
+            >
+              Contribution Description (Optional)
+            </Label>
+            <Textarea
+              id="contribution-description"
+              placeholder="What the contribution concretely achieved..."
+              value={contributionDescription}
+              onChange={(e) => setContributionDescription(e.target.value)}
+              maxLength={1000}
+              rows={4}
+              disabled={isSaving}
+              className="font-[family-name:var(--font-outfit)]"
+            />
+            <p className="text-muted-foreground font-[family-name:var(--font-outfit)] text-[11px]">
+              {contributionDescription.length} / 1000 characters
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <DatePicker
+              label="Contribution Started"
+              initDate={contributionStartDate ?? undefined}
+              onChange={setContributionStartDate}
+            />
+            <DatePicker
+              label="Contribution Finished"
+              initDate={contributionEndDate ?? undefined}
+              onChange={setContributionEndDate}
+            />
+          </div>
+
+          {hasNewContributors && !contributionRole.trim() ? (
+            <p className="font-[family-name:var(--font-outfit)] text-sm text-amber-600">
+              Please enter a role for the contributors.
+            </p>
+          ) : null}
+          {!isContributionWeightValid ? (
+            <p className="font-[family-name:var(--font-outfit)] text-sm text-amber-600">
+              Contribution weight must be a positive number like 1, 0.5, or 25.
+            </p>
+          ) : null}
+        </div>
+      </div>
+
       {/* ── Actions ── */}
       <div className="border-border/50 mt-2 flex items-center justify-between gap-4 border-t pt-6">
         <Button
@@ -350,11 +602,11 @@ export default function HypercertsEditForm({
 
         <Button
           type="submit"
-          disabled={updateMutation.isPending || isPristine}
+          disabled={isSaving || isPristine}
           className="bg-create-accent hover:bg-create-accent/90 text-create-accent-foreground min-w-[140px] font-[family-name:var(--font-outfit)] font-medium"
         >
-          {updateMutation.isPending ? <Spinner className="mr-2" /> : null}
-          {updateMutation.isPending ? "Saving..." : "Save Changes"}
+          {isSaving ? <Spinner className="mr-2" /> : null}
+          {isSaving ? "Saving..." : "Save Changes"}
         </Button>
       </div>
     </form>

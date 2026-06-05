@@ -3,6 +3,7 @@ import { parseAtUri } from "@/lib/utils";
 import type { RepoContext } from "@/lib/repo-context";
 import { assertValidRecord } from "@/lib/record-validation";
 import { coerceAtprotoDatetime, currentAtprotoDatetime } from "@/lib/datetime";
+import { normalizeContributionWeight } from "@/lib/contribution-validation";
 import {
   OrgHypercertsClaimContribution,
   OrgHypercertsClaimContributorInformation,
@@ -27,6 +28,7 @@ export interface ContributionEntry {
   contributionDescription?: string;
   startDate?: string;
   endDate?: string;
+  weight?: string;
 }
 
 /**
@@ -62,6 +64,36 @@ export const processContributions = async (
     );
   }
 
+  const normalizedContributions = contributions.map((contribution) => {
+    const contributors = (
+      Array.isArray(contribution.contributors) ? contribution.contributors : []
+    )
+      .filter(
+        (identifier): identifier is string => typeof identifier === "string",
+      )
+      .map((identifier) => identifier.trim())
+      .filter((identifier) => identifier !== "");
+    const role =
+      typeof contribution.role === "string" ? contribution.role.trim() : "";
+
+    if (contributors.length === 0) {
+      throw new Error(
+        "Invalid contribution: at least one contributor identifier is required.",
+      );
+    }
+    if (!role) {
+      throw new Error("Invalid contribution: role is required.");
+    }
+
+    return {
+      ...contribution,
+      contributors,
+      role,
+      contributionDescription:
+        contribution.contributionDescription?.trim() || undefined,
+    };
+  });
+
   // 3. Fetch the existing hypercert record before creating child records
   const existingHypercertResult = await ctx.agent.com.atproto.repo.getRecord({
     repo: hypercertParsed.did,
@@ -74,45 +106,52 @@ export const processContributions = async (
   >;
 
   const allNewContributors: unknown[] = [];
+  const createdChildRefs: Array<{ uri: string; cid: string }> = [];
 
-  for (const contribution of contributions) {
-    const normalizedStartDate = contribution.startDate
-      ? coerceAtprotoDatetime(contribution.startDate, "contribution startDate")
-      : undefined;
-    const normalizedEndDate = contribution.endDate
-      ? coerceAtprotoDatetime(contribution.endDate, "contribution endDate")
-      : undefined;
+  try {
+    for (const contribution of normalizedContributions) {
+      const normalizedStartDate = contribution.startDate
+        ? coerceAtprotoDatetime(
+            contribution.startDate,
+            "contribution startDate",
+          )
+        : undefined;
+      const normalizedEndDate = contribution.endDate
+        ? coerceAtprotoDatetime(contribution.endDate, "contribution endDate")
+        : undefined;
+      const normalizedWeight = normalizeContributionWeight(contribution.weight);
 
-    // 4. Create contributionDetails record
-    const detailsRecord: OrgHypercertsClaimContribution.Record = {
-      $type: "org.hypercerts.claim.contribution",
-      role: contribution.role,
-      createdAt: currentAtprotoDatetime(),
-      ...(contribution.contributionDescription
-        ? { contributionDescription: contribution.contributionDescription }
-        : {}),
-      ...(normalizedStartDate ? { startDate: normalizedStartDate } : {}),
-      ...(normalizedEndDate ? { endDate: normalizedEndDate } : {}),
-    };
+      // 4. Create contributionDetails record
+      const detailsRecord: OrgHypercertsClaimContribution.Record = {
+        $type: "org.hypercerts.claim.contribution",
+        role: contribution.role,
+        createdAt: currentAtprotoDatetime(),
+        ...(contribution.contributionDescription
+          ? { contributionDescription: contribution.contributionDescription }
+          : {}),
+        ...(normalizedStartDate ? { startDate: normalizedStartDate } : {}),
+        ...(normalizedEndDate ? { endDate: normalizedEndDate } : {}),
+      };
 
-    assertValidRecord(
-      "contributionDetails",
-      detailsRecord,
-      OrgHypercertsClaimContribution.validateRecord,
-    );
-    const detailsResult = await ctx.agent.com.atproto.repo.createRecord({
-      repo: ctx.userDid,
-      collection: "org.hypercerts.claim.contribution",
-      record: detailsRecord,
-    });
-    const detailsRef = {
-      uri: detailsResult.data.uri,
-      cid: detailsResult.data.cid,
-    };
+      assertValidRecord(
+        "contributionDetails",
+        detailsRecord,
+        OrgHypercertsClaimContribution.validateRecord,
+      );
+      const detailsResult = await ctx.agent.com.atproto.repo.createRecord({
+        repo: ctx.userDid,
+        collection: "org.hypercerts.claim.contribution",
+        record: detailsRecord,
+      });
+      const detailsRef = {
+        uri: detailsResult.data.uri,
+        cid: detailsResult.data.cid,
+      };
+      createdChildRefs.push(detailsRef);
 
-    // 5. Create contributorInformation records for each contributor
-    const contributorRefs = await Promise.all(
-      contribution.contributors.map(async (identifier) => {
+      // 5. Create contributorInformation records for each contributor
+      const contributorRefs: Array<{ uri: string; cid: string }> = [];
+      for (const identifier of contribution.contributors) {
         const infoRecord: OrgHypercertsClaimContributorInformation.Record = {
           $type: "org.hypercerts.claim.contributorInformation",
           identifier,
@@ -128,44 +167,74 @@ export const processContributions = async (
           collection: "org.hypercerts.claim.contributorInformation",
           record: infoRecord,
         });
-        return { uri: infoResult.data.uri, cid: infoResult.data.cid };
+        const infoRef = {
+          uri: infoResult.data.uri,
+          cid: infoResult.data.cid,
+        };
+        createdChildRefs.push(infoRef);
+        contributorRefs.push(infoRef);
+      }
+
+      // Build new contributor entries for this contribution
+      const newContributors = contributorRefs.map((ref) => ({
+        contributorIdentity: {
+          $type: "com.atproto.repo.strongRef" as const,
+          ...ref,
+        },
+        contributionDetails: {
+          $type: "com.atproto.repo.strongRef" as const,
+          ...detailsRef,
+        },
+        ...(normalizedWeight ? { contributionWeight: normalizedWeight } : {}),
+      }));
+
+      allNewContributors.push(...newContributors);
+    }
+
+    const existingContributors =
+      (existingRecord.contributors as unknown[]) || [];
+    existingRecord.contributors = [
+      ...existingContributors,
+      ...allNewContributors,
+    ];
+
+    // 6. Update hypercert with appended contributors
+    normalizeLegacyDescription(existingRecord);
+    assertValidRecord(
+      "activity",
+      existingRecord,
+      OrgHypercertsClaimActivity.validateRecord,
+    );
+    const putResult = await ctx.agent.com.atproto.repo.putRecord({
+      repo: ctx.userDid,
+      collection: hypercertParsed.collection,
+      rkey: hypercertParsed.rkey,
+      record: existingRecord,
+    });
+
+    return { uri: putResult.data.uri, cid: putResult.data.cid };
+  } catch (error) {
+    const cleanupResults = await Promise.allSettled(
+      createdChildRefs.map((ref) => {
+        const parsed = parseAtUri(ref.uri);
+        if (!parsed?.collection || !parsed.rkey) return Promise.resolve();
+        return ctx.agent.com.atproto.repo.deleteRecord({
+          repo: ctx.userDid,
+          collection: parsed.collection,
+          rkey: parsed.rkey,
+        });
       }),
     );
 
-    // Build new contributor entries for this contribution
-    const newContributors = contributorRefs.map((ref) => ({
-      contributorIdentity: {
-        $type: "com.atproto.repo.strongRef" as const,
-        ...ref,
-      },
-      contributionDetails: {
-        $type: "com.atproto.repo.strongRef" as const,
-        ...detailsRef,
-      },
-    }));
+    for (const result of cleanupResults) {
+      if (result.status === "rejected") {
+        console.error(
+          "processContributions child cleanup failed:",
+          result.reason,
+        );
+      }
+    }
 
-    allNewContributors.push(...newContributors);
+    throw error;
   }
-
-  const existingContributors = (existingRecord.contributors as unknown[]) || [];
-  existingRecord.contributors = [
-    ...existingContributors,
-    ...allNewContributors,
-  ];
-
-  // 6. Update hypercert with appended contributors
-  normalizeLegacyDescription(existingRecord);
-  assertValidRecord(
-    "activity",
-    existingRecord,
-    OrgHypercertsClaimActivity.validateRecord,
-  );
-  const putResult = await ctx.agent.com.atproto.repo.putRecord({
-    repo: ctx.userDid,
-    collection: hypercertParsed.collection,
-    rkey: hypercertParsed.rkey,
-    record: existingRecord,
-  });
-
-  return { uri: putResult.data.uri, cid: putResult.data.cid };
 };

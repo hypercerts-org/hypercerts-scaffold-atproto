@@ -1,5 +1,6 @@
 "use client";
 import Image from "next/image";
+import { toast } from "sonner";
 import HypercertRightsFields, {
   RightsState,
 } from "@/components/hypercerts-rights-fields";
@@ -11,6 +12,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { OrgHypercertsClaimActivity } from "@hypercerts-org/lexicon";
 import type { CreateHypercertParams } from "@/lib/types";
 import { localDateToAtprotoDatetime } from "@/lib/datetime";
+import {
+  CONTRIBUTION_WEIGHT_PATTERN,
+  isValidContributionWeight,
+} from "@/lib/contribution-validation";
 import { Label } from "@radix-ui/react-label";
 import {
   PlusIcon,
@@ -92,6 +97,7 @@ export default function HypercertsBaseForm({
   const [contributionRole, setContributionRole] = useState("");
   const [contributors, setContributors] = useState<ProfileView[]>([]);
   const [manualContributors, setManualContributors] = useState<string[]>([""]);
+  const [contributionWeight, setContributionWeight] = useState("");
   const [contributionDescription, setContributionDescription] = useState("");
   const [contributionStartDate, setContributionStartDate] =
     useState<Date | null>(null);
@@ -152,6 +158,16 @@ export default function HypercertsBaseForm({
 
   const hasContributors =
     contributors.length > 0 || manualContributors.some((c) => c.trim() !== "");
+  const hasContributionMetadata =
+    contributionRole.trim() !== "" ||
+    contributionWeight.trim() !== "" ||
+    contributionDescription.trim() !== "" ||
+    contributionStartDate !== null ||
+    contributionEndDate !== null;
+  const hasInvalidContributionDraft =
+    (hasContributors && !contributionRole.trim()) ||
+    (!hasContributors && hasContributionMetadata) ||
+    !isValidContributionWeight(contributionWeight);
 
   const getRecord = (): CreateHypercertParams | undefined => {
     if (
@@ -166,20 +182,29 @@ export default function HypercertsBaseForm({
       return;
     }
 
+    if (!isValidContributionWeight(contributionWeight)) {
+      return;
+    }
+
     // Build contributions array if contributors exist
     let contributions: CreateHypercertParams["contributions"] = undefined;
-    if (hasContributors && contributionRole.trim()) {
+    if (
+      hasContributors &&
+      contributionRole.trim() &&
+      isValidContributionWeight(contributionWeight)
+    ) {
       const mappedContributors: string[] = [];
       for (const c of contributors) mappedContributors.push(c.did);
       for (const uri of manualContributors) {
-        if (uri.trim() !== "") mappedContributors.push(uri);
+        const trimmed = uri.trim();
+        if (trimmed !== "") mappedContributors.push(trimmed);
       }
 
       contributions = [
         {
           contributors: mappedContributors,
           contributionDetails: {
-            role: contributionRole,
+            role: contributionRole.trim(),
             contributionDescription: contributionDescription || undefined,
             startDate: contributionStartDate
               ? localDateToAtprotoDatetime(
@@ -194,6 +219,7 @@ export default function HypercertsBaseForm({
                 )
               : undefined,
           },
+          weight: contributionWeight.trim() || undefined,
         },
       ];
     }
@@ -218,6 +244,12 @@ export default function HypercertsBaseForm({
 
   const handleSubmit: FormEventHandler<HTMLFormElement> = (e) => {
     e.preventDefault();
+    if (hasInvalidContributionDraft) {
+      toast.error(
+        "To add contributors, enter at least one identifier, a role/title, and a positive weight if provided.",
+      );
+      return;
+    }
     setButtonClicked("create");
     const record = getRecord();
     if (!record) return;
@@ -546,7 +578,7 @@ export default function HypercertsBaseForm({
               <Tabs defaultValue="search" className="w-full">
                 <TabsList className="grid w-full grid-cols-2">
                   <TabsTrigger value="search">Search Users</TabsTrigger>
-                  <TabsTrigger value="manual">Enter URI or DID</TabsTrigger>
+                  <TabsTrigger value="manual">Enter Identifier</TabsTrigger>
                 </TabsList>
                 <TabsContent value="search" className="space-y-2 pt-2">
                   <UserSelection onUserSelect={addContributor} />
@@ -576,7 +608,7 @@ export default function HypercertsBaseForm({
                     <div key={index} className="flex items-center gap-2">
                       <Input
                         type="text"
-                        placeholder="at://did:plc:..., https://..., did:eth:..."
+                        placeholder="govtech.bt, jaggle.ai, did:plc:..., https://..."
                         value={uri}
                         onChange={(e) =>
                           updateManualContributor(index, e.target.value)
@@ -595,6 +627,10 @@ export default function HypercertsBaseForm({
                       </Button>
                     </div>
                   ))}
+                  <p className="text-muted-foreground font-[family-name:var(--font-outfit)] text-[11px]">
+                    Use any stable contributor identifier: an org domain,
+                    website URL, DID, AT-URI, or social profile.
+                  </p>
                   <Button
                     variant="outline"
                     size="sm"
@@ -606,6 +642,31 @@ export default function HypercertsBaseForm({
                   </Button>
                 </TabsContent>
               </Tabs>
+            </div>
+
+            <div className="space-y-2">
+              <Label
+                htmlFor="contribution-weight"
+                className="font-[family-name:var(--font-outfit)] text-sm font-medium"
+              >
+                Contribution Weight (Optional)
+              </Label>
+              <Input
+                id="contribution-weight"
+                type="text"
+                inputMode="decimal"
+                pattern={CONTRIBUTION_WEIGHT_PATTERN}
+                title="Use a positive number like 1, 0.5, or 25."
+                placeholder="e.g., 1, 0.5, 25"
+                value={contributionWeight}
+                onChange={(e) => setContributionWeight(e.target.value)}
+                maxLength={100}
+                className="font-[family-name:var(--font-outfit)]"
+              />
+              <p className="text-muted-foreground font-[family-name:var(--font-outfit)] text-[11px]">
+                Relative contribution weight. Values do not need to add up to
+                100.
+              </p>
             </div>
 
             <div className="space-y-2">
@@ -648,7 +709,19 @@ export default function HypercertsBaseForm({
 
             {hasContributors && !contributionRole.trim() ? (
               <p className="font-[family-name:var(--font-outfit)] text-sm text-amber-600">
-                Please enter a role for the contributors
+                Please enter a role for the contributors.
+              </p>
+            ) : null}
+            {!hasContributors && hasContributionMetadata ? (
+              <p className="font-[family-name:var(--font-outfit)] text-sm text-amber-600">
+                Please enter at least one contributor identifier or clear the
+                contribution details.
+              </p>
+            ) : null}
+            {!isValidContributionWeight(contributionWeight) ? (
+              <p className="font-[family-name:var(--font-outfit)] text-sm text-amber-600">
+                Contribution weight must be a positive number like 1, 0.5, or
+                25.
               </p>
             ) : null}
           </div>
@@ -663,7 +736,7 @@ export default function HypercertsBaseForm({
             <Button
               type="submit"
               variant="outline"
-              disabled={isSaving}
+              disabled={isSaving || hasInvalidContributionDraft}
               aria-label="Save"
               className="font-[family-name:var(--font-outfit)]"
             >
@@ -688,7 +761,7 @@ export default function HypercertsBaseForm({
 
       {!updateActions ? (
         <Button
-          disabled={saveDisabled || isSaving}
+          disabled={saveDisabled || isSaving || hasInvalidContributionDraft}
           type="submit"
           className="bg-create-accent hover:bg-create-accent/90 text-create-accent-foreground font-[family-name:var(--font-outfit)] font-medium"
         >

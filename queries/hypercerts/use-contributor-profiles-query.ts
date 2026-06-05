@@ -2,7 +2,10 @@
 
 import { useQueries } from "@tanstack/react-query";
 import { getProfile } from "@/lib/api/external/bluesky";
-import { getContributorInformationRecord } from "@/lib/create-actions";
+import {
+  getContributionRecord,
+  getContributorInformationRecord,
+} from "@/lib/create-actions";
 import { queryKeys } from "@/lib/api/query-keys";
 import { parseAtUri } from "@/lib/utils";
 import type { DisplayContributor } from "@/lib/contributor-utils";
@@ -44,8 +47,19 @@ export function useContributorProfilesQuery(
 }
 
 interface ResolvedContributorInfo {
-  identifier: string; // the actual DID from the contributorInformation record
+  identifier: string; // the actual DID, domain, URI, or org identifier from the record
   displayName?: string;
+}
+
+interface ResolvedContributionDetails {
+  role?: string;
+  contributionDescription?: string;
+  startDate?: string;
+  endDate?: string;
+}
+
+function strongRefKey(ref: { uri: string; cid: string }): string {
+  return `${ref.uri}#${ref.cid}`;
 }
 
 /**
@@ -65,9 +79,18 @@ export function useResolveContributorIdentities(
       const ref = c.identityRef!;
       const { did, collection, rkey } = parseAtUri(ref.uri)!;
       return {
-        queryKey: queryKeys.hypercerts.contributorInformation(did, rkey),
+        queryKey: queryKeys.hypercerts.contributorInformation(
+          did,
+          rkey,
+          ref.cid,
+        ),
         queryFn: () =>
-          getContributorInformationRecord({ did, collection, rkey }),
+          getContributorInformationRecord({
+            did,
+            collection,
+            rkey,
+            cid: ref.cid,
+          }),
         retry: 1,
         staleTime: 10 * 60 * 1000,
       };
@@ -78,13 +101,61 @@ export function useResolveContributorIdentities(
   queries.forEach((q, i) => {
     if (q.isSuccess && q.data?.value) {
       const val = q.data.value as { identifier?: string; displayName?: string };
-      resolvedMap.set(needsResolution[i].identity, {
-        identifier: val.identifier || "",
-        displayName: val.displayName,
-      });
+      const identifier = val.identifier?.trim();
+      if (identifier) {
+        resolvedMap.set(strongRefKey(needsResolution[i].identityRef!), {
+          identifier,
+          displayName: val.displayName,
+        });
+      }
     }
   });
 
   const isLoading = queries.some((q) => q.isLoading);
   return { resolvedMap, isLoading };
+}
+
+/**
+ * Resolves StrongRef contribution detail records into displayable role,
+ * description, and contribution timeframe fields.
+ */
+export function useResolveContributionDetails(
+  contributors: DisplayContributor[],
+) {
+  const uniqueRefs = [
+    ...new Map(
+      contributors
+        .filter((c) => c.detailsRef && parseAtUri(c.detailsRef.uri))
+        .map((c) => [strongRefKey(c.detailsRef!), c.detailsRef!]),
+    ).values(),
+  ];
+
+  const queries = useQueries({
+    queries: uniqueRefs.map((ref) => {
+      const { did, collection, rkey } = parseAtUri(ref.uri)!;
+      return {
+        queryKey: queryKeys.hypercerts.contributionDetails(did, rkey, ref.cid),
+        queryFn: () =>
+          getContributionRecord({ did, collection, rkey, cid: ref.cid }),
+        retry: 1,
+        staleTime: 10 * 60 * 1000,
+      };
+    }),
+  });
+
+  const detailsMap = new Map<string, ResolvedContributionDetails>();
+  queries.forEach((q, i) => {
+    if (q.isSuccess && q.data?.value) {
+      const val = q.data.value as ResolvedContributionDetails;
+      detailsMap.set(strongRefKey(uniqueRefs[i]), {
+        role: val.role,
+        contributionDescription: val.contributionDescription,
+        startDate: val.startDate,
+        endDate: val.endDate,
+      });
+    }
+  });
+
+  const isLoading = queries.some((q) => q.isLoading);
+  return { detailsMap, isLoading };
 }

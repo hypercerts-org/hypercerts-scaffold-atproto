@@ -14,6 +14,9 @@ export interface DisplayContributor {
   isDid: boolean;
   role?: string;
   weight?: string;
+  contributionDescription?: string;
+  startDate?: string;
+  endDate?: string;
   identityRef?: StrongRef;
   detailsRef?: StrongRef;
   needsResolution: boolean; // true when identity comes from a StrongRef that needs fetching
@@ -62,7 +65,7 @@ function isStrongRef(v: unknown): v is StrongRef {
  *    - Fallback → stringify
  * 2. Resolve `contributionDetails`:
  *    - ContributorRole (has `role` field) → use role string
- *    - StrongRef → set detailsRef, role stays undefined
+ *    - StrongRef → set detailsRef for later resolution
  * 3. isDid = identity.startsWith("did:")
  * 4. weight = contributionWeight
  */

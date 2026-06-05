@@ -5,6 +5,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { addContribution } from "@/lib/create-actions";
 import { BaseHypercertFormProps } from "@/lib/types";
 import { localDateToAtprotoDatetime } from "@/lib/datetime";
+import {
+  CONTRIBUTION_WEIGHT_PATTERN,
+  isValidContributionWeight,
+} from "@/lib/contribution-validation";
 import type { ProfileView } from "@atproto/api/dist/client/types/app/bsky/actor/defs";
 import { Trash, PlusCircle, Users, Wand2 } from "lucide-react";
 import { FormEventHandler, useState } from "react";
@@ -27,6 +31,7 @@ export default function HypercertContributionForm({
   const [role, setRole] = useState("");
   const [contributors, setContributors] = useState<ProfileView[]>([]);
   const [manualContributors, setManualContributors] = useState<string[]>([""]);
+  const [weight, setWeight] = useState("");
   const [description, setDescription] = useState("");
   const [workTimeframeFrom, setWorkTimeframeFrom] = useState<Date>();
   const [workTimeframeTo, setWorkTimeframeTo] = useState<Date>();
@@ -81,9 +86,10 @@ export default function HypercertContributionForm({
     const contributionRecord = {
       hypercertUri: hypercertInfo.hypercertUri,
       contributors: mappedContributors,
+      weight: weight.trim() || undefined,
       contributionDetails: {
-        role,
-        contributionDescription: description || undefined,
+        role: role.trim(),
+        contributionDescription: description.trim() || undefined,
         startDate: workTimeframeFrom
           ? localDateToAtprotoDatetime(
               workTimeframeFrom,
@@ -105,6 +111,12 @@ export default function HypercertContributionForm({
     e.preventDefault();
     if (!hypercertInfo?.hypercertUri) {
       toast.error("Hypercert information is missing");
+      return;
+    }
+    if (!isValidContributionWeight(weight)) {
+      toast.error(
+        "Contribution weight must be a positive number like 1, 0.5, or 25.",
+      );
       return;
     }
     setSaving(true);
@@ -130,6 +142,7 @@ export default function HypercertContributionForm({
       "did:plc:z72i7hdynmk6r22z27h6tvur",
       "did:plc:ragtjsm2j2vknwkz3zp4oxrd",
     ]);
+    setWeight("1");
     setDescription(
       "Led the technical development and implementation of the community platform, including backend infrastructure, API design, and database architecture. Coordinated with stakeholders to ensure project milestones were met on time.",
     );
@@ -198,7 +211,7 @@ export default function HypercertContributionForm({
           <Tabs defaultValue="search" className="w-full">
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="search">Search Users</TabsTrigger>
-              <TabsTrigger value="manual">Enter URI or DID</TabsTrigger>
+              <TabsTrigger value="manual">Enter Identifier</TabsTrigger>
             </TabsList>
             <TabsContent value="search" className="space-y-2 pt-2">
               <UserSelection onUserSelect={addContributor} />
@@ -229,7 +242,7 @@ export default function HypercertContributionForm({
                 <div key={index} className="flex items-center gap-2">
                   <Input
                     type="text"
-                    placeholder="at://did:plc:..., https://..., did:eth:..."
+                    placeholder="govtech.bt, jaggle.ai, did:plc:..., https://..."
                     value={uri}
                     onChange={(e) =>
                       updateManualContributor(index, e.target.value)
@@ -242,23 +255,60 @@ export default function HypercertContributionForm({
                     size="icon"
                     onClick={() => removeManualContributor(index)}
                     disabled={manualContributors.length === 1 || saving}
+                    type="button"
                     className="text-muted-foreground hover:text-destructive"
                   >
                     <Trash className="h-4 w-4" />
                   </Button>
                 </div>
               ))}
+              <p className="text-muted-foreground font-[family-name:var(--font-outfit)] text-[11px]">
+                Use any stable contributor identifier: an org domain, website
+                URL, DID, AT-URI, or social profile.
+              </p>
               <Button
                 variant="outline"
                 size="sm"
                 onClick={addManualContributor}
                 disabled={saving}
+                type="button"
                 className="gap-2 font-[family-name:var(--font-outfit)]"
               >
                 <PlusCircle className="h-3.5 w-3.5" /> Add Contributor
               </Button>
             </TabsContent>
           </Tabs>
+        </div>
+
+        {/* Weight */}
+        <div className="space-y-2">
+          <Label
+            htmlFor="weight"
+            className="font-[family-name:var(--font-outfit)] text-sm font-medium"
+          >
+            Contribution Weight (Optional)
+          </Label>
+          <Input
+            id="weight"
+            type="text"
+            inputMode="decimal"
+            pattern={CONTRIBUTION_WEIGHT_PATTERN}
+            title="Use a positive number like 1, 0.5, or 25."
+            placeholder="e.g., 1, 0.5, 25"
+            value={weight}
+            onChange={(e) => setWeight(e.target.value)}
+            maxLength={100}
+            disabled={saving}
+            className="font-[family-name:var(--font-outfit)]"
+          />
+          <p className="text-muted-foreground font-[family-name:var(--font-outfit)] text-[11px]">
+            Relative contribution weight. Values do not need to add up to 100.
+          </p>
+          {!isValidContributionWeight(weight) ? (
+            <p className="font-[family-name:var(--font-outfit)] text-sm text-amber-600">
+              Contribution weight must be a positive number like 1, 0.5, or 25.
+            </p>
+          ) : null}
         </div>
 
         {/* Description */}
@@ -308,7 +358,12 @@ export default function HypercertContributionForm({
           submitLabel="Save & Next"
           savingLabel="Saving..."
           saving={saving}
-          submitDisabled={!hasContributors || !role || saving}
+          submitDisabled={
+            !hasContributors ||
+            !role ||
+            !isValidContributionWeight(weight) ||
+            saving
+          }
         />
       </form>
     </FormInfo>

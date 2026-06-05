@@ -84,6 +84,7 @@ export async function POST(req: NextRequest) {
       contributionDescription?: string;
       startDate?: string;
       endDate?: string;
+      weight?: string;
       contributionDetails?: {
         role?: string;
         contributionDescription?: string;
@@ -107,6 +108,7 @@ export async function POST(req: NextRequest) {
           c.contributionDetails?.contributionDescription,
         startDate: c.startDate ?? c.contributionDetails?.startDate,
         endDate: c.endDate ?? c.contributionDetails?.endDate,
+        weight: c.weight,
       }));
 
     const workScopeTags: string[] = workScopeRaw
@@ -203,6 +205,7 @@ export async function POST(req: NextRequest) {
     };
 
     // 4. Create the claim record (PDS generates TID rkey)
+    let createdClaimUri: string | undefined;
     try {
       assertValidRecord(
         "activity",
@@ -214,27 +217,40 @@ export async function POST(req: NextRequest) {
         collection: "org.hypercerts.claim.activity",
         record: claimRecord,
       });
+      createdClaimUri = claimResult.data.uri;
+      let hypercertRef = {
+        uri: claimResult.data.uri,
+        cid: claimResult.data.cid,
+      };
 
-      // Process contributions best-effort — failure must not block the response
       if (contributions && contributions.length > 0) {
-        void processContributions(
+        hypercertRef = await processContributions(
           ctx,
           claimResult.data.uri,
           contributions,
-        ).catch((err: unknown) => {
-          console.error("processContributions failed (non-fatal):", err);
-        });
+        );
       }
 
       const data = {
-        hypercertUri: claimResult.data.uri,
-        hypercertCid: claimResult.data.cid,
+        hypercertUri: hypercertRef.uri,
+        hypercertCid: hypercertRef.cid,
         rightsUri: rightsResult.data.uri,
         rightsCid: rightsResult.data.cid,
       };
       return NextResponse.json(data);
     } catch (e) {
-      // Compensating delete of orphaned rights record
+      // Compensating delete of orphaned claim and rights records.
+      const parsedClaim = parseAtUri(createdClaimUri);
+      if (parsedClaim) {
+        await ctx.agent.com.atproto.repo
+          .deleteRecord({
+            repo: ctx.userDid,
+            collection:
+              parsedClaim.collection || "org.hypercerts.claim.activity",
+            rkey: parsedClaim.rkey,
+          })
+          .catch(() => undefined); // best-effort cleanup
+      }
       const parsedRights = parseAtUri(rightsResult.data.uri);
       if (parsedRights) {
         await ctx.agent.com.atproto.repo
@@ -246,7 +262,11 @@ export async function POST(req: NextRequest) {
           })
           .catch(() => undefined); // best-effort cleanup
       }
-      if (e instanceof Error && e.message.startsWith("Invalid")) {
+      if (
+        e instanceof Error &&
+        (e.message.startsWith("Invalid") ||
+          e.message.startsWith("Contribution weight"))
+      ) {
         return NextResponse.json({ error: e.message }, { status: 400 });
       }
       throw e;
@@ -259,7 +279,11 @@ export async function POST(req: NextRequest) {
         { status: 400 },
       );
     }
-    if (e instanceof Error && e.message.startsWith("Invalid ")) {
+    if (
+      e instanceof Error &&
+      (e.message.startsWith("Invalid ") ||
+        e.message.startsWith("Contribution weight"))
+    ) {
       return NextResponse.json({ error: e.message }, { status: 400 });
     }
     console.error("Error creating hypercert:", e);

@@ -342,6 +342,19 @@ export async function GET() {
 }
 ```
 
+## Contributor Identifiers and Weights
+
+Hypercert activity records can include contributors that are not ATProto
+accounts. Use the contributor identifier field for any stable public identifier:
+a DID, AT-URI, website URL, social profile URL, or organization domain such as
+`govtech.bt` or `jaggle.ai`.
+
+Contribution weights are optional positive decimal strings (`1`, `0.5`, `25`).
+They are relative weights; they do not need to sum to `100`. The app validates
+weights before writing records, stores them in the lexicon
+`contributionWeight` field, and resolves strong references by both collection
+and CID before displaying contribution details.
+
 ## Project Structure
 
 ```

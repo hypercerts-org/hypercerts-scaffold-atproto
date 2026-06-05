@@ -9,6 +9,8 @@ import {
 } from "@/lib/atproto-writes";
 import { coerceAtprotoDatetime, currentAtprotoDatetime } from "@/lib/datetime";
 import {
+  OrgHypercertsClaimContribution,
+  OrgHypercertsClaimContributorInformation,
   OrgHypercertsContextEvaluation,
   OrgHypercertsContextMeasurement,
 } from "@hypercerts-org/lexicon";
@@ -21,6 +23,55 @@ export interface SerializedRecord {
   value: Record<string, unknown>;
 }
 
+const OWNED_CHILD_COLLECTIONS = new Set([
+  "org.hypercerts.claim.rights",
+  "org.hypercerts.claim.contribution",
+  "org.hypercerts.claim.contributorInformation",
+]);
+
+function isStrongRef(value: unknown): value is StrongRef {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    "uri" in value &&
+    "cid" in value &&
+    typeof (value as Record<string, unknown>).uri === "string" &&
+    typeof (value as Record<string, unknown>).cid === "string"
+  );
+}
+
+function getOwnedChildRefs(
+  record: Record<string, unknown>,
+  ownerDid: string,
+): StrongRef[] {
+  const refs: StrongRef[] = [];
+  const maybeAdd = (value: unknown) => {
+    if (!isStrongRef(value)) return;
+    const parsed = parseAtUri(value.uri);
+    if (
+      parsed?.did === ownerDid &&
+      parsed.collection &&
+      OWNED_CHILD_COLLECTIONS.has(parsed.collection)
+    ) {
+      refs.push(value);
+    }
+  };
+
+  maybeAdd(record.rights);
+
+  const contributors = Array.isArray(record.contributors)
+    ? record.contributors
+    : [];
+  for (const contributor of contributors) {
+    if (typeof contributor !== "object" || contributor === null) continue;
+    const entry = contributor as Record<string, unknown>;
+    maybeAdd(entry.contributorIdentity);
+    maybeAdd(entry.contributionDetails);
+  }
+
+  return refs;
+}
+
 export const addContribution = async (params: {
   hypercertUri: string;
   contributors: string[];
@@ -30,6 +81,7 @@ export const addContribution = async (params: {
     startDate?: string;
     endDate?: string;
   };
+  weight?: string;
 }): Promise<{ uri: string; cid: string }> => {
   const ctx = await getRepoContext();
   if (!ctx) {
@@ -46,6 +98,7 @@ export const addContribution = async (params: {
         params.contributionDetails.contributionDescription,
       startDate: params.contributionDetails.startDate,
       endDate: params.contributionDetails.endDate,
+      weight: params.weight,
     },
   ]);
 
@@ -305,23 +358,81 @@ export const getEvidenceRecord = async (params: {
   return JSON.parse(JSON.stringify(data)) as SerializedRecord;
 };
 
+export const getContributionRecord = async (params: {
+  did: string;
+  collection: string;
+  rkey: string;
+  cid: string;
+}): Promise<SerializedRecord> => {
+  const { did, collection, rkey, cid } = params;
+  const ctx = await getRepoContext();
+  if (!ctx) {
+    throw new Error(
+      "getContributionRecord failed: could not establish repository context. The user session may have expired or the target DID is unreachable.",
+    );
+  }
+  if (collection !== "org.hypercerts.claim.contribution") {
+    throw new Error(
+      "getContributionRecord failed: expected org.hypercerts.claim.contribution reference.",
+    );
+  }
+
+  const result = await ctx.agent.com.atproto.repo.getRecord({
+    repo: did,
+    collection,
+    rkey,
+  });
+  if (result.data.cid !== cid) {
+    throw new Error("getContributionRecord failed: strongRef CID mismatch.");
+  }
+  if (!OrgHypercertsClaimContribution.isRecord(result.data.value)) {
+    throw new Error(
+      "getContributionRecord failed: referenced record is not a contribution.",
+    );
+  }
+
+  const data: Record<string, unknown> = { ...result.data };
+  if (data?.value) {
+    data.value = await resolveRecordBlobs(data.value, did);
+  }
+  return JSON.parse(JSON.stringify(data)) as SerializedRecord;
+};
+
 export const getContributorInformationRecord = async (params: {
   did: string;
   collection: string;
   rkey: string;
+  cid: string;
 }): Promise<SerializedRecord> => {
-  const { did, collection, rkey } = params;
+  const { did, collection, rkey, cid } = params;
   const ctx = await getRepoContext();
   if (!ctx) {
     throw new Error(
       "getContributorInformationRecord failed: could not establish repository context. The user session may have expired or the target DID is unreachable.",
     );
   }
+  if (collection !== "org.hypercerts.claim.contributorInformation") {
+    throw new Error(
+      "getContributorInformationRecord failed: expected org.hypercerts.claim.contributorInformation reference.",
+    );
+  }
+
   const result = await ctx.agent.com.atproto.repo.getRecord({
     repo: did,
     collection,
     rkey,
   });
+  if (result.data.cid !== cid) {
+    throw new Error(
+      "getContributorInformationRecord failed: strongRef CID mismatch.",
+    );
+  }
+  if (!OrgHypercertsClaimContributorInformation.isRecord(result.data.value)) {
+    throw new Error(
+      "getContributorInformationRecord failed: referenced record is not contributor information.",
+    );
+  }
+
   const data: Record<string, unknown> = { ...result.data };
   if (data?.value) {
     data.value = await resolveRecordBlobs(data.value, did);
@@ -347,11 +458,44 @@ export const deleteHypercert = async (params: {
       "deleteHypercert failed: Forbidden — URI DID does not match active session DID.",
     );
   }
-  await ctx.agent.com.atproto.repo.deleteRecord({
+  const collection = parsed.collection || "org.hypercerts.claim.activity";
+  const existingResult = await ctx.agent.com.atproto.repo.getRecord({
     repo: ctx.userDid,
-    collection: parsed.collection || "org.hypercerts.claim.activity",
+    collection,
     rkey: parsed.rkey,
   });
+  const childRefs = getOwnedChildRefs(
+    existingResult.data.value as Record<string, unknown>,
+    ctx.userDid,
+  );
+
+  await ctx.agent.com.atproto.repo.deleteRecord({
+    repo: ctx.userDid,
+    collection,
+    rkey: parsed.rkey,
+  });
+
+  const uniqueChildRefs = [
+    ...new Map(childRefs.map((ref) => [ref.uri, ref])).values(),
+  ];
+  const cleanupResults = await Promise.allSettled(
+    uniqueChildRefs.map((ref) => {
+      const child = parseAtUri(ref.uri);
+      if (!child?.collection || !child.rkey) return Promise.resolve();
+      return ctx.agent.com.atproto.repo.deleteRecord({
+        repo: ctx.userDid,
+        collection: child.collection,
+        rkey: child.rkey,
+      });
+    }),
+  );
+
+  for (const result of cleanupResults) {
+    if (result.status === "rejected") {
+      console.error("deleteHypercert child cleanup failed:", result.reason);
+    }
+  }
+
   return { success: true };
 };
 

@@ -7,6 +7,7 @@ import Link from "next/link";
 import { parseContributors } from "@/lib/contributor-utils";
 import {
   useContributorProfilesQuery,
+  useResolveContributionDetails,
   useResolveContributorIdentities,
 } from "@/queries/hypercerts";
 import HypercertContributorView from "./hypercert-contributor-view";
@@ -20,6 +21,9 @@ interface HypercertContributorsSectionProps {
   hypercertUri?: string;
   isOwner?: boolean;
 }
+
+const contributorRefKey = (ref: { uri: string; cid: string }) =>
+  `${ref.uri}#${ref.cid}`;
 
 const ContributorSkeleton = () => (
   <div className="glass-panel border-border/50 flex items-center gap-3 rounded-xl border p-4">
@@ -38,32 +42,55 @@ export default function HypercertContributorsSection({
 }: HypercertContributorsSectionProps) {
   const displayContributors = parseContributors(contributors);
 
-  // Phase 1: Resolve StrongRef identities to actual DIDs
+  // Phase 1: Resolve StrongRef identities and contribution details.
   const { resolvedMap, isLoading: isResolvingIdentities } =
     useResolveContributorIdentities(displayContributors);
+  const { detailsMap, isLoading: isResolvingDetails } =
+    useResolveContributionDetails(displayContributors);
 
-  // Build resolved contributors list — replace placeholder identities with actual DIDs
+  // Build resolved contributors list — replace placeholder identities and
+  // StrongRef contribution details with their displayable fields.
   const resolvedContributors = useMemo(() => {
     return displayContributors.map((c) => {
-      if (c.needsResolution && resolvedMap.has(c.identity)) {
-        const resolved = resolvedMap.get(c.identity)!;
-        return {
-          ...c,
-          identity: resolved.identifier,
-          isDid: resolved.identifier.startsWith("did:"),
-          displayName: resolved.displayName,
-          needsResolution: false,
-        };
-      }
-      return c;
+      const identityKey = c.identityRef
+        ? contributorRefKey(c.identityRef)
+        : c.identity;
+      const resolvedIdentity =
+        c.needsResolution && resolvedMap.has(identityKey)
+          ? resolvedMap.get(identityKey)
+          : undefined;
+      const resolvedDetails = c.detailsRef
+        ? detailsMap.get(contributorRefKey(c.detailsRef))
+        : undefined;
+
+      return {
+        ...c,
+        ...(resolvedIdentity
+          ? {
+              identity: resolvedIdentity.identifier,
+              isDid: resolvedIdentity.identifier.startsWith("did:"),
+              displayName: resolvedIdentity.displayName,
+              needsResolution: false,
+            }
+          : {}),
+        ...(resolvedDetails
+          ? {
+              role: resolvedDetails.role,
+              contributionDescription: resolvedDetails.contributionDescription,
+              startDate: resolvedDetails.startDate,
+              endDate: resolvedDetails.endDate,
+            }
+          : {}),
+      };
     });
-  }, [displayContributors, resolvedMap]);
+  }, [detailsMap, displayContributors, resolvedMap]);
 
   // Phase 2: Resolve DIDs to Bluesky profiles
   const { profileMap, isLoading: isLoadingProfiles } =
     useContributorProfilesQuery(resolvedContributors);
 
-  const isLoading = isResolvingIdentities || isLoadingProfiles;
+  const isLoading =
+    isResolvingIdentities || isResolvingDetails || isLoadingProfiles;
 
   const didContributors = resolvedContributors.filter((c) => c.isDid);
 
@@ -92,7 +119,9 @@ export default function HypercertContributorsSection({
       {/* Loading state — shown while resolving StrongRef identities or DID profiles */}
       {isLoading &&
         (didContributors.length > 0 ||
-          displayContributors.some((c) => c.needsResolution)) && (
+          displayContributors.some(
+            (c) => c.needsResolution || c.detailsRef,
+          )) && (
           <div className="space-y-3">
             {(didContributors.length > 0
               ? didContributors
