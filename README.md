@@ -8,9 +8,9 @@ A Next.js scaffold for building applications on ATProto using native ATProto. Th
 
 - **Node.js 20+** (we recommend [nvm](https://github.com/nvm-sh/nvm) for version management)
 - **pnpm** package manager (`npm install -g pnpm`)
-- **Redis** for session & state storage:
-  - **Local development:** `docker run -d -p 6379:6379 redis:alpine`
-  - **Cloud Redis:** Upstash, Redis Labs, Railway, etc. (see [Environment Configuration](#environment-configuration))
+- **Session/state storage**:
+  - **Local development:** `SESSION_STORE=memory` (default in `.env.example`)
+  - **Preview/production:** Redis via Upstash, Redis Labs, Railway, etc. (see [Environment Configuration](#environment-configuration))
 - **A PDS account** for testing (e.g., on https://dev.certified.app)
 
 ## Quick Start
@@ -26,8 +26,8 @@ pnpm install
 # Copy environment file and configure
 cp .env.example .env.local
 
-# Make sure Redis is running (if using Docker)
-docker ps  # should show a Redis container running
+# Local development uses process memory by default.
+# If you set SESSION_STORE=redis instead, start Redis before running the app.
 
 # Generate and display the key
 pnpm run generate-jwk
@@ -59,10 +59,16 @@ This scaffold uses **native ATProto** — all record operations go through `@atp
 | ---------------------- | ---------------------------------------------------------------------------------------------- |
 | `NEXT_PUBLIC_BASE_URL` | App base URL. Use `http://127.0.0.1:3000` for local dev. Falls back to `VERCEL_URL` on Vercel. |
 | `ATPROTO_JWK_PRIVATE`  | Private JWK (JWKS format) for OAuth client assertion. Generate with `pnpm run generate-jwk`.   |
-| `REDIS_HOST`           | Redis server hostname (e.g., `localhost` for Docker, or cloud Redis host)                      |
-| `REDIS_PORT`           | Redis server port (default: `6379`)                                                            |
-| `REDIS_PASSWORD`       | Redis password. Leave empty for local Docker (no auth).                                        |
 | `NEXT_PUBLIC_PDS_URL`  | Personal Data Server URL (e.g., `https://dev.certified.app`)                                   |
+
+### Storage Variables
+
+| Variable         | Description                                                                                                      |
+| ---------------- | ---------------------------------------------------------------------------------------------------------------- |
+| `SESSION_STORE`  | `memory` for loopback local development, or `redis` for Vercel preview/production. Defaults to `redis` if unset. |
+| `REDIS_HOST`     | Required when `SESSION_STORE=redis`. Redis server hostname (e.g., `localhost` for Docker, or cloud Redis host).  |
+| `REDIS_PORT`     | Required when `SESSION_STORE=redis`. Redis server port (default: `6379`).                                        |
+| `REDIS_PASSWORD` | Optional Redis password. Leave empty for local Docker with no auth.                                              |
 
 ### Optional Variables
 
@@ -79,9 +85,12 @@ For local development, you **must** use `127.0.0.1` instead of `localhost`:
 
 ```env
 NEXT_PUBLIC_BASE_URL=http://127.0.0.1:3000
+SESSION_STORE=memory
 ```
 
-This is required for [RFC 8252](https://datatracker.ietf.org/doc/html/rfc8252#section-7.3) compliance. The application includes automatic redirect handling - if you access `http://localhost:3000`, you'll be redirected to `http://127.0.0.1:3000`.
+`SESSION_STORE=memory` keeps OAuth state and sessions in the local Next.js server process, so you do not need Redis for `pnpm run dev`. It is blocked on Vercel and for public base URLs; use `SESSION_STORE=redis` for preview, production, ngrok, or any shared deployment.
+
+The `127.0.0.1` URL is required for [RFC 8252](https://datatracker.ietf.org/doc/html/rfc8252#section-7.3) compliance. The application includes automatic redirect handling - if you access `http://localhost:3000`, you'll be redirected to `http://127.0.0.1:3000`.
 
 ### Test Server URLs
 
@@ -145,11 +154,11 @@ The script outputs the complete environment variable line. You can either copy i
     │  Validation       │  CRUD (getRecord, putRecord) │
     └──────────┬──────────────────────┬───────────────┘
                │                      │
-        ┌──────▼──────┐        ┌──────▼──────────┐
-        │    Redis    │        │   PDS / ePDS    │
-        │  Sessions   │        │  XRPC calls:    │
-        │ OAuth State │        │  getRecord      │
-        └─────────────┘        │  createRecord   │
+        ┌──────▼──────────┐    ┌──────▼──────────┐
+        │ Session Store   │    │   PDS / ePDS    │
+        │ Redis or local  │    │  XRPC calls:    │
+        │ dev memory      │    │  getRecord      │
+        └─────────────────┘    │  createRecord   │
                                │  putRecord      │
                                │  deleteRecord   │
                                │  uploadBlob     │
@@ -194,7 +203,8 @@ This application automatically redirects requests from `localhost` to `127.0.0.1
 - Clear browser cookies
 - Restart the dev server
 - Try in incognito/private browsing mode
-- Check that Redis is running (`docker ps`)
+- If `SESSION_STORE=redis`, check that Redis is running (`docker ps`)
+- If `SESSION_STORE=memory`, restart the login flow after any dev server restart
 
 **Problem:** Works on `127.0.0.1` but not with ngrok
 
@@ -216,8 +226,8 @@ This scaffold uses OAuth 2.0 with DPoP (Demonstrating Proof of Possession) for a
 2. Application redirects to the ATProto authorization server
 3. User approves the application
 4. OAuth callback receives the authorization code
-5. NodeOAuthClient exchanges code for session credentials (stored in Redis)
-6. App creates an opaque `sid` cookie and stores `sid -> did` mapping in Redis
+5. NodeOAuthClient exchanges code for session credentials (stored server-side)
+6. App creates an opaque `sid` cookie and stores `sid -> did` mapping server-side
 
 ### Flow 2: Email Login (ePDS)
 
@@ -225,19 +235,19 @@ This scaffold uses OAuth 2.0 with DPoP (Demonstrating Proof of Possession) for a
 
 1. User enters their email address (or leaves it blank for the ePDS to collect it)
 2. App sends a Pushed Authorization Request (PAR) to the ePDS with a PKCE challenge and DPoP proof
-3. App stores OAuth state (code verifier + DPoP private key) in Redis
+3. App stores OAuth state (code verifier + DPoP private key) server-side
 4. User is redirected to the ePDS authorization page
 5. ePDS sends a one-time password (OTP) to the user's email
 6. User enters the OTP code on the ePDS page
 7. ePDS redirects back to `/api/oauth/epds/callback` with an authorization code
-8. App exchanges the code for tokens using DPoP, creates a session in Redis
+8. App exchanges the code for tokens using DPoP, creates a server-side session
 9. User is authenticated — same `sid` cookie model as the standard flow
 
 **Key technical details:**
 
 - DPoP (Demonstrating Proof-of-Possession) uses EC P-256 keys to bind tokens to the client
 - PKCE with S256 challenge method prevents authorization code interception
-- OAuth state is stored in Redis (not cookies) to avoid cross-site redirect issues
+- OAuth state is stored server-side (not cookies) to avoid cross-site redirect issues
 - The ePDS flow supports custom branding (logo, colors) and a custom email template for OTP codes
 
 ### How the Login UI Works
@@ -352,6 +362,7 @@ export async function GET() {
 │   ├── api/                   # Client-side API functions and types
 │   ├── config.ts              # Centralized app configuration
 │   ├── hypercerts-sdk.ts      # OAuth client initialization (NodeOAuthClient)
+│   ├── memory-state-store.ts  # Local development in-memory stores
 │   ├── redis.ts               # Redis client setup
 │   ├── redis-state-store.ts   # Redis stores (sessions, OAuth state, ePDS state)
 │   ├── atproto-session.ts     # Server-side session helpers
@@ -375,8 +386,9 @@ export async function GET() {
 | File                                | Purpose                                                                        |
 | ----------------------------------- | ------------------------------------------------------------------------------ |
 | `lib/config.ts`                     | Centralized configuration — base URLs, OAuth client IDs, redirect URIs, scopes |
-| `lib/hypercerts-sdk.ts`             | OAuth client initialization with NodeOAuthClient, Redis stores                 |
-| `lib/redis-state-store.ts`          | Three Redis-backed stores: sessions, standard OAuth state, ePDS OAuth state    |
+| `lib/hypercerts-sdk.ts`             | OAuth client initialization with the configured session/state stores           |
+| `lib/memory-state-store.ts`         | Local development in-memory stores for sessions, OAuth state, and ePDS state   |
+| `lib/redis-state-store.ts`          | Redis-backed stores for sessions, standard OAuth state, and ePDS OAuth state   |
 | `lib/repo-context.ts`               | Helper to get authenticated Agent + DID context                                |
 | `lib/atproto-writes.ts`             | Shared write utilities (StrongRef resolution, location creation, blob upload)  |
 | `lib/record-validation.ts`          | Generic lexicon record validation assertion                                    |

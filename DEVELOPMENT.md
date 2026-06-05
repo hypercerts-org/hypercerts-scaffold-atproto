@@ -36,7 +36,7 @@ If types have changed, update code in `lib/types.ts`, `lib/create-actions.ts`, a
 
 - **Node.js 20+** (we recommend [nvm](https://github.com/nvm-sh/nvm) for version management)
 - **pnpm** package manager: `npm install -g pnpm`
-- **Docker** (for Redis) OR a cloud Redis instance
+- **Optional Redis** (Docker or cloud) when using `SESSION_STORE=redis`
 - **A PDS account** for testing (e.g., on https://dev.certified.app)
 
 ### First-time Setup
@@ -49,17 +49,21 @@ cd hypercerts-scaffold-atproto
 pnpm install
 ```
 
-#### 2. Start Redis
+#### 2. Choose a session store
 
-**Option A - Docker (recommended for local development):**
+**Option A - Local memory (recommended for simple local development):**
+
+Set `SESSION_STORE=memory` in `.env.local`. OAuth state and sessions stay in the local Next.js server process, reset on restart, and are blocked on Vercel.
+
+**Option B - Redis:**
+
+Use Redis for Vercel preview/production, ngrok, or shared development environments.
 
 ```bash
 docker run -d -p 6379:6379 --name hypercerts-redis redis:alpine
 ```
 
-**Option B - Cloud Redis:**
-
-Use a service like Upstash, Redis Labs, Railway, etc. You'll need the connection details for `.env.local`.
+Cloud Redis providers like Upstash, Redis Labs, or Railway also work. You'll need the connection details for `.env.local`.
 
 #### 3. Configure environment
 
@@ -77,7 +81,10 @@ Edit `.env.local` and configure:
 # MUST use 127.0.0.1 for OAuth to work
 NEXT_PUBLIC_BASE_URL=http://127.0.0.1:3000
 
-# If using cloud Redis, update these:
+# Use local process memory for pnpm run dev without Redis
+SESSION_STORE=memory
+
+# If using Redis instead, set SESSION_STORE=redis and update these:
 REDIS_HOST=your-redis-host.com
 REDIS_PORT=12345
 REDIS_PASSWORD=your_password
@@ -106,7 +113,7 @@ You should see the scaffold homepage. Try logging in with your PDS account.
 ### Daily Development
 
 ```bash
-# Make sure Redis is running (if using Docker)
+# If using SESSION_STORE=redis with Docker, make sure Redis is running
 docker start hypercerts-redis
 
 # Start the dev server
@@ -180,7 +187,8 @@ You don't need to run these manually — they run on `git commit`.
 
 **Solutions:**
 
-- Check Redis is running: `docker ps` (should see hypercerts-redis)
+- If you do not need Redis locally, set `SESSION_STORE=memory` and restart the dev server
+- If `SESSION_STORE=redis`, check Redis is running: `docker ps` (should see hypercerts-redis)
 - Start Redis if stopped: `docker start hypercerts-redis`
 - Check `REDIS_HOST`, `REDIS_PORT`, `REDIS_PASSWORD` in `.env.local`
 - Test Redis connection: `redis-cli ping` (should return `PONG`)
@@ -204,7 +212,8 @@ You don't need to run these manually — they run on `git commit`.
 - Clear browser cookies
 - Restart dev server
 - Try in incognito/private browsing mode
-- Check Redis is running and accessible
+- If `SESSION_STORE=redis`, check Redis is running and accessible
+- If `SESSION_STORE=memory`, restart the login flow after any dev server restart
 
 ### OAuth Branding
 
@@ -346,6 +355,8 @@ hypercerts-scaffold/
 ├── lib/                   # Core libraries
 │   ├── api/              # API client utilities
 │   ├── hypercerts-sdk.ts # OAuth client initialization (NodeOAuthClient)
+│   ├── memory-state-store.ts # Local development session/state storage
+│   ├── redis-state-store.ts # Redis session/state storage
 │   ├── atproto-writes.ts # ATProto write utilities
 │   ├── record-validation.ts # Lexicon record validation
 │   ├── types.ts          # TypeScript types and Collections enum
@@ -360,18 +371,20 @@ hypercerts-scaffold/
 
 ### Key Files
 
-| File                          | Purpose                                                      |
-| ----------------------------- | ------------------------------------------------------------ |
-| `lib/hypercerts-sdk.ts`       | Initializes NodeOAuthClient with OAuth config, Redis storage |
-| `lib/atproto-writes.ts`       | ATProto write utilities for CRUD operations                  |
-| `lib/record-validation.ts`    | Lexicon record validation helpers                            |
-| `lib/types.ts`                | TypeScript types and Collections enum                        |
-| `lib/blob-utils.ts`           | Blob URL resolution utilities                                |
-| `lib/repo-context.ts`         | Helper to get authenticated repository context               |
-| `lib/create-actions.ts`       | Server actions for CRUD operations via native ATProto        |
-| `providers/OAuthProvider.tsx` | Client-side OAuth state management                           |
-| `app/api/oauth/*`             | ATProto OAuth flow endpoints (login, callback, logout)       |
-| `app/api/oauth/epds/*`        | ePDS email OAuth flow endpoints (login, callback)            |
+| File                          | Purpose                                                              |
+| ----------------------------- | -------------------------------------------------------------------- |
+| `lib/hypercerts-sdk.ts`       | Initializes NodeOAuthClient with OAuth config and configured storage |
+| `lib/memory-state-store.ts`   | Local development in-memory stores for sessions and OAuth state      |
+| `lib/redis-state-store.ts`    | Redis-backed stores for sessions and OAuth state                     |
+| `lib/atproto-writes.ts`       | ATProto write utilities for CRUD operations                          |
+| `lib/record-validation.ts`    | Lexicon record validation helpers                                    |
+| `lib/types.ts`                | TypeScript types and Collections enum                                |
+| `lib/blob-utils.ts`           | Blob URL resolution utilities                                        |
+| `lib/repo-context.ts`         | Helper to get authenticated repository context                       |
+| `lib/create-actions.ts`       | Server actions for CRUD operations via native ATProto                |
+| `providers/OAuthProvider.tsx` | Client-side OAuth state management                                   |
+| `app/api/oauth/*`             | ATProto OAuth flow endpoints (login, callback, logout)               |
+| `app/api/oauth/epds/*`        | ePDS email OAuth flow endpoints (login, callback)                    |
 
 ---
 

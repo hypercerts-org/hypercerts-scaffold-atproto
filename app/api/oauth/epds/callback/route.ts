@@ -35,11 +35,11 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
       );
     }
 
-    // 2. Retrieve OAuth state from Redis
+    // 2. Retrieve OAuth state from the configured server-side store
     const oauthState = await epdsStateStore.get(state);
     if (!oauthState) {
       console.error(
-        "[oauth/epds/callback] No OAuth state found in Redis for state:",
+        "[oauth/epds/callback] No OAuth state found in store for state:",
         state,
       );
       return NextResponse.redirect(
@@ -49,7 +49,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
 
     const { codeVerifier, dpopPrivateJwk } = oauthState;
 
-    // 5. Restore DPoP key pair from the private JWK stored in Redis state
+    // 5. Restore DPoP key pair from the private JWK stored in OAuth state
     const { privateKey, publicJwk } = restoreDpopKeyPair(
       dpopPrivateJwk as import("node:crypto").JsonWebKey,
     );
@@ -118,7 +118,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
       );
     }
 
-    // 11. Construct NodeSavedSession and write to Redis
+    // 11. Construct NodeSavedSession and write to the session store
     // The issuer is the PDS origin (token endpoint without the /oauth/token path)
     const issuer = tokenEndpoint.replace("/oauth/token", "");
 
@@ -144,7 +144,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
       },
     };
 
-    // Session persists in Redis for 24h; SDK handles token refresh within that window
+    // Session persists for 24h; SDK handles token refresh within that window
     await sessionStore.set(tokenData.sub, nodeSavedSession);
 
     const sessionId = generateSessionId();
