@@ -1,14 +1,17 @@
 import "server-only";
+
 import { parseAtUri } from "@/lib/utils";
 import type { RepoContext } from "@/lib/repo-context";
 import { assertValidRecord } from "@/lib/record-validation";
 import { coerceAtprotoDatetime, currentAtprotoDatetime } from "@/lib/datetime";
-import { normalizeContributionWeight } from "@/lib/contribution-validation";
+import { normalizeContributionWeight as normalizeContributionWeightValue } from "@/lib/contribution-validation";
 import {
   OrgHypercertsClaimContribution,
   OrgHypercertsClaimContributorInformation,
   OrgHypercertsClaimActivity,
 } from "@hypercerts-org/lexicon";
+
+export { normalizeContributionWeight } from "@/lib/contribution-validation";
 
 const normalizeLegacyDescription = (record: {
   description?: unknown;
@@ -22,13 +25,62 @@ const normalizeLegacyDescription = (record: {
   }
 };
 
+/**
+ * Contribution payload used when appending contributor records to an activity.
+ * Each entry creates one contribution-details record and one contributor-info
+ * record per contributor, then links them from the activity claim.
+ */
 export interface ContributionEntry {
   contributors: string[];
   role: string;
   contributionDescription?: string;
   startDate?: string;
   endDate?: string;
+  /** Relative contribution weight stored on each linked activity contributor. */
   weight?: string;
+}
+
+interface NormalizedContributionEntry extends ContributionEntry {
+  contributors: string[];
+  role: string;
+  weight?: string;
+}
+
+function normalizeContributionEntry(
+  contribution: ContributionEntry,
+  index: number,
+): NormalizedContributionEntry {
+  const contributors = (
+    Array.isArray(contribution.contributors) ? contribution.contributors : []
+  )
+    .filter(
+      (identifier): identifier is string => typeof identifier === "string",
+    )
+    .map((identifier) => identifier.trim())
+    .filter((identifier) => identifier !== "");
+  const role =
+    typeof contribution.role === "string" ? contribution.role.trim() : "";
+
+  if (contributors.length === 0) {
+    throw new Error(
+      "Invalid contribution: at least one contributor identifier is required.",
+    );
+  }
+  if (!role) {
+    throw new Error("Invalid contribution: role is required.");
+  }
+
+  return {
+    ...contribution,
+    contributors,
+    role,
+    contributionDescription:
+      contribution.contributionDescription?.trim() || undefined,
+    weight: normalizeContributionWeightValue(
+      contribution.weight,
+      `contributions[${index}].weight`,
+    ),
+  };
 }
 
 /**
@@ -57,42 +109,15 @@ export const processContributions = async (
     throw new Error("processContributions failed: invalid hypercertUri.");
   }
 
-  // 2. Ownership check — must happen before any child record writes
+  // 2. Ownership check — must happen before any writes
   if (hypercertParsed.did !== ctx.userDid) {
     throw new Error(
       "processContributions failed: cannot modify another user's hypercert.",
     );
   }
 
-  const normalizedContributions = contributions.map((contribution) => {
-    const contributors = (
-      Array.isArray(contribution.contributors) ? contribution.contributors : []
-    )
-      .filter(
-        (identifier): identifier is string => typeof identifier === "string",
-      )
-      .map((identifier) => identifier.trim())
-      .filter((identifier) => identifier !== "");
-    const role =
-      typeof contribution.role === "string" ? contribution.role.trim() : "";
-
-    if (contributors.length === 0) {
-      throw new Error(
-        "Invalid contribution: at least one contributor identifier is required.",
-      );
-    }
-    if (!role) {
-      throw new Error("Invalid contribution: role is required.");
-    }
-
-    return {
-      ...contribution,
-      contributors,
-      role,
-      contributionDescription:
-        contribution.contributionDescription?.trim() || undefined,
-    };
-  });
+  // Validate all entries before any child records are created.
+  const normalizedContributions = contributions.map(normalizeContributionEntry);
 
   // 3. Fetch the existing hypercert record before creating child records
   const existingHypercertResult = await ctx.agent.com.atproto.repo.getRecord({
@@ -119,7 +144,6 @@ export const processContributions = async (
       const normalizedEndDate = contribution.endDate
         ? coerceAtprotoDatetime(contribution.endDate, "contribution endDate")
         : undefined;
-      const normalizedWeight = normalizeContributionWeight(contribution.weight);
 
       // 4. Create contributionDetails record
       const detailsRecord: OrgHypercertsClaimContribution.Record = {
@@ -185,7 +209,9 @@ export const processContributions = async (
           $type: "com.atproto.repo.strongRef" as const,
           ...detailsRef,
         },
-        ...(normalizedWeight ? { contributionWeight: normalizedWeight } : {}),
+        ...(contribution.weight
+          ? { contributionWeight: contribution.weight }
+          : {}),
       }));
 
       allNewContributors.push(...newContributors);

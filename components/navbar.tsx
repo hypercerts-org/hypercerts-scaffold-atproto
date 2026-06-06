@@ -77,6 +77,16 @@ export default function Navbar({
                   Hypercerts
                 </Link>
                 <Link
+                  href="/activity-grid"
+                  className={`rounded-lg px-3 py-1.5 font-[family-name:var(--font-outfit)] text-sm font-medium transition-colors ${
+                    pathname === "/activity-grid"
+                      ? "bg-create-accent/10 text-create-accent hover:bg-create-accent/20"
+                      : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                  }`}
+                >
+                  Activity Grid
+                </Link>
+                <Link
                   href="/hypercerts/create"
                   className={`rounded-lg px-3 py-1.5 font-[family-name:var(--font-outfit)] text-sm font-medium transition-colors ${
                     pathname === "/hypercerts/create"

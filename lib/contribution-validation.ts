@@ -30,13 +30,14 @@ export function isValidContributionWeight(value: string): boolean {
  */
 export function normalizeContributionWeight(
   value?: string,
+  label = "contribution weight",
 ): string | undefined {
   const trimmed = value?.trim();
   if (!trimmed) return undefined;
 
   if (!isValidContributionWeight(trimmed)) {
     throw new Error(
-      "Contribution weight must be a positive numeric value like 1, 0.5, or 25.",
+      `Invalid ${label}: expected a positive numeric string like 1, 0.5, or 25.`,
     );
   }
 

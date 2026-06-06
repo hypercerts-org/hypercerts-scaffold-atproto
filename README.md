@@ -49,6 +49,12 @@ Open [http://127.0.0.1:3000](http://127.0.0.1:3000) to see the application.
 
 This scaffold uses **native ATProto** — all record operations go through `@atproto/api` directly, with `@hypercerts-org/lexicon` for type definitions and record validation. There is no SDK wrapper layer.
 
+## Activity Claim Grid
+
+Signed-in users can open `/activity-grid` to see their `org.hypercerts.claim.activity` records as Hyperboards-style weighted image grids. The page resolves contributor information records, contribution detail roles, activity cover images, and `contributionWeight` values, then lays each claim out as a visual contribution map.
+
+When creating activity records programmatically, include `contributionWeight` on each contributor (or pass `weight` through this scaffold's create API contribution payload) so the grid can size contributor tiles proportionally.
+
 **Issues & Support:** Found a bug or have questions? [Create an issue](https://github.com/hypercerts-org/hypercerts-scaffold-atproto/issues) and [@kzoeps](https://github.com/kzoeps) will respond!
 
 ## Environment Configuration
@@ -367,6 +373,7 @@ and CID before displaying contribution details.
 │   ├── client-metadata.json/  # OAuth client metadata endpoint
 │   ├── jwks.json/             # Public JWKS endpoint
 │   ├── hypercerts/            # Hypercert pages (list, create, [detail])
+│   ├── activity-grid/         # Weighted activity claim visualization page
 │   ├── profile/               # Certified profile page
 │   └── bsky-profile/          # Bluesky profile page
 ├── components/                # React components (login dialog, forms, detail views)
@@ -407,6 +414,7 @@ and CID before displaying contribution details.
 | `lib/record-validation.ts`          | Generic lexicon record validation assertion                                    |
 | `lib/types.ts`                      | TypeScript types, Collections enum, type guards                                |
 | `lib/blob-utils.ts`                 | Blob reference to URL resolution for rendering                                 |
+| `lib/activity-grid.ts`              | Resolves activity claims into weighted contributor grid view models            |
 | `lib/epds-config.ts`                | Derives ePDS OAuth endpoints (PAR, auth, token) from `NEXT_PUBLIC_EPDS_URL`    |
 | `lib/epds-helpers.ts`               | PKCE code verifier/challenge, DPoP key generation and proof creation           |
 | `components/login-dialog.tsx`       | Dual-mode login UI with Handle/Email pill toggle                               |
