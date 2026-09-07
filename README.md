@@ -2,6 +2,9 @@
 
 # Hypercerts Scaffold
 
+> [!IMPORTANT]
+> This repository has been archived and is no longer maintained. A new demo application showcasing the full Hypercerts ecosystem is coming soon.
+
 A Next.js scaffold for building applications on ATProto using native ATProto. This project demonstrates authentication, profile management, and hypercert creation on the ATProto network.
 
 ## Prerequisites
